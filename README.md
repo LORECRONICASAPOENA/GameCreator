@@ -24,3 +24,9 @@ O arquivo-fonte original, `APOENA_GAME_CREATOR_OFFLINE_v3_9_EDITOR_VISUAL_REORGA
 A edição completa incluirá as ferramentas já existentes no HTML original: editor de layouts, personagens, itens e receitas, biblioteca e exportação de referência para Godot 4. A ativação dos sistemas dentro do jogo depende de integração e testes específicos.
 
 **Repositório de acesso privado.** Não incluir senhas, tokens ou credenciais nos arquivos.
+
+## Gerador Pixel Art (novo)
+
+O iniciador `index.html` agora oferece o botão **Abrir Gerador Pixel Art**, que abre `pixel-art/index.html`. O editor funciona offline em Android/PC, permite montar personagens por camadas (corpo, cabelo, roupas, armas e acessórios), testar movimento em uma pequena arena HTML e exportar spritesheets PNG, JSON e ZIP com `SpriteFrames` para Godot 4. Consulte [o guia do gerador](pixel-art/README.md).
+
+**Limitação:** o teste HTML é um protótipo de movimento; não é o jogo MOBA completo nem substitui a integração no projeto Godot. O editor visual completo GameCreator v3.9 continua pendente de recuperação e é independente do novo módulo Pixel Art.
