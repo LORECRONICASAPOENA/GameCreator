@@ -39,6 +39,7 @@ label{color:var(--muted);font-size:12px;display:inline-flex;align-items:center;g
   <div class="divider"></div>
   <h2>2 · Importar sua folha de terreno</h2>
   <label class="file">＋ Importar tileset PNG<input id="sheetfile" type="file" accept="image/png,image/webp"></label>
+  <div class="fields" style="margin:7px 0"><button id="saveTileset" type="button">Salvar tileset na biblioteca</button><select id="libraryTilesets" aria-label="Tilesets salvos"><option value="">Tilesets da biblioteca…</option></select><button id="loadTileset" type="button">Carregar salvo</button></div>
   <p class="muted" style="font-size:12px;margin:7px 0">Para tiles de 32 × 32, selecione um quadradinho da folha abaixo; ele vira seu pincel. Aceita PNG de 128 × 128, 256 × 256 e maiores.</p>
   <canvas id="sheet" width="256" height="160" title="Clique para escolher um bloco"></canvas>
   <div class="controls"><button id="useAtlas" disabled>Usar tile selecionado</button><button id="clearAtlas">Voltar aos terrenos</button></div>
@@ -270,6 +271,33 @@ $('preset').onclick=makePreset;
 $('empty').onclick=()=>{remember();makeBlank(+$('width').value,+$('height').value);say('Mapa vazio criado.')};
 function imageFrom(src,id){const im=new Image();im.onload=()=>{if(id==='sheet'){sheetImg=im;showSheet();say('Folha '+sheetCols+'×'+sheetRows+' carregada: '+Math.round(im.width/sheetCols)+'×'+Math.round(im.height/sheetRows)+' pixels por imagem. A escala será ajustada automaticamente no mapa.')}else assetImages[id]=im;drawSoon()};im.src=src;return im}
 function fileData(file){return new Promise((resolve,reject)=>{if(file.size>4*1024*1024){reject(Error('O PNG deve ter até 4 MB.'));return}let fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=()=>reject(Error('Falha ao ler imagem'));fr.readAsDataURL(file)})}
+async function refreshLibraryTilesets(){
+ try{
+  const items=await ApoenaLibrary.listAssets({category:'tileset'});
+  const select=$('libraryTilesets'),prior=select.value;select.replaceChildren(new Option('Tilesets da biblioteca…',''));
+  items.forEach(item=>select.add(new Option(item.name+' · '+item.width+'×'+item.height,item.id)));
+  if(items.some(item=>item.id===prior))select.value=prior;
+ }catch(error){say('Biblioteca central indisponível: '+error.message)}
+}
+$('saveTileset').onclick=async()=>{
+ if(!sheetSrc||!sheetImg)return say('Importe um tileset primeiro.');
+ try{
+  const name=prompt('Nome do tileset:', 'Tileset Apoena');
+  if(name===null)return;
+  const saved=await ApoenaLibrary.saveAsset({name:name.trim()||'Tileset Apoena',category:'tileset',type:'tileset',dataUrl:sheetSrc,width:sheetImg.width,height:sheetImg.height,metadata:{columns:sheetCols,rows:sheetRows,profile:sheetProfile},tags:['tileset','mapa-2.5d'],replaceExisting:true});
+  await refreshLibraryTilesets();$('libraryTilesets').value=saved.id;say('Tileset salvo na biblioteca central: '+saved.name);
+ }catch(error){say('Falha ao salvar tileset: '+error.message)}
+};
+$('loadTileset').onclick=async()=>{
+ const id=$('libraryTilesets').value;if(!id)return say('Selecione um tileset salvo.');
+ try{
+  const item=await ApoenaLibrary.getAsset(id);if(!item)throw new Error('Tileset não encontrado.');
+  sheetSrc=await ApoenaLibrary.blobToDataURL(item.blob);sheetProfile='manual';$('sheetProfile').value='manual';
+  const im=new Image();im.onload=()=>{sheetImg=im;sheetCols=Math.max(1,Math.min(32,Number(item.metadata&&item.metadata.columns)||6));sheetRows=Math.max(1,Math.min(32,Number(item.metadata&&item.metadata.rows)||4));$('sheetCols').value=sheetCols;$('sheetRows').value=sheetRows;selectedTile=0;showSheet();drawSoon();scheduleSave();say('Tileset carregado da biblioteca central: '+item.name)};im.onerror=()=>say('Falha ao abrir o tileset salvo.');im.src=sheetSrc;
+ }catch(error){say('Falha ao carregar tileset: '+error.message)}
+};
+if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(()=>refreshLibraryTilesets());
+refreshLibraryTilesets();
 $('sheetfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{let src=await fileData(f);sheetSrc=src;imageFrom(src,'sheet');scheduleSave();say('Tileset carregado. Selecione uma célula da folha.')}catch(err){say(err.message)}e.target.value=''};
 function showSheet(){
  if(!sheetImg)return;
