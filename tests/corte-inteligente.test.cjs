@@ -84,7 +84,11 @@ assert.ok(libraryHtml.includes('includeData:false')&&libraryHtml.includes('Apoen
 assert.ok(mapHtml.includes('listProjects({includeData:false})'),'editor de mapas lista metadados sem baixar mapas completos');
 assert.ok(js.includes('listProjects({includeData:false})'),'estúdio lista projetos sem baixar todos os quadros');
 assert.ok(libraryHtml.includes("window.open(url,'_blank','noopener')"),'biblioteca pode abrir mapa salvo no editor');
-assert.ok(shellHtml.includes("ApoenaLibrary.dispatch(message.action,message.payload||{})"),'shell roteia chamadas para a biblioteca central');
+assert.ok(shellHtml.includes('bundle-v4/parte_000.js')&&shellHtml.includes('window.__APOENA_V4_PARTES')&&shellHtml.includes('document.write(full)')&&!shellHtml.includes('<iframe'),'entrada mantém o Creator V4.0 nativo e não usa iframe');
+assert.ok(shellHtml.includes('shared/asset-library.js')&&shellHtml.includes('pixel-art/natureza.js'),'entrada carrega biblioteca central e editor de Natureza');
+const integratedModule=fs.readFileSync(path.join(__dirname,'../pixel-art/modulo-integrado.js'),'utf8');
+for(const href of ['pixel-art/estudio.html','map-editor/index.html','biblioteca/index.html','integracao/index.html'])
+  assert.ok(integratedModule.includes(href),'ferramenta V4.1 não acessível pela área Pixel Art: '+href);
 console.log('CORTE INTELIGENTE OK: malha ajustável, transparência, isolamento, proteção, desfazer e UI');
 console.log('MAPAS/BIBLIOTECA OK: salvar/reabrir, link direto, lista de projetos e ponte central');
 
@@ -101,7 +105,8 @@ const modulePaths=[
   'ORGANIZACAO_EDITOR.html'
 ];
 for(const file of modulePaths)assert.ok(fs.existsSync(path.join(root,file)),'módulo do menu ausente: '+file);
-assert.ok(shell.includes('data-page="3d"')&&shell.includes('data-page="pixel"'),'menu unificado incompleto');
-assert.ok(shell.includes('data-page="animais"')&&shell.includes('data-page="cenario"')&&shell.includes('data-page="efeitos"'),'categorias de assets ausentes');
-assert.ok(shell.includes('data-page="mapa"')&&shell.includes('data-page="itens"'),'módulos existentes não integrados');
-console.log('INTEGRAÇÃO V4.1 OK: destinos do menu e módulos preservados');
+assert.ok(shell.includes('bundle-v4/parte_000.js')&&shell.includes('window.__APOENA_V4_PARTES')&&shell.includes('document.write(full)'),'entrada do Creator V4.0 e carregamento de módulos');
+assert.ok(shell.includes('shared/asset-library.js')&&shell.includes('pixel-art/natureza.js'),'biblioteca central e Natureza incluídas no bundle nativo');
+assert.ok(!shell.includes('<iframe'),'entrada principal não substitui o Creator por um shell com iframe');
+assert.ok(integratedModule.includes('data-pixel-tab=\\"objects\\"')&&integratedModule.includes('data-pixel-tab=\\"maps\\"'),'abas nativas de objetos e mapas preservadas');
+console.log('INTEGRAÇÃO V4.1 OK: entrada nativa, módulos existentes e ferramentas acessíveis');
