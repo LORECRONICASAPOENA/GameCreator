@@ -112,10 +112,10 @@ async function refreshLibrary(){
 async function refreshLibraryProjects(){
   const select=$('libraryProjects'),prior=select.value;
   try{
-    const all=await ApoenaLibrary.listProjects({});
+    const all=await ApoenaLibrary.listProjects({includeData:false});
     const projects=all.filter(p=>p&&p.schema==='apoena.pixelart.v1');
     select.replaceChildren(new Option('Selecione um projeto…',''));
-    projects.forEach(p=>select.add(new Option(p.name+' · '+((p.data&&p.data.frames)||[]).length+' quadros',p.id)));
+    projects.forEach(p=>select.add(new Option(p.name+' · '+Number((p.metadata||{}).frames||0)+' quadros',p.id)));
     if(projects.some(p=>p.id===prior))select.value=prior;
   }catch(error){msg('Não foi possível listar projetos: '+error.message)}
 }
