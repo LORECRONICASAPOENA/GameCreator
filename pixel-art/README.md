@@ -44,3 +44,7 @@ O arquivo `frames.tres` contém quatro animações e 16 texturas AtlasTexture re
 
 - `../index.html`: tela inicial do GameCreator com atalho ao gerador.
 - `pixel-art/index.html`: editor, previews, exportação e teste de arena sem dependências externas.
+
+## Vínculo com itens da Fábrica de Itens — 28/10/2026
+
+O gerador aceita o catálogo `apoena.gamecreator.catalogo.v1` exportado pela página `../integracao/index.html`. Clique em **Importar catálogo de itens**, escolha um item e salve o personagem. O campo `character.linkedItemId` no `personagem.json` e no ZIP preserva o vínculo ao mesmo ID usado nas receitas e no inventário do Game Creator. `linked_catalog_game_id` identifica o jogo de origem. Não há alteração visual automática da arma, ligação física ao Godot ou equipagem de verdade: essas operações precisam de scripts e sprites de jogo.
