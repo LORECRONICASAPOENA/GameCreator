@@ -58,6 +58,9 @@ assert.ok(mapHtml.includes('ApoenaLibrary.saveProject')&&mapHtml.includes('Apoen
 assert.ok(mapHtml.includes("new URLSearchParams(location.search).get('projeto')")&&mapHtml.includes('openLibraryMap(requestedMapId)'),'mapa pode ser aberto por link com ID salvo');
 for(const id of ['projectStatus','projects'])assert.ok(libraryHtml.includes('id="'+id+'"'),'biblioteca sem área de projetos: '+id);
 assert.ok(libraryHtml.includes('ApoenaLibrary.listProjects')&&libraryHtml.includes('ApoenaLibrary.deleteProject'),'biblioteca lista e exclui projetos');
+assert.ok(libraryHtml.includes('includeData:false')&&libraryHtml.includes('ApoenaLibrary.getProject(project.id)'),'biblioteca carrega payload grande apenas sob demanda');
+assert.ok(mapHtml.includes('listProjects({includeData:false})'),'editor de mapas lista metadados sem baixar mapas completos');
+assert.ok(js.includes('listProjects({includeData:false})'),'estúdio lista projetos sem baixar todos os quadros');
 assert.ok(libraryHtml.includes("window.open(url,'_blank','noopener')"),'biblioteca pode abrir mapa salvo no editor');
 assert.ok(shellHtml.includes("ApoenaLibrary.dispatch(message.action,message.payload||{})"),'shell roteia chamadas para a biblioteca central');
 console.log('CORTE INTELIGENTE OK: malha ajustável, transparência, isolamento, proteção, desfazer e UI');
