@@ -65,7 +65,7 @@ async function loadProjects(){
       const updated=document.createElement('p');updated.textContent='Atualizado '+dateLabel(project.updatedAt);card.append(updated);
       const actions=document.createElement('div');actions.className='actions';
       actions.append(makeButton('Baixar JSON',function(){
-        const base=(project.name||'projeto').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9_-]+/g,'_').slice(0,70)||'projeto';
+        const base=(project.name||'projeto').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9_-]+/g,'_').slice(0,70)||'projeto';
         download(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),base+'.json');
       }));
       if(schema==='apoena.map2d.v1')actions.append(makeButton('Abrir mapa',function(){
