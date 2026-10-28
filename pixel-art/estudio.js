@@ -206,7 +206,18 @@ $('librarySave').onclick=async()=>{
       tags:[kind,'pixel-art'],metadata:{manifest:manifest(),frames:frames.map((f,i)=>({index:i,action:f.action,direction:f.direction,rect:f.rect}))},
       replaceExisting:true
     });
-    await refreshLibrary();$('libraryAssets').value=item.id;msg('Spritesheet salva na biblioteca central: '+item.name);
+    let syncMessage='';
+    if(window.opener&&!window.opener.closed&&blob.size<=10*1024*1024&&window.ApoenaCreatorBridge){
+      try{
+        const synced=await ApoenaCreatorBridge.request('saveAsset',{manifest:manifest(),png:output.toDataURL('image/png')});
+        syncMessage=' Também sincronizada com a sessão V4.0 ('+synced.name+'). Use "Salvar projeto editável" para guardar o projeto completo.';
+      }catch(error){syncMessage=' A biblioteca central foi salva, mas a sessão V4.0 não foi sincronizada: '+error.message}
+    }else if(blob.size>10*1024*1024){
+      syncMessage=' O PNG excede 10 MB; permanece salvo na biblioteca central, sem cópia base64 na sessão V4.0.';
+    }else{
+      syncMessage=' Para também gravar no projeto V4.0, abra o Estúdio pelo menu Pixel Art do Creator.';
+    }
+    await refreshLibrary();$('libraryAssets').value=item.id;msg('Spritesheet salva na biblioteca central: '+item.name+'.'+syncMessage);
   }catch(error){msg('Falha ao salvar na biblioteca: '+error.message)}
   finally{button.disabled=false}
 };
