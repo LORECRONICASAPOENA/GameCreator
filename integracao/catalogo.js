@@ -46,8 +46,9 @@
       if(!byId.has(cleanId(r.resultId)))errors.push("Receita "+id+": item produzido "+cleanId(r.resultId)+" não existe.");
       if(!Array.isArray(r.ingredients))errors.push("Receita "+id+": ingredientes inválidos.");
       else for(const x of r.ingredients){
-        if(!byId.has(cleanId(x&&x.id)))errors.push("Receita "+id+": ingrediente "+cleanId(x&&x.id)+" não existe.");
-        if(!Number.isSafeInteger(Number(x&&x.qty))||Number(x.qty)<1)errors.push("Receita "+id+": quantidade de ingrediente inválida.");
+        if(!x||typeof x!=="object"){errors.push("Receita "+id+": ingrediente malformado.");continue}
+        if(!byId.has(cleanId(x.id)))errors.push("Receita "+id+": ingrediente "+cleanId(x.id)+" não existe.");
+        if(!Number.isSafeInteger(Number(x.qty))||Number(x.qty)<1)errors.push("Receita "+id+": quantidade de ingrediente inválida.");
       }
       if(!Number.isSafeInteger(Number(r.quantity))||Number(r.quantity)<1)errors.push("Receita "+id+": quantidade produzida inválida.");
       if(num(r.gold)<0||num(r.seconds)<0)errors.push("Receita "+id+": preço ou tempo negativo.");
@@ -96,11 +97,13 @@
     validateCatalog(c);
     const recipe=c.recipes.find(x=>x.id===recipeId);
     if(!recipe)throw Error("Receita não encontrada: "+recipeId);
-    for(const x of recipe.ingredients){
-      if((session.inventory[x.id]||0)<x.qty)throw Error("Falta ingrediente: "+x.id);
+    const totals={};
+    for(const x of recipe.ingredients)totals[x.id]=(totals[x.id]||0)+Number(x.qty);
+    for(const [id,qty] of Object.entries(totals)){
+      if((session.inventory[id]||0)<qty)throw Error("Falta ingrediente: "+id);
     }
     if((session.gold||0)<num(recipe.gold))throw Error("Ouro insuficiente.");
-    for(const x of recipe.ingredients)session.inventory[x.id]-=x.qty;
+    for(const [id,qty] of Object.entries(totals))session.inventory[id]-=qty;
     session.gold-=num(recipe.gold);
     session.inventory[recipe.resultId]=(session.inventory[recipe.resultId]||0)+Number(recipe.quantity);
     return {item_id:recipe.resultId,quantity:Number(recipe.quantity)};
