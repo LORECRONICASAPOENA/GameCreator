@@ -3,6 +3,7 @@
 Preserva os 17 scripts e os cadastros da fonte original."""
 from pathlib import Path
 import hashlib
+import re
 root=Path(__file__).resolve().parent.parent
 src=root/'APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html'
 out=root/'index.html'
