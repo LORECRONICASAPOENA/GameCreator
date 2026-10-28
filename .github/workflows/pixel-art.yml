@@ -78,8 +78,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Testar backup e restauracao da biblioteca
         run: |
-          node tests/library-backup.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/library-backup.log
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmd /c "node tests/library-backup.test.cjs > .ci-results\library-backup.log 2>&1"
+          $testCode = $LASTEXITCODE
+          Get-Content .ci-results/library-backup.log
+          if ($testCode -ne 0) { exit $testCode }
       - name: Garantir preservacao do Creator original e dos modulos
         run: |
           $required = @(
