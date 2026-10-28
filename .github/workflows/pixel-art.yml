@@ -1,7 +1,5 @@
 name: Validar Apoena Creator Pixel Art
 on:
-  push:
-    branches: [feature/estudio-unificado-pixelart-v41]
   pull_request:
     branches: [main]
     paths:
@@ -21,6 +19,11 @@ on:
 permissions:
   contents: read
   actions: write
+
+concurrency:
+  group: apoena-v41-${{ github.event.pull_request.head.ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validar:
     runs-on: [self-hosted, Windows, X64]
