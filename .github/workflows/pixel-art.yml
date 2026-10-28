@@ -25,6 +25,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Instalar adaptador IndexedDB para testes
+        run: npm install --no-save --no-package-lock fake-indexeddb@6.2.4
       - name: Validar sintaxe JavaScript
         run: |
           node --check pixel-art/estudio.js
