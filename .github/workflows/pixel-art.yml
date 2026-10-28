@@ -41,10 +41,15 @@ jobs:
           node --check pixel-art/estudio.js 2>&1 | tee .ci-results/syntax.log
           node --check pixel-art/corte-inteligente.js 2>&1 | tee -a .ci-results/syntax.log
           node --check shared/asset-library.js 2>&1 | tee -a .ci-results/syntax.log
+          node --check shared/tileset-check.js 2>&1 | tee -a .ci-results/syntax.log
       - name: Testar Corte Inteligente e contratos da interface
         run: |
           set -o pipefail
           node tests/corte-inteligente.test.cjs 2>&1 | tee .ci-results/corte.log
+      - name: Testar verificador de encaixe dos tilesets
+        run: |
+          set -o pipefail
+          node tests/tileset-check.test.cjs 2>&1 | tee .ci-results/tileset.log
       - name: Testar biblioteca e persistência IndexedDB
         run: |
           set -o pipefail
