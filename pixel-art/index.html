@@ -99,6 +99,15 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 <label class="button secondary" style="display:inline-block;text-align:center;cursor:pointer">Importar personagem JSON
 <input id="importJson" type="file" accept=".json,application/json" hidden>
 </label>
+<div class="note" style="margin:15px 0;padding:13px;border:1px solid #466374;border-radius:9px">
+<strong>Vincular item do Game Creator ao personagem</strong>
+<p>Importe o catálogo criado na Central de Integração e escolha uma arma, acessório ou outro item cadastrado. O ID ficará no JSON e no ZIP do personagem para o jogo usar depois. <strong>Isso não desenha automaticamente a arma no sprite.</strong></p>
+<label style="cursor:pointer">Importar catálogo de itens (.json)
+<input id="catalogJson" type="file" accept=".json,application/json"></label>
+<label>Item do catálogo para vincular</label>
+<select id="catalogItem"><option value="">Nenhum item vinculado</option></select>
+<small id="catalogInfo">Nenhum catálogo importado.</small>
+</div>
 <p id="status" class="status" role="status" aria-live="polite"></p>
 <p class="note">O ZIP inclui PNG completo, PNG de cada camada, JSON e um <strong>SpriteFrames .tres</strong> para Godot 4. Extraia a pasta <code>personagem</code> dentro da raiz do projeto Godot. Não muda o jogo automaticamente.</p>
 </section>
@@ -130,6 +139,7 @@ const presets={
  ar:{nome:"Arqueiro do Ar",tribo:"ar",corpo:"adulto",cabeloTipo:"preso",roupaTipo:"aventureiro",calcaTipo:"curta",capa:"curta",acessorio:"arco",pele:"#c49170",olhos:"#644d29",cabelo:"#c9ac55",roupa:"#ceb753",calca:"#e9ddaa",botas:"#6f5638"}
 };
 let model={...presets.apoena};
+let linkedCatalogGame="";
 const $=id=>document.getElementById(id);
 const inputs=[...document.querySelectorAll("[data-key]")];
 const colors={nenhuma:"#79c9d6",agua:"#4cb6ee",fogo:"#ee6254",terra:"#65c77e",ar:"#eed169"};
@@ -334,7 +344,7 @@ function canvasBytes(canvas){
  return b;
 }
 function manifest(){
- return {schema:"apoena-pixel-v1",version:1,cell:{width:W,height:H},sheet:{columns:4,rows:4},directions:DIRS,frames_per_direction:4,animation:"0=parado, 1=passo esquerdo, 2=parado, 3=passo direito",layers:LAYERS,character:{...model}};
+ return {schema:"apoena-pixel-v1",version:1,cell:{width:W,height:H},sheet:{columns:4,rows:4},directions:DIRS,frames_per_direction:4,animation:"0=parado, 1=passo esquerdo, 2=parado, 3=passo direito",layers:LAYERS,linked_catalog_game_id:linkedCatalogGame,character:{...model}};
 }
 function animationResource(){
  let result='[gd_resource type="SpriteFrames" load_steps=18 format=3]\n\n';
@@ -406,6 +416,7 @@ function validateImport(obj){
   else if(el.tagName==="SELECT"){if([...el.options].some(o=>o.value===v))out[k]=v}
   else if(k==="nome")out[k]=v.slice(0,40);
  }
+ out.linkedItemId=(typeof obj.character.linkedItemId==="string"&&obj.character.linkedItemId.length<=120)?obj.character.linkedItemId:"";
  return out;
 }
 inputs.forEach(el=>el.addEventListener(el.type==="color"||el.tagName==="SELECT"?"change":"input",()=>{
@@ -423,6 +434,32 @@ $("importJson").onchange=async ev=>{
  catch(e){showMessage("Erro ao importar: "+e.message)}
  ev.target.value="";
 };
+$("catalogJson").addEventListener("change",async ev=>{
+ const file=ev.target.files?.[0];if(!file)return;
+ try{
+  if(file.size>35000000)throw Error("O catálogo ultrapassa o limite de 35 MB.");
+  const data=JSON.parse(await file.text());
+  if(!["apoena.gamecreator.catalogo.v1","apoena.central.v1","apoena.items.v1"].includes(data.schema)||!Array.isArray(data.items))throw Error("Catálogo de itens não reconhecido.");
+  const ids=new Set();const candidates=data.items.filter(item=>{
+    if(!item||typeof item.id!=="string"||!item.id||ids.has(item.id))return false;
+    ids.add(item.id);return true;
+  });
+  const select=$("catalogItem");
+  select.replaceChildren(new Option("Nenhum item vinculado",""));
+  for(const item of candidates)select.add(new Option((item.name||item.id)+" • "+(item.category||"item"),item.id));
+  linkedCatalogGame=typeof data.game_id==="string"?data.game_id:"";
+  if(model.linkedItemId&&candidates.some(x=>x.id===model.linkedItemId))select.value=model.linkedItemId;
+  else{model.linkedItemId="";select.value="";}
+  $("catalogInfo").textContent=candidates.length+" itens carregados do projeto "+(data.project||data.name||"Game Creator")+".";
+  showMessage("Itens importados. Selecione qual item do catálogo este personagem usa.");
+ }catch(e){showMessage("Erro no catálogo: "+e.message)}
+ ev.target.value="";
+});
+$("catalogItem").addEventListener("change",()=>{
+ model.linkedItemId=$("catalogItem").value;
+ update();
+ showMessage(model.linkedItemId?"Item vinculado ao personagem: "+model.linkedItemId+". A arte ainda é editada separadamente.":"Vínculo de item removido.");
+});
 // Arena de teste: cenario procedural, sem sprites externos ou dados do servidor.
 const arena=$("arena"),ac=arena.getContext("2d");
 const player={x:160,y:144,dir:0},held=new Set();
