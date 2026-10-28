@@ -460,7 +460,7 @@ const status=(s,bad=false)=>{$("apoobj-status").textContent=s;$("apoobj-status")
 const slug=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9_-]+/g,"_").replace(/^_+|_+$/g,"").slice(0,55);
 const download=(data,name,type)=>{const url=URL.createObjectURL(new Blob([data],{type}));const a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),8000)};
 function clearForm(){
- currentOriginalId="";for(const id of ["apoobj-id","apoobj-name","apoobj-description"])set(id,"");
+ currentOriginalId="";$("apoobj-id").readOnly=false;for(const id of ["apoobj-id","apoobj-name","apoobj-description"])set(id,"");
  for(const id of ["apoobj-hp","apoobj-durability"])set(id,100);
  for(const id of ["apoobj-attack","apoobj-defense","apoobj-price","apoobj-effect-value","apoobj-effect-duration"])set(id,0);
  set("apoobj-stack",99);set("apoobj-category","material");set("apoobj-kind","objeto");set("apoobj-interact","coletar");set("apoobj-effect","nenhum");
@@ -481,7 +481,7 @@ function itemList(){
 function loadItem(id){
  const i=project?.items.find(x=>x.id===id);
  if(!i)return clearForm();
- currentOriginalId=i.id;set("apoobj-id",i.id);set("apoobj-name",i.name);set("apoobj-description",i.description);
+ currentOriginalId=i.id;set("apoobj-id",i.id);$("apoobj-id").readOnly=true;set("apoobj-name",i.name);set("apoobj-description",i.description);
  set("apoobj-category",i.category||"material");set("apoobj-price",i.price||0);set("apoobj-stack",i.maxStack||99);
  const w=i.worldBehavior||{};
  set("apoobj-kind",w.kind||"objeto");set("apoobj-interact",w.interact||"coletar");
