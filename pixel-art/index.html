@@ -430,7 +430,7 @@ $("exportJson").onclick=()=>{download(new Blob([JSON.stringify(manifest(),null,2
 $("exportZip").onclick=()=>{try{packageZip()}catch(e){showMessage("Não foi possível criar o ZIP: "+e.message)}};
 $("importJson").onchange=async ev=>{
  const file=ev.target.files&&ev.target.files[0];if(!file)return;
- try{if(file.size>100000)throw new Error("Arquivo muito grande.");model=validateImport(JSON.parse(await file.text()));update();showMessage("Personagem importado.");}
+ try{if(file.size>100000)throw new Error("Arquivo muito grande.");const imported=JSON.parse(await file.text());model=validateImport(imported);linkedCatalogGame=typeof imported.linked_catalog_game_id==="string"?imported.linked_catalog_game_id:"";update();if(model.linkedItemId){$("catalogInfo").textContent="Item vinculado à ficha: "+model.linkedItemId+". Importe o catálogo para selecionar outro item.";}showMessage("Personagem importado.");}
  catch(e){showMessage("Erro ao importar: "+e.message)}
  ev.target.value="";
 };
