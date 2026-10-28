@@ -21,6 +21,7 @@ jobs:
           node --check pixel-art/corte-inteligente.js
       - name: Testar grade ajustavel e Corte Inteligente
         run: node tests/corte-inteligente.test.cjs
+          node tests/asset-library.test.cjs
       - name: Garantir preservação do antigo Creator e módulos
         shell: bash
         run: |
