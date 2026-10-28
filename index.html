@@ -35,9 +35,9 @@
   if(pieces.length!==24||pieces.some(p=>typeof p!=="string"||!p.length))throw Error("Arquivos do editor incompletos. Extraia o ZIP inteiro: precisa manter a pasta bundle-v4.");
   const full=pieces.join("").replace(
    '<script src="pixel-art/modulo-integrado.js"></script>',
-   '<script src="shared/asset-library.js"></script>\\n<script src="pixel-art/natureza.js"></script>\\n<script src="pixel-art/modulo-integrado.js"></script>'
+   '<script src="shared/asset-library.js"></script>\\n<script src="shared/creator-bridge.js"></script>\\n<script src="pixel-art/natureza.js"></script>\\n<script src="pixel-art/modulo-integrado.js"></script>'
   );
-  if(!full.startsWith("<!DOCTYPE html>")||!full.includes('id="page-pixelart"')||!full.includes('Game Creator v4.0')||!full.includes('shared/asset-library.js')||!full.includes('pixel-art/natureza.js')||full.includes('<iframe'))throw Error("Versão 4.0 integrada inválida ou incompleta. Confirme o pacote bundle-v4 e os módulos V4.1.");
+  if(!full.startsWith("<!DOCTYPE html>")||!full.includes('id="page-pixelart"')||!full.includes('Game Creator v4.0')||!full.includes('shared/asset-library.js')||!full.includes('shared/creator-bridge.js')||!full.includes('pixel-art/natureza.js')||full.includes('<iframe'))throw Error("Versão 4.0 integrada inválida ou incompleta. Confirme o pacote bundle-v4 e os módulos V4.1.");
   window.__APOENA_V4_PARTES=null;
   document.open();document.write(full);document.close();
  }catch(e){
