@@ -41,6 +41,8 @@ async function main() {
   assert.equal((await ApoenaLibrary.listAssets()).length, 1);
   assert.equal(second.metadata.columns, 8);
   assert.ok(second.originalBlob, "a versão original é preservada quando uma edição não a substitui");
+  assert.equal(second.sourceWidth, 512, "a dimensão original da imagem é preservada em edições sem dimensões de origem");
+  assert.equal(second.sourceHeight, 256, "a altura original é preservada em edições sem dimensões de origem");
 
   const project = await ApoenaLibrary.saveProject({
     id: "mapa-teste",
