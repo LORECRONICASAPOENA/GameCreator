@@ -43,8 +43,10 @@ const mapScriptEnd=mapHtml.indexOf('</script>',mapScriptStart);
 assert.ok(mapScriptStart>=0&&mapScriptEnd>mapScriptStart,'script do editor de mapas encontrado');
 assert.doesNotThrow(()=>new Function(mapHtml.slice(mapScriptStart+8,mapScriptEnd)),'script do editor de mapas sintaticamente válido');
 assert.doesNotThrow(()=>new Function(js),'script UI válido');
-for(const id of ['meshMode','meshReset','smartSelected','smartAll','smartPanel','smartApply','smartCancel','smartUndoBatch'])
+for(const id of ['meshMode','meshReset','smartSelected','smartAll','smartPanel','smartApply','smartCancel','smartUndoBatch','projectFile','libraryProjects','libraryProjectSave','libraryProjectOpen','libraryProjectRefresh'])
   assert.ok(html.includes('id="'+id+'"'),'falta controle '+id);
+assert.ok(html.includes('id="action" list="actionOptions"')&&html.includes('id="direction" list="directionOptions"'),'ações e direções são configuráveis');
+assert.ok(js.includes('async function loadProjectData')&&js.includes('ApoenaLibrary.saveProject')&&js.includes('ApoenaLibrary.getProject'),'projeto editável pode ser importado, salvo e reaberto');
 assert.ok(html.indexOf('corte-inteligente.js')<html.indexOf('estudio.js'),'ordem de scripts');
 const alphaStart=js.indexOf('function alpha()'),alphaEnd=js.indexOf('function trim()',alphaStart);
 assert.ok(alphaStart>=0&&alphaEnd>alphaStart,'rotina de limpeza de alfa presente');
