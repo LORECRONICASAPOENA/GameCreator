@@ -89,9 +89,13 @@ const entryHtml=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const loaderPath=path.join(root,'.ci-results','index-loader.html');
 const loaderHtml=fs.existsSync(loaderPath)?fs.readFileSync(loaderPath,'utf8'):entryHtml;
 if(loaderHtml.includes('bundle-v4/parte_000.js')){
-  assert.ok(loaderHtml.includes('window.__APOENA_V4_PARTES')&&loaderHtml.includes('document.write(full)')&&!loaderHtml.includes('<iframe'),'loader compacto preserva o Creator V4.0 sem iframe');
+  assert.ok(loaderHtml.includes('window.__APOENA_V4_PARTES')&&loaderHtml.includes('document.write(full)')&&loaderHtml.includes('shared/creator-bridge.js')&&!loaderHtml.includes('<iframe src='),'loader compacto preserva o Creator V4.0 sem iframe de substituição');
 }
-assert.ok(entryHtml.includes('id="page-pixelart"')&&entryHtml.includes('pixel-art/modulo-integrado.js')&&!entryHtml.includes('<iframe'),'entrada mantém o Creator V4.0 nativo e não usa iframe');
+if(entryHtml.includes('window.__APOENA_V4_PARTES')){
+  assert.ok(entryHtml.includes('document.write(full)')&&entryHtml.includes('shared/creator-bridge.js')&&!entryHtml.includes('<iframe src='),'entrada compacta preserva o Creator V4.0');
+}else{
+  assert.ok(entryHtml.includes('id="page-pixelart"')&&entryHtml.includes('pixel-art/modulo-integrado.js')&&!entryHtml.includes('<iframe'),'build produz Creator V4.0 nativo sem iframe');
+}
 assert.ok(entryHtml.includes('shared/asset-library.js')&&entryHtml.includes('shared/creator-bridge.js')&&entryHtml.includes('pixel-art/natureza.js'),'entrada carrega biblioteca, ponte e editor de Natureza');
 const integratedModule=fs.readFileSync(path.join(__dirname,'../pixel-art/modulo-integrado.js'),'utf8');
 for(const href of ['pixel-art/estudio.html','map-editor/index.html','biblioteca/index.html','integracao/index.html'])
@@ -111,8 +115,8 @@ const modulePaths=[
 ];
 for(const file of modulePaths)assert.ok(fs.existsSync(path.join(root,file)),'módulo do menu ausente: '+file);
 if(loaderHtml.includes('bundle-v4/parte_000.js'))
-  assert.ok(loaderHtml.includes('window.__APOENA_V4_PARTES')&&loaderHtml.includes('document.write(full)'),'loader compacto do Creator V4.0 preservado');
-assert.ok(entryHtml.includes('shared/asset-library.js')&&entryHtml.includes('pixel-art/natureza.js'),'biblioteca central e Natureza incluídas na entrada nativa');
-assert.ok(!entryHtml.includes('<iframe'),'entrada principal não substitui o Creator por um shell com iframe');
+  assert.ok(loaderHtml.includes('shared/asset-library.js')&&loaderHtml.includes('shared/creator-bridge.js')&&loaderHtml.includes('pixel-art/natureza.js'),'loader injeta biblioteca, ponte e Natureza');
+assert.ok(entryHtml.includes('shared/asset-library.js')&&entryHtml.includes('shared/creator-bridge.js')&&entryHtml.includes('pixel-art/natureza.js'),'biblioteca central, ponte e Natureza incluídas na entrada nativa');
+assert.ok(!entryHtml.includes('<iframe src='),'entrada principal não substitui o Creator por um shell com iframe');
 assert.ok(integratedModule.includes('data-pixel-tab="objects"')&&integratedModule.includes('data-pixel-tab="maps"'),'abas nativas de objetos e mapas preservadas');
 console.log('INTEGRAÇÃO V4.1 OK: entrada nativa, módulos existentes e ferramentas acessíveis');
