@@ -162,7 +162,8 @@ async function loadProjectData(data){
   $('cell').value=[...$('cell').options].some(o=>o.value===cell)?cell:'256';
   $('cols').value=clamp(Number(data.columns)||4,1,24);
   $('rows').value=clamp(Number(data.rows)||Math.ceil(loaded.length/Number($('cols').value)),1,24);
-  if(data.kind){const button=$('categories').querySelector('[data-kind="'+String(data.kind).replace(/["\\\\]/g,'')+'"]');if(button)button.click()}
+  const importedKind=String(data.kind||'');
+  if(['personagem','animal','cenario','efeito'].includes(importedKind)){const button=$('categories').querySelector('[data-kind="'+importedKind+'"]');if(button)button.click()}
   $('sourceInfo').textContent='Projeto editável carregado · '+loaded.length+' quadros · a imagem de origem completa não está incluída.';
   $('cropStatus').textContent='Quadros restaurados do projeto editável.';
   pick(0);
