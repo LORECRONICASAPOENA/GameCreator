@@ -70,6 +70,7 @@ assert.ok(mapHtml.includes('<script src="../shared/asset-library.js"></script>')
 for(const id of ['saveMapLibrary','libraryMaps','loadMapLibrary'])
   assert.ok(mapHtml.includes('id="'+id+'"'),'falta controle de mapas na biblioteca: '+id);
 assert.ok(mapHtml.includes('ApoenaLibrary.saveProject')&&mapHtml.includes('ApoenaLibrary.getProject'),'mapas podem ser salvos e reabertos pela biblioteca central');
+assert.ok(mapHtml.includes('ApoenaTilesetCheck.analyze')&&mapHtml.includes('id="checkTilesetFit"'),'verificador de encaixe de tilesets está conectado ao editor');
 assert.ok(mapHtml.includes("new URLSearchParams(location.search).get('projeto')")&&mapHtml.includes('openLibraryMap(requestedMapId)'),'mapa pode ser aberto por link com ID salvo');
 for(const id of ['projectStatus','projects'])assert.ok(libraryHtml.includes('id="'+id+'"'),'biblioteca sem área de projetos: '+id);
 assert.ok(libraryHtml.includes('ApoenaLibrary.listProjects')&&libraryHtml.includes('ApoenaLibrary.deleteProject'),'biblioteca lista e exclui projetos');
