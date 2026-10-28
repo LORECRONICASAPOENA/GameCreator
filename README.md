@@ -45,3 +45,11 @@ O iniciador \`index.html\` oferece agora **Abrir Editor de Mapas 2.5D** em \`map
 4. Preserve cópias dos projetos JSON anteriores; teste exportações no Godot antes de colocá-las no jogo.
 
 O código HTML foi dividido em **23 arquivos `parte_000.js` a `parte_022.js`** para publicação; não são 23 versões diferentes. O iniciador valida quantidade, tamanho de cada parte e marcadores de início/fim antes de reconstruir o documento. A fonte possivelmente perdeu apenas a marca de BOM UTF-8 na leitura, que é reposta na exportação do HTML único. Não houve teste ponta a ponta no Android nem no Godot nesta recuperação. Não substituir nem remover a fonte original da Biblioteca.
+
+## Integração de itens e receitas entre jogos — 28/10/2026
+
+A central agora oferece **Integração de Itens e Receitas** pelo botão em `index.html`, com página `integracao/index.html`. Ela importa o JSON salvo pela Fábrica de Itens do editor v3.9, valida IDs e vínculos dos ingredientes, exporta um catálogo com o ID do jogo de destino e fornece um script inicial para Godot 4 em `integracao/godot/ApoenaCatalogo.gd`. Não modifica o projeto de origem.
+
+O gerador Pixel Art também pode importar esse catálogo e vincular o ID de um item à ficha de personagem exportada. O vínculo ainda **não desenha/equipa o item no jogo**. Para aprender o fluxo completo, leia [Instruções de integração](integracao/README.md). Testes lógicos do contrato foram implementados em `integracao/testes/catalogo.test.js` e o GitHub Actions está configurado para executá-los; os testes de Godot e Android continuam pendentes.
+
+**Limites:** essa primeira integração preserva a Fábrica de Itens e receitas originais e adiciona interoperabilidade de dados. Não equivale à recuperação da v3.9.2/v4.0 integral, nem a integrar automaticamente inventário, mapa, efeitos e combate a qualquer jogo.
