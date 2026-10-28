@@ -36,6 +36,8 @@ for(const axis of [grid.x,grid.y])for(let i=1;i<axis.length;i++)assert.ok(axis[i
 const html=fs.readFileSync(path.join(__dirname,'../pixel-art/estudio.html'),'utf8');
 const js=fs.readFileSync(path.join(__dirname,'../pixel-art/estudio.js'),'utf8');
 const mapHtml=fs.readFileSync(path.join(__dirname,'../map-editor/index.html'),'utf8');
+const libraryHtml=fs.readFileSync(path.join(__dirname,'../biblioteca/index.html'),'utf8');
+const shellHtml=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 const mapScriptStart=mapHtml.indexOf('<script>');
 const mapScriptEnd=mapHtml.indexOf('</script>',mapScriptStart);
 assert.ok(mapScriptStart>=0&&mapScriptEnd>mapScriptStart,'script do editor de mapas encontrado');
@@ -51,8 +53,13 @@ assert.ok(mapHtml.includes('<script src="../shared/asset-library.js"></script>')
 for(const id of ['saveMapLibrary','libraryMaps','loadMapLibrary'])
   assert.ok(mapHtml.includes('id="'+id+'"'),'falta controle de mapas na biblioteca: '+id);
 assert.ok(mapHtml.includes('ApoenaLibrary.saveProject')&&mapHtml.includes('ApoenaLibrary.getProject'),'mapas podem ser salvos e reabertos pela biblioteca central');
+assert.ok(mapHtml.includes("new URLSearchParams(location.search).get('projeto')")&&mapHtml.includes('openLibraryMap(requestedMapId)'),'mapa pode ser aberto por link com ID salvo');
+for(const id of ['projectStatus','projects'])assert.ok(libraryHtml.includes('id="'+id+'"'),'biblioteca sem área de projetos: '+id);
+assert.ok(libraryHtml.includes('ApoenaLibrary.listProjects')&&libraryHtml.includes('ApoenaLibrary.deleteProject'),'biblioteca lista e exclui projetos');
+assert.ok(libraryHtml.includes("window.open(url,'_blank','noopener')"),'biblioteca pode abrir mapa salvo no editor');
+assert.ok(shellHtml.includes("ApoenaLibrary.dispatch(message.action,message.payload||{})"),'shell roteia chamadas para a biblioteca central');
 console.log('CORTE INTELIGENTE OK: malha ajustável, transparência, isolamento, proteção, desfazer e UI');
-console.log('MAPAS/BIBLIOTECA OK: biblioteca carregada e salvar/reabrir projeto conectados');
+console.log('MAPAS/BIBLIOTECA OK: salvar/reabrir, link direto, lista de projetos e ponte central');
 
 /* Regressão da integração: todos os módulos apontados pelo menu unificado devem existir. */
 const root=path.join(__dirname,'..');
