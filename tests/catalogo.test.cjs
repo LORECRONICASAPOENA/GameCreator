@@ -66,5 +66,9 @@ for (const fn of ["carregar_catalogo", "obter_item", "coletar", "remover", "inic
   assert.ok(gd.includes("func " + fn + "("), "método Godot ausente: " + fn);
 }
 assert.ok(gd.includes("const SESSAO_SCHEMA: String = \"apoena.gamecreator.sessao.v1\""), "sessão Godot possui schema versionado");
+const powershellBuild = fs.readFileSync(path.join(root, "integracao/build_unificado.ps1"), "utf8");
+const pythonBuild = fs.readFileSync(path.join(root, "integracao/build_unificado.py"), "utf8");
+assert.ok(powershellBuild.includes("$menuPattern") && powershellBuild.includes("shared\\creator-bridge.js"), "build PowerShell localiza menu e inclui ponte");
+assert.ok(pythonBuild.includes("menu_pattern") && pythonBuild.includes("shared/creator-bridge.js"), "build Python localiza menu e inclui ponte");
 
 console.log("CATALOGO OK: validação, exportação portátil, crafting, integridade e contrato Godot 4");
