@@ -13,7 +13,9 @@
     for(const item of assets){
       serializedAssets.push({id:item.id,name:item.name,category:item.category,type:item.type,mimeType:item.mimeType||item.blob?.type||"image/png",blob:await encode(item.blob),originalBlob:await encode(item.originalBlob),width:item.width||0,height:item.height||0,sourceWidth:item.sourceWidth||0,sourceHeight:item.sourceHeight||0,tags:item.tags||[],metadata:item.metadata||{},createdAt:item.createdAt||null,updatedAt:item.updatedAt||null});
     }
-    return {schema:SCHEMA,version:1,exportedAt:new Date().toISOString(),assets:serializedAssets,projects:projects.map(p=>({id:p.id,name:p.name,schema:p.schema,type:p.type,data:p.data,metadata:p.metadata||{},createdAt:p.createdAt||null,updatedAt:p.updatedAt||null}))};
+    const snapshot={schema:SCHEMA,version:1,exportedAt:new Date().toISOString(),assets:serializedAssets,projects:projects.map(p=>({id:p.id,name:p.name,schema:p.schema,type:p.type,data:p.data,metadata:p.metadata||{},createdAt:p.createdAt||null,updatedAt:p.updatedAt||null}))};
+    if(JSON.stringify(snapshot).length>MAX_IMPORT_CHARS)throw new Error("Backup maior que 120 MB de texto; filtre ou divida a biblioteca em backups menores.");
+    return snapshot;
   }
   function isImageDataURL(value){
     return typeof value==="string"&&/^data:image\/[A-Za-z0-9.+-]+;base64,[A-Za-z0-9+/]+={0,2}$/.test(value);
