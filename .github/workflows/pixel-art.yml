@@ -119,7 +119,8 @@ jobs:
             Write-Warning "O comando python nao pode ser executado; o build principal continua pelo PowerShell."
             return
           }
-          & $python.Source -m py_compile integracao/build_unificado.py 2>&1 | Tee-Object -FilePath (Join-Path $diagDir "python-build.log") -Append
+          $pythonCode = 'import ast, pathlib; ast.parse(pathlib.Path("integracao/build_unificado.py").read_text(encoding="utf-8")); print("Python build syntax OK")'
+          & $python.Source -c $pythonCode 2>&1 | Tee-Object -FilePath (Join-Path $diagDir "python-build.log") -Append
           if ($LASTEXITCODE -ne 0) { throw "Sintaxe do build Python invalida." }
       - name: Instalar dependencias de teste
         run: |
