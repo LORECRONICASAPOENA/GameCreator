@@ -300,6 +300,8 @@ $('loadTileset').onclick=async()=>{
 };
 if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(()=>{refreshLibraryTilesets();refreshLibraryMaps();});
 refreshLibraryTilesets();refreshLibraryMaps();
+const requestedMapId=new URLSearchParams(location.search).get('projeto');
+if(requestedMapId)setTimeout(()=>openLibraryMap(requestedMapId).catch(error=>say('Falha ao abrir mapa solicitado: '+error.message)),0);
 $('sheetfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{let src=await fileData(f);sheetSrc=src;imageFrom(src,'sheet');scheduleSave();say('Tileset carregado. Selecione uma célula da folha.')}catch(err){say(err.message)}e.target.value=''};
 function showSheet(){
  if(!sheetImg)return;
@@ -346,15 +348,16 @@ $('saveMapLibrary').onclick=async()=>{
   say('Mapa salvo na biblioteca central: '+saved.name+' ('+width+'×'+height+').');
  }catch(error){say('Falha ao salvar mapa na biblioteca: '+error.message)}
 };
+async function openLibraryMap(id){
+ const project=await ApoenaLibrary.getProject(id);
+ if(!project||!project.data)throw Error('O projeto salvo não foi encontrado.');
+ await applyMapData(project.data);currentLibraryMapId=project.id;mapName=project.name||project.data.name||mapName;
+ await refreshLibraryMaps();$('libraryMaps').value=project.id;
+ say('Mapa reaberto da biblioteca central: '+mapName+'.');
+}
 $('loadMapLibrary').onclick=async()=>{
  const id=$('libraryMaps').value;if(!id)return say('Selecione um mapa salvo na biblioteca.');
- try{
-  const project=await ApoenaLibrary.getProject(id);
-  if(!project||!project.data)throw Error('O projeto salvo não foi encontrado.');
-  applyMapData(project.data);currentLibraryMapId=project.id;mapName=project.name||project.data.name||mapName;
-  await refreshLibraryMaps();$('libraryMaps').value=project.id;
-  say('Mapa reaberto da biblioteca central: '+mapName+'.');
- }catch(error){say('Falha ao reabrir mapa: '+error.message)}
+ try{await openLibraryMap(id)}catch(error){say('Falha ao reabrir mapa: '+error.message)}
 };
 async function applyMapData(d){
  if(!d||d.schema!=='apoena.map2d.v1'||!Number.isInteger(d.width)||!Number.isInteger(d.height)||d.width<16||d.height<16||d.width>MAX||d.height>MAX||!Array.isArray(d.tiles)||d.tiles.length!==d.width*d.height)throw Error('Projeto incompatível ou inválido');
