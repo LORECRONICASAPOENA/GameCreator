@@ -1,0 +1,16 @@
+APOENA GAME CREATOR 3.0 — CENTRAL OFFLINE
+
+COMO ABRIR
+1. Extraia todo este ZIP numa pasta do seu computador.
+2. Clique duas vezes em ABRIR_GAME_CREATOR.cmd (Windows).
+3. Ou abra APOENA_GAME_CREATOR_OFFLINE_v3.html no Chrome, Edge ou Firefox.
+4. Use a aba Sistemas RPG v3 para criar: missões, diálogos, passes, regiões, NPCs, drops, evolução, forja, recursos e modos.
+5. As 52 poções e os módulos do editor v2 foram preservados.
+
+SALVAR: botão Salvar projeto editável baixa JSON com todos os dados e imagens. Use Abrir projeto para retomar em qualquer computador.
+Uma cópia local também é tentada automaticamente no IndexedDB do navegador (não substitui o backup exportado).
+
+EXPORTAR PARA GODOT: botão Pacote para Godot (.zip) inclui dados/apoena_sistemas_v3.json, leitor Godot e o resto dos dados e artes da Central. Utilize uma CÓPIA do projeto Godot; testes reais ainda são necessários.
+
+LIMITAÇÕES (LEIA): Ações ligadas a missões, passes online, IA, multijogador e combate não serão executadas pelo simples cadastro: é necessário integrar o conector ao jogo. A prévia no navegador cobre missões e drops sem tocar nos dados reais do jogo.
+Esta é uma versão de desenvolvimento; não instala aplicativos e não modifica o Godot automaticamente.

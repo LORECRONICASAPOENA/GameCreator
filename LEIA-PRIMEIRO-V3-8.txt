@@ -1,0 +1,48 @@
+APOENA GAME CREATOR v3.8 — JANELAS INDEPENDENTES + LOJA MOBA VISUAL
+===============================================================
+
+1. EXTRAIA este ZIP em uma PASTA NOVA do Windows. Nao substitua a pasta anterior.
+2. Abra ABRIR_GAME_CREATOR.cmd (ou o HTML principal no Chrome/Edge).
+3. Para continuar um projeto antigo, clique em "Abrir projeto" e selecione o JSON previamente salvo.
+4. Ao terminar de editar, clique em "Salvar projeto editavel". Isso baixa o JSON do projeto.
+5. O botao "Pacote para Godot" exporta definicoes, imagens e layouts. Nao instala nem altera automaticamente o jogo.
+
+AREA DE TRABALHO / JANELAS
+- Clique em "Ir para ferramenta" ou nos grupos de navegacao para abrir outro modulo.
+- Cada painel possui [−] minimizar, [□] maximizar/restaurar e [×] fechar.
+- Fechar o PAINEL do construtor nao apaga o conteudo do banco, mas nao substitui salvar o projeto.
+- Na barra inferior, clique no nome da ferramenta para restaurar uma janela minimizada.
+- Use "Lado a lado" para dispor duas janelas (no PC). Na tela pequena, cada ferramenta usa a area disponivel.
+- Para mover uma janela no PC, restaure seu tamanho e arraste a barra de titulo.
+- Para redimensionar, puxe a alca inferior direita quando nao estiver maximizada.
+- O estado das janelas e salvo no navegador, quando o armazenamento local esta disponivel.
+- Os dados do PROJETO ficam no JSON baixado: nunca confie na persistencia de uma aba aberta como seu unico backup.
+
+LOJA MOBA — NOVO PAINEL
+- Abra "Loja MOBA" no menu principal.
+- "Tela da loja inicial": cria/abre layout loja_moba_inicio (1280x720).
+- "Tela da loja durante partida": cria/abre layout loja_moba_partida (1280x720).
+- As duas telas sao editaveis por arraste e salvam-se no MESMO projeto do Creator.
+- Os slots usam as referencias de item do catalogo existente; nao criam copias do item.
+- Cadastra itens em "Itens e economia", indicando o escopo da partida MOBA.
+- A simulacao começa com 2.000 moedas de teste e permite comprar/vender sem mexer nos itens reais.
+- Fora da base, o simulador bloqueia novas compras. Diamantes nao viram ouro.
+- A taxa de revenda usada na demonstracao e 70%; nao deve ser considerada uma regra canonica final.
+- Nao inclui equipamento ou bonus de jogo novo se ele nao foi cadastrado.
+
+IMPORTANTE: LIMITES E PENDENCIAS
+- O projeto exportado contem metadados e os layouts; o Godot precisa de seus executores reais para compras, equipar, efeitos e restricoes de base.
+- A validacao de compras no multiplayer deve ocorrer no servidor, nao apenas na interface.
+- Simulacao local no construtor NAO substitui testar uma partida no Godot.
+- O editor de logica visual completo, arvore de evolucao e balanceamento aprofundado seguem como proximas etapas.
+- Os 100 requisitos anexados servem como especificacao de continuidade, nao como lista de funcionalidades entregues nesta versao.
+- A versao 3.7 original foi preservada e nao foi modificada.
+
+ARQUIVOS DO PACOTE
+APOENA_GAME_CREATOR_OFFLINE_v3_8_JANELAS_LOJA_MOBA.html — aplicativo principal offline.
+MODULOS/ e ABRIR_*.cmd — atalhos.
+FONTES_52_POCOES/ — catalogo de apoio do pacote anterior.
+INTEGRACAO_GODOT_REFERENCIA/ — exemplos anteriores para integrar ao jogo.
+REQUISITOS_COMPLETOS_RECEBIDOS.txt — documento do usuario sobre evolucao da loja.
+PLANO_PENDENCIAS_V3_8.txt — escopo real pendente.
+RELATORIO_TESTES_V3_8.txt — validacoes executadas.

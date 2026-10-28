@@ -1,0 +1,40 @@
+APOENA GAME CREATOR 3.9 — ENTREGUE E PENDENTE
+=============================================
+
+ENTREGUE NO EDITOR EXISTENTE
+[OK] Aplicacao original (mesmo estado central e mesmos sistemas) preservada.
+[OK] Backup integral do ZIP 3.8, distribuido separadamente.
+[OK] Editor unico de telas: principal, loja, inventario, laboratorio, forja etc.
+[OK] Componentes: construcao clicavel, placa, slot, grade, barra, retrato, visor 3D declarativo.
+[OK] Propriedades e comportamento: posicao, dimensoes, opacidade, rotacao, escala,
+     visibilidade, trava, z_index, ancora, grupo, recurso visual e vinculacao de dados.
+[OK] Camadas arrastaveis, olho, cadeado, agrupamento, alinhamento, distribuicao.
+[OK] Resolucao personalizada, formatos de PC/celular, zoom e redimensionamento.
+[OK] Fundos de tela existentes: imagem/cor, escala, enquadramento.
+[OK] Previa visual navegavel das telas e fechamento local de janela vinculada.
+[OK] Preservacao do catalogo oficial de 52 pocoes e dados anteriores.
+[OK] Exportacao de metadados JSON e extensao do leitor de UI Godot de referencia.
+[OK] Atalhos Windows e MODULOS redirecionados para a versao 3.9.
+
+PARCIAL / PRECISA INTEGRAR AO JOGO
+[~] Grade mostra slots e escopo/binding, mas ainda nao preenche automaticamente
+    com o inventario real no Godot.
+[~] Barra Godot suporta atualizar_valor(caminho,atual,maximo), mas a chamada
+    depende de um controlador do jogo que nao foi alterado.
+[~] Botoes navegaveis entre layouts exportados podem abrir telas no leitor;
+    eventos jogaveis (compras, craft, equipamentos etc.) sao sinais.
+[~] Visor 3D no HTML e representacao configuravel, nao renderizador real de GLB.
+[~] Ancoras funcionam ao redimensionar a pagina no Creator. O leitor Godot
+    conserva o escalonamento da tela inteira; regras adaptativas avancadas
+    por ancora em tempo de jogo exigem extensao posterior.
+
+AINDA NAO IMPLEMENTADO / NAO VERIFICADO
+[ ] Ligacao automatica de componentes a toda logica de inventario/compras no jogo.
+[ ] Renderizacao real de modelos e animacoes 3D dentro do HTML offline.
+[ ] Editor universal de regras com programacao visual completa e depurador.
+[ ] Teste do pacote em uma instalacao real do Godot 4.
+[ ] Teste de abertura file:// diretamente no Windows, e em Android real.
+[ ] Testes de uso prolongado, 1000 itens, acessibilidade/touch em dispositivos.
+[ ] Testes e publicacao de APK (intencionalmente fora do escopo).
+
+Toda acao real executada pelo jogo deve ser conferida no Godot separadamente.

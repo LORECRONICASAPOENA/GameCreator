@@ -1,0 +1,28 @@
+APOENA GAME CREATOR v3.9 — PACOTE COMPLETO (ANDROID E WINDOWS)
+
+Este arquivo contém o programa offline completo, incluindo Editor de Layout,
+Fábrica Universal de Itens (núcleo), Slicer Inteligente, módulos originais,
+catálogo e 52 ícones originais e integração de referência com Godot 4.
+
+ANDROID
+1. Extraia o ZIP no gerenciador de arquivos.
+2. Abra APOENA_GAME_CREATOR_OFFLINE_v3_9_EDITOR_VISUAL.html usando um navegador
+   ou visualizador HTML local compatível. Não execute arquivos .cmd.
+3. Se o navegador bloquear recursos de arquivo local, teste outro visualizador
+   compatível. O HTML também está disponível separadamente, sem extração.
+
+WINDOWS
+1. Extraia o ZIP inteiro e abra ABRIR_GAME_CREATOR.cmd.
+2. O programa abrirá no navegador, em modo offline.
+
+IMPORTANTE
+- Os dados das 52 poções e suas imagens PNG originais foram preservados.
+- Os 130 requisitos debatidos incluem propostas ainda pendentes: a Fábrica Universal
+  tem uma primeira implementação funcional, não 130 funções finalizadas.
+- Alguns recursos executáveis ainda precisam de integração/testes reais no Godot.
+- As pastas HISTORICO e backups foram incluídas intencionalmente.
+- Não misture este repositório com os do jogo, Studio Maker ou Lore Engine.
+
+ARQUIVO PRINCIPAL:
+  APOENA_GAME_CREATOR_OFFLINE_v3_9_EDITOR_VISUAL.html
+

@@ -1,0 +1,45 @@
+ATENCAO: USE ABRIR_GAME_CREATOR.cmd PARA A VERSAO MAIS RECENTE v3.7!
+Veja LEIA-PRIMEIRO-V3-7.txt antes de usar.
+
+APOENA GAME CREATOR v2.0 — PRIMEIRA VERSÃO INTEGRADA (OFFLINE)
+===============================================================
+
+COMO ABRIR NO COMPUTADOR:
+1. Extraia o ZIP completo em uma pasta sua, fora da pasta Runner e fora do projeto Godot real.
+2. Clique duas vezes em ABRIR_GAME_CREATOR.cmd ou em APOENA_GAME_CREATOR_OFFLINE_v2.html.
+3. Pode trabalhar sem internet. Nenhum servidor ou Runner é necessário.
+4. A aba PAINEL CENTRAL já traz os 52 ícones oficiais com nomes, descrições e grupos do pack enviado.
+5. Clique numa poção para editar efeito, intensidade, preço, raridade, visibilidade, pilhas e custo.
+6. Use Personagens para retratos, atributos e equipamentos; Ações/Eventos para montar sequências de blocos.
+7. No Cortador, envie uma foto de ícones e escolha 10,20,30,40,42 ou 50; você também pode ajustar linhas/colunas. Baixe PNGs separados em um ZIP.
+8. O Simulador permite testar valores e menus sem alterar o jogo oficial.
+
+SALVAMENTO — IMPORTANTE:
+* Clique SALVAR PROJETO EDITÁVEL no cabeçalho. Será baixado um JSON contendo imagens e todas as fichas.
+* Copie esse JSON como backup. Fechar o HTML sem salvar pode perder suas edições.
+* Para continuar outro dia clique ABRIR PROJETO, selecione o JSON salvo.
+* Aceita projetos editáveis da Central v1.1/v1.2 e insere as poções oficiais que faltarem, sem sobrescrever seus cadastros.
+
+EXPORTAR PARA GODOT 4:
+* Clique PACOTE PARA GODOT (.zip). Será baixado um ZIP com layouts, PNGs, dados e scripts de leitura.
+* Extraia esse ZIP inicialmente apenas numa CÓPIA do seu projeto Godot 4; não sobrescreva scripts oficiais sem revisar.
+* Para testar navegação, abra e execute cenas/game_creator_previa.tscn no Godot (F6).
+* O botão Jogar, economia real, efeitos no combate, fabricação e animações exigem vínculo com os scripts reais do jogo. Não são declarados funcionais sem esse vínculo.
+* A pasta INTEGRACAO_GODOT_REFERENCIA neste ZIP é um exemplo independente, inclusive com os 52 PNGs originais, que pode ser testado antes de exportar qualquer coisa da Central.
+
+PACK DE 52 POÇÕES:
+* Extraído exatamente do arquivo "KIT 52 POSION(1).zip" enviado pelo usuário.
+* O catálogo original informa: 3 itens "implementado" e 49 "conceito".
+* Nomes, descrições e estados foram preservados sem invenção de preços, receitas ou poderes.
+* Mesmo os 3 marcados "implementado" no pack precisam ser conferidos no jogo; nenhuma poção é ativada automaticamente pelo editor.
+* Todas 52 imagens são PNG de 512x512 pixels com transparência.
+
+FUNCIONALIDADE / LIMITES DA v2:
+* Editores de telas, itens, personagens e receitas compartilham um único estado local.
+* A biblioteca de ações é por blocos com tipos pré-definidos. Não executa JS/GDScript vindo de arquivos importados.
+* O simulador testa a lógica da Central, não é o combate nem o inventário oficial.
+* A edição visual do corpo 3D não faz parte deste gerador (é da Lore Engine, em repositório separado).
+* A central v2 ainda precisa de teste prático de uso no navegador do PC e em um projeto Godot 4 real antes de publicar no jogo.
+* O mecanismo de ZIP da Central cria arquivos locais; upload de imagem fica no navegador, sem enviar dados para servidor.
+
+NUNCA COPIE ARQUIVOS SOBRE O GODOT PRINCIPAL SEM TER UM BACKUP VALIDADO.

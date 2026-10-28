@@ -1,0 +1,765 @@
+Vamos fazer isso de uma forma que a outra IA entenda exatamente o que queremos construir, sem sair criando ferramentas duplicadas nem bagunçar o que já funciona no Apoena Agar Game Creator v3.5.
+
+A minha proposta é transformar o Creator em um editor visual de interfaces jogáveis, começando pela loja MOBA. O gerador de itens será conectado à biblioteca, ao banco central e ao editor de layouts. Você cria um item uma única vez, configura seus atributos sem programar, organiza sua posição na loja e visualiza como o jogador verá tudo no Godot 4.
+
+Preparei 100 melhorias adicionais, além da arquitetura, do layout, das regras de funcionamento e dos testes que a outra IA deverá executar. O texto abaixo já está escrito como uma instrução completa para você copiar e entregar a ela.
+
+# PROMPT DE IMPLEMENTAÇÃO — APOENA AGAR GAME CREATOR v3.5
+
+## Gerador de Itens MOBA + Editor Visual de Loja + Integração ao Banco Central
+
+### 1. OBJETIVO PRINCIPAL
+
+Quero ampliar o meu programa existente, **Apoena Agar Game Creator v3.5**, adicionando um sistema completo de criação de equipamentos MOBA e um editor visual das interfaces da loja que serão utilizadas pelos jogadores dentro do jogo Apoena Agar, desenvolvido em Godot 4.
+
+**Não quero criar outro aplicativo. Não quero substituir o Creator. Quero integrar as novas funcionalidades ao sistema que já existe.**
+
+O Creator funciona offline, utiliza uma interface HTML aberta pelo navegador e já possui ferramentas de criação, gerenciamento de imagens, itens, inventário, menus, poções, cards e exportação para Godot 4.
+
+A implementação precisa preservar todas essas funções e os dados já cadastrados.
+
+A interface deverá seguir uma filosofia **mobile-first**, funcionando no PC e no Android, com rolagem vertical, controles simples, botões visuais e ferramentas que não exijam programação manual do usuário.
+
+Existem dois públicos diferentes:
+
+- **Desenvolvedor:** usa o Creator para criar itens, editar layouts, arrastar elementos, configurar atributos, gerenciar a biblioteca e exportar o resultado.
+- **Jogador:** usa somente a loja final dentro do jogo. Não tem acesso aos controles de edição, coordenadas, ferramentas de programação ou propriedades internas.
+
+Essa separação é obrigatória.
+
+---
+
+### 2. PRESERVAÇÃO DO CREATOR ATUAL
+
+A versão de referência é o **Apoena Agar Game Creator v3.5 Offline — Correções Preventivas**.
+
+Pelas capturas fornecidas, o Creator já possui seções semelhantes a:
+
+- Layouts / Menus
+- Biblioteca de imagens
+- Gerador de ícones
+- Itens / Inventário / Loja
+- Banco cruzado / Packs
+- Receitas / Poções
+- Cards
+- Editor de imagens
+- Como salvar / Usar no Godot
+- Painel central / 52 Poções
+- Personagens
+
+Também possui as ações de salvar projeto editável, abrir projeto e gerar pacote para Godot.
+
+Na captura, o banco central apresenta 52 itens, 52 poções, 53 imagens, 0 receitas e 52 pendências de configuração. Esses números são referências da captura e devem ser confirmados na versão real antes de qualquer alteração.
+
+**Regras obrigatórias:**
+
+1. Inspecionar a estrutura existente antes de modificar.
+2. Criar backup integral do HTML original e dos dados do projeto.
+3. Reaproveitar módulos e funções existentes sempre que possível.
+4. Não apagar, recriar ou sobrescrever registros anteriores.
+5. Preservar os identificadores dos itens, imagens e poções.
+6. Adicionar migração de dados quando o formato precisar evoluir.
+7. Não inventar efeitos para poções que ainda não tenham configuração.
+8. Manter o programa totalmente utilizável offline.
+9. Não misturar os arquivos do Creator com os repositórios do jogo ou de outras ferramentas independentes.
+10. Garantir que o projeto salvo possa ser reaberto e editado.
+
+---
+
+### 3. ARQUITETURA PRINCIPAL
+
+O sistema deverá seguir esta organização:
+
+**APOENA GAME CREATOR**
+
+- Biblioteca central de imagens
+- Gerador de ícones
+- Gerador de itens e equipamentos
+- Cadastro de atributos e efeitos
+- Sistema de receitas e evolução
+- Editor visual de loja MOBA
+- Editor de layouts e menus
+- Visualizador / simulador do jogador
+- Validador de dados e dependências
+- Exportador para Godot 4
+
+Todos os módulos devem consultar um **registro central de dados**, sem manter cópias independentes e conflitantes do mesmo item.
+
+Exemplo de fluxo:
+
+Importar imagem → cadastrar equipamento → configurar atributos e efeitos → definir preço e evolução → salvar no banco → exibir automaticamente na biblioteca → posicionar na loja → testar na prévia → exportar para Godot 4.
+
+Não exigir que o usuário escreva scripts para executar esse processo.
+
+O código interno poderá usar JavaScript, HTML, CSS e os recursos adequados ao formato já utilizado pelo Creator.
+
+---
+
+### 4. PADRÃO VISUAL DO PROGRAMA
+
+Quero adotar o seguinte padrão em todos os novos geradores:
+
+**Barra superior**
+
+- Nome do programa e projeto ativo.
+- Nome da ferramenta aberta.
+- Estado de salvamento.
+- Acesso a visualizar, salvar e voltar.
+
+**Área central**
+
+Conteúdo organizado verticalmente. O usuário desce a página e encontra cada etapa da configuração.
+
+Os formulários devem ter seções bem separadas, títulos claros, poucos campos simultâneos e controles grandes.
+
+**Barra de navegação inferior no celular**
+
+Quatro opções principais:
+
+- Início
+- Criar
+- Editor
+- Biblioteca
+
+As demais funções deverão aparecer como abas internas ou ferramentas contextuais, evitando uma barra inferior com botões demais.
+
+No PC, preservar a navegação existente quando conveniente e utilizar a largura disponível para mostrar painéis lado a lado.
+
+No celular, usar uma coluna principal e painéis recolhíveis. Evitar rolagem horizontal da página principal.
+
+Cores: manter identidade escura, azul-petróleo, detalhes ciano e dourado utilizada no Creator, com texto legível e contraste adequado.
+
+---
+
+### 5. LAYOUT DO GERADOR DE ITENS
+
+O formulário principal deve seguir exatamente esta ordem visual:
+
+**1. Imagem do equipamento**
+
+Um quadrado grande, com possibilidade de:
+
+- Arrastar imagem do PC para o programa.
+- Selecionar arquivo manualmente.
+- Escolher imagem da biblioteca.
+- Importar várias imagens.
+- Ajustar enquadramento.
+- Visualizar transparência.
+- Substituir imagem.
+- Exportar ícone.
+
+Aceitar PNG, JPG e WebP. Preservar o arquivo original e preparar uma versão otimizada para a loja.
+
+**2. Nome do item**
+
+Campo de texto simples.
+
+**3. Destino**
+
+Selecionar MOBA, Exploração ou Ambos, conforme compatibilidade.
+
+**4. Categoria**
+
+Arma, armadura, escudo, artefato mágico, acessório, movimento, suporte ou consumível.
+
+**5. Subcategoria**
+
+Exemplos: espada, machado, arco, manopla, escudo, bota, cristal, anel e poção.
+
+**6. Atributos**
+
+Controles numéricos para ATK, DEF, HP, AUR, velocidade, poder de habilidades, crítico, regeneração e outros atributos registrados.
+
+Permitir vários atributos no mesmo equipamento.
+
+**7. Efeitos**
+
+Escolher efeitos ativos ou passivos predefinidos, com parâmetros editáveis.
+
+**8. Economia**
+
+Preço de compra, valor de revenda, requisitos e componentes necessários.
+
+**9. Evolução**
+
+Selecionar equipamentos necessários para fabricar versões superiores.
+
+**10. Prévia**
+
+Mostrar o equipamento exatamente como aparecerá na loja.
+
+**11. Salvamento**
+
+Salvar rascunho, publicar na biblioteca, duplicar ou exportar.
+
+O formulário deve oferecer configurações automáticas sugeridas, mas permitir modificações manuais.
+
+---
+
+### 6. EDITOR VISUAL DA LOJA MOBA
+
+Criar um editor gráfico integrado à seção de Layouts / Menus, acessível também a partir de Itens / Inventário / Loja.
+
+O desenvolvedor deve conseguir montar a interface usando componentes arrastáveis e redimensionáveis.
+
+**Componentes disponíveis:**
+
+- Barra de pesquisa
+- Categorias
+- Grade de equipamentos
+- Recomendados
+- Itens básicos
+- Itens avançados
+- Itens épicos
+- Itens lendários
+- Painel de descrição
+- Árvore de evolução
+- Saldo de moedas
+- Inventário do jogador
+- Botão comprar
+- Botão vender
+- Indicador de itens possuídos
+- Lista de compras planejadas
+- Botão fechar
+- Mensagens de erro e avisos
+
+A grade de itens deve permitir reorganizar a ordem dos ícones por arrastar e soltar.
+
+Os blocos de interface devem permitir mover, redimensionar, alinhar e configurar suas propriedades.
+
+Utilizar componentes responsivos. Evitar posições fixas que quebrem quando a resolução mudar.
+
+Separar **modo de edição** e **modo de visualização jogável**.
+
+No modo jogável, nenhum controle de editor deve aparecer.
+
+---
+
+### 7. DUAS TELAS DE LOJA
+
+**A. Loja de início de partida**
+
+- Disponível na fase inicial, antes da liberação de movimento.
+- Jogadores começam com 2.000 moedas de partida.
+- Mostrar equipamentos iniciais e recomendados.
+- Oferecer compras rápidas.
+- Possuir interface simples.
+- Permitir fechar ou recolher conforme regras da partida.
+- O bloqueio de movimento e sua liberação são responsabilidades do sistema de partida no Godot, não apenas da interface visual.
+
+**B. Loja durante a partida**
+
+- Abre normalmente quando o jogador solicita.
+- Compras permitidas somente na base, respeitando as regras já estabelecidas para Apoena Agar.
+- Pode permitir consultar itens fora da base, mas não comprá-los.
+- Exibe pesquisa, categorias, equipamentos avançados e evolução.
+- Mostra o inventário atual e o saldo real do jogador.
+- Permite vender equipamentos quando as regras autorizarem.
+- Apresenta mensagens claras quando não é possível comprar.
+
+As duas telas poderão compartilhar o mesmo estilo e os mesmos componentes, mas deverão permitir ajustes de layout independentes.
+
+---
+
+## 8. CEM MELHORIAS ADICIONAIS OBRIGATÓRIAS
+
+### GRUPO A — NAVEGAÇÃO E EXPERIÊNCIA DO CRIADOR (1–10)
+
+1. Criar uma tela introdutória curta que ensine as funções essenciais.
+2. Oferecer modo simples e modo avançado de edição.
+3. Mostrar um caminho de navegação indicando o módulo atual.
+4. Permitir continuar rapidamente o último projeto aberto.
+5. Guardar qual seção do formulário estava aberta.
+6. Recolher automaticamente opções avançadas que não estejam em uso.
+7. Mostrar explicações curtas ao lado de configurações complexas.
+8. Adicionar um indicador de progresso de preenchimento do item.
+9. Avisar quando houver alterações ainda não salvas.
+10. Disponibilizar busca rápida de ferramentas dentro do Creator.
+
+### GRUPO B — PRODUTIVIDADE DO EDITOR VISUAL (11–20)
+
+11. Criar modelos prontos de lojas que possam ser reutilizados.
+12. Oferecer opções de grade responsiva de uma, duas ou várias colunas.
+13. Criar um painel de hierarquia dos componentes presentes na tela.
+14. Permitir bloquear um componente para evitar movimentações acidentais.
+15. Adicionar alinhamento magnético a guias e outros objetos.
+16. Permitir distribuir automaticamente os espaços entre componentes.
+17. Selecionar múltiplos componentes simultaneamente.
+18. Copiar estilos de um componente para outro.
+19. Permitir ajustar zoom e enquadrar o layout inteiro.
+20. Criar histórico de desfazer e refazer para todas as operações de edição.
+
+### GRUPO C — USABILIDADE NO CELULAR E ACESSIBILIDADE (21–30)
+
+21. Permitir iniciar o arraste mantendo pressionada uma alça própria do componente.
+22. Adicionar botões direcionais para movimentar elementos com precisão.
+23. Diferenciar gestos de rolagem da página e arraste de componentes.
+24. Exibir propriedades selecionadas em painel inferior deslizante.
+25. Manter áreas de toque confortáveis, preferencialmente com pelo menos 44 × 44 pixels CSS.
+26. Suportar orientação vertical e horizontal.
+27. Criar perfis de prévia para diferentes tamanhos de tela.
+28. Respeitar áreas seguras de celulares com recortes e barras do sistema.
+29. Aplicar nomes acessíveis e uma ordem lógica de navegação nos controles.
+30. Permitir fontes maiores, contraste melhorado e redução de animações.
+
+### GRUPO D — GERAÇÃO E ORGANIZAÇÃO DE EQUIPAMENTOS (31–40)
+
+31. Permitir duplicar um item sem repetir seu identificador interno.
+32. Criar rascunhos de itens em lote a partir de imagens importadas.
+33. Sugerir atributos adequados à categoria escolhida.
+34. Oferecer sugestões editáveis de nomes para equipamentos.
+35. Criar etiquetas pesquisáveis para função e estilo de cada item.
+36. Permitir aplicar molduras e fundos predefinidos ao ícone.
+37. Avisar sobre nomes repetidos sem impedir nomes semelhantes.
+38. Oferecer modelos específicos para lutador, tanque, mago e suporte.
+39. Mostrar claramente se o item pertence ao MOBA, Exploração ou ambos.
+40. Permitir manter itens em desenvolvimento ocultos da loja jogável.
+
+### GRUPO E — SISTEMA DE ATRIBUTOS E EFEITOS (41–50)
+
+41. Padronizar unidades de atributos, distinguindo valores absolutos e percentuais.
+42. Configurar limites e alertas de valores excessivos.
+43. Mostrar quais atributos combinam bem e quais podem entrar em conflito.
+44. Criar condições predefinidas para ativação dos efeitos.
+45. Permitir configurar duração e tempo de recarga.
+46. Distinguir efeitos passivos, ativos, temporários e permanentes.
+47. Configurar exclusividade entre efeitos incompatíveis.
+48. Definir se bônus iguais acumulam e quais são seus limites.
+49. Mostrar uma comparação do herói antes e depois de equipar o item.
+50. Impedir a publicação jogável de efeitos cujo funcionamento não exista no runtime do jogo.
+
+### GRUPO F — ECONOMIA E BALANCEAMENTO (51–60)
+
+51. Criar simulador de compras considerando as 2.000 moedas iniciais.
+52. Oferecer sugestões de conjuntos iniciais por função de personagem.
+53. Mostrar o custo total dos itens selecionados e o saldo restante.
+54. Alertar sobre equipamentos com preços inconsistentes em relação aos atributos.
+55. Calcular preços de evolução considerando os componentes exigidos.
+56. Evitar cobrança duplicada de componentes já pertencentes ao jogador.
+57. Impedir compras quando o saldo for insuficiente.
+58. Separar moedas de partida de diamantes, passes e outras moedas externas.
+59. Permitir configurar porcentagem de reembolso na venda de itens.
+60. Definir limites de quantidade e empilhamento para consumíveis.
+
+### GRUPO G — FUNCIONAMENTO DA LOJA JOGÁVEL (61–70)
+
+61. Vincular a interface às fases reais da partida.
+62. Utilizar eventos do jogo para abrir ou fechar a loja inicial.
+63. Mostrar corretamente o estado de bloqueio de movimento na fase inicial.
+64. Permitir abertura automática da loja no início da partida.
+65. Validar se o herói está na base antes de autorizar uma compra.
+66. Permitir consulta ao catálogo fora da base, sem permitir compra.
+67. Configurar o fechamento automático da loja ao começar a movimentação, se desejado.
+68. Definir recomendações específicas para cada herói ou classe.
+69. Implementar pesquisa por nome, categoria, função e sinônimos cadastrados.
+70. Preservar a categoria e a posição da lista durante a sessão de compras.
+
+### GRUPO H — RECEITAS E ÁRVORES DE EVOLUÇÃO (71–80)
+
+71. Impedir receitas circulares em que um item dependa de si mesmo.
+72. Mostrar em quais equipamentos superiores um componente pode ser utilizado.
+73. Calcular custo total e custo restante da evolução.
+74. Permitir navegar pelos componentes clicando na árvore de evolução.
+75. Identificar componentes inexistentes ou removidos.
+76. Indicar quais componentes o jogador já possui.
+77. Permitir múltiplos caminhos de evolução quando configurados.
+78. Exibir claramente o nível e a raridade do equipamento final.
+79. Manter histórico de alterações nas receitas.
+80. Impedir exclusão silenciosa de itens utilizados por outras receitas.
+
+### GRUPO I — IMAGENS, ÍCONES E BIBLIOTECA VISUAL (81–90)
+
+81. Importar diversos PNGs, JPGs ou WebPs simultaneamente.
+82. Identificar imagens potencialmente duplicadas por comparação dos arquivos.
+83. Mostrar fundo quadriculado para conferir transparência.
+84. Simular os ícones nos tamanhos de 32, 48 e 64 pixels.
+85. Ajustar centralização e enquadramento sem distorcer imagens.
+86. Preservar separadamente imagem original e versão otimizada.
+87. Reduzir o tamanho dos arquivos exportados sem degradação desnecessária.
+88. Mostrar aviso quando a imagem vinculada estiver ausente ou corrompida.
+89. Adicionar campos opcionais para origem e licença das imagens importadas.
+90. Identificar imagens sem uso e permitir limpeza mediante confirmação.
+
+### GRUPO J — INTEGRAÇÃO, SEGURANÇA E QUALIDADE (91–100)
+
+91. Criar identificadores únicos e estáveis compartilhados entre os módulos.
+92. Versionar o formato dos dados e executar migrações compatíveis.
+93. Preservar os itens, imagens, poções e receitas existentes sem duplicá-los.
+94. Garantir que salvar e reabrir o projeto preserve imagens, atributos e layouts.
+95. Gerar pacote ZIP estruturado com manifesto de conteúdo e validações.
+96. Fornecer integração efetiva com Godot 4, incluindo adaptadores ou scripts necessários, sem tratar JSON sozinho como funcionalidade jogável.
+97. Evitar dependências externas obrigatórias para o funcionamento offline.
+98. Testar responsividade, posicionamento e ausência de sobreposições em diferentes resoluções.
+99. Testar desempenho com bibliotecas grandes, utilizando carregamento eficiente dos ícones.
+100. Gerar relatório final de validação, informando funções concluídas, problemas encontrados, pendências e resultados dos testes.
+
+---
+
+### 9. ESTRUTURA DE DADOS OBRIGATÓRIA
+
+A ferramenta deverá criar dados organizados que possam ser utilizados pelo Creator e exportados para Godot 4.
+
+Cada equipamento deverá possuir, no mínimo:
+
+- ID estável
+- Nome
+- Descrição
+- Categoria
+- Subcategoria
+- Raridade
+- Destino de uso
+- ID da imagem
+- Preço
+- Valor de revenda
+- Lista de atributos com valores e unidades
+- Lista de efeitos e seus parâmetros
+- Requisitos de compra
+- Componentes de evolução
+- Limites de compra
+- Regras de acúmulo
+- Estado de publicação
+- Versão do registro
+
+Cada layout deverá possuir:
+
+- Identificador próprio
+- Tela correspondente
+- Perfil de resolução
+- Componentes presentes
+- Ordem de exibição
+- Posições e dimensões responsivas
+- Propriedades visuais
+- Ligações aos dados
+- Regras de visibilidade
+- Estados de interação
+- Configurações de navegação
+
+Não salvar coordenadas de um único monitor como única informação de posicionamento. O editor deverá produzir layouts adaptáveis.
+
+Itens, imagens, efeitos e layouts deverão ser ligados por referências estáveis.
+
+O runtime do Godot será responsável por executar os efeitos, processar transações e aplicar regras de partida. O Creator será responsável por produzir, validar e exportar suas definições.
+
+---
+
+### 10. SISTEMA DE EFEITOS SEM PROGRAMAR
+
+O desenvolvedor não deverá precisar digitar código para criar um item comum.
+
+Construir uma biblioteca de comportamentos predefinidos, por exemplo:
+
+- Aumentar ataque
+- Aumentar defesa
+- Aumentar vida
+- Aumentar Aurium
+- Aumentar velocidade
+- Recuperar HP
+- Recuperar AUR
+- Aplicar escudo temporário
+- Aplicar efeito de lentidão
+- Reduzir tempo de recarga
+- Conceder regeneração
+- Melhorar curas
+- Conceder resistência temporária
+
+Cada comportamento terá parâmetros editáveis por controles visuais.
+
+Exemplo:
+
+**Efeito:** Aumentar ataque\
+**Valor:** 3\
+**Duração:** Enquanto equipado\
+**Acúmulo:** Conforme regra definida
+
+O sistema não deverá gerar código arbitrário para cada novo item.
+
+Os comportamentos precisam existir e ser testados no runtime do jogo. Se um efeito ainda não for suportado, o Creator deverá marcá-lo como pendente, em vez de simular que ele já funciona.
+
+**Importante:** no Apoena Agar existem poderes que causam dano proporcional ao HP do alvo. O balanceamento não deve presumir que todo bônus de ATK aumenta automaticamente o dano de qualquer habilidade. Cada habilidade precisa respeitar sua fórmula registrada.
+
+---
+
+### 11. SIMULADOR DE LOJA
+
+Criar um simulador dentro do editor, sem afetar uma partida real.
+
+O simulador deverá permitir:
+
+- Escolher um herói de teste.
+- Simular 2.000 moedas iniciais.
+- Comprar equipamentos.
+- Conferir atributos antes e depois.
+- Verificar espaços do inventário.
+- Simular compras de componentes.
+- Conferir requisitos.
+- Testar venda e reembolso.
+- Verificar mensagens de erro.
+- Testar a navegação.
+- Alternar entre início e meio de partida.
+- Testar visualização em PC e celular.
+
+Os dados de teste não deverão alterar automaticamente o catálogo real nem os itens do projeto.
+
+---
+
+### 12. MODELO DE NAVEGAÇÃO DO EDITOR
+
+**No celular:**
+
+Tela inicial do Creator\
+↓\
+Ferramentas de criação\
+↓\
+Gerador de Itens\
+↓\
+Imagem\
+↓\
+Nome\
+↓\
+Categoria\
+↓\
+Atributos\
+↓\
+Efeitos\
+↓\
+Preço\
+↓\
+Evolução\
+↓\
+Prévia\
+↓\
+Salvar
+
+Para editar a loja:
+
+Creator\
+↓\
+Layouts / Menus\
+↓\
+Editor de Loja MOBA\
+↓\
+Escolher tela inicial ou durante partida\
+↓\
+Canvas visual\
+↓\
+Adicionar componentes\
+↓\
+Arrastar e redimensionar\
+↓\
+Selecionar um componente\
+↓\
+Configurar propriedades\
+↓\
+Visualizar como jogador\
+↓\
+Salvar layout
+
+No PC, permitir que o canvas apareça ao lado do painel de propriedades.
+
+No celular, utilizar uma única coluna, barra inferior de ferramentas e painel de propriedades deslizante.
+
+A prévia do jogador deverá ser apresentada em tela cheia quando necessário.
+
+O editor deve permitir alternar entre edição e visualização sem perder alterações.
+
+---
+
+### 13. COMPORTAMENTO DO EDITOR POR ARRASTAR E SOLTAR
+
+Quero um funcionamento inspirado em editores visuais como o Canva, mas adequado ao nosso projeto.
+
+Requisitos:
+
+- Arrastar componentes com o mouse.
+- Arrastar pelo toque com uma alça dedicada.
+- Selecionar ao tocar ou clicar.
+- Mover usando controles numéricos e direcionais.
+- Ajustar largura e altura.
+- Duplicar componentes.
+- Remover componentes.
+- Desfazer e refazer.
+- Alinhar ao centro e às bordas.
+- Utilizar guias visuais e encaixe automático.
+- Impedir que componentes fiquem acidentalmente fora da área útil.
+- Avisar sobre sobreposições prejudiciais.
+- Permitir bloquear a edição de objetos específicos.
+
+A grade de itens deve reorganizar automaticamente seu conteúdo quando um ícone mudar de posição, respeitando o número de colunas e o tamanho configurados.
+
+Um ícone individual não deve depender de coordenadas absolutas para permanecer no catálogo.
+
+---
+
+### 14. INTEGRAÇÃO COM A LOJA REAL DO JOGO
+
+A interface exportada deverá poder funcionar no jogo Apoena Agar, em Godot 4.
+
+Regras estabelecidas:
+
+- Saldo inicial MOBA: 2.000 moedas.
+- Loja de compra acessível na base.
+- Loja inicial disponível durante o bloqueio de movimentação.
+- Loja normal acessível durante a partida.
+- Inventário e equipamentos conectados aos atributos dos heróis.
+- Consumíveis com regras separadas dos equipamentos permanentes.
+- Evolução por receitas quando configurada.
+- Interface adaptável a PC e Android.
+
+Usar a mesma fonte de dados para todos os estados da loja.
+
+Uma mudança no atributo de um equipamento deverá refletir no catálogo, na prévia e nos arquivos exportados sem recadastrar o item.
+
+Não criar um sistema de economia desconectado das regras da partida.
+
+Não utilizar as moedas de exploração, diamantes ou passes como substitutos automáticos das moedas MOBA.
+
+---
+
+### 15. EXPORTAÇÃO E SALVAMENTO
+
+O sistema deverá ter três níveis de saída:
+
+**A. Projeto editável do Creator**
+
+Contém os dados necessários para continuar o trabalho posteriormente, inclusive referências e imagens.
+
+**B. Pacote de recursos**
+
+Contém os ícones, catálogos e definições dos equipamentos, com nomes e identificadores consistentes.
+
+**C. Pacote para Godot 4**
+
+Contém dados, imagens, layouts e integrações disponíveis para o runtime do jogo.
+
+A exportação deve indicar quando depender de scripts ou funcionalidades que ainda não estejam implementadas no projeto Godot.
+
+Garantir que as imagens estejam efetivamente incluídas no projeto salvo ou pacote exportado. Não depender apenas dos caminhos locais do computador, pois caminhos do Windows podem não funcionar em outro dispositivo.
+
+O salvamento deve funcionar de forma compatível com as limitações de um HTML aberto diretamente do disco. Utilizar mecanismo confiável de persistência e exportação editável, sem presumir acesso irrestrito ao sistema de arquivos.
+
+Incluir importação segura, backups e avisos antes de substituir dados existentes.
+
+---
+
+### 16. IMPLEMENTAÇÃO POR ETAPAS
+
+Não tentar reescrever todo o Creator simultaneamente.
+
+**Etapa 1 — Análise e proteção**
+
+- Inspecionar a implementação existente.
+- Criar backup.
+- Mapear os dados e funções que serão reutilizados.
+- Identificar problemas de compatibilidade.
+
+**Etapa 2 — Estrutura de dados**
+
+- Integrar cadastro de equipamentos ao banco único.
+- Criar esquema de atributos e efeitos.
+- Validar IDs e referências.
+- Preservar a biblioteca anterior.
+
+**Etapa 3 — Gerador de itens**
+
+- Implementar formulário mobile-first.
+- Importação e gerenciamento de imagem.
+- Atributos e preços.
+- Efeitos e evolução.
+- Salvamento e prévia.
+
+**Etapa 4 — Editor visual da loja**
+
+- Criar canvas com componentes.
+- Implementar arrastar, redimensionar e alinhar.
+- Configurar tela inicial e tela durante partida.
+- Criar visualização do jogador.
+
+**Etapa 5 — Economia e simulação**
+
+- Validar saldo inicial.
+- Simular compras, vendas e evoluções.
+- Conferir inventário e atributos.
+- Validar regras de compra na base.
+
+**Etapa 6 — Integração Godot 4**
+
+- Preparar exportação de dados e imagens.
+- Integrar layouts.
+- Implementar ou conectar os comportamentos existentes.
+- Validar as dependências do runtime.
+
+**Etapa 7 — Testes e estabilização**
+
+- Testes de regressão do Creator.
+- Testes de salvamento e reabertura.
+- Testes de integração com o banco.
+- Testes em PC e Android.
+- Testes offline.
+- Revisão de desempenho.
+
+Concluir, testar e estabilizar cada etapa antes de avançar para a próxima.
+
+---
+
+### 17. TESTES MÍNIMOS PARA ACEITAÇÃO
+
+A implementação só poderá ser considerada concluída depois que os seguintes cenários forem verificados:
+
+1. Criar um equipamento com imagem própria, preço e dois atributos.
+2. Salvar o equipamento e encontrá-lo na biblioteca central.
+3. Fechar e reabrir o projeto sem perder a imagem e os dados.
+4. Editar o equipamento e atualizar sua prévia automaticamente.
+5. Duplicar o item sem criar conflito de ID.
+6. Inserir o item na loja inicial.
+7. Reorganizar sua posição usando mouse.
+8. Reorganizar sua posição usando toque ou controles alternativos.
+9. Alterar o tamanho do ícone sem deformar a imagem.
+10. Trocar entre a tela inicial e a tela durante a partida.
+11. Simular uma compra com 2.000 moedas.
+12. Impedir uma compra com saldo insuficiente.
+13. Impedir uma compra fora da base, quando essa regra estiver ativa.
+14. Mostrar árvore de evolução correta.
+15. Identificar receita circular ou com componente ausente.
+16. Exportar e reimportar o projeto.
+17. Gerar pacote com os arquivos realmente necessários.
+18. Conferir que os 52 registros de poções da captura, se presentes na versão real, não foram perdidos.
+19. Confirmar que as demais ferramentas existentes continuam funcionando.
+20. Validar a interface em resoluções de PC e Android.
+
+Também testar ausência de internet, importações inválidas, imagens grandes, nomes repetidos, preços negativos, IDs duplicados e tentativas de compra repetidas.
+
+---
+
+### 18. RESULTADO QUE ESPERO RECEBER
+
+Quero receber uma versão atualizada e editável do Apoena Agar Game Creator, preservando todas as ferramentas existentes.
+
+O novo sistema deverá permitir:
+
+**Criar o equipamento → configurar sem código → salvar → encontrar na biblioteca → colocar na loja → organizar visualmente → testar como jogador → exportar para Godot 4.**
+
+A interface deverá ser simples o suficiente para utilização pelo celular.
+
+Não quero apenas uma demonstração estática, botões ilustrativos ou arquivos de configuração desconectados do programa.
+
+As funções implementadas precisam responder corretamente e manter os dados integrados.
+
+Se algum recurso não puder ser entregue completamente, documentar a limitação e não apresentá-lo como funcional.
+
+**Antes de modificar o arquivo original, analisar a versão disponível e preservar uma cópia de segurança. Depois, executar a implementação por etapas, mantendo o Creator existente íntegro e testável.**
+
+O princípio de desenvolvimento é:
+
+**Uma biblioteca central, vários geradores integrados, interfaces editáveis visualmente e uma exportação organizada para o jogo.**
+
+O desenvolvedor configura tudo visualmente no Creator. O jogador recebe apenas a interface final, limpa e pronta para usar.
+
+## Minha recomendação para a implementação
+
+Eu daria prioridade a três coisas antes dos efeitos mais sofisticados: salvamento confiável, ligação com o banco central e edição visual responsiva.
+
+Pelas imagens que você mostrou, o Creator já tem uma base considerável. O maior risco agora não é faltar ferramenta, mas criar módulos que funcionem isoladamente e depois não consigam compartilhar os mesmos itens, imagens e configurações.
+
+Também não começaria gerando centenas de equipamentos. Primeiro testaria uma espada com ataque e velocidade, um escudo com defesa e HP, uma poção e um artefato de Aurium. Se os quatro passarem corretamente pelo cadastro, editor, simulador, salvamento e exportação, teremos uma base mais segura para expandir a biblioteca.
+
+Esse prompt é para a outra IA implementar no Creator existente. Ele ainda não altera o seu programa nem afirma que a integração ao Godot já está pronta.

@@ -1,0 +1,44 @@
+RELATORIO DE VERIFICACAO — APOENA GAME CREATOR v3.9
+==================================================
+Teste automatizado: Chromium headless via Playwright, HTML completo
+carregado no navegador, sem internet nem chamadas de servidor.
+
+PASS — aplicacao carrega sem excecoes JavaScript no desktop.
+PASS — 52 pocoes do pack oficial continuam no projeto inicial.
+PASS — 23 paginas/modulos continuam presentes no HTML principal.
+PASS — criacao de tela nova sem perder telas anteriores.
+PASS — composicao pelo unico editor com 7 novos componentes testados.
+PASS — rotacao, opacidade e ancoras refletidas visualmente no editor.
+PASS — redimensionamento de tela por ancoras de objetos.
+PASS — selecao multipla, agrupar e desagrupar.
+PASS — camadas: visibilidade, bloqueio, selecao e reordenacao implementadas.
+PASS — previa navegavel abre, renderiza objetos e fecha.
+PASS — reordenacao das camadas alterou o z_index corretamente.
+PASS — botao clicavel navega a outra tela do projeto na previa.
+PASS — importa JSON editavel salvo originalmente pelo HTML v3.8 (52 itens/7 telas).
+PASS — upload de PNG na construcao cria recurso e vincula ID da imagem.
+PASS — schema legado apoena.central.v1 / apoena.layout.v1 mantido.
+PASS — salvar JSON com dados originais, propriedades novas e imagens.
+PASS — exportar ZIP do Godot com dados, recursos, layouts e leitura atualizada.
+PASS — script Godot exportado contem funcoes abrir_tela e atualizar_valor.
+PASS — viewport 390 x 844 carrega editor e permite adicionar componente.
+PASS — nenhum erro JavaScript nos cenarios de desktop/mobile.
+
+PENDENTE DE TESTE REAL
+- Abrir file:// no Windows do usuario (restricao do ambiente de teste).
+- Importar e testar um JSON pessoal antigo com dados customizados do usuario;
+  um JSON generico gerado da v3.8 foi testado com sucesso.
+- Rodar UI GDScript em Godot 4 local, PC e Android fisico.
+- Testar rig, Viewport 3D real, interacoes jogaveis e compras no Godot.
+- Validar menus complexos de grande volume (1000+ itens / 100+ telas).
+
+OBS: As acoes de comprar, craftar, equipar e recompensa sao metadados no
+Creator. Nao se afirma integracao jogavel ate haver testes no jogo.
+
+ADENDO — REORGANIZACAO / BOTOES DE IMAGEM
+PASS: 52 pocoes, 7 layouts, 52 imagens, inicializacao Chromium sem erros.
+PASS: painel Camadas, mudanca flutuante/lateral, modo foco, zoom, painel avancado.
+PASS: botao com imagem selecionada mostra 1 foto, 0 textos e borda de 0px.
+PASS: JSON exportado para Godot recebe action_icon_path, texture e button_look=image.
+PASS: previa navegavel e PNG 1280x720.
+A VALIDAR: persistencia entre aberturas no Windows real e execucao no Godot 4.

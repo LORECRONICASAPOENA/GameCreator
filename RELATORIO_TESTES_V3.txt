@@ -1,0 +1,15 @@
+RELATÓRIO DE TESTES — APOENA GAME CREATOR v3.0
+
+OK — Sintaxe JavaScript dos 4 blocos do HTML (node --check).
+OK — Dez schemas com editor de campos e coleções filhos.
+OK — Leitura do arquivo de referência v2 e manutenção da lista oficial de 52 poções.
+OK — Criação, atualização e validação de dados: missões, itens, diálogos, passes, NPCs, drops, progressão, regiões, forja, mídia e modos.
+OK — Validação automática detectou região referenciada e inexistente, chance de drop >100%, datas de passe invertidas e máximo de jogadores inferior ao mínimo.
+OK — Exportador incluiu dados/apoena_sistemas_v3.json e leitor GDScript para Godot 4.
+OK — Estrutura e integridade do pacote ZIP verificadas.
+
+NÃO VALIDADO AQUI — Clique/arraste/renderização real em Chrome/Edge no computador do usuário. O navegador automatizado do ambiente bloqueou qualquer navegação, inclusive páginas locais. Não há garantia visual para a interface completa.
+NÃO VALIDADO AQUI — Execução dentro do Godot 4. Nenhuma instalação do motor foi encontrada neste ambiente de testes.
+PENDENTE DE CONEXÃO AO JOGO — Execução real de missões, comércio, drops, IA, combate, forja, eventos online, calendário de passe, multiplayer, cenas e recompensas. O módulo v3 edita e exporta esses dados, mas não executa sozinho os sistemas dentro do jogo.
+
+Importante: usar apenas em cópia do projeto; não substituir arquivos principais sem validação.

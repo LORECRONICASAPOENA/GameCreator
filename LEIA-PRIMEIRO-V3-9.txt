@@ -1,0 +1,68 @@
+APOENA GAME CREATOR 3.9 — EDITOR VISUAL LIVRE (OFFLINE)
+=====================================================
+
+COMO ABRIR NO WINDOWS
+1. Extraia TODO este ZIP em uma pasta nova do computador.
+2. Clique em ABRIR_GAME_CREATOR.cmd ou abra o arquivo
+   APOENA_GAME_CREATOR_OFFLINE_v3_9_EDITOR_VISUAL.html no Chrome/Edge.
+3. Para retomar um projeto, clique em "Abrir projeto" e selecione seu JSON.
+4. Para guardar suas alteracoes, clique em "Salvar projeto editavel" e guarde o JSON.
+5. "Pacote para Godot (.zip)" gera um NOVO pacote de referencia; nao altera seu jogo.
+
+ONDE ESTAO AS FUNCOES NOVAS
+- Ferramenta "Editor de layouts" abre a edicao visual unica das telas.
+- A barra "EDITOR LIVRE • V3.9" ajusta resolucao, zoom, alinhamento,
+  distribuicao, grupos, ordem de camadas e abre a previa navegavel.
+- A coluna "Composicao livre v3.9" cria construcao clicavel, placa,
+  slot de inventario, grade de itens, barra de status, retrato e visualizador 3D.
+- Clique num elemento: a coluna PROPRIEDADES tem rotacao, escala,
+  opacidade, arredondamento, ancoras, grupo e vinculos declarativos.
+- Em CAMADAS, clique no olho para mostrar/ocultar, no cadeado para
+  bloquear/desbloquear ou arraste a linha para reordenar.
+- Selecione elementos segurando Ctrl/Shift; use Agrupar e Desagrupar.
+- Para criar uma cidade interativa: importe um desenho de fundo, depois
+  adicione uma construcao clicavel por edificio; associe uma imagem da
+  biblioteca e escolha a tela de destino ou acao do Godot.
+- A previa pode navegar entre telas do mesmo projeto e esconder janelas,
+  mas nao executa jogo nem compras/efeitos reais.
+
+REGRA DE SEGURANCA DO PROJETO
+- A versao 3.8 original NAO foi editada. Existe copia de seguranca separada.
+- Nao foi criada outra engine ou outro projeto. Todas as ferramentas
+  da 3.8 permanecem no mesmo HTML em uma extensao retrocompativel.
+- Os dados oficiais das 52 pocoes, imagens e nomes originais nao foram
+  alterados. Nao foram atribuidos efeitos novos ou precos inventados.
+- Os schemas JSON 'apoena.central.v1' / 'apoena.layout.v1' foram mantidos.
+- Nenhum repositório Godot, Apoena Studio Maker ou Lore Engine foi modificado.
+
+LIMITES REAIS
+- O executante Godot exportado admite a navegacao por layouts e a chamada
+  atualizar_valor(caminho,atual,maximo) em barras cadastradas.
+- Grades ainda mostram ESPACOS VISUAIS. Conteudo real de inventario,
+  compras, bloqueio de partida, interacao com herois e regras do jogo
+  precisam ser ligados aos sistemas do projeto Godot.
+- O visualizador 3D no editor HTML continua REPRESENTATIVO. O rig,
+  modelo GLB, animacoes e Viewport 3D real exigem implementacao no Godot.
+- Foi testado via Chromium Headless carregando o HTML por conteudo;
+  este ambiente bloqueia navegar para file://. Abra no seu Windows para
+  confirmar o duplo clique offline no dispositivo real.
+- Nenhum APK foi gerado.
+
+PASTAS
+MODULOS/: atalhos para os modulos da mesma aplicacao.
+FONTES_52_POCOES/: catalogos oficiais recebidos.
+INTEGRACAO_GODOT_REFERENCIA/: arquivos de referencia atualizados de UI.
+FONTES_V3_9/: fontes legiveis da extensao incorporada ao HTML principal.
+RELATORIO_TESTES_V3_9.txt: escopo e resultado dos testes automatizados.
+
+ATUALIZACAO DO EDITOR DE LAYOUT — MODO FOCO E BOTOES SOMENTE IMAGEM
+- O Layout agora mostra uma barra unica em modo de foco. As outras ferramentas
+  estao recolhidas no botao Ferramentas.
+- A escolha Flutuantes/Laterais retreateis e salva localmente no navegador.
+- Somente imagem: escolher uma foto no botao remove a exibicao de texto,
+  borda e fundo. A acao continua configuravel em Propriedades.
+- Veja ALTERACOES_INTERFACE_V39.txt para operacao e limites dos testes.
+
+ATUALIZACAO DA FABRICA DE ITENS: menu Ingredientes e drops agora e
+a Fabrica de Itens, na ordem Foto / Nome e ID / O que faz /
+Disponibilidade / Drop / Valor. Ver README.md e INSTRUCOES_GITHUB.md.

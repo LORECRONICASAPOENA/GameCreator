@@ -1,0 +1,35 @@
+APOENA GAME CREATOR v3.8 — RELATORIO DE TESTES EXECUTADOS
+========================================================
+Testador: Chromium headless via Playwright; documento HTML carregado no contexto do navegador.
+OBS: ambiente automatizado bloqueou navegacao direta para file:// e localhost. Portanto
+esta rodada validou o HTML montado no navegador, mas nao testou o duplo clique Windows.
+
+PASS: inicializacao do HTML sem excecoes JavaScript.
+PASS: 52 registros de pocao preservados no projeto inicial.
+PASS: Layouts e Ingredientes abrem como janelas independentes.
+PASS: Minimizar, restaurar e recuperar o texto nao salvo de um formulario.
+PASS: Organizar 2 janelas lado a lado no desktop.
+PASS: Filtrar itens MOBA temporarios sem exibir item permanente no simulador.
+PASS: Item com moeda diamantes bloqueado no simulador MOBA com ouro de partida.
+PASS: Simulacao de compra diminui ouro e nao altera os itens do banco.
+PASS: Compra durante a partida bloqueada fora da base.
+PASS: Geracao da loja inicial e da loja durante a partida como 2 layouts distintos.
+PASS: Slots do layout referenciam o mesmo ID do item no banco.
+PASS: Botao fechar local preservado como acao declarativa do layout.
+PASS: Salvar JSON editavel com os layouts e itens novos.
+PASS: Reimportar JSON editavel de teste com layouts e itens intactos.
+PASS: Exportar pacote Godot ZIP com layouts/loja_moba_inicio.json e layouts/loja_moba_partida.json.
+PASS: Metadados shop_scope e acoes do layout presentes no JSON Godot.
+PASS: Android viewport 390x844: abrir, minimizar e restaurar ferramentas.
+PASS: nenhum erro de JavaScript nos cenarios acima.
+
+NAO TESTADO NESTA RODADA
+- Renderizacao do arquivo file:// no PC Windows do usuario.
+- Execucao dos layouts em projeto Godot 4 real.
+- Partida multiplayer, compilacao APK e latencias/touch em dispositivo fisico.
+- Compatibilidade de rigs 3D/animacoes FBX/GLB em runtime real.
+
+TESTES FUTUROS RECOMENDADOS
+- Uso prolongado com 1000+ itens e 100+ imagens importadas.
+- Varios navegadores e restauracao apos fechar/reabrir arquivos no Windows.
+- Exportacao para copia do jogo e checagem dos scripts de compra/fechamento local.

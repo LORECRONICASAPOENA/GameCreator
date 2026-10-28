@@ -1,0 +1,34 @@
+APOENA GAME CREATOR — PLANO DE CONTINUIDADE APOS v3.8
+====================================================
+IMPLEMENTADO NESTA ENTREGA
+  [OK] Janelas de ferramentas independentes, minimizar/restaurar/maximizar/fechar.
+  [OK] Dock com ferramentas abertas; estado visual local; organização lado a lado no PC.
+  [OK] Navegacao compacta no Android; preservar formulario ao minimizar.
+  [OK] Dois layouts de loja MOBA (inicio e durante a partida), arrastaveis pelo editor atual.
+  [OK] Exibicao de produtos do banco central por ID, sem duplicar catalogo.
+  [OK] Simulacao separada com 2.000 moedas iniciais, estoque de teste e bloqueio fora da base.
+  [OK] Exportar dados/layouts MOBA pelo mesmo pacote Godot existente.
+
+PROXIMAS ETAPAS — AINDA NAO EXECUTADAS
+  [ ] Gerador de equipamentos MOBA com editor didatico integral, atributos multiplos e variantes.
+  [ ] Visualizacao jogavel do layout exato no simulador (o simulador de compra atual e separado).
+  [ ] Arvore visual de evolucao e ingredientes com deteccao de ciclos.
+  [ ] Formula de recompra/upgrade de item levando em conta pecas adquiridas.
+  [ ] Precificacao customizavel, parcelas de revenda e bloqueio por requisitos.
+  [ ] Configurar herois/classes e recomendacoes da loja.
+  [ ] Estados de botao normal/hover/pressionado/desabilitado em todos os componentes.
+  [ ] Sincronizar layout responsivo para multiplas resolucoes, ancoras e zonas seguras.
+  [ ] Godot runtime: transacoes reais, inventario temporario, verificacao de base e inicio bloqueado.
+  [ ] Godot runtime: ligação real das barras HP/AUR/Especial/XP, minimapas e habilidades.
+  [ ] Godot runtime: efeitos/atributos/receitas e persistencia consistentes.
+  [ ] Render 3D real de personagens e clipes FBX/GLB no Creator (ainda apenas metadados).
+  [ ] Drag & drop de arquivos e imagens de fundo onde faltar, sem burlar permissões locais.
+  [ ] Interface visual de programação por blocos com executor comum e diagnostico.
+  [ ] Testes Godot PC e Android, testes de seguranca multiplayer e perfil de desempenho.
+
+LIMITES DA IMPLEMENTACAO ATUAL
+  - O simulador MOBA e uma simulacao local dos produtos/precificacao; nao altera o jogo.
+  - Janela fechada no editor conserva estado da sessao, mas salvar o JSON continua obrigatorio.
+  - O modo de duas janelas no celular foi substituido por janela em foco e dock de navegação.
+  - O programa mantem arte oficial Apoena por padrao; projetos vazios permanecem disponiveis.
+  - A fonte dos requisitos e Texto colado(2).txt, com 100 melhorias adicionais.

@@ -1,0 +1,65 @@
+APOENA GAME CREATOR v3.9 — REORGANIZACAO DE INTERFACE E BOTOES DE IMAGEM
+================================================================================
+
+O que mudou nesta revisao
+- AREA COMPLETA: ao abrir Layout o editor ocupa praticamente toda a janela;
+  a navegacao geral do Creator fica oculta durante o modo foco.
+- PAINEIS: escolha livre entre flutuantes/moveis e laterais retreateis; ao
+  alternar entre modos, o programa nao duplica ferramentas.
+- PREFERENCIAS: modo, foco, visibilidade e posicionamento dos paineis sao
+  gravados pelo navegador no armazenamento local (localStorage). Dependem
+  de permissao do navegador, nao do JSON de projeto.
+- CENTRO DE EDICAO: o mapa usa quase todo o espaco visivel; menus de
+  elementos, camadas e propriedades podem ficar ocultos.
+- CAMERAS: roda do mouse para zoom, Espaco + arrastar ou botao do meio do
+  mouse para deslocar o mapa; Encaixar restaura visualizacao.
+- FERRAMENTAS: botao 'Ferramentas' revela recursos originais 3.5/3.8 e 3.9
+  (resolucao, alinhamento, exportacao, grade, selecao, etc.). Nada foi removido.
+- BOTOES DE IMAGEM: selecionar imagem no inspector coloca automaticamente
+  o modo 'So imagem'; a foto vira o aspecto visual do botao, sem texto,
+  fundo, borda ou caixa adicional visivel. Acao de clique e nome interno
+  permanecem. Opcao para ajustar proporcao da caixa conforme a foto.
+- A exportacao PNG de tela desenha botao em modo imagem sem o texto antigo.
+- JSON Godot recebe 'action_icon_path' e modo 'image', com texto vazio e
+  visual de borda transparente; o carregador de referencia recebeu
+  alinhamento centralizado de icones de botoes sem texto.
+
+Como usar
+1. Extraia todo o ZIP. Abra ABRIR_EDITOR_LAYOUTS.cmd, ou o HTML principal.
+2. Clique em 'Painéis' na barra e escolha 'Flutuantes' ou
+   'Laterais retráteis'. A preferencia fica salva no navegador.
+3. Use os icones '+ Elementos', 'Camadas', 'Propriedades' para abrir/fechar.
+4. Pressione 'Creator' ou 'Janela normal' para sair do modo de foco.
+5. Para botao sem texto, adicione 'Botao', selecione-o, abra 'Propriedades',
+   escolha uma imagem ou envie PNG/JPG/WebP. O modo 'So imagem' e ativado.
+6. Para reaproveitar texto: abra 'Como mostrar' e escolha 'So texto' ou
+   'Imagem + texto'; o texto original continua no JSON editavel por
+   compatibilidade, mas nao aparece nem e exportado no modo so imagem.
+7. 'Ferramentas' abre a barra de operacoes de edicao avancada preexistentes.
+
+Preservacao
+- Backup original v3.8 em BACKUP_ORIGINAL_v3_8.zip sem alteracoes.
+- 52 pocoes oficiais preservadas sem novos efeitos ou precos.
+- Geradores originais, bibliotecas, controles PC/Android, animacoes 3D e
+  referencias de Godot mantidos.
+- Nao foi criado APK nem foi modificado o repositorio do jogo.
+
+Verificacoes realizadas no Chromium (HTML com os recursos incorporados)
+- Inicializacao sem erros JavaScript de pagina: PASSOU
+- 52 pocoes, 7 layouts existentes, 52 imagens no cadastro: PASSOU
+- Mudanca entre modo flutuante e lateral: PASSOU
+- Painel de camadas acessivel e menu avancado preservado: PASSOU
+- Zoom com roda + modo foco: PASSOU
+- Selecionar foto para botao ativa 'image' e tira texto/borda: PASSOU
+- Previa, normalizacao Godot e PNG 1280 x 720: PASSOU
+- Saida do modo foco e retorno ao menu Creator: PASSOU
+
+Limites do teste
+- O ambiente Chromium de testes nao fornece localStorage persistente
+  (pagina carregada por set_content, origem opaca). O recurso esta
+  implementado com localStorage no HTML mas a persistencia entre
+  reinicializacoes devera ser testada em Chrome/Edge no Windows real.
+- Nao ha Godot 4 instalado no ambiente; verificacao do carregador foi
+  estatica, nao um teste pratico de importacao/execucao no Godot.
+- As funcoes reais de compra, inventario e jogo precisam dos respectivos
+  executores no jogo Godot.
