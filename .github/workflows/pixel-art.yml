@@ -1,0 +1,29 @@
+name: Validar Apoena Creator Pixel Art
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "pixel-art/**"
+      - "INICIO_RAPIDO.html"
+      - ".github/workflows/pixel-art.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  conferir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sintaxe do editor Pixel Art
+        run: node --check pixel-art/estudio.js
+      - name: Garantir preservação do antigo Creator e módulos
+        shell: bash
+        run: |
+          test -f APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html
+          test -f pixel-art/index.html
+          test -f pixel-art/estudio.html
+          test -f map-editor/index.html
+          test -f integracao/index.html
+          test -f legacy/iniciador-anterior.html
+          grep -q 'data-page="pixel"' index.html
