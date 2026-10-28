@@ -1,0 +1,44 @@
+name: Publicar Game Creator v4.0 Unificado
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'integracao/build_unificado.py'
+      - 'pixel-art/modulo-integrado.js'
+      - 'pixel-art/ponte-creator.js'
+      - 'map-editor/modulo-integrado.js'
+      - 'APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  unificar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter projeto sem perder arquivos
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Montar v4.0 com abas nativas
+        run: python3 integracao/build_unificado.py
+      - name: Conferir estrutura essencial
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          assert s.count('id="page-pixelart"')==1
+          assert s.count('data-page="pixelart"')==1
+          assert '<iframe' not in s
+          assert 'id="page-layouts"' in s and 'id="page-recipes"' in s
+          assert 'ApoenaBancada40' in s
+          print('Estrutura principal e v4.0 preservadas.')
+          PY
+      - name: Publicar somente se houver alteração
+        run: |
+          if ! git diff --quiet -- index.html; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add index.html
+            git commit -m "Publicar Game Creator v4.0 integrado em pagina unica"
+            git push
+          fi
