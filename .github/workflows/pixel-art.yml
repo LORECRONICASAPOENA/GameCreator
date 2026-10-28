@@ -32,7 +32,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Preparar diagnósticos do runner Windows
+      - name: Preparar diagnosticos do runner Windows
         run: |
           $ErrorActionPreference = "Stop"
           $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
@@ -43,12 +43,12 @@ jobs:
           $nodeOutput = & node --version 2>&1
           $nodeCode = $LASTEXITCODE
           $nodeOutput | Out-File -FilePath $log -Append -Encoding utf8
-          if ($nodeCode -ne 0) { throw "node --version falhou com código $nodeCode." }
+          if ($nodeCode -ne 0) { throw "node --version falhou com codigo $nodeCode." }
           $npmOutput = & npm --version 2>&1
           $npmCode = $LASTEXITCODE
           $npmOutput | Out-File -FilePath $log -Append -Encoding utf8
-          if ($npmCode -ne 0) { throw "npm --version falhou com código $npmCode." }
-      - name: Instalar dependências de teste
+          if ($npmCode -ne 0) { throw "npm --version falhou com codigo $npmCode." }
+      - name: Instalar dependencias de teste
         run: |
           npm install --no-package-lock --ignore-scripts --no-audit --no-fund 2>&1 | Tee-Object -FilePath .ci-results/install.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -72,15 +72,15 @@ jobs:
         run: |
           node tests/tileset-check.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/tileset.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Testar biblioteca e persistência IndexedDB
+      - name: Testar biblioteca e persistencia IndexedDB
         run: |
           node tests/asset-library.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/library.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Testar backup e restauração da biblioteca
+      - name: Testar backup e restauracao da biblioteca
         run: |
           node tests/library-backup.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/library-backup.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Garantir preservação do Creator original e dos módulos
+      - name: Garantir preservacao do Creator original e dos modulos
         run: |
           $required = @(
             "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html",
@@ -94,17 +94,17 @@ jobs:
             if (-not (Test-Path $path)) { throw "Arquivo essencial ausente: $path" }
           }
           $index = Get-Content -Raw index.html
-          if ($index -notmatch 'data-page="3d"') { throw "A navegação 3D não foi encontrada no Creator." }
-          if ($index -notmatch 'data-page="pixel"') { throw "A navegação Pixel Art não foi encontrada no Creator." }
+          if ($index -notmatch 'data-page="3d"') { throw "A navegacao 3D nao foi encontrada no Creator." }
+          if ($index -notmatch 'data-page="pixel"') { throw "A navegacao Pixel Art nao foi encontrada no Creator." }
           $map = Get-Content -Raw map-editor/index.html
-          if ($map -notmatch 'asset-library.js') { throw "O editor de mapas não carrega a biblioteca central." }
-          "Contratos de preservação e integração passaram." | Tee-Object -FilePath .ci-results/contracts.log
+          if ($map -notmatch 'asset-library.js') { throw "O editor de mapas nao carrega a biblioteca central." }
+          "Contratos de preservacao e integracao passaram." | Tee-Object -FilePath .ci-results/contracts.log
       - name: Preparar entrega na pasta ChatGPT trabalho do runner
         if: always()
         run: |
           $ErrorActionPreference = "Stop"
           $source = $env:GITHUB_WORKSPACE
-          if (-not $source -or -not (Test-Path -LiteralPath $source)) { throw "GITHUB_WORKSPACE inválido: $source" }
+          if (-not $source -or -not (Test-Path -LiteralPath $source)) { throw "GITHUB_WORKSPACE invalido: $source" }
           $stage = Join-Path $source "_delivery"
           $project = Join-Path $stage "GameCreator-V4.1"
           New-Item -ItemType Directory -Force -Path $stage | Out-Null
@@ -124,7 +124,7 @@ jobs:
             if ($deliveryRoot) { break }
           }
           if (-not $deliveryRoot) {
-            Write-Warning "Não localizei run.cmd/config.cmd nos diretórios ancestrais. A cópia local será guardada em RUNNER_TEMP."
+            Write-Warning "Nao localizei run.cmd/config.cmd nos diretorios ancestrais. A copia local sera guardada em RUNNER_TEMP."
             $deliveryRoot = Join-Path $env:RUNNER_TEMP "ChatGPT trabalho"
           }
           New-Item -ItemType Directory -Force -Path $deliveryRoot | Out-Null
@@ -137,15 +137,15 @@ jobs:
               Copy-Item -LiteralPath $item.FullName -Destination $project -Recurse -Force
             }
             $info = @(
-              "APOENA GAME CREATOR V4.1 — PACOTE DE TRABALHO",
+              "APOENA GAME CREATOR V4.1 - PACOTE DE TRABALHO",
               "Commit: $env:GITHUB_SHA",
               "Run: https://github.com/apoenalore/GameCreator/actions/runs/$env:GITHUB_RUN_ID",
               "Pull request: https://github.com/apoenalore/GameCreator/pull/1",
               "Criado em: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')",
               "",
-              "Esta pasta contém a cópia do checkout deste commit.",
-              "O pacote não significa que os testes passaram. Confira o resultado do run acima.",
-              "A V4.0 original foi mantida no repositório; não houve mesclagem automática na main."
+              "Esta pasta contem a copia do checkout deste commit.",
+              "O pacote nao significa que os testes passaram. Confira o resultado do run acima.",
+              "A V4.0 original foi mantida no repositorio; nao houve mesclagem automatica na main."
             )
             $info | Set-Content -Encoding UTF8 (Join-Path $project "ENTREGA-INFO.txt")
             $manifestPath = Join-Path $project "MANIFESTO-ARQUIVOS.txt"
@@ -160,7 +160,7 @@ jobs:
             Add-Type -AssemblyName System.IO.Compression.FileSystem
             [System.IO.Compression.ZipFile]::CreateFromDirectory($project, $zipPath, [System.IO.Compression.CompressionLevel]::Optimal, $true)
             $latest = @(
-              "ENTREGA MAIS RECENTE — APOENA GAME CREATOR V4.1",
+              "ENTREGA MAIS RECENTE - APOENA GAME CREATOR V4.1",
               "Commit: $env:GITHUB_SHA",
               "Run: https://github.com/apoenalore/GameCreator/actions/runs/$env:GITHUB_RUN_ID",
               "Pasta: GameCreator-V4.1",
@@ -182,14 +182,14 @@ jobs:
             $errorText | Set-Content -Encoding UTF8 (Join-Path $stage "ERRO-ENTREGA.txt")
             Write-Error $errorText
           }
-      - name: Disponibilizar pacote de código para download
+      - name: Disponibilizar pacote de codigo para download
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Apoena-GameCreator-V4.1-source
           path: _delivery/
           if-no-files-found: warn
-      - name: Anexar logs de diagnóstico
+      - name: Anexar logs de diagnostico
         if: always()
         uses: actions/upload-artifact@v4
         with:
