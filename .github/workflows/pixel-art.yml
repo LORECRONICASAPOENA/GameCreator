@@ -4,21 +4,26 @@ on:
     branches: [main]
     paths:
       - "index.html"
+      - "bundle-v4/**"
+      - "ABRIR_GAME_CREATOR.cmd"
       - "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
       - "pixel-art/**"
       - "shared/**"
       - "biblioteca/**"
       - "map-editor/**"
       - "integracao/**"
+      - "legacy/**"
+      - "**/*.gd"
       - "tests/**"
       - "package.json"
       - "README.md"
       - "ORGANIZACAO_EDITOR.md"
       - ".github/workflows/pixel-art.yml"
+  schedule:
+    - cron: "17 6 * * *"
   workflow_dispatch:
 permissions:
   contents: read
-  actions: write
 
 concurrency:
   group: apoena-v41-${{ github.event.pull_request.head.ref || github.ref }}
@@ -35,6 +40,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Preparar diagnosticos do runner Windows
         run: |
           $ErrorActionPreference = "Stop"
@@ -51,6 +59,22 @@ jobs:
           $npmCode = $LASTEXITCODE
           $npmOutput | Out-File -FilePath $log -Append -Encoding utf8
           if ($npmCode -ne 0) { throw "npm --version falhou com codigo $npmCode." }
+      - name: Preservar loader e compilar Creator nativo V4.0
+        run: |
+          $ErrorActionPreference = "Stop"
+          $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
+          New-Item -ItemType Directory -Force -Path $diagDir | Out-Null
+          Copy-Item -LiteralPath (Join-Path $env:GITHUB_WORKSPACE "index.html") -Destination (Join-Path $diagDir "index-loader.html") -Force
+          python integracao/build_unificado.py 2>&1 | Tee-Object -FilePath (Join-Path $diagDir "build.log")
+          $buildCode = $LASTEXITCODE
+          if ($buildCode -ne 0) { throw "Falha ao compilar a entrada nativa V4.0 (codigo $buildCode)." }
+          $built = Get-Content -Raw (Join-Path $env:GITHUB_WORKSPACE "index.html")
+          foreach ($required in @('id="page-pixelart"', 'shared/asset-library.js', 'pixel-art/natureza.js', 'pixel-art/modulo-integrado.js', 'pixel-art/ponte-creator.js')) {
+            if (-not $built.Contains($required)) { throw "Build nativo incompleto: $required" }
+          }
+          if ($built.Contains("<iframe")) { throw "A entrada nativa nao pode substituir o Creator por iframe." }
+          $hash = Get-FileHash -LiteralPath (Join-Path $env:GITHUB_WORKSPACE "index.html") -Algorithm SHA256
+          "Build nativo OK; bytes=$((Get-Item index.html).Length); SHA256=$($hash.Hash)" | Tee-Object -FilePath (Join-Path $diagDir "build.log") -Append
       - name: Instalar dependencias de teste
         run: |
           npm install --no-package-lock --ignore-scripts --no-audit --no-fund 2>&1 | Tee-Object -FilePath .ci-results/install.log
@@ -200,4 +224,5 @@ jobs:
         with:
           name: v41-ci-diagnostics
           path: .ci-results/
+          include-hidden-files: true
           if-no-files-found: warn
