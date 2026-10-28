@@ -98,6 +98,54 @@ function safeName(){return ($('name').value||'apoena_sprite').normalize('NFD').r
 function sheet(){const cell=clamp(num('cell'),128,512),cols=clamp(num('cols'),1,24),rows=Math.ceil(frames.length/cols),out=document.createElement('canvas');out.width=cols*cell;out.height=Math.max(1,rows)*cell;const ctx=out.getContext('2d');frames.forEach((f,i)=>{const c=f.canvas,scale=Math.min((cell-8)/c.width,(cell-8)/c.height),w=c.width*scale,h=c.height*scale;ctx.drawImage(c,(i%cols)*cell+(cell-w)/2,Math.floor(i/cols)*cell+cell-h-4,w,h)});return{out,cell,cols,rows}}
 function manifest(){const s=sheet();return{schema:'apoena.pixelart.v1',name:safeName(),kind,texture:safeName()+'.png',transparent:true,anchor:{x:.5,y:1},cell_px:s.cell,columns:s.cols,rows:s.rows,fps:clamp(num('fps'),1,30),frames:frames.map((f,i)=>({index:i,action:f.action,direction:f.direction,source:f.rect,atlas:{x:(i%s.cols)*s.cell,y:Math.floor(i/s.cols)*s.cell,w:s.cell,h:s.cell}}))}}
 function download(obj,name){const url=typeof obj==='string'?URL.createObjectURL(new Blob([obj],{type:'application/json'})):obj.toDataURL('image/png'),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();if(typeof obj==='string')setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function canvasBlob(canvas){return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Não foi possível preparar a imagem PNG.')),'image/png'))}
+async function refreshLibrary(){
+  const select=$('libraryAssets'),prior=select.value;
+  try{
+    const items=await ApoenaLibrary.listAssets({category:'all'});
+    select.replaceChildren(new Option('Selecione um recurso da biblioteca…',''));
+    items.forEach(item=>select.add(new Option(item.name+' · '+item.category+' · '+item.width+'×'+item.height,item.id)));
+    if(items.some(item=>item.id===prior))select.value=prior;
+    msg(items.length+' recurso(s) disponíveis na biblioteca central.');
+  }catch(error){msg('Biblioteca indisponível: '+error.message)}
+}
+$('libraryRefresh').onclick=refreshLibrary;
+$('librarySave').onclick=async()=>{
+  if(!ready())return;
+  const button=$('librarySave');button.disabled=true;
+  try{
+    const output=sheet().out;
+    const blob=await canvasBlob(output);
+    const sourceBlob=image?await new Promise((resolve,reject)=>{const c=document.createElement('canvas');c.width=image.width;c.height=image.height;const ctx=c.getContext('2d');ctx.drawImage(image,0,0);c.toBlob(b=>b?resolve(b):reject(new Error('Falha ao preservar o original.')),'image/png')}):null;
+    const item=await ApoenaLibrary.saveAsset({
+      name:safeName(),category:kind==='cenario'?'cenario':kind==='personagem'?'personagem':kind,
+      type:'spritesheet',blob:blob,originalBlob:sourceBlob,width:output.width,height:output.height,
+      sourceWidth:image?image.width:0,sourceHeight:image?image.height:0,
+      tags:[kind,'pixel-art'],metadata:{manifest:manifest(),frames:frames.map((f,i)=>({index:i,action:f.action,direction:f.direction,rect:f.rect}))},
+      replaceExisting:true
+    });
+    await refreshLibrary();$('libraryAssets').value=item.id;msg('Spritesheet salva na biblioteca central: '+item.name);
+  }catch(error){msg('Falha ao salvar na biblioteca: '+error.message)}
+  finally{button.disabled=false}
+};
+$('libraryAssets').onchange=async()=>{
+  const id=$('libraryAssets').value;if(!id)return;
+  try{
+    const item=await ApoenaLibrary.getAsset(id);if(!item)throw new Error('Recurso não encontrado.');
+    const url=URL.createObjectURL(item.blob),im=new Image();
+    im.onload=()=>{
+      if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=url;image=im;frames=[];current=-1;batchBackup=null;
+      $('smartUndoBatch').disabled=true;
+      const cols=clamp(num('cols'),1,24),rows=clamp(num('rows'),1,24);resetMesh();
+      setCrop({x:0,y:0,w:im.width,h:im.height});
+      list();drawEdit();$('sourceInfo').textContent=item.name+' · biblioteca central · '+im.width+'×'+im.height+' px';
+      msg('Recurso carregado. Se for uma spritesheet, ajuste linhas e colunas antes de separar os quadros.');
+    };
+    im.onerror=()=>{URL.revokeObjectURL(url);msg('Não foi possível abrir a imagem salva.')};im.src=url;
+  }catch(error){msg('Falha ao carregar recurso: '+error.message)}
+};
+if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(()=>refreshLibrary());
+refreshLibrary();
 function ready(){if(frames.length)return true;msg('Adicione quadros antes de exportar.');return false}
 function animate(t){if(t-lastPreview>1000/clamp(num('fps'),1,30)){pc.clearRect(0,0,preview.width,preview.height);const index=$('playing').checked?Math.floor(t/(1000/clamp(num('fps'),1,30)))%Math.max(1,frames.length):Math.max(0,current),f=frames[index];if(f){const c=f.canvas,k=Math.min(178/c.width,178/c.height);pc.imageSmoothingEnabled=false;pc.drawImage(c,(192-c.width*k)/2,185-c.height*k,c.width*k,c.height*k)}lastPreview=t}requestAnimationFrame(animate)}
 $('file').onchange=ev=>{const f=ev.target.files?.[0];if(!f)return;if(!/^image\/(png|webp|jpeg)$/.test(f.type)||f.size>22*1024*1024)return msg('Use PNG, WebP ou JPG com até 22MB.');if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(f);const im=new Image();im.onload=()=>{if(im.width*im.height>32000000)return msg('Imagem muito grande para celular.');image=im;frames=[];current=-1;batchBackup=null;$('smartUndoBatch').disabled=true;const cols=clamp(num('cols'),1,24),rows=clamp(num('rows'),1,24);resetMesh();setCrop({x:0,y:0,w:Math.floor(im.width/cols),h:Math.floor(im.height/rows)});list();drawEdit();$('sourceInfo').textContent=f.name+' • '+im.width+'×'+im.height+' px';msg('Importado. Ajuste recortes e limpe antes de exportar.')};im.src=imageUrl};
