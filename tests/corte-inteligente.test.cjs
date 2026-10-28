@@ -64,6 +64,7 @@ for(const id of ['meshMode','meshReset','smartSelected','smartAll','smartPanel',
   assert.ok(html.includes('id="'+id+'"'),'falta controle '+id);
 assert.ok(html.includes('id="action" list="actionOptions"')&&html.includes('id="direction" list="directionOptions"'),'ações e direções são configuráveis');
 assert.ok(js.includes('async function loadProjectData')&&js.includes('ApoenaLibrary.saveProject')&&js.includes('ApoenaLibrary.getProject'),'projeto editável pode ser importado, salvo e reaberto');
+assert.ok(js.includes('frames.filter(f=>f.action===action&&f.direction===direction)'),'prévia animada filtra quadros pela ação e direção selecionadas');
 assert.ok(js.includes('ApoenaCorte.detectSprites')&&js.includes('runSpriteDetection'),'detecção automática tem implementação e handler real');
 assert.ok(js.includes('Limites detectados carregados nos campos de recorte'),'limites detectados podem ser corrigidos manualmente');
 assert.ok(html.indexOf('corte-inteligente.js')<html.indexOf('estudio.js'),'ordem de scripts');
