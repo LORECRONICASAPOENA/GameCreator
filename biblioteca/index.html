@@ -54,20 +54,23 @@ async function load(){
 async function loadProjects(){
   const status=$('projectStatus'),host=$('projects');host.replaceChildren();status.textContent='Lendo projetos salvos…';
   try{
-    const projects=await ApoenaLibrary.listProjects({search:$('search').value});
+    const projects=await ApoenaLibrary.listProjects({search:$('search').value,includeData:false});
     if(!projects.length){status.textContent='Nenhum projeto encontrado. Salve um mapa pelo Editor de Mapas 2.5D para começar.';const empty=document.createElement('div');empty.className='empty';empty.textContent='Mapas e outros projetos editáveis ficam separados dos arquivos de imagem e podem ser exportados em JSON.';host.append(empty);return}
     status.textContent=projects.length+' projeto(s) encontrado(s). Os dados ficam no armazenamento local do navegador.';
     projects.forEach(function(project){
       const card=document.createElement('article');card.className='project';
       const title=document.createElement('h3');title.textContent=project.name||'Projeto sem nome';card.append(title);
-      const data=project.data||{},schema=project.schema||'apoena.gamecreator.project.v1';
-      const info=document.createElement('p');info.textContent=(project.type||'projeto')+' · '+schema+(Number.isInteger(data.width)&&Number.isInteger(data.height)?' · '+data.width+'×'+data.height+' células':'');card.append(info);
+      const metadata=project.metadata||{},schema=project.schema||'apoena.gamecreator.project.v1';
+      const info=document.createElement('p');info.textContent=(project.type||'projeto')+' · '+schema+(Number.isInteger(metadata.width)&&Number.isInteger(metadata.height)?' · '+metadata.width+'×'+metadata.height+' células':'');card.append(info);
       const updated=document.createElement('p');updated.textContent='Atualizado '+dateLabel(project.updatedAt);card.append(updated);
       const actions=document.createElement('div');actions.className='actions';
-      actions.append(makeButton('Baixar JSON',function(){
-        const base=(project.name||'projeto').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9_-]+/g,'_').slice(0,70)||'projeto';
-        download(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),base+'.json');
-      }));
+      actions.append(makeButton('Baixar JSON',async function(){
+        try{
+          const full=await ApoenaLibrary.getProject(project.id);if(!full)throw Error('Projeto não encontrado.');
+          const base=(project.name||'projeto').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9_-]+/g,'_').slice(0,70)||'projeto';
+          download(new Blob([JSON.stringify(full.data||{},null,2)],{type:'application/json'}),base+'.json');
+        }catch(error){status.textContent='Falha ao exportar projeto: '+error.message}
+      }));;
       if(schema==='apoena.map2d.v1')actions.append(makeButton('Abrir mapa',function(){
         const url='../map-editor/index.html?projeto='+encodeURIComponent(project.id);
         window.open(url,'_blank','noopener');
