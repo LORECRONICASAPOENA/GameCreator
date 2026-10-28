@@ -130,7 +130,7 @@ async function loadProjectData(data){
     throw Error('Projeto editável incompatível. Use o JSON de projeto exportado pelo Estúdio Pixel Art.');
   const loaded=[];let totalPixels=0;
   for(const item of data.frames){
-    if(!item||typeof item.dataUrl!=='string'||!/^data:image\\/(png|webp);base64,/.test(item.dataUrl))
+    if(!item||typeof item.dataUrl!=='string'||!/^data:image\/(png|webp);base64,/.test(item.dataUrl))
       throw Error('O projeto não contém as imagens dos quadros. Exporte como Projeto JSON editável.');
     const canvas=await new Promise((resolve,reject)=>{
       const im=new Image();
