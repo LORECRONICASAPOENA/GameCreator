@@ -13,13 +13,13 @@
 - **Estúdio Pixel Art:** importação PNG/WebP/JPG, recorte livre e por grade, divisórias ajustáveis, transparência, borracha, remoção de fundo por região conectada, detecção automática de sprites separados por componentes conectados (com margem e união configuráveis), prévia dos limites e desfazer de limpeza em lote.
 - **Spritesheets:** quadros padronizados, âncora inferior, prévia animada, ações e direções configuráveis por quadro, exportação PNG/JSON e importação de projetos JSON editáveis.
 - **Biblioteca central:** imagens editadas e originais, metadados, categorias, etiquetas, atualização sem duplicação e projetos em IndexedDB. Os módulos compatíveis usam `shared/asset-library.js`.
-- **Mapas 2.5D e tilesets:** o editor permite importar e reutilizar tilesets, verificar transparência nas bordas e dimensões da grade sem modificar os PNGs, salvar projetos na biblioteca central e reabrir mapas salvos.
+- **Mapas 2.5D e tilesets:** o editor permite importar e reutilizar tilesets, verificar transparência nas bordas, emendas ao repetir o mesmo tile e dimensões divisíveis da grade sem modificar os PNGs, salvar projetos na biblioteca central e reabrir mapas salvos.
 - **Projetos de Pixel Art:** podem ser exportados em JSON editável e salvos/reabertos pela biblioteca. O projeto do Creator continua separado do jogo Apoena Agar.
 
 ## Testes e limites conhecidos
 
 - `tests/corte-inteligente.test.cjs` cobre limpeza/transparência, detecção de sprites com espaçamento variável, fundos opacos esparsos, malha, proteções e contratos de integração.
-- `tests/asset-library.test.cjs` testa operações da biblioteca com IndexedDB simulado por `fake-indexeddb`; o workflow instala essa dependência de teste.
+- `tests/asset-library.test.cjs` testa operações da biblioteca com IndexedDB simulado por `fake-indexeddb`; `tests/tileset-check.test.cjs` valida bordas transparentes, repetição, grade e proteção de imagens grandes. O workflow instala a dependência de teste.
 - Os testes de sintaxe e de contrato executados nesta rodada passaram no runtime JavaScript disponível.
 - A execução do GitHub Actions ainda não foi confirmada nesta sessão. Também faltam testes visuais ponta a ponta no navegador/Android, regressão manual da bancada 3D e importação dos pacotes exportados no Godot.
 - A biblioteca central não substitui automaticamente a persistência interna da V4.0 nem conecta, sozinha, os dados visuais ao runtime do jogo. Essas integrações devem ser verificadas antes de declarar a V4.1 concluída.
