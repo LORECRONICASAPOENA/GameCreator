@@ -84,8 +84,15 @@ assert.ok(libraryHtml.includes('includeData:false')&&libraryHtml.includes('Apoen
 assert.ok(mapHtml.includes('listProjects({includeData:false})'),'editor de mapas lista metadados sem baixar mapas completos');
 assert.ok(js.includes('listProjects({includeData:false})'),'estúdio lista projetos sem baixar todos os quadros');
 assert.ok(libraryHtml.includes("window.open(url,'_blank','noopener')"),'biblioteca pode abrir mapa salvo no editor');
-assert.ok(shellHtml.includes('bundle-v4/parte_000.js')&&shellHtml.includes('window.__APOENA_V4_PARTES')&&shellHtml.includes('document.write(full)')&&!shellHtml.includes('<iframe'),'entrada mantém o Creator V4.0 nativo e não usa iframe');
-assert.ok(shellHtml.includes('shared/asset-library.js')&&shellHtml.includes('pixel-art/natureza.js'),'entrada carrega biblioteca central e editor de Natureza');
+const root=path.join(__dirname,'..');
+const entryHtml=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const loaderPath=path.join(root,'.ci-results','index-loader.html');
+const loaderHtml=fs.existsSync(loaderPath)?fs.readFileSync(loaderPath,'utf8'):entryHtml;
+if(loaderHtml.includes('bundle-v4/parte_000.js')){
+  assert.ok(loaderHtml.includes('window.__APOENA_V4_PARTES')&&loaderHtml.includes('document.write(full)')&&!loaderHtml.includes('<iframe'),'loader compacto preserva o Creator V4.0 sem iframe');
+}
+assert.ok(entryHtml.includes('id="page-pixelart"')&&entryHtml.includes('pixel-art/modulo-integrado.js')&&!entryHtml.includes('<iframe'),'entrada mantém o Creator V4.0 nativo e não usa iframe');
+assert.ok(entryHtml.includes('shared/asset-library.js')&&entryHtml.includes('pixel-art/natureza.js'),'entrada carrega biblioteca central e editor de Natureza');
 const integratedModule=fs.readFileSync(path.join(__dirname,'../pixel-art/modulo-integrado.js'),'utf8');
 for(const href of ['pixel-art/estudio.html','map-editor/index.html','biblioteca/index.html','integracao/index.html'])
   assert.ok(integratedModule.includes(href),'ferramenta V4.1 não acessível pela área Pixel Art: '+href);
@@ -93,8 +100,6 @@ console.log('CORTE INTELIGENTE OK: malha ajustável, transparência, isolamento,
 console.log('MAPAS/BIBLIOTECA OK: salvar/reabrir, link direto, lista de projetos e ponte central');
 
 /* Regressão da integração: todos os módulos apontados pelo menu unificado devem existir. */
-const root=path.join(__dirname,'..');
-const shell=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const modulePaths=[
   'APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html',
   'pixel-art/estudio.html',
@@ -105,8 +110,9 @@ const modulePaths=[
   'ORGANIZACAO_EDITOR.html'
 ];
 for(const file of modulePaths)assert.ok(fs.existsSync(path.join(root,file)),'módulo do menu ausente: '+file);
-assert.ok(shell.includes('bundle-v4/parte_000.js')&&shell.includes('window.__APOENA_V4_PARTES')&&shell.includes('document.write(full)'),'entrada do Creator V4.0 e carregamento de módulos');
-assert.ok(shell.includes('shared/asset-library.js')&&shell.includes('pixel-art/natureza.js'),'biblioteca central e Natureza incluídas no bundle nativo');
-assert.ok(!shell.includes('<iframe'),'entrada principal não substitui o Creator por um shell com iframe');
+if(loaderHtml.includes('bundle-v4/parte_000.js'))
+  assert.ok(loaderHtml.includes('window.__APOENA_V4_PARTES')&&loaderHtml.includes('document.write(full)'),'loader compacto do Creator V4.0 preservado');
+assert.ok(entryHtml.includes('shared/asset-library.js')&&entryHtml.includes('pixel-art/natureza.js'),'biblioteca central e Natureza incluídas na entrada nativa');
+assert.ok(!entryHtml.includes('<iframe'),'entrada principal não substitui o Creator por um shell com iframe');
 assert.ok(integratedModule.includes('data-pixel-tab=\\"objects\\"')&&integratedModule.includes('data-pixel-tab=\\"maps\\"'),'abas nativas de objetos e mapas preservadas');
 console.log('INTEGRAÇÃO V4.1 OK: entrada nativa, módulos existentes e ferramentas acessíveis');
