@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Game Creator • Integrar itens, receitas e outros jogos</title>
+<style>
+:root{color-scheme:dark;--bg:#091620;--panel:#152b3b;--line:#375367;--fg:#edf7fa;--muted:#b9cbd7;--gold:#f1d28c;--aqua:#90dfe4}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:15px system-ui,Arial;color:var(--fg)}
+header{background:#0f2534;padding:15px 5%;border-bottom:1px solid var(--line)}
+header h1{font-size:21px;margin:5px 0;color:var(--gold)}
+main{max-width:1060px;margin:auto;padding:18px;display:grid;gap:14px}
+section{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:17px}
+h2{font-size:18px;color:var(--gold);margin:0 0 12px}p{line-height:1.52}
+a,button,.file{display:inline-block;cursor:pointer;background:var(--aqua);color:#102332;border:0;border-radius:8px;padding:11px 14px;font:700 14px system-ui;text-decoration:none}
+.secondary{background:#2a485c;color:var(--fg)}button:disabled{opacity:.44;cursor:not-allowed}
+label{display:block;font-size:13px;color:var(--muted);margin:9px 0 4px}
+input,select{background:#10212e;border:1px solid #446173;color:var(--fg);font:15px system-ui;padding:12px;border-radius:7px;max-width:100%}
+input[type=text]{width:100%}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.metric{background:#102232;border-radius:8px;border:1px solid #355268;padding:12px}
+.metric strong{font-size:26px;color:var(--gold);display:block}.muted,small{color:var(--muted)}
+#log{white-space:pre-wrap;overflow-wrap:anywhere;background:#0a1c28;padding:13px;border-radius:8px;min-height:48px;max-height:280px;overflow:auto}
+.ok{color:#a5e8be}.bad{color:#ffb7ae}
+ul{padding-left:20px;line-height:1.65}li{margin:5px 0}
+fieldset{border:1px solid #355268;border-radius:9px;padding:12px}
+legend{color:var(--gold)}
+</style></head>
+<body>
+<header><div class="muted">APOENA GAME CREATOR • PONTE DE PROJETOS</div><h1>Integração de itens, receitas e jogos</h1></header>
+<main>
+<section>
+ <h2>1 · Prepare os itens no editor original</h2>
+ <p>A <strong>Fábrica de Itens</strong>, o <strong>Inventário</strong> e as <strong>Receitas</strong> continuam no Game Creator v3.9 original. Não recriamos esses cadastros. Abra o editor e escolha <strong>Salvar projeto editável</strong>. O arquivo gerado chama-se <code>APOENA_PROJETO_EDITAVEL.json</code>.</p>
+ <div class="row">
+  <a href="../legacy/abrir-editor-v3.9.html">Abrir Fábrica de Itens original</a>
+  <a class="secondary" href="../index.html">Voltar à central</a>
+ </div>
+</section>
+<section>
+ <h2>2 · Importe seu projeto completo</h2>
+ <p>O arquivo fica apenas neste dispositivo. Também aceita importar juntos os exports <code>apoena.items.v1</code> e <code>apoena.recipes.v1</code>, se preferir. Nada é enviado ao GitHub.</p>
+ <label class="file">Selecionar projeto JSON
+  <input id="files" hidden type="file" accept=".json,application/json" multiple>
+ </label>
+ <label for="game">Jogo que receberá os dados (ex.: apoena-agar ou meu-outro-jogo)</label>
+ <input type="text" id="game" value="apoena-agar" autocomplete="off">
+ <grid>
+  <div class="metric"><strong id="items">0</strong> itens</div>
+  <div class="metric"><strong id="recipes">0</strong> receitas</div>
+  <div class="metric"><strong id="assets">0</strong> imagens cadastradas</div>
+ </grid>
+ <p id="source" class="muted">Aguardando JSON do Game Creator.</p>
+ <div id="log" role="status" aria-live="polite">Selecione um projeto para verificar referências e quantidades.</div>
+</section>
+<section>
+ <h2>3 · Exporte para outro jogo</h2>
+ <p>O catálogo mantém <strong>os IDs, as propriedades dos itens, os efeitos declarados e as receitas</strong> do projeto original. Para ficar leve, o JSON de runtime não repete os dados base64 das imagens. Os ícones precisam ser exportados ou copiados como arquivos PNG separadamente.</p>
+ <div class="row">
+  <button id="export" disabled>Baixar catálogo do jogo (.json)</button>
+  <button id="report" class="secondary" disabled>Baixar relatório de integração</button>
+ </div>
+ <p class="muted">No Godot 4, o script <code>integracao/godot/ApoenaCatalogo.gd</code> consegue carregar esse catálogo e executar o fluxo inicial de coletar e fabricar. Instale-o em uma <strong>cópia do jogo</strong> primeiro. Os efeitos de combate, imagens e animações dependem de conexão às cenas reais.</p>
+</section>
+<section>
+ <h2>4 · Teste de vínculo entre ingredientes e produtos</h2>
+ <p>Este teste é isolado: monta os ingredientes no inventário de uma simulação local e verifica se a receita produz o item correto. Não altera os salvamentos dos jogos.</p>
+ <div class="row"><select id="recipe"><option value="">Selecione uma receita</option></select>
+ <button id="test" class="secondary" disabled>Testar fabricação</button></div>
+ <p id="result" class="muted">Importe um catálogo com receitas para testar.</p>
+</section>
+<section>
+ <h2>Outros geradores do Game Creator</h2>
+ <p>As ferramentas permanecem acessíveis pela mesma central. O gerador de personagens e o editor de mapas ainda mantêm seus próprios arquivos JSON; a migração para um único formato de projeto é uma etapa posterior.</p>
+ <div class="row"><a class="secondary" href="../pixel-art/index.html">Gerador de personagens</a>
+ <a class="secondary" href="../map-editor/index.html">Editor de mapas 2.5D</a></div>
+</section>
+</main>
+<script src="catalogo.js"></script>
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id),A=window.ApoenaCatalogo;
+let source=null,report=null;
+function msg(text,error=false){$("log").textContent=text;$("log").className=error?"bad":"ok"}
+function download(text,name,type="application/json"){
+ const blob=new Blob([text],{type:type+";charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download=name;document.body.append(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),8000)
+}
+function update(){
+ const d=A.detect(source),r=A.examine(d.items,d.recipes,d.assets);
+ report=r;
+ $("items").textContent=r.items;$("recipes").textContent=r.recipes;$("assets").textContent=r.assets;
+ $("source").textContent=d.name+" · "+d.kind;
+ $("export").disabled=r.errors.length>0||d.kind==="arquivo de itens"||d.kind==="arquivo de receitas";
+ $("report").disabled=false;
+ $("test").disabled=r.errors.length>0||!r.recipes;
+ $("recipe").replaceChildren(new Option("Selecione uma receita",""));
+ for(const x of d.recipes)$("recipe").add(new Option((x.name||x.id)+" → "+x.resultId,x.id));
+ msg(r.errors.length?"ERROS (precisam ser corrigidos no editor):\n• "+r.errors.join("\n• "):
+  "Estrutura conferida. "+r.items+" itens, "+r.recipes+" receitas. "+
+  (r.warnings.length?"Avisos:\n• "+r.warnings.join("\n• "):"Nenhum vínculo inválido encontrado."),!!r.errors.length);
+}
+$("files").addEventListener("change",async ev=>{
+ try{
+  const list=Array.from(ev.target.files||[]);if(!list.length)return;
+  const objects=await Promise.all(list.map(async file=>JSON.parse(await file.text())));
+  const full=objects.find(x=>x.schema==="apoena.central.v1"||x.schema===A.SCHEMA);
+  if(full)source=full;
+  else{
+    const i=objects.find(x=>x.schema==="apoena.items.v1");
+    const r=objects.find(x=>x.schema==="apoena.recipes.v1");
+    if(!i||!r)throw Error("Para importar arquivos separados, selecione itens e receitas juntos.");
+    source={schema:A.SCHEMA,project:"Catálogos unidos",items:i.items,recipes:r.recipes,assets:[]};
+  }
+  update();
+ }catch(e){source=null;report=null;$("export").disabled=$("test").disabled=$("report").disabled=true;msg("Não foi possível ler o projeto: "+e.message,true)}
+ ev.target.value="";
+});
+$("export").addEventListener("click",()=>{
+ try{
+  const catalog=A.portable(source,$("game").value);
+  download(JSON.stringify(catalog,null,2),"apoena_catalogo_"+(catalog.game_id.replace(/[^a-z0-9_-]/gi,"_"))+".json");
+  msg("Catálogo exportado sem alterar o projeto original.");
+ }catch(e){msg(e.message,true)}
+});
+$("report").addEventListener("click",()=>{
+ if(!report)return;
+ const data=A.detect(source);
+ download("Projeto: "+data.name+"\nErros:\n"+(report.errors.join("\n")||"Nenhum")+
+ "\nAvisos:\n"+(report.warnings.join("\n")||"Nenhum")+
+ "\nItens: "+report.items+"\nReceitas: "+report.recipes+"\nImagens: "+report.assets,
+ "relatorio_integracao_game_creator.txt","text/plain");
+});
+$("test").addEventListener("click",()=>{
+ try{
+  const id=$("recipe").value;if(!id)throw Error("Escolha uma receita.");
+  const catalog=A.portable(source,$("game").value),recipe=catalog.recipes.find(x=>x.id===id);
+  const session=A.createSession(catalog);
+  for(const ingredient of recipe.ingredients)A.collect(catalog,session,ingredient.id,ingredient.qty);
+  session.gold=Math.max(0,Number(recipe.gold)||0);
+  const product=A.craft(catalog,session,id);
+  $("result").textContent="Teste concluído: ingredientes consumidos; "+product.quantity+" × "+product.item_id+" produzido(s) em uma sessão isolada.";
+ }catch(e){$("result").textContent="Falha no teste: "+e.message}
+});
+})();
+</script>
+</body></html>
