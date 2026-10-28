@@ -10,7 +10,7 @@
 
 ## Ferramentas V4.1 implementadas nesta branch
 
-- **Estúdio Pixel Art:** importação PNG/WebP/JPG, recorte livre e por grade, divisórias ajustáveis, transparência, borracha, remoção de fundo por região conectada, prévia conservadora do Corte Inteligente e desfazer de limpeza em lote.
+- **Estúdio Pixel Art:** importação PNG/WebP/JPG, recorte livre e por grade, divisórias ajustáveis, transparência, borracha, remoção de fundo por região conectada, detecção automática de sprites separados por componentes conectados (com margem e união configuráveis), prévia dos limites e desfazer de limpeza em lote.
 - **Spritesheets:** quadros padronizados, âncora inferior, prévia animada, ações e direções configuráveis por quadro, exportação PNG/JSON e importação de projetos JSON editáveis.
 - **Biblioteca central:** imagens editadas e originais, metadados, categorias, etiquetas, atualização sem duplicação e projetos em IndexedDB. Os módulos compatíveis usam `shared/asset-library.js`.
 - **Mapas 2.5D:** o editor permite importar e reutilizar tilesets, salvar projetos na biblioteca central e reabrir mapas salvos.
@@ -18,7 +18,7 @@
 
 ## Testes e limites conhecidos
 
-- `tests/corte-inteligente.test.cjs` cobre o algoritmo de limpeza, transparência, malha, proteções e contratos de integração.
+- `tests/corte-inteligente.test.cjs` cobre limpeza/transparência, detecção de sprites com espaçamento variável, fundos opacos esparsos, malha, proteções e contratos de integração.
 - `tests/asset-library.test.cjs` testa operações da biblioteca com IndexedDB simulado por `fake-indexeddb`; o workflow instala essa dependência de teste.
 - Os testes de sintaxe e de contrato executados nesta rodada passaram no runtime JavaScript disponível.
 - A execução do GitHub Actions ainda não foi confirmada nesta sessão. Também faltam testes visuais ponta a ponta no navegador/Android, regressão manual da bancada 3D e importação dos pacotes exportados no Godot.
