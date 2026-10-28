@@ -245,9 +245,16 @@
   async function localListProjects(filters) {
     filters = filters || {};
     const search = String(filters.search || "").trim().toLocaleLowerCase();
-    return (await getAllRecords(PROJECTS)).filter(function(item) {
+    const items = (await getAllRecords(PROJECTS)).filter(function(item) {
       return !search || (item.name + " " + item.type + " " + item.schema).toLocaleLowerCase().indexOf(search) >= 0;
     }).sort(function(a, b) { return String(b.updatedAt).localeCompare(String(a.updatedAt)); });
+    if (filters.includeData !== false) return items;
+    return items.map(function(item) {
+      return {
+        id: item.id, name: item.name, schema: item.schema, type: item.type,
+        metadata: clone(item.metadata || {}), createdAt: item.createdAt, updatedAt: item.updatedAt
+      };
+    });
   }
   async function localDeleteProject(id) {
     if (!id) throw new Error("Identificador de projeto ausente.");
