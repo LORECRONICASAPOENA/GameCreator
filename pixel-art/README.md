@@ -54,3 +54,17 @@ O gerador aceita o catálogo `apoena.gamecreator.catalogo.v1` exportado pela pá
 A aba **Pixel Art → Natureza / Plantas** registra espécies, necessidades do solo, germinação, reprodução, vida, decomposição e 14 PNGs separados (semente, muda, planta adulta, fruto, tronco, pó). Permite importar PNG, verificar transparência, baixar PNG com nomes estáveis e exportar ficha JSON `apoena.natureza.asset.v1`. Não é um segundo gerador e não altera a biblioteca de itens nem a ferramenta 3D. Consulte `pixel-art/NATUREZA_CONTRATO.md`.
 
 **Importante:** o GameCreator não gera automaticamente as ilustrações; a pessoa produz as imagens e as cadastra. Para abrir como aba do editor principal é preciso recompilar a versão v4.0 com `integracao/build_unificado.py` ou `.ps1`; abrir `pixel-art/index.html` oferece a aba local imediatamente.
+
+## Estúdio Pixel Art V4.1
+
+O menu **Pixel Art** do shell V4.1 abre `estudio.html`. Esse módulo trabalha com PNG/WebP/JPG, recortes manuais e por grade, detecção automática de componentes separados em imagens com espaçamento variável, limpeza de transparência, revisão de limites antes de aplicar e exportação de spritesheets.
+
+- **Projeto editável:** use **Projeto JSON** para exportar os quadros e seus metadados; **Projeto editável JSON** permite reabrir esse pacote.
+- **Detecção:** os contornos verdes são uma prévia; clicar em um contorno carrega X/Y/largura/altura para correção manual. A detecção não altera a imagem original, não separa objetos fisicamente conectados e pede revisão quando os limites tocam as bordas ou o fundo ocupa quase toda a folha.
+- **Ações/direções:** podem ser definidas por quadro, incluindo ações personalizadas como andar, correr, atacar, beber, crescer, florescer ou frutificar.
+- **Biblioteca central:** **Salvar projeto editável** guarda o projeto; **Abrir projeto salvo** recupera os quadros e seus metadados. **Salvar na biblioteca central** guarda a imagem final e preserva o original quando disponível.
+- **Mapas e tilesets:** o editor 2.5D possui controles para salvar/reabrir mapas e reutilizar tilesets pela mesma biblioteca. **Verificar encaixes** sinaliza bordas transparentes/semitransparentes e grades cujas dimensões não se dividem uniformemente; é um diagnóstico, não uma correção automática.
+
+Os arquivos editáveis podem ficar grandes porque cada quadro é incorporado como data URL no JSON. O importador limita o arquivo a 18 MB e o conjunto descompactado a 32 MB; para projetos maiores, exporte em partes.
+
+A presença desses controles não substitui os testes visuais em navegador/Android nem a importação de recursos exportados no Godot. Consulte o README da raiz para o status de validação da branch.
