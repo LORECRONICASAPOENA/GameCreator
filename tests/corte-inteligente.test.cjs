@@ -42,7 +42,7 @@ for(const id of ['meshMode','meshReset','smartSelected','smartAll','smartPanel',
 assert.ok(html.indexOf('corte-inteligente.js')<html.indexOf('estudio.js'),'ordem de scripts');
 const alphaStart=js.indexOf('function alpha()'),alphaEnd=js.indexOf('function trim()',alphaStart);
 assert.ok(alphaStart>=0&&alphaEnd>alphaStart,'rotina de limpeza de alfa presente');
-assert.match(js.slice(alphaStart,alphaEnd),/saveUndo\\(\\)/,'limpeza de alfa permite desfazer');
+assert.ok(js.slice(alphaStart,alphaEnd).includes('saveUndo();'),'limpeza de alfa permite desfazer');
 assert.ok(mapHtml.includes('<script src="../shared/asset-library.js"></script>'),'editor de mapas carrega a biblioteca compartilhada');
 for(const id of ['saveMapLibrary','libraryMaps','loadMapLibrary'])
   assert.ok(mapHtml.includes('id="'+id+'"'),'falta controle de mapas na biblioteca: '+id);
