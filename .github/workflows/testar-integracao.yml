@@ -2,6 +2,9 @@ name: Game Creator - integração de catálogo
 on:
   push:
     paths:
+      - 'pixel-art/natureza.js'
+      - 'pixel-art/modulo-integrado.js'
+      - 'integracao/testes/natureza.test.cjs'
       - 'integracao/catalogo.js'
       - 'integracao/testes/**'
       - '.github/workflows/testar-integracao.yml'
@@ -9,6 +12,8 @@ on:
     paths:
       - 'integracao/catalogo.js'
       - 'integracao/testes/**'
+      - 'pixel-art/natureza.js'
+      - 'pixel-art/modulo-integrado.js'
   workflow_dispatch:
 jobs:
   testar-catalogo:
@@ -22,7 +27,12 @@ jobs:
           node-version: '22'
       - name: Verificar sintaxe JS
         run: |
+          node --check pixel-art/natureza.js
+          node --check pixel-art/modulo-integrado.js
+          node --check integracao/testes/natureza.test.cjs
           node --check integracao/catalogo.js
           node --check integracao/testes/catalogo.test.js
       - name: Executar testes isolados do catálogo
-        run: node integracao/testes/catalogo.test.js
+        run: |
+          node integracao/testes/catalogo.test.js
+          node integracao/testes/natureza.test.cjs

@@ -5,7 +5,7 @@ $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $orig = Join-Path $repo 'APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html'
 $index = Join-Path $repo 'index.html'
 if (-not (Test-Path $orig)) { throw "Falta a v4.0 original: $orig" }
-foreach($mod in @('pixel-art\modulo-integrado.js','pixel-art\ponte-creator.js','map-editor\modulo-integrado.js')) {
+foreach($mod in @('pixel-art\natureza.js','pixel-art\modulo-integrado.js','pixel-art\ponte-creator.js','map-editor\modulo-integrado.js')) {
   if(-not (Test-Path (Join-Path $repo $mod))) {throw "Modulo Pixel Art ausente: $mod"}
 }
 $s=[System.IO.File]::ReadAllText($orig,[System.Text.Encoding]::UTF8)

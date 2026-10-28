@@ -1,0 +1,17 @@
+"use strict";
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const vm = require("node:vm");
+const source = fs.readFileSync("pixel-art/natureza.js","utf8");
+const ctx = { window: {} };
+vm.runInNewContext(source,ctx,{filename:"pixel-art/natureza.js"});
+const api=ctx.window.ApoenaNaturezaEditor;
+assert.equal(api.SCHEMA,"apoena.natureza.asset.v1");
+assert.equal(api.FASES.length,14);
+for(const k of ["semente","germinacao","muda","jovem","adulta","floracao","frutificando","fruto_caido","murchando","morta","tronco_caido","decompondo","po"])assert.ok(api.FASES.some(f=>f[0]===k));
+assert.equal(api.MODELOS.bananeira.rebentos,3);
+assert.equal(api.MODELOS.jabuticabeira.propagacao,"sementes");
+new vm.Script(fs.readFileSync("pixel-art/modulo-integrado.js","utf8"));
+assert.ok(fs.readFileSync("pixel-art/index.html","utf8").includes('<script src="natureza.js"></script>'));
+for(const builder of ["integracao/build_unificado.py","integracao/build_unificado.ps1"])assert.ok(fs.readFileSync(builder,"utf8").includes('pixel-art/natureza.js'));
+console.log("PASSOU: editor Natureza, fases, presets e integracao aos dois fluxos.");
