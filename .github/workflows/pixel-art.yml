@@ -247,7 +247,7 @@ jobs:
           try {
             if (Test-Path -LiteralPath $project) { Remove-Item -LiteralPath $project -Recurse -Force }
             New-Item -ItemType Directory -Force -Path $project | Out-Null
-            $skipNames = @(".git", "node_modules", ".ci-results", "_delivery")
+            $skipNames = @(".git", "node_modules", ".ci-results", "_delivery", ".godot", "__pycache__")
             $items = Get-ChildItem -LiteralPath $source -Force | Where-Object { $_.Name -notin $skipNames }
             foreach ($item in $items) {
               Copy-Item -LiteralPath $item.FullName -Destination $project -Recurse -Force
