@@ -57,9 +57,10 @@ A aba **Pixel Art → Natureza / Plantas** registra espécies, necessidades do s
 
 ## Estúdio Pixel Art V4.1
 
-O menu **Pixel Art** do shell V4.1 abre `estudio.html`. Esse módulo trabalha com PNG/WebP/JPG, recortes manuais e por grade, limpeza de transparência, Corte Inteligente com revisão antes de aplicar e exportação de spritesheets.
+O menu **Pixel Art** do shell V4.1 abre `estudio.html`. Esse módulo trabalha com PNG/WebP/JPG, recortes manuais e por grade, detecção automática de componentes separados em imagens com espaçamento variável, limpeza de transparência, revisão de limites antes de aplicar e exportação de spritesheets.
 
 - **Projeto editável:** use **Projeto JSON** para exportar os quadros e seus metadados; **Projeto editável JSON** permite reabrir esse pacote.
+- **Detecção:** os contornos verdes são uma prévia; clicar em um contorno carrega X/Y/largura/altura para correção manual. A detecção não altera a imagem original, não separa objetos fisicamente conectados e pede revisão quando os limites tocam as bordas ou o fundo ocupa quase toda a folha.
 - **Ações/direções:** podem ser definidas por quadro, incluindo ações personalizadas como andar, correr, atacar, beber, crescer, florescer ou frutificar.
 - **Biblioteca central:** **Salvar projeto editável** guarda o projeto; **Abrir projeto salvo** recupera os quadros e seus metadados. **Salvar na biblioteca central** guarda a imagem final e preserva o original quando disponível.
 - **Mapas:** o editor 2.5D possui controles para salvar/reabrir mapas e reutilizar tilesets pela mesma biblioteca.
