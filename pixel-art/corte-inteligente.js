@@ -153,6 +153,7 @@
     }));
     const warnings=[];
     if(analysis.warning)warnings.push(analysis.warning);
+    if(analysis.backgroundRemoved/(w*h)>.94)warnings.push('O fundo ocupa quase toda a imagem; confira se sprites pequenos foram preservados.');
     if(sprites.length<2)warnings.push('Foram encontrados menos de dois sprites separados; revise o resultado ou use a grade/manual.');
     if(sprites.some(b=>b.touchesBorder))warnings.push('Um ou mais sprites tocam a borda da imagem; confira os limites.');
     return {width:w,height:h,sprites,components:analysis.components,confidence:warnings.length?'revisar':'normal',warning:warnings.join(' '),backgroundRemoved:analysis.backgroundRemoved};
