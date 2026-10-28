@@ -92,7 +92,7 @@ if(loaderHtml.includes('bundle-v4/parte_000.js')){
   assert.ok(loaderHtml.includes('window.__APOENA_V4_PARTES')&&loaderHtml.includes('document.write(full)')&&!loaderHtml.includes('<iframe'),'loader compacto preserva o Creator V4.0 sem iframe');
 }
 assert.ok(entryHtml.includes('id="page-pixelart"')&&entryHtml.includes('pixel-art/modulo-integrado.js')&&!entryHtml.includes('<iframe'),'entrada mantém o Creator V4.0 nativo e não usa iframe');
-assert.ok(entryHtml.includes('shared/asset-library.js')&&entryHtml.includes('pixel-art/natureza.js'),'entrada carrega biblioteca central e editor de Natureza');
+assert.ok(entryHtml.includes('shared/asset-library.js')&&entryHtml.includes('shared/creator-bridge.js')&&entryHtml.includes('pixel-art/natureza.js'),'entrada carrega biblioteca, ponte e editor de Natureza');
 const integratedModule=fs.readFileSync(path.join(__dirname,'../pixel-art/modulo-integrado.js'),'utf8');
 for(const href of ['pixel-art/estudio.html','map-editor/index.html','biblioteca/index.html','integracao/index.html'])
   assert.ok(integratedModule.includes(href),'ferramenta V4.1 não acessível pela área Pixel Art: '+href);
