@@ -40,8 +40,8 @@
     if(encodeLength>MAX_IMPORT_CHARS)throw new Error("Backup maior que 120 MB de texto; divida a biblioteca em backups menores.");
     let assets=0,projects=0;
     for(const item of snapshot.assets){
-      const blob=api.dataURLToBlob(item.blob,item.mimeType||"image/png");
-      const originalBlob=item.originalBlob?api.dataURLToBlob(item.originalBlob):null;
+      const blob=await api.dataURLToBlob(item.blob,item.mimeType||"image/png");
+      const originalBlob=item.originalBlob?await api.dataURLToBlob(item.originalBlob):null;
       await api.saveAsset({id:item.id,name:item.name,category:item.category,type:item.type,blob:blob,originalBlob:originalBlob,width:item.width,height:item.height,sourceWidth:item.sourceWidth,sourceHeight:item.sourceHeight,tags:item.tags,metadata:item.metadata,createdAt:item.createdAt,updatedAt:item.updatedAt});
       assets++;
     }
