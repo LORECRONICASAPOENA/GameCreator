@@ -30,6 +30,16 @@ assert.ok(bad.tiles[0].edges.includes("top"));
 assert.ok(bad.tiles[0].edges.includes("left"));
 assert.deepEqual(withGap.data, before, "checker does not alter source pixels");
 
+const mismatched = imageData(2, 2);
+for (let y = 0; y < 2; y++) {
+  mismatched.data[(y * 2 + 0) * 4] = 20;
+  mismatched.data[(y * 2 + 1) * 4] = 220;
+}
+const seam = TilesetCheck.analyze(mismatched, 1, 1);
+assert.equal(seam.tiles.length, 1, "non-matching left/right edges are flagged for repeat seams");
+assert.equal(seam.tiles[0].repeatX, true);
+assert.equal(seam.tiles[0].repeatY, false);
+
 const uneven = TilesetCheck.analyze(imageData(5, 4), 2, 2);
 assert.equal(uneven.divisible, false, "non-divisible dimensions are reported");
 assert.ok(uneven.warnings.some(w => w.includes("não são divisíveis")));
