@@ -1,130 +1,17 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Apoena Game Creator — Iniciador Offline</title>
-<style>
-:root{color-scheme:dark;--bg:#0b1520;--panel:#152a39;--line:#375366;--fg:#eef7ff;--muted:#b8cbd5;--aqua:#83d1d7;--gold:#efd18d}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px system-ui,Arial,sans-serif}
-header{padding:17px 18px;background:#102132;border-bottom:1px solid var(--line)}h1{font-size:23px;margin:0;color:var(--gold)}.tag{font-size:11px;letter-spacing:.15em;color:var(--aqua)}main{max-width:1200px;margin:auto;padding:15px;display:grid;gap:15px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px}.warn{border-left:4px solid var(--gold);padding-left:12px;color:#f4e6bd}
-a,button,.file-button{color:#071a22;background:var(--aqua);border:none;display:inline-block;border-radius:7px;padding:10px 13px;text-decoration:none;font:600 14px system-ui;cursor:pointer}
-button.secondary{background:#2b4254;color:var(--fg)}button:disabled{opacity:.6}input,textarea,select{width:100%;color:var(--fg);border:1px solid var(--line);border-radius:6px;background:#0c1f2c;padding:9px;font:inherit}
-label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}.tools{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-.catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}.potion{background:#102331;border:1px solid var(--line);padding:10px;border-radius:9px;text-align:left;cursor:pointer;color:var(--fg)}.potion.selected{outline:2px solid var(--gold)}
-.potion img{display:block;width:100%;height:130px;object-fit:contain;margin-bottom:7px}.potion strong{font-size:13px}.potion small{display:block;color:var(--muted);margin-top:3px}
-.edit{display:grid;grid-template-columns:1fr 1fr;gap:12px}.edit>div{min-width:0}.muted{color:var(--muted)}.fine{font-size:12px}.count{color:var(--gold)}
-@media(max-width:700px){.edit{grid-template-columns:1fr}.catalog{grid-template-columns:repeat(2,minmax(0,1fr))}.potion img{height:105px}}
-</style>
-</head>
-<body>
-<header><div class="tag">APOENA AGAR • GAME CREATOR</div><h1>Iniciador HTML offline</h1></header>
-<main>
-<section class="card" style="border-color:#d9bf84;background:#263041">
- <div class="tag">EDITOR ORIGINAL RESGATADO • V3.9</div>
- <h2 style="color:var(--gold);margin:8px 0">Game Creator completo — versão preservada</h2>
- <p>Recuperamos o editor original com fábrica de itens, layouts, biblioteca, personagens, receitas e exportações de referência Godot 4. O arquivo está preservado em 23 partes no GitHub; o iniciador reúne tudo e permite baixar um único HTML offline.</p>
- <div class="tools"><a href="legacy/abrir-editor-v3.9.html">Abrir editor v3.9 completo</a><span class="fine muted">A v3.9.2 e a v4.0 ainda não foram recuperadas integralmente neste repositório.</span></div>
-</section>
-<section class="card" style="border-color:#e5c985;background:#2b303e">
- <div class="tag">NOVO • PROJETOS MULTIJOGOS • ITENS E RECEITAS</div>
- <h2 style="color:var(--gold);margin:8px 0">Integração Game Creator → Outros Jogos</h2>
- <p>Use os itens e as receitas da Fábrica de Itens original no seu próximo jogo: importe o projeto editável, confira os vínculos, exporte o catálogo para HTML/Godot e utilize a ponte Godot 4 disponível no repositório. É uma integração inicial de dados e inventário; efeitos complexos e cenas reais ainda exigem testes.</p>
- <div class="tools"><a href="integracao/index.html">Abrir Integração de Itens e Receitas</a><span class="fine muted">Android / PC · funciona offline após extrair o ZIP.</span></div>
-</section>
-<section class="card" style="border-color:#6fb7bd;background:#122c3c">
- <div class="tag">NOVO • CRIAÇÃO 2D / 2.5D</div>
- <h2 style="color:var(--gold);margin:8px 0">Gerador de Personagens Pixel Art</h2>
- <p>Monte personagens do universo Apoena com corpo, cabelo, roupa, arma e acessórios modulares. Visualize animações, teste o movimento no celular e exporte sprites e camadas para Godot 4.</p>
- <div class="tools"><a href="pixel-art/index.html">Abrir Gerador Pixel Art</a><span class="fine muted">Funciona offline depois de extrair o ZIP completo.</span></div>
-</section>
-<section class="card" style="border-color:#7b9c72;background:#172c30">
- <div class="tag">NOVO • EDITOR DE MAPAS MOBA 2.5D</div>
- <h2 style="color:var(--gold);margin:8px 0">Montador de Terrenos e Caminhos</h2>
- <p>Crie a geografia do Desfiladeiro de Agar. Pinte grama, pedra, água e caminhos conectados automaticamente; importe tilesets PNG e coloque árvores, montanhas, torres e outros assets com transparência. Salve JSON e exporte uma prévia PNG.</p>
- <div class="tools"><a href="map-editor/index.html">Abrir Editor de Mapas 2.5D</a><span class="fine muted">Android / PC · funciona offline no ZIP completo.</span></div>
-</section>
-<section class="card">
- <p class="warn"><strong>Resgate parcial concluído.</strong> O editor original v3.9 está acessível pelo botão acima; este catálogo de poções continua separado. Versões v3.9.2 e v4.0 e execução Godot real ainda dependem de recuperação e testes.</p>
- <div class="tools">
-  <a href="legacy/abrir-editor-v3.9.html">Abrir editor completo recuperado</a>
-  <button id="save" type="button">Baixar catálogo editado (.json)</button>
-  <label class="file-button" style="margin:0">Importar catálogo (.json)<input id="load" type="file" accept=".json,application/json" hidden></label>
- </div>
- <p class="fine muted">Funciona sem internet após extrair todos os arquivos do ZIP. Mantenha esta página junto da pasta assets. As alterações são exportadas por arquivo JSON; não são enviadas ao GitHub automaticamente.</p>
-</section>
-<section class="card"><div class="tools"><strong>Catálogo de poções</strong><span class="count" id="counter"></span><input style="flex:1;min-width:180px" id="filter" placeholder="Buscar item ou categoria"></div></section>
-<div class="edit">
- <section class="card"><div class="catalog" id="catalog"></div></section>
- <section class="card">
-  <h2 style="margin-top:0;color:var(--gold)">Propriedades do item</h2>
-  <div id="empty" class="muted">Selecione uma poção à esquerda para editar.</div>
-  <form id="form" hidden>
-   <label>Nome</label><input name="nome" required>
-   <label>Categoria</label><input name="categoria">
-   <label>Descrição</label><textarea name="descricao" rows="4"></textarea>
-   <label>Estado</label><input name="estado">
-   <label>Observação</label><textarea name="observacao" rows="3"></textarea>
-   <div class="tools" style="margin-top:16px"><button type="submit">Aplicar alterações</button><button type="button" id="revert" class="secondary">Restaurar item</button></div>
-  </form>
- </section>
-</div>
-<footer class="muted fine">Apoena Game Creator • Iniciador provisório • Sem conexão com Godot ou Runner</footer>
-</main>
-<script src="assets/pocoes-01.js"></script>
-<script src="assets/pocoes-02.js"></script>
-<script src="assets/pocoes-03.js"></script>
-<script src="assets/pocoes-04.js"></script>
-<script src="assets/pocoes-05.js"></script>
-<script src="assets/pocoes-06.js"></script>
-<script src="assets/pocoes-07.js"></script>
-<script src="assets/pocoes-08.js"></script>
-<script src="assets/pocoes-09.js"></script>
-<script>
-(function(){
-"use strict";
-const originals=(window.__APOENA_POTIONS||[]).map(x=>Object.assign({},x));
-let items=originals.map(x=>Object.assign({},x)), selected=items.length?items[0].id:null;
-const $=id=>document.getElementById(id);
-const keys=["nome","categoria","descricao","estado","observacao"];
-function safe(t){return String(t??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function select(id){selected=id;render();}
-function render(){
- const needle=$("filter").value.toLocaleLowerCase("pt-BR");
- const visible=items.filter(x=>[x.nome,x.categoria,x.descricao].join(" ").toLocaleLowerCase("pt-BR").includes(needle));
- $("counter").textContent=items.length+" / 52 oficiais";
- const host=$("catalog");host.replaceChildren();
- visible.forEach(p=>{
-  const b=document.createElement("button");b.type="button";b.className="potion"+(selected===p.id?" selected":"");
-  const im=document.createElement("img");im.loading="lazy";im.alt=p.nome||"Poção";if(p.base64)im.src=p.base64.startsWith("data:")?p.base64:"data:image/png;base64,"+p.base64;
-  const title=document.createElement("strong");title.textContent=p.nome||p.id;
-  const sm=document.createElement("small");sm.textContent=p.categoria||"Sem categoria";
-  b.append(im,title,sm);b.onclick=()=>select(p.id);host.append(b);
- });
- const p=items.find(x=>x.id===selected);
- $("empty").hidden=!!p;$("form").hidden=!p;
- if(p)keys.forEach(k=>{$("form").elements.namedItem(k).value=p[k]||""});
-}
-$("filter").addEventListener("input",render);
-$("form").addEventListener("submit",e=>{e.preventDefault();const p=items.find(x=>x.id===selected);if(!p)return;keys.forEach(k=>p[k]=$("form").elements.namedItem(k).value);render()});
-$("revert").onclick=()=>{const p=originals.find(x=>x.id===selected),n=items.findIndex(x=>x.id===selected);if(p&&n>=0){items[n]=Object.assign({},p);render()}};
-$("save").onclick=()=>{
- const payload={formato:"apoena-game-creator-catalogo",versao:"1.0",nota:"Editor basico em recuperação; não é pacote Godot",itens:items.map(x=>Object.fromEntries(Object.entries(x).filter(([k])=>k!=="base64")))};
- const a=document.createElement("a"),url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));a.href=url;a.download="apoena_catalogo_pocoes_editado.json";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-};
-$("load").addEventListener("change",async e=>{
- const file=e.target.files?.[0];if(!file)return;
- try{
-  const data=JSON.parse(await file.text());
-  if(!Array.isArray(data.itens))throw Error("JSON sem campo itens[]");
-  const byId=new Map(data.itens.map(p=>[p.id,p]));
-  items=originals.map(p=>Object.assign({},p,Object.fromEntries(Object.entries(byId.get(p.id)||{}).filter(([k])=>k!=="base64"))));
-  render();alert("Catálogo importado.");
- }catch(err){alert("Não foi possível importar: "+err.message)}
- e.target.value="";
-});
-render();
-})();
-</script>
-</body></html>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#102738"><title>Apoena Game Creator — Estúdio Unificado</title>
+<style>:root{color-scheme:dark;--bg:#0a1924;--side:#102738;--panel:#172f40;--border:#39586c;--fg:#f1f9ff;--muted:#b9d0dc;--gold:#f5d48c;--aqua:#87dee1}*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,Arial}header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 15px;background:var(--side);border-bottom:1px solid var(--border)}h1{font-size:18px;margin:0;color:var(--gold)}small{color:var(--muted)}#layout{display:grid;grid-template-columns:220px minmax(0,1fr);height:calc(100dvh - 65px);min-height:350px}nav{overflow:auto;background:var(--side);border-right:1px solid var(--border);padding:11px;display:flex;flex-direction:column;gap:7px}button{font:600 14px system-ui;border:1px solid var(--border);background:var(--panel);border-radius:9px;padding:11px 10px;min-height:44px;text-align:left;color:var(--fg);cursor:pointer}button.active{border-color:var(--aqua);background:#1e5360}button.sub{margin-left:11px;font-size:13px;min-height:39px;padding:9px}.group{font-size:11px;letter-spacing:.12em;color:var(--gold);margin-top:10px}#viewer{display:flex;flex-direction:column;min-width:0}#crumb{display:flex;justify-content:space-between;padding:8px 13px;gap:8px;background:#142b3b;border-bottom:1px solid var(--border);font-size:13px;color:var(--aqua)}#crumb a{color:var(--muted)}iframe{width:100%;height:100%;border:0;flex:1;min-height:0;background:#0b1823}#notice{font-size:11px;color:var(--muted);padding:10px;border:1px solid var(--border);border-radius:9px;margin-top:auto}@media(max-width:800px){#layout{display:flex;flex-direction:column;height:calc(100dvh - 60px)}nav{flex-direction:row;overflow-x:auto;overflow-y:hidden;min-height:68px;max-height:68px;padding:8px;gap:7px;border-right:0;border-bottom:1px solid var(--border)}nav button,nav button.sub{flex:0 0 auto;white-space:nowrap;margin:0}nav .group,nav #notice{display:none}#viewer{flex:1;min-height:0}h1{font-size:15px}}</style></head><body>
+<header><div><small>UNIVERSO AGAR • EDITOR OFFLINE</small><h1>Apoena Game Creator <small>V4.1 • 3D + Pixel Art</small></h1></div><small>Um programa, várias ferramentas</small></header>
+<div id="layout"><nav aria-label="Menu unificado"><div class="group">CRIAR</div><button data-page="3d" class="active">🧊 Creator e editor 3D</button><button data-page="pixel">🎨 Pixel Art</button><button data-page="personagens" class="sub">🧍 Personagens</button><button data-page="animais" class="sub">🐗 Animais</button><button data-page="cenario" class="sub">🌳 Cenários e plantas</button><button data-page="efeitos" class="sub">✨ Efeitos e ataques</button><div class="group">SISTEMAS EXISTENTES</div><button data-page="mapa">🗺️ Mapas 2.5D</button><button data-page="itens">⚗️ Itens e receitas</button><button data-page="catalogo">📋 Catálogo anterior</button><button data-page="manual">📖 Guia do estúdio</button><div id="notice">O Creator original, o gerador modular, o editor de mapas e a fábrica de itens permanecem no mesmo repositório. A troca de tela não cria outro projeto.</div></nav>
+<div id="viewer"><div id="crumb"><span id="here">Creator e editor 3D</span><a id="full" href="APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html" target="_blank" rel="noopener">Abrir tela inteira</a></div><iframe id="module" title="Ferramenta atual do Apoena Game Creator" src="APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html" loading="eager"></iframe></div></div>
+<script>(function(){'use strict';const pages={
+"3d":["Creator e editor 3D","APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"],
+"pixel":["Pixel Art • recorte, limpeza e exportação","pixel-art/estudio.html"],
+"personagens":["Pixel Art • gerador modular de personagens","pixel-art/index.html"],
+"animais":["Pixel Art • animais","pixel-art/estudio.html?tipo=animal"],
+"cenario":["Pixel Art • cenários e plantas","pixel-art/estudio.html?tipo=cenario"],
+"efeitos":["Pixel Art • efeitos de poderes","pixel-art/estudio.html?tipo=efeito"],
+"mapa":["Editor de mapas 2.5D","map-editor/index.html"],
+"itens":["Itens, receitas e integração","integracao/index.html"],
+"catalogo":["Iniciador e catálogo anterior","legacy/iniciador-anterior.html"],
+"manual":["Organização do Creator","ORGANIZACAO_EDITOR.html"]};
+const frame=document.getElementById('module'),title=document.getElementById('here'),link=document.getElementById('full');function choose(id,changeHash){const key=pages[id]?id:'3d',p=pages[key];if(frame.getAttribute('src')!==p[1])frame.src=p[1];title.textContent=p[0];link.href=p[1];document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===key));if(changeHash)location.hash=key}document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.page,true)));addEventListener('hashchange',()=>choose(location.hash.slice(1),false));choose(location.hash.slice(1)||'3d',false)})();</script></body></html>
