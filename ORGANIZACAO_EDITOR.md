@@ -30,3 +30,12 @@ O PNG e o manifesto ajudam a ligar frames no HTML ou Godot 4. Eles não corrigem
 - Importar sprite com 4 quadros, separar grade, remover fundo por cor, testar desfazer e exportar PNG transparente.
 - Exportar JSON e conferir posições do atlas.
 - Testar lançamento dos módulos antigos e da bancada 3D em Windows/Android antes de mesclar.
+
+## Malha ajustável e Corte Inteligente (atualização da V4.1)
+- **Malha ajustável:** edite linhas/colunas, deslocamentos, espaçamento X/Y ou toque em **Ajustar divisórias** e arraste cada linha azul individualmente. Toque numa célula para selecionar. Clique em **Separar malha ajustada** para cortar todos os quadros de uma vez.
+- **Corte Inteligente • quadro:** avalia pixels transparentes ou fundo opaco uniforme ligado à borda, identifica a parte central e pequenos fragmentos soltos próximos às margens, mostra uma **prévia** e só modifica os pixels depois de tocar em **Aplicar limpeza**.
+- **Corte Inteligente • todos:** repete a limpeza nos quadros da spritesheet, em grupos pequenos para evitar travamento no Android; quadros incertos são preservados sem apagamento automático.
+- **Desfazer último corte em lote:** restaura todos os quadros ao estado anterior (limite de segurança de 32 MB para backup).
+- **Exportação padronizada:** mantém cada sprite dentro de células PNG com medidas iguais e apoio inferior consistente; JSON identifica ação/direção/célula.
+- **Limite importante:** quando imagens estão fisicamente coladas ou se sobrepõem, não é possível reconstruir o que está atrás delas sem informação adicional. O sistema alerta e exige borracha manual em vez de danificar o personagem. O corte de fundo com gradiente complexo também não é prometido como totalmente automático.
+- **Teste:** \`node tests/corte-inteligente.test.cjs\`; cobre fundo transparente e preto opaco, sobras separadas, toque de figura nas bordas, preservação do original e existência dos controles. A sintaxe de \`pixel-art/estudio.js\` foi verificada; tela Android real ainda exige validação.
