@@ -17,7 +17,7 @@ $s=$s.Replace('— Game Creator v3.9.2','— Game Creator v4.0')
 $s=$s.Replace($old,$old.Replace('</nav>','<button class="tab" data-page="pixelart">▧ Pixel Art • Personagens / Objetos / Mapas</button></nav>'))
 $pg='<section class="page" id="page-pixelart"><div id="gc40PixelRoot"><div class="panel"><h2>Pixel Art</h2><p>Carregando personagens, objetos e mapas...</p></div></div></section>'
 $s=[regex]::new('</main>').Replace($s,$pg+"</main>",1)
-$tags='<script src="map-editor/modulo-integrado.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/modulo-integrado.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/ponte-creator.js"></script>' + [Environment]::NewLine
+$tags='<script src="map-editor/modulo-integrado.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/natureza.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/modulo-integrado.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/ponte-creator.js"></script>' + [Environment]::NewLine
 $s=[regex]::new('</body>').Replace($s,$tags+'</body>',1)
 if(-not $s.Contains('id="page-pixelart"') -or $s.Contains('<iframe')) {throw "Falha na integracao"}
 [System.IO.File]::WriteAllText($index,$s,(New-Object System.Text.UTF8Encoding($false)))

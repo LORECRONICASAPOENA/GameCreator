@@ -48,3 +48,9 @@ O arquivo `frames.tres` contém quatro animações e 16 texturas AtlasTexture re
 ## Vínculo com itens da Fábrica de Itens — 28/10/2026
 
 O gerador aceita o catálogo `apoena.gamecreator.catalogo.v1` exportado pela página `../integracao/index.html`. Clique em **Importar catálogo de itens**, escolha um item e salve o personagem. O campo `character.linkedItemId` no `personagem.json` e no ZIP preserva o vínculo ao mesmo ID usado nas receitas e no inventário do Game Creator. `linked_catalog_game_id` identifica o jogo de origem. Não há alteração visual automática da arma, ligação física ao Godot ou equipagem de verdade: essas operações precisam de scripts e sprites de jogo.
+
+## Natureza no mesmo Editor Pixel Art
+
+A aba **Pixel Art → Natureza / Plantas** registra espécies, necessidades do solo, germinação, reprodução, vida, decomposição e 14 PNGs separados (semente, muda, planta adulta, fruto, tronco, pó). Permite importar PNG, verificar transparência, baixar PNG com nomes estáveis e exportar ficha JSON `apoena.natureza.asset.v1`. Não é um segundo gerador e não altera a biblioteca de itens nem a ferramenta 3D. Consulte `pixel-art/NATUREZA_CONTRATO.md`.
+
+**Importante:** o GameCreator não gera automaticamente as ilustrações; a pessoa produz as imagens e as cadastra. Para abrir como aba do editor principal é preciso recompilar a versão v4.0 com `integracao/build_unificado.py` ou `.ps1`; abrir `pixel-art/index.html` oferece a aba local imediatamente.

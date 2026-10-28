@@ -633,5 +633,6 @@ for(const btn of nav.querySelectorAll("button")){
 clearForm();if(project){itemList();$("apoobj-info").textContent="Conectado a "+(project.name||"projeto atual")+" • "+project.items.length+" itens e "+project.recipes.length+" receitas."}
 if(location.hash==="#objetos")nav.querySelector('[data-pixel-tab="objects"]').click();
 })();
+ window.ApoenaNaturezaEditor?.mount(pixelRoot);
  return pixelRoot;
  }};

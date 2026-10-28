@@ -46,3 +46,9 @@ Os dois redirecionadores redundantes `INICIO_RAPIDO.html` e `INICIO_RAPIDO_V39_2
 Os efeitos de clima, combate, inventário e produção precisam de adaptadores/runtime nos jogos consumidores; editar uma propriedade no Creator não a executa sozinho em todo jogo.
 
 **Orientação de preservação:** usar o código v4.0 como base e implementar em cima dele. Não reiniciar o projeto, não duplicar funções, não descartar trabalho 3.9 ou 3.9.2.
+
+## Natureza no mesmo Editor Pixel Art
+
+A aba **Pixel Art → Natureza / Plantas** registra espécies, necessidades do solo, germinação, reprodução, vida, decomposição e 14 PNGs separados (semente, muda, planta adulta, fruto, tronco, pó). Permite importar PNG, verificar transparência, baixar PNG com nomes estáveis e exportar ficha JSON `apoena.natureza.asset.v1`. Não é um segundo gerador e não altera a biblioteca de itens nem a ferramenta 3D. Consulte `pixel-art/NATUREZA_CONTRATO.md`.
+
+**Importante:** o GameCreator não gera automaticamente as ilustrações; a pessoa produz as imagens e as cadastra. Para abrir como aba do editor principal é preciso recompilar a versão v4.0 com `integracao/build_unificado.py` ou `.ps1`; abrir `pixel-art/index.html` oferece a aba local imediatamente.
