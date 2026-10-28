@@ -112,22 +112,14 @@ window.ApoenaCreatorIntegrated=Object.freeze({
  open,
  getItem:id=>state.items?.find(x=>x.id===id)||null
 });
-const BRIDGE_CHANNEL="apoena.creator.v4.bridge.v1";
-window.addEventListener("message",event=>{
- const message=event.data;
- if((event.origin!==location.origin&&event.origin!=="null")||!message||message.channel!==BRIDGE_CHANNEL||message.type!=="request"||typeof message.id!=="string"||!event.source||event.source===window)return;
- try{
-  const payload=message.payload||{};
-  let value;
-  if(message.action==="saveAsset")value=savePixelAsset(payload.manifest,payload.png);
-  else if(message.action==="saveMap"){const saved=saveMap(payload.map);value={id:saved.id,name:saved.name}}
-  else if(message.action==="listItems")value=(Array.isArray(state.items)?state.items:[]).map(item=>({id:item.id,name:item.name}));
-  else throw Error("Ação de integração não reconhecida: "+String(message.action||""));
-  event.source.postMessage({channel:BRIDGE_CHANNEL,type:"response",id:message.id,ok:true,value},"*");
- }catch(error){
-  try{event.source.postMessage({channel:BRIDGE_CHANNEL,type:"response",id:message.id,ok:false,error:{message:error&&error.message?error.message:"Falha ao sincronizar com o Creator V4.0."}},"*")}catch(_){}
- }
-});
+if(window.ApoenaCreatorBridge?.listen){
+ window.ApoenaCreatorBridge.listen((action,payload)=>{
+  if(action==="saveAsset")return savePixelAsset(payload.manifest,payload.png);
+  if(action==="saveMap"){const saved=saveMap(payload.map);return {id:saved.id,name:saved.name}}
+  if(action==="listItems")return (Array.isArray(state.items)?state.items:[]).map(item=>({id:item.id,name:item.name}));
+  throw Error("Ação de integração não reconhecida: "+String(action||""));
+ });
+}
 // Um link contextual dentro do painel central; não cria uma segunda página inicial.
 const panel=document.getElementById("page-creator");
 if(panel&&!panel.querySelector("#gc40GoPixel")){
