@@ -96,7 +96,8 @@ function applySmart(){
 }
 function safeName(){return ($('name').value||'apoena_sprite').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9_-]/g,'_').slice(0,48)}
 function sheet(){const cell=clamp(num('cell'),128,512),cols=clamp(num('cols'),1,24),rows=Math.ceil(frames.length/cols),out=document.createElement('canvas');out.width=cols*cell;out.height=Math.max(1,rows)*cell;const ctx=out.getContext('2d');frames.forEach((f,i)=>{const c=f.canvas,scale=Math.min((cell-8)/c.width,(cell-8)/c.height),w=c.width*scale,h=c.height*scale;ctx.drawImage(c,(i%cols)*cell+(cell-w)/2,Math.floor(i/cols)*cell+cell-h-4,w,h)});return{out,cell,cols,rows}}
-function manifest(){const s=sheet();return{schema:'apoena.pixelart.v1',name:safeName(),kind,texture:safeName()+'.png',transparent:true,anchor:{x:.5,y:1},cell_px:s.cell,columns:s.cols,rows:s.rows,fps:clamp(num('fps'),1,30),frames:frames.map((f,i)=>({index:i,action:f.action,direction:f.direction,source:f.rect,atlas:{x:(i%s.cols)*s.cell,y:Math.floor(i/s.cols)*s.cell,w:s.cell,h:s.cell}}))}}
+function readResourceMetadata(){const raw=$('resourceMetadata').value.trim();if(!raw)return {};const value=JSON.parse(raw);if(!value||Array.isArray(value)||typeof value!=='object')throw Error('Metadados específicos devem ser um objeto JSON.');if(JSON.stringify(value).length>50000)throw Error('Metadados específicos acima de 50 KB.');return value}
+function manifest(){const s=sheet();return{schema:'apoena.pixelart.v1',version:1,name:safeName(),kind,resource:{habitat:String($('habitat').value||'').trim().slice(0,120),behavior:String($('behavior').value||'').trim().slice(0,120),metadata:readResourceMetadata()},texture:safeName()+'.png',transparent:true,anchor:{x:.5,y:1},cell_px:s.cell,columns:s.cols,rows:s.rows,fps:clamp(num('fps'),1,30),frames:frames.map((f,i)=>({index:i,action:f.action,direction:f.direction,source:f.rect,atlas:{x:(i%s.cols)*s.cell,y:Math.floor(i/s.cols)*s.cell,w:s.cell,h:s.cell}}))}}
 function download(obj,name){const url=typeof obj==='string'?URL.createObjectURL(new Blob([obj],{type:'application/json'})):obj.toDataURL('image/png'),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();if(typeof obj==='string')setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function canvasBlob(canvas){return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Não foi possível preparar a imagem PNG.')),'image/png'))}
 async function refreshLibrary(){
@@ -157,6 +158,9 @@ async function loadProjectData(data){
   $('meshMode').classList.remove('selected');$('meshMode').setAttribute('aria-pressed','false');
   source.width=400;source.height=260;sc.clearRect(0,0,source.width,source.height);
   $('name').value=String(data.name||'apoena_sprite').slice(0,80);
+  const resource=data.resource&&typeof data.resource==='object'?data.resource:{};
+  $('habitat').value=String(resource.habitat||'').slice(0,120);$('behavior').value=String(resource.behavior||'').slice(0,120);
+  $('resourceMetadata').value=JSON.stringify(resource.metadata&&typeof resource.metadata==='object'?resource.metadata:{},null,2);
   $('fps').value=clamp(Number(data.fps)||8,1,30);
   const cell=String(Number(data.cell_px)||256);
   $('cell').value=[...$('cell').options].some(o=>o.value===cell)?cell:'256';
