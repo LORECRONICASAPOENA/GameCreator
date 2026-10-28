@@ -13,11 +13,12 @@
 <body>
 <header><small>APOENA GAME CREATOR · RECURSOS REUTILIZÁVEIS</small><h1>Biblioteca Central</h1><p>Recursos salvos pelo Pixel Art e reutilizáveis nos editores compatíveis.</p><a href="../index.html">← Voltar ao Creator</a></header>
 <main>
-<div class="tools"><input id="search" type="search" placeholder="Buscar por nome, categoria ou etiqueta"><select id="category"><option value="all">Todas as categorias</option><option value="personagem">Personagens</option><option value="animal">Animais</option><option value="cenario">Cenários</option><option value="planta">Plantas</option><option value="efeito">Efeitos</option><option value="tileset">Tilesets</option><option value="objeto">Objetos</option><option value="outro">Outros</option></select><button id="refresh" class="primary">Atualizar biblioteca</button></div>
+<div class="tools"><input id="search" type="search" placeholder="Buscar por nome, categoria ou etiqueta"><select id="category"><option value="all">Todas as categorias</option><option value="personagem">Personagens</option><option value="animal">Animais</option><option value="cenario">Cenários</option><option value="planta">Plantas</option><option value="efeito">Efeitos</option><option value="tileset">Tilesets</option><option value="objeto">Objetos</option><option value="outro">Outros</option></select><button id="refresh" class="primary">Atualizar biblioteca</button><button id="exportBackup">Exportar backup completo</button><button id="importBackup">Restaurar backup</button><input id="backupFile" type="file" accept="application/json,.json" hidden></div>
 <p id="status" role="status">Carregando recursos salvos…</p><div id="assets"></div>
 <section class="project-section" aria-labelledby="projectHeading"><h2 id="projectHeading">Projetos editáveis</h2><p id="projectStatus" role="status">Carregando projetos…</p><div id="projects"></div></section>
 </main>
 <script src="../shared/asset-library.js"></script>
+<script src="../shared/library-backup.js"></script>
 <script>
 (function(){
 'use strict';
@@ -84,6 +85,33 @@ async function loadProjects(){
   }catch(error){status.textContent='Não foi possível acessar os projetos: '+error.message}
 }
 $('refresh').onclick=function(){load();loadProjects()};
+$('exportBackup').onclick=async function(){
+  const button=$('exportBackup'),status=$('status');button.disabled=true;status.textContent='Preparando backup completo…';
+  try{
+    const snapshot=await ApoenaLibraryBackup.exportSnapshot();
+    const blob=new Blob([JSON.stringify(snapshot)],{type:'application/json'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download='apoena-gamecreator-library-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+    setTimeout(function(){URL.revokeObjectURL(url)},3000);
+    status.textContent='Backup exportado: '+snapshot.assets.length+' recurso(s) e '+snapshot.projects.length+' projeto(s).';
+  }catch(error){status.textContent='Falha ao exportar backup: '+error.message}
+  finally{button.disabled=false}
+};
+$('importBackup').onclick=function(){$('backupFile').click()};
+$('backupFile').onchange=async function(event){
+  const file=event.target.files&&event.target.files[0];if(!file)return;
+  const status=$('status');
+  try{
+    if(file.size>120*1024*1024)throw Error('Arquivo maior que 120 MB. Exporte e restaure em partes menores.');
+    if(!confirm('Restaurar '+file.name+'? Recursos/projetos com IDs iguais serão atualizados. Os demais serão mantidos.'))return;
+    status.textContent='Validando e restaurando backup…';
+    const snapshot=JSON.parse(await file.text());
+    const result=await ApoenaLibraryBackup.importSnapshot(snapshot);
+    status.textContent='Backup restaurado: '+result.assets+' recurso(s) e '+result.projects+' projeto(s).';
+    await load();await loadProjects();
+  }catch(error){status.textContent='Falha ao restaurar backup: '+error.message}
+  finally{event.target.value=''}
+};
 $('search').addEventListener('input',function(){load();loadProjects()});
 $('category').onchange=load;
 if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(function(){load();loadProjects()});
