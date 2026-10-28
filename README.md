@@ -30,3 +30,9 @@ A edição completa incluirá as ferramentas já existentes no HTML original: ed
 O iniciador `index.html` agora oferece o botão **Abrir Gerador Pixel Art**, que abre `pixel-art/index.html`. O editor funciona offline em Android/PC, permite montar personagens por camadas (corpo, cabelo, roupas, armas e acessórios), testar movimento em uma pequena arena HTML e exportar spritesheets PNG, JSON e ZIP com `SpriteFrames` para Godot 4. Consulte [o guia do gerador](pixel-art/README.md).
 
 **Limitação:** o teste HTML é um protótipo de movimento; não é o jogo MOBA completo nem substitui a integração no projeto Godot. O editor visual completo GameCreator v3.9 continua pendente de recuperação e é independente do novo módulo Pixel Art.
+
+## Editor de Mapas 2.5D (novo)
+
+O iniciador \`index.html\` oferece agora **Abrir Editor de Mapas 2.5D** em \`map-editor/index.html\` (HTML puro, offline). Nele é possível pintar grama, água, pedras e caminhos com união automática básica; selecionar peças de um tileset PNG 32×32; importar imagens transparentes de árvores, montanhas e torres; posicionar e mover objetos no mapa; usar preset MOBA com três rotas, bases e 18 posições de torres; exportar PNG e salvar/importar projeto JSON.
+
+**Ainda não é uma edição automática da partida MOBA nem exportação pronta de TileMapLayer para Godot.** O visualizador é independente, preservando o projeto 3D, o gerador de personagens e o protótipo de jogo HTML. Veja [instruções do editor](map-editor/README.md).
