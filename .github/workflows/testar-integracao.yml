@@ -1,0 +1,28 @@
+name: Game Creator - integração de catálogo
+on:
+  push:
+    paths:
+      - 'integracao/catalogo.js'
+      - 'integracao/testes/**'
+      - '.github/workflows/testar-integracao.yml'
+  pull_request:
+    paths:
+      - 'integracao/catalogo.js'
+      - 'integracao/testes/**'
+  workflow_dispatch:
+jobs:
+  testar-catalogo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar sintaxe JS
+        run: |
+          node --check integracao/catalogo.js
+          node --check integracao/testes/catalogo.test.js
+      - name: Executar testes isolados do catálogo
+        run: node integracao/testes/catalogo.test.js
