@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const $=id=>document.getElementById(id),num=(id,def=0)=>Number.isFinite(Number($(id).value))?Number($(id).value):def,clamp=(n,a,b)=>Math.max(a,Math.min(n,b));let image=null,imageUrl='',frames=[],current=-1,kind='personagem',tool='erase',undo=[],grid=false,dragStart=null,drawing=false,lastPreview=0,mesh={x:[],y:[]},meshMode=false,meshDrag=null,smartPending=null,smartBusy=false,batchBackup=null;
+const $=id=>document.getElementById(id),num=(id,def=0)=>Number.isFinite(Number($(id).value))?Number($(id).value):def,clamp=(n,a,b)=>Math.max(a,Math.min(n,b));let image=null,imageUrl='',frames=[],current=-1,kind='personagem',tool='erase',undo=[],grid=false,dragStart=null,drawing=false,lastPreview=0,mesh={x:[],y:[]},meshMode=false,meshDrag=null,smartPending=null,smartBusy=false,batchBackup=null,detectedSprites=[];
 const source=$('sourceCanvas'),sc=source.getContext('2d'),edit=$('editCanvas'),ec=edit.getContext('2d',{willReadFrequently:true}),preview=$('preview'),pc=preview.getContext('2d');
 const msg=s=>{$('status').textContent=s},selected=()=>frames[current]||null;
 function canvasCopy(c){const o=document.createElement('canvas');o.width=c.width;o.height=c.height;o.getContext('2d').drawImage(c,0,0);return o}
@@ -7,7 +7,7 @@ function crop(){if(!image)return null;const x=clamp(Math.round(num('cropX')),0,i
 function resetMesh(){if(!image)return;if(num('cols')>image.width||num('rows')>image.height){msg('A imagem tem menos pixels que as divisões solicitadas.');return}mesh=ApoenaCorte.grid(image.width,image.height,clamp(num('cols'),1,24),clamp(num('rows'),1,24),num('meshOffsetX'),num('meshOffsetY'),num('meshGapX'),num('meshGapY'))}
 function setCrop(r){for(const [id,val] of [['cropX',r.x],['cropY',r.y],['cropW',r.w],['cropH',r.h]])$(id).value=val;drawSource()}
 function scale(){return clamp(num('zoom')/100,.25,1.6)}
-function drawSource(){if(!image)return;const z=scale();source.width=Math.max(1,Math.round(image.width*z));source.height=Math.max(1,Math.round(image.height*z));sc.imageSmoothingEnabled=false;sc.clearRect(0,0,source.width,source.height);sc.drawImage(image,0,0,source.width,source.height);if((grid||meshMode)&&mesh.x.length){sc.strokeStyle='#47eee9cb';sc.lineWidth=meshMode?2:1;for(let i=1;i<mesh.x.length-1;i++){sc.beginPath();sc.moveTo(mesh.x[i]*z,0);sc.lineTo(mesh.x[i]*z,source.height);sc.stroke()}for(let i=1;i<mesh.y.length-1;i++){sc.beginPath();sc.moveTo(0,mesh.y[i]*z);sc.lineTo(source.width,mesh.y[i]*z);sc.stroke()}}const r=crop();sc.lineWidth=2;sc.strokeStyle='#ffcf4e';sc.strokeRect(r.x*z,r.y*z,r.w*z,r.h*z)}
+function drawSource(){if(!image)return;const z=scale();source.width=Math.max(1,Math.round(image.width*z));source.height=Math.max(1,Math.round(image.height*z));sc.imageSmoothingEnabled=false;sc.clearRect(0,0,source.width,source.height);sc.drawImage(image,0,0,source.width,source.height);if((grid||meshMode)&&mesh.x.length){sc.strokeStyle='#47eee9cb';sc.lineWidth=meshMode?2:1;for(let i=1;i<mesh.x.length-1;i++){sc.beginPath();sc.moveTo(mesh.x[i]*z,0);sc.lineTo(mesh.x[i]*z,source.height);sc.stroke()}for(let i=1;i<mesh.y.length-1;i++){sc.beginPath();sc.moveTo(0,mesh.y[i]*z);sc.lineTo(source.width,mesh.y[i]*z);sc.stroke()}}for(let i=0;i<detectedSprites.length;i++){const b=detectedSprites[i],x=b.x*z,y=b.y*z,w=b.w*z,h=b.h*z;sc.strokeStyle='#55e8a8';sc.lineWidth=2;sc.strokeRect(x,y,w,h);sc.fillStyle='#55e8a8';sc.fillRect(x,y,Math.max(17,Math.min(26,w)),14);sc.fillStyle='#06251c';sc.font='11px sans-serif';sc.fillText(String(i+1),x+3,y+11)}const r=crop();sc.lineWidth=2;sc.strokeStyle='#ffcf4e';sc.strokeRect(r.x*z,r.y*z,r.w*z,r.h*z)}
 function add(rect,silent=false){if(!image){msg('Importe uma imagem primeiro.');return}if(rect.w<1||rect.h<1){msg('Recorte vazio: ajuste a malha.');return}if(frames.length>=160){msg('Limite de 160 quadros, para proteger o desempenho do celular.');return}const c=document.createElement('canvas');c.width=rect.w;c.height=rect.h;c.getContext('2d').drawImage(image,rect.x,rect.y,rect.w,rect.h,0,0,rect.w,rect.h);frames.push({canvas:c,original:canvasCopy(c),rect,action:$('action').value,direction:$('direction').value});if(!silent)pick(frames.length-1)}
 function list(){const host=$('frames');host.replaceChildren();$('frameCount').textContent='('+frames.length+')';frames.forEach((f,i)=>{const b=document.createElement('button');if(i===current)b.className='selected';const thumb=document.createElement('canvas');thumb.width=55;thumb.height=52;const scale=Math.min(54/f.canvas.width,51/f.canvas.height);thumb.getContext('2d').drawImage(f.canvas,(55-f.canvas.width*scale)/2,52-f.canvas.height*scale,f.canvas.width*scale,f.canvas.height*scale);const title=document.createElement('div');title.textContent=i+1;b.append(thumb,title);b.onclick=()=>pick(i);host.append(b)})}
 function pick(i){current=i;undo=[];smartPending=null;$('smartPanel').hidden=true;const f=selected();if(f){$('action').value=f.action||'parado';$('direction').value=f.direction||'nenhuma'}list();drawEdit()}
@@ -151,7 +151,7 @@ async function loadProjectData(data){
     loaded.push({canvas,original:canvasCopy(canvas),rect,action:String(item.action||'parado').trim().slice(0,40)||'parado',direction:String(item.direction||'nenhuma').trim().slice(0,20)||'nenhuma'});
   }
   if(imageUrl)URL.revokeObjectURL(imageUrl);
-  imageUrl='';image=null;frames=loaded;current=-1;undo=[];batchBackup=null;smartPending=null;
+  imageUrl='';image=null;frames=loaded;current=-1;undo=[];batchBackup=null;smartPending=null;detectedSprites=[];$('autoDetectPanel').hidden=true;
   mesh={x:[],y:[]};grid=false;meshMode=false;
   $('smartUndoBatch').disabled=true;$('smartPanel').hidden=true;
   $('meshMode').classList.remove('selected');$('meshMode').setAttribute('aria-pressed','false');
@@ -212,7 +212,7 @@ $('libraryAssets').onchange=async()=>{
     const item=await ApoenaLibrary.getAsset(id);if(!item)throw new Error('Recurso não encontrado.');
     const url=URL.createObjectURL(item.blob),im=new Image();
     im.onload=()=>{
-      if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=url;image=im;frames=[];current=-1;batchBackup=null;
+      if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=url;image=im;frames=[];current=-1;batchBackup=null;detectedSprites=[];$('autoDetectPanel').hidden=true;
       $('smartUndoBatch').disabled=true;
       resetMesh();setCrop({x:0,y:0,w:im.width,h:im.height});
       list();drawEdit();$('sourceInfo').textContent=item.name+' · biblioteca central · '+im.width+'×'+im.height+' px';
@@ -225,7 +225,7 @@ if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(()=>{refreshLibrary();refresh
 refreshLibrary();refreshLibraryProjects();
 function ready(){if(frames.length)return true;msg('Adicione quadros antes de exportar.');return false}
 function animate(t){if(t-lastPreview>1000/clamp(num('fps'),1,30)){pc.clearRect(0,0,preview.width,preview.height);const index=$('playing').checked?Math.floor(t/(1000/clamp(num('fps'),1,30)))%Math.max(1,frames.length):Math.max(0,current),f=frames[index];if(f){const c=f.canvas,k=Math.min(178/c.width,178/c.height);pc.imageSmoothingEnabled=false;pc.drawImage(c,(192-c.width*k)/2,185-c.height*k,c.width*k,c.height*k)}lastPreview=t}requestAnimationFrame(animate)}
-$('file').onchange=ev=>{const f=ev.target.files?.[0];if(!f)return;if(!/^image\/(png|webp|jpeg)$/.test(f.type)||f.size>22*1024*1024)return msg('Use PNG, WebP ou JPG com até 22MB.');if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(f);const im=new Image();im.onload=()=>{if(im.width*im.height>32000000)return msg('Imagem muito grande para celular.');image=im;frames=[];current=-1;batchBackup=null;$('smartUndoBatch').disabled=true;const cols=clamp(num('cols'),1,24),rows=clamp(num('rows'),1,24);resetMesh();setCrop({x:0,y:0,w:Math.floor(im.width/cols),h:Math.floor(im.height/rows)});list();drawEdit();$('sourceInfo').textContent=f.name+' • '+im.width+'×'+im.height+' px';msg('Importado. Ajuste recortes e limpe antes de exportar.')};im.src=imageUrl};
+$('file').onchange=ev=>{const f=ev.target.files?.[0];if(!f)return;detectedSprites=[];$('autoDetectPanel').hidden=true;if(!/^image\/(png|webp|jpeg)$/.test(f.type)||f.size>22*1024*1024)return msg('Use PNG, WebP ou JPG com até 22MB.');if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(f);const im=new Image();im.onload=()=>{if(im.width*im.height>32000000)return msg('Imagem muito grande para celular.');image=im;frames=[];current=-1;batchBackup=null;$('smartUndoBatch').disabled=true;const cols=clamp(num('cols'),1,24),rows=clamp(num('rows'),1,24);resetMesh();setCrop({x:0,y:0,w:Math.floor(im.width/cols),h:Math.floor(im.height/rows)});list();drawEdit();$('sourceInfo').textContent=f.name+' • '+im.width+'×'+im.height+' px';msg('Importado. Ajuste recortes e limpe antes de exportar.')};im.src=imageUrl};
 $('projectFile').onchange=async ev=>{
  const file=ev.target.files?.[0];if(!file)return;
  try{if(file.size>18000000)throw Error('Arquivo acima de 18 MB.');const data=JSON.parse(await file.text());await loadProjectData(data)}
@@ -238,11 +238,36 @@ for(const id of ['zoom','cols','rows','cropX','cropY','cropW','cropH','meshOffse
 $('grid').onclick=()=>{grid=!grid;drawSource()};
 $('meshMode').onclick=()=>{meshMode=!meshMode;if(meshMode)grid=true;$('meshMode').classList.toggle('selected',meshMode);$('meshMode').setAttribute('aria-pressed',String(meshMode));drawSource();msg(meshMode?'Arraste uma linha azul para ajustar a malha. Toque numa célula para selecionar.':'Arraste para fazer um recorte livre.')};
 $('meshReset').onclick=()=>{resetMesh();drawSource();msg('Malha reiniciada.')};
+function runSpriteDetection(){
+ if(!image)return msg('Importe uma imagem antes de detectar sprites.');
+ try{
+  const c=document.createElement('canvas');c.width=image.width;c.height=image.height;
+  const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
+  const result=ApoenaCorte.detectSprites(ctx.getImageData(0,0,c.width,c.height),{
+   tolerance:num('tolerance'),strength:$('smartStrength').value,
+   mergeGap:clamp(num('detectMergeGap'),0,16),padding:clamp(num('detectPadding'),0,64)
+  });
+  detectedSprites=result.sprites;
+  $('autoDetectStatus').textContent='Prévia: '+detectedSprites.length+' recorte(s) detectado(s). Nenhum quadro foi adicionado ainda. '+(result.warning||'Confira os limites antes de aplicar.');
+  $('autoDetectPanel').hidden=false;drawSource();
+  msg('Detecção pronta. Revise os contornos verdes; o original ainda não foi alterado.');
+ }catch(error){detectedSprites=[];$('autoDetectPanel').hidden=true;drawSource();msg('Não foi possível detectar sprites: '+error.message)}
+}
+$('detectSprites').onclick=runSpriteDetection;
+$('autoDetectApply').onclick=()=>{
+ if(!image||!detectedSprites.length)return msg('Nenhum recorte detectado para adicionar.');
+ if(frames.length+detectedSprites.length>160)return msg('A detecção excede o limite de 160 quadros; remova quadros ou reduza os recortes.');
+ const first=frames.length,boxes=detectedSprites.slice();
+ for(const b of boxes)add({x:b.x,y:b.y,w:b.w,h:b.h},true);
+ detectedSprites=[];$('autoDetectPanel').hidden=true;pick(first);
+ msg(boxes.length+' recorte(s) adicionados. Revise cada quadro e sua ordem antes de exportar.');
+};
+$('autoDetectCancel').onclick=()=>{detectedSprites=[];$('autoDetectPanel').hidden=true;drawSource();msg('Detecção cancelada; nenhum quadro foi adicionado.')};
 $('smartSelected').onclick=()=>previewSmart('quadro');
 $('smartAll').onclick=()=>previewSmart('todos');
 $('smartApply').onclick=applySmart;
 $('smartCancel').onclick=()=>{smartPending=null;$('smartPanel').hidden=true;msg('Corte cancelado: imagem preservada.')};
-$('smartUndoBatch').onclick=()=>{if(smartBusy||!batchBackup)return;frames.forEach((f,i)=>{f.canvas=batchBackup[i]});batchBackup=null;$('smartUndoBatch').disabled=true;drawEdit();list();msg('Corte em lote desfeito: todos os quadros voltaram ao estado anterior.');};$('addFrame').onclick=()=>{const c=crop();if(c)add(c)};$('allGrid').onclick=()=>{if(!image)return msg('Importe imagem primeiro.');const cols=clamp(num('cols'),1,24),rows=clamp(num('rows'),1,24);if(cols*rows>160)return msg('Limite 160 quadros.');if(cols>image.width||rows>image.height)return msg('A malha tem mais divisões que pixels. Diminua linhas/colunas.');frames=[];if(mesh.x.length!==cols+1||mesh.y.length!==rows+1)resetMesh();for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const lx=mesh.x[x],ly=mesh.y[y];add({x:lx,y:ly,w:mesh.x[x+1]-lx,h:mesh.y[y+1]-ly},true)}pick(0);msg('Grade separada em '+frames.length+' quadros. Confira os cortes.');};
+$('smartUndoBatch').onclick=()=>{if(smartBusy||!batchBackup)return;frames.forEach((f,i)=>{f.canvas=batchBackup[i]});batchBackup=null;$('smartUndoBatch').disabled=true;drawEdit();list();msg('Corte em lote desfeito: todos os quadros voltaram ao estado anterior.');};$('addFrame').onclick=()=>{const c=crop();if(c)add(c)};$('allGrid').onclick=()=>{if(!image)return msg('Importe imagem primeiro.');detectedSprites=[];$('autoDetectPanel').hidden=true;const cols=clamp(num('cols'),1,24),rows=clamp(num('rows'),1,24);if(cols*rows>160)return msg('Limite 160 quadros.');if(cols>image.width||rows>image.height)return msg('A malha tem mais divisões que pixels. Diminua linhas/colunas.');frames=[];if(mesh.x.length!==cols+1||mesh.y.length!==rows+1)resetMesh();for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const lx=mesh.x[x],ly=mesh.y[y];add({x:lx,y:ly,w:mesh.x[x+1]-lx,h:mesh.y[y+1]-ly},true)}pick(0);msg('Grade separada em '+frames.length+' quadros. Confira os cortes.');};
 source.onpointerdown=ev=>{
  if(!image)return;source.setPointerCapture(ev.pointerId);
  const p=xy(ev,source,image.width,image.height);
