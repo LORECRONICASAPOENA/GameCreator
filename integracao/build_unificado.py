@@ -16,7 +16,7 @@ html=html.replace('Game Creator v3.9.2 — Editor Visual Livre','Game Creator v4
 html=html.replace('— Game Creator v3.9.2','— Game Creator v4.0',1)
 html=html.replace(needle,needle.replace('</nav>','<button class="tab" data-page="pixelart">▧ Pixel Art • Personagens / Objetos / Mapas</button></nav>'),1)
 html=html.replace('</main>','<section class="page" id="page-pixelart"><div id="gc40PixelRoot"><div class="panel"><h2>Pixel Art</h2><p>Carregando personagens, objetos e mapas...</p></div></div></section>\n</main>',1)
-imports='\n<script src="map-editor/modulo-integrado.js"></script>\n<script src="pixel-art/natureza.js"></script>\n<script src="pixel-art/modulo-integrado.js"></script>\n<script src="pixel-art/ponte-creator.js"></script>\n'
+imports='\n<script src="shared/asset-library.js"></script>\n<script src="map-editor/modulo-integrado.js"></script>\n<script src="pixel-art/natureza.js"></script>\n<script src="pixel-art/modulo-integrado.js"></script>\n<script src="pixel-art/ponte-creator.js"></script>\n'
 html=html.replace('</body>',imports+'</body>',1)
 assert '<iframe' not in html, 'Editor integrado não utiliza iframe'
 assert html.count('id="page-pixelart"')==1
