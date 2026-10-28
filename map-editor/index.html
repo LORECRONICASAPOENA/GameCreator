@@ -361,7 +361,12 @@ $('saveMapLibrary').onclick=async()=>{
   const saved=await ApoenaLibrary.saveProject({id:id,name:mapName,schema:'apoena.map2d.v1',type:'map',data:data,metadata:{width:width,height:height,tileSize:TILE,tilesetColumns:sheetCols,tilesetRows:sheetRows}});
   currentLibraryMapId=saved.id;
   await refreshLibraryMaps();$('libraryMaps').value=saved.id;
-  say('Mapa salvo na biblioteca central: '+saved.name+' ('+width+'×'+height+').');
+  let syncMessage='';
+  if(window.opener&&!window.opener.closed&&window.ApoenaCreatorBridge){
+   try{await ApoenaCreatorBridge.request('saveMap',{map:data});syncMessage=' Também sincronizado com a sessão V4.0; use "Salvar projeto editável" para guardar o projeto completo.'}
+   catch(error){syncMessage=' A biblioteca central foi salva, mas a sessão V4.0 não foi sincronizada: '+error.message}
+  }else syncMessage=' Para também gravar no projeto V4.0, abra o editor pelo menu Pixel Art do Creator.';
+  say('Mapa salvo na biblioteca central: '+saved.name+' ('+width+'×'+height+').'+syncMessage);
  }catch(error){say('Falha ao salvar mapa na biblioteca: '+error.message)}
 };
 async function openLibraryMap(id){
