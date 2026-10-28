@@ -17,6 +17,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 jobs:
   validar:
     runs-on: ubuntu-latest
@@ -25,27 +26,45 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Preparar diagnósticos
+        run: mkdir -p .ci-results
       - name: Instalar adaptador IndexedDB para testes
-        run: npm install --no-save --no-package-lock fake-indexeddb@6.2.4
+        run: |
+          set -o pipefail
+          npm install --no-save --no-package-lock fake-indexeddb@6.2.6 2>&1 | tee .ci-results/install.log
       - name: Validar sintaxe JavaScript
         run: |
-          node --check pixel-art/estudio.js
-          node --check pixel-art/corte-inteligente.js
-          node --check shared/asset-library.js
-      - name: Testar Corte Inteligente, biblioteca e contratos de integração
+          set -o pipefail
+          node --check pixel-art/estudio.js 2>&1 | tee .ci-results/syntax.log
+          node --check pixel-art/corte-inteligente.js 2>&1 | tee -a .ci-results/syntax.log
+          node --check shared/asset-library.js 2>&1 | tee -a .ci-results/syntax.log
+      - name: Testar Corte Inteligente e contratos da interface
         run: |
-          node tests/corte-inteligente.test.cjs
-          node tests/asset-library.test.cjs
+          set -o pipefail
+          node tests/corte-inteligente.test.cjs 2>&1 | tee .ci-results/corte.log
+      - name: Testar biblioteca e persistência IndexedDB
+        run: |
+          set -o pipefail
+          node tests/asset-library.test.cjs 2>&1 | tee .ci-results/library.log
       - name: Garantir preservação do Creator original e dos módulos
         shell: bash
         run: |
           set -euo pipefail
-          test -f APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html
-          test -f pixel-art/index.html
-          test -f pixel-art/estudio.html
-          test -f map-editor/index.html
-          test -f integracao/index.html
-          test -f legacy/iniciador-anterior.html
-          grep -q 'data-page="3d"' index.html
-          grep -q 'data-page="pixel"' index.html
-          grep -q 'asset-library.js' map-editor/index.html
+          {
+            test -f APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html
+            test -f pixel-art/index.html
+            test -f pixel-art/estudio.html
+            test -f map-editor/index.html
+            test -f integracao/index.html
+            test -f legacy/iniciador-anterior.html
+            grep -q 'data-page="3d"' index.html
+            grep -q 'data-page="pixel"' index.html
+            grep -q 'asset-library.js' map-editor/index.html
+          } 2>&1 | tee .ci-results/contracts.log
+      - name: Anexar logs de diagnóstico
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v41-ci-diagnostics
+          path: .ci-results/
+          if-no-files-found: warn
