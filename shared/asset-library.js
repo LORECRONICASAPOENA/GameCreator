@@ -31,6 +31,9 @@
     try { return JSON.parse(JSON.stringify(value == null ? fallback : value)); }
     catch (_) { return clone(fallback); }
   }
+  function validTimestamp(value) {
+    return typeof value === "string" && Number.isFinite(Date.parse(value)) ? value : null;
+  }
   function makeId(prefix) {
     prefix = prefix || "asset";
     if (root.crypto && typeof root.crypto.randomUUID === "function") return prefix + "-" + root.crypto.randomUUID();
@@ -195,8 +198,8 @@
       originalSize: originalBlob ? originalBlob.size : 0,
       tags: Array.isArray(input.tags) ? input.tags.map(function(tag) { return String(tag).trim().slice(0, 48); }).filter(Boolean).slice(0, 40) : (previous ? previous.tags || [] : []),
       metadata: jsonCopy(input.metadata, previous ? previous.metadata || {} : {}),
-      createdAt: previous ? previous.createdAt : now,
-      updatedAt: now
+      createdAt: validTimestamp(input.createdAt) || (previous ? previous.createdAt : now),
+      updatedAt: validTimestamp(input.updatedAt) || now
     };
     await putRecord(ASSETS, record);
     emit({ action: "saveAsset", id: record.id, category: record.category, updatedAt: record.updatedAt });
@@ -235,8 +238,8 @@
       type: String(input.type || "project").slice(0, 48),
       data: jsonCopy(input.data, {}),
       metadata: jsonCopy(input.metadata, {}),
-      createdAt: previous ? previous.createdAt : now,
-      updatedAt: now
+      createdAt: validTimestamp(input.createdAt) || (previous ? previous.createdAt : now),
+      updatedAt: validTimestamp(input.updatedAt) || now
     };
     await putRecord(PROJECTS, record);
     emit({ action: "saveProject", id: id, updatedAt: record.updatedAt });
