@@ -61,6 +61,8 @@ async function main() {
 
   await assert.rejects(() => Backup.importSnapshot({ schema: "wrong", version: 1, assets: [], projects: [] }), /Backup incompatível/);
   await assert.rejects(() => Backup.importSnapshot({ schema: Backup.schema, version: 1, assets: [{ id: "x", name: "x", blob: "data:text/plain;base64,WA==" }], projects: [] }), /recurso de imagem inválido/);
+  await assert.rejects(() => Backup.importSnapshot({ schema: Backup.schema, version: 1, assets: [{ id: "valid-first", name: "válido", blob: "data:image/png;base64,WA==" }, { id: "invalid-second", name: "inválido", blob: "data:image/png;base64,***" }], projects: [] }), /recurso de imagem inválido/);
+  assert.equal(await ApoenaLibrary.getAsset("valid-first"), null, "validação completa ocorre antes de importar qualquer registro");
   console.log("LIBRARY BACKUP OK: exportação, restauração de imagens/originais/metadados/projetos e validação");
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });
