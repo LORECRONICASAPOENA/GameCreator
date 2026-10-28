@@ -42,6 +42,7 @@ jobs:
           node --check pixel-art/corte-inteligente.js 2>&1 | tee -a .ci-results/syntax.log
           node --check shared/asset-library.js 2>&1 | tee -a .ci-results/syntax.log
           node --check shared/tileset-check.js 2>&1 | tee -a .ci-results/syntax.log
+          node --check shared/library-backup.js 2>&1 | tee -a .ci-results/syntax.log
       - name: Testar Corte Inteligente e contratos da interface
         run: |
           set -o pipefail
@@ -54,6 +55,10 @@ jobs:
         run: |
           set -o pipefail
           node tests/asset-library.test.cjs 2>&1 | tee .ci-results/library.log
+      - name: Testar backup e restauração da biblioteca
+        run: |
+          set -o pipefail
+          node tests/library-backup.test.cjs 2>&1 | tee .ci-results/library-backup.log
       - name: Garantir preservação do Creator original e dos módulos
         shell: bash
         run: |
