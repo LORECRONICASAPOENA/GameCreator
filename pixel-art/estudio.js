@@ -248,7 +248,7 @@ function runSpriteDetection(){
    mergeGap:clamp(num('detectMergeGap'),0,16),padding:clamp(num('detectPadding'),0,64)
   });
   detectedSprites=result.sprites;
-  $('autoDetectStatus').textContent='Prévia: '+detectedSprites.length+' recorte(s) detectado(s). Nenhum quadro foi adicionado ainda. '+(result.warning||'Confira os limites antes de aplicar.');
+  $('autoDetectStatus').textContent='Prévia: '+detectedSprites.length+' recorte(s) detectado(s). Nenhum quadro foi adicionado ainda. Clique num contorno verde para carregar os limites e ajustar manualmente. '+(result.warning||'Confira os limites antes de aplicar.');
   $('autoDetectPanel').hidden=false;drawSource();
   msg('Detecção pronta. Revise os contornos verdes; o original ainda não foi alterado.');
  }catch(error){detectedSprites=[];$('autoDetectPanel').hidden=true;drawSource();msg('Não foi possível detectar sprites: '+error.message)}
@@ -271,6 +271,7 @@ $('smartUndoBatch').onclick=()=>{if(smartBusy||!batchBackup)return;frames.forEac
 source.onpointerdown=ev=>{
  if(!image)return;source.setPointerCapture(ev.pointerId);
  const p=xy(ev,source,image.width,image.height);
+ if(!meshMode&&detectedSprites.length){const hit=detectedSprites.find(b=>p.x>=b.x&&p.x<b.x+b.w&&p.y>=b.y&&p.y<b.y+b.h);if(hit){setCrop({x:hit.x,y:hit.y,w:hit.w,h:hit.h});msg('Limites detectados carregados nos campos de recorte; ajuste X/Y/largura/altura antes de adicionar.');return}}
  if(!meshMode){dragStart=p;return}
  const tolerance=14/scale();
  let axis=null,index=-1,distance=Infinity;
