@@ -4,6 +4,12 @@ const ApoenaLibrary = require("../shared/asset-library.js");
 globalThis.ApoenaLibrary = ApoenaLibrary;
 require("../shared/library-backup.js");
 const Backup = globalThis.ApoenaLibraryBackup;
+const fs = require("node:fs");
+const path = require("node:path");
+const libraryPage = fs.readFileSync(path.join(__dirname, "../biblioteca/index.html"), "utf8");
+assert.ok(libraryPage.includes('id="exportBackup"'), "biblioteca oferece exportação de backup");
+assert.ok(libraryPage.includes('id="importBackup"'), "biblioteca oferece restauração de backup");
+assert.ok(libraryPage.includes('../shared/library-backup.js'), "página carrega o módulo de backup");
 
 async function main() {
   const image = new Blob([Buffer.from([0, 1, 2, 255, 10])], { type: "image/png" });
