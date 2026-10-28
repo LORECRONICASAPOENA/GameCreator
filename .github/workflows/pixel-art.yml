@@ -109,6 +109,30 @@ jobs:
           $testCode = $LASTEXITCODE
           Get-Content .ci-results/library-backup.log
           if ($testCode -ne 0) { exit $testCode }
+      - name: Testar exportacao de catalogo e contrato Godot
+        run: |
+          node tests/catalogo.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/catalogo.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Testar runtime Godot 4 quando instalado
+        run: |
+          $ErrorActionPreference = "Stop"
+          $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
+          $godot = Get-Command godot -ErrorAction SilentlyContinue
+          if (-not $godot) { $godot = Get-Command godot4 -ErrorAction SilentlyContinue }
+          if (-not $godot) {
+            "GODOT_RUNTIME_NOT_INSTALLED: teste GDScript nao executado neste runner." | Set-Content -Encoding UTF8 (Join-Path $diagDir "godot-runtime.log")
+            Write-Warning "Godot 4 nao encontrado. O contrato esta coberto pelo teste Node; o runtime GDScript fica registrado como nao testado."
+            return
+          }
+          $version = & $godot.Source --version 2>&1
+          $versionCode = $LASTEXITCODE
+          $versionText = ($version | Out-String).Trim()
+          $versionText | Set-Content -Encoding UTF8 (Join-Path $diagDir "godot-runtime.log")
+          if ($versionCode -ne 0) { throw "Nao foi possivel consultar a versao do Godot." }
+          if ($versionText -notmatch '^4\.') { throw "Godot 4 necessario; encontrado: $versionText" }
+          & $godot.Source --headless --path (Join-Path $env:GITHUB_WORKSPACE "integracao/godot") --script res://tests/test_catalogo.gd 2>&1 | Tee-Object -FilePath (Join-Path $diagDir "godot-runtime.log") -Append
+          $godotCode = $LASTEXITCODE
+          if ($godotCode -ne 0) { throw "Teste Godot falhou com codigo $godotCode." }
       - name: Garantir preservacao do Creator original e dos modulos
         run: |
           $required = @(
