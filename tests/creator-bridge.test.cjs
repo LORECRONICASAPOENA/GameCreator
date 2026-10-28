@@ -92,7 +92,7 @@ async function flush() {
   assert.ok(nativeBridgeSource.includes('action==="saveAsset"') && nativeBridgeSource.includes('action==="saveMap"'), "ponte grava spritesheets e mapas no estado V4.0");
   assert.ok(studioHtml.includes("../shared/creator-bridge.js") && studioJs.includes("ApoenaCreatorBridge.request('saveAsset'"), "Estúdio carrega e usa a ponte compartilhada");
   assert.ok(mapHtml.includes("../shared/creator-bridge.js") && mapHtml.includes("ApoenaCreatorBridge.request('saveMap'"), "editor de mapas envia alterações ao Creator");
-  assert.ok(pixelModuleSource.includes(String.raw\`rel="opener"\`) || pixelModuleSource.includes(String.raw\`rel=\\\"opener\\\"\`), "links locais preservam window.opener para a ponte");
+  assert.ok(pixelModuleSource.includes('rel="opener"') || pixelModuleSource.includes('rel=\\"opener\\"'), "links locais preservam window.opener para a ponte");
   console.log("CREATOR BRIDGE OK: request/response, validação de origem, erros e contratos de sincronização");
 })().catch(error => {
   console.error(error);
