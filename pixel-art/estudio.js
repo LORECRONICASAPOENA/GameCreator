@@ -245,7 +245,7 @@ function runSpriteDetection(){
   const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
   const result=ApoenaCorte.detectSprites(ctx.getImageData(0,0,c.width,c.height),{
    tolerance:num('tolerance'),strength:$('smartStrength').value,
-   mergeGap:clamp(num('detectMergeGap'),0,16),padding:clamp(num('detectPadding'),0,64)
+   minArea:clamp(num('detectMinArea'),1,100000),mergeGap:clamp(num('detectMergeGap'),0,16),padding:clamp(num('detectPadding'),0,64)
   });
   detectedSprites=result.sprites;
   $('autoDetectStatus').textContent='Prévia: '+detectedSprites.length+' recorte(s) detectado(s). Nenhum quadro foi adicionado ainda. Clique num contorno verde para carregar os limites e ajustar manualmente. '+(result.warning||'Confira os limites antes de aplicar.');
