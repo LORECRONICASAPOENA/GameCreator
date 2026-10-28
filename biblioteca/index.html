@@ -7,7 +7,7 @@
 <title>Apoena Game Creator — Biblioteca Central</title>
 <style>
 :root{color-scheme:dark;--bg:#0a1924;--panel:#172f40;--line:#39586c;--fg:#f1f9ff;--muted:#b9d0dc;--gold:#f5d48c;--aqua:#87dee1}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,Arial}header{padding:16px;background:#102738;border-bottom:1px solid var(--line)}h1{font-size:21px;color:var(--gold);margin:3px 0}header a{color:var(--aqua)}main{max-width:1400px;margin:auto;padding:16px}.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}input,select,button{font:inherit;color:var(--fg);background:#172f40;border:1px solid var(--line);border-radius:8px;padding:10px}input,select{min-height:42px}input{flex:1;min-width:180px}button{cursor:pointer;font-weight:650}button.primary{background:#237d83;border-color:var(--aqua)}#status{min-height:26px;color:var(--aqua)}#assets{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}.asset{min-width:0;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel)}.asset img{width:100%;height:170px;object-fit:contain;image-rendering:pixelated;background:repeating-conic-gradient(#435766 0 25%,#273c4a 0 50%) 50%/18px 18px;border-radius:7px}.asset h2{font-size:15px;margin:8px 0 2px;overflow-wrap:anywhere}.asset p{font-size:12px;color:var(--muted);margin:4px 0}.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.actions button{flex:1 1 90px;font-size:12px;padding:8px}.empty{padding:28px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}@media(max-width:520px){main{padding:10px}.asset img{height:130px}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,Arial}header{padding:16px;background:#102738;border-bottom:1px solid var(--line)}h1{font-size:21px;color:var(--gold);margin:3px 0}header a{color:var(--aqua)}main{max-width:1400px;margin:auto;padding:16px}.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}input,select,button{font:inherit;color:var(--fg);background:#172f40;border:1px solid var(--line);border-radius:8px;padding:10px}input,select{min-height:42px}input{flex:1;min-width:180px}button{cursor:pointer;font-weight:650}button.primary{background:#237d83;border-color:var(--aqua)}#status{min-height:26px;color:var(--aqua)}#assets{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}.asset{min-width:0;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel)}.asset img{width:100%;height:170px;object-fit:contain;image-rendering:pixelated;background:repeating-conic-gradient(#435766 0 25%,#273c4a 0 50%) 50%/18px 18px;border-radius:7px}.asset h2{font-size:15px;margin:8px 0 2px;overflow-wrap:anywhere}.asset p{font-size:12px;color:var(--muted);margin:4px 0}.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.actions button{flex:1 1 90px;font-size:12px;padding:8px}.empty{padding:28px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}#projects{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}.project{min-width:0;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel)}.project h3{font-size:15px;margin:0 0 5px;overflow-wrap:anywhere}.project p{font-size:12px;color:var(--muted);margin:4px 0}.project .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.project .actions button{flex:1 1 90px;font-size:12px;padding:8px}.project-section{margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}@media(max-width:520px){main{padding:10px}.asset img{height:130px}}
 </style>
 </head>
 <body>
@@ -15,6 +15,7 @@
 <main>
 <div class="tools"><input id="search" type="search" placeholder="Buscar por nome, categoria ou etiqueta"><select id="category"><option value="all">Todas as categorias</option><option value="personagem">Personagens</option><option value="animal">Animais</option><option value="cenario">Cenários</option><option value="planta">Plantas</option><option value="efeito">Efeitos</option><option value="tileset">Tilesets</option><option value="objeto">Objetos</option><option value="outro">Outros</option></select><button id="refresh" class="primary">Atualizar biblioteca</button></div>
 <p id="status" role="status">Carregando recursos salvos…</p><div id="assets"></div>
+<section class="project-section" aria-labelledby="projectHeading"><h2 id="projectHeading">Projetos editáveis</h2><p id="projectStatus" role="status">Carregando projetos…</p><div id="projects"></div></section>
 </main>
 <script src="../shared/asset-library.js"></script>
 <script>
@@ -50,9 +51,40 @@ async function load(){
     });
   }catch(error){status.textContent='Não foi possível acessar a biblioteca: '+error.message}
 }
-$('refresh').onclick=load;$('search').addEventListener('input',load);$('category').onchange=load;
-if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(function(){load()});
-load();
+async function loadProjects(){
+  const status=$('projectStatus'),host=$('projects');host.replaceChildren();status.textContent='Lendo projetos salvos…';
+  try{
+    const projects=await ApoenaLibrary.listProjects({search:$('search').value});
+    if(!projects.length){status.textContent='Nenhum projeto encontrado. Salve um mapa pelo Editor de Mapas 2.5D para começar.';const empty=document.createElement('div');empty.className='empty';empty.textContent='Mapas e outros projetos editáveis ficam separados dos arquivos de imagem e podem ser exportados em JSON.';host.append(empty);return}
+    status.textContent=projects.length+' projeto(s) encontrado(s). Os dados ficam no armazenamento local do navegador.';
+    projects.forEach(function(project){
+      const card=document.createElement('article');card.className='project';
+      const title=document.createElement('h3');title.textContent=project.name||'Projeto sem nome';card.append(title);
+      const data=project.data||{},schema=project.schema||'apoena.gamecreator.project.v1';
+      const info=document.createElement('p');info.textContent=(project.type||'projeto')+' · '+schema+(Number.isInteger(data.width)&&Number.isInteger(data.height)?' · '+data.width+'×'+data.height+' células':'');card.append(info);
+      const updated=document.createElement('p');updated.textContent='Atualizado '+dateLabel(project.updatedAt);card.append(updated);
+      const actions=document.createElement('div');actions.className='actions';
+      actions.append(makeButton('Baixar JSON',function(){
+        const base=(project.name||'projeto').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9_-]+/g,'_').slice(0,70)||'projeto';
+        download(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),base+'.json');
+      }));
+      if(schema==='apoena.map2d.v1')actions.append(makeButton('Abrir mapa',function(){
+        const url='../map-editor/index.html?projeto='+encodeURIComponent(project.id);
+        window.open(url,'_blank','noopener');
+      }));
+      actions.append(makeButton('Excluir',async function(){
+        if(!confirm('Excluir o projeto “'+(project.name||'sem nome')+'”?'))return;
+        try{await ApoenaLibrary.deleteProject(project.id);await loadProjects()}catch(error){status.textContent='Falha ao excluir projeto: '+error.message}
+      }));
+      card.append(actions);host.append(card);
+    });
+  }catch(error){status.textContent='Não foi possível acessar os projetos: '+error.message}
+}
+$('refresh').onclick=function(){load();loadProjects()};
+$('search').addEventListener('input',function(){load();loadProjects()});
+$('category').onchange=load;
+if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(function(){load();loadProjects()});
+load();loadProjects();
 })();
 </script>
 </body>
