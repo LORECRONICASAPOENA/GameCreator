@@ -305,6 +305,20 @@ refreshLibraryTilesets();refreshLibraryMaps();
 const requestedMapId=new URLSearchParams(location.search).get('projeto');
 if(requestedMapId)setTimeout(()=>openLibraryMap(requestedMapId).catch(error=>say('Falha ao abrir mapa solicitado: '+error.message)),0);
 $('sheetfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{let src=await fileData(f);sheetSrc=src;imageFrom(src,'sheet');scheduleSave();say('Tileset carregado. Selecione uma célula da folha.')}catch(err){say(err.message)}e.target.value=''};
+$('checkTilesetFit').onclick=()=>{
+ const status=$('tilesetFitStatus');
+ if(!sheetImg){status.textContent='Importe ou carregue um tileset antes de verificar.';return}
+ try{
+  const c=document.createElement('canvas');c.width=sheetImg.naturalWidth||sheetImg.width;c.height=sheetImg.naturalHeight||sheetImg.height;
+  const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(sheetImg,0,0);
+  const result=ApoenaTilesetCheck.analyze(ctx.getImageData(0,0,c.width,c.height),sheetCols,sheetRows,{maxPixels:4000000,alphaThreshold:250,maxTransparentRatio:0.05});
+  status.style.color=result.ok?'#8de7ad':'#ffd28a';
+  status.textContent='Grade '+result.columns+'×'+result.rows+' · '+(result.cellWidth?result.cellWidth+'×'+result.cellHeight+' px por tile':'células com tamanhos diferentes')+' · '+result.tiles.length+' tile(s) com bordas transparentes.';
+  if(result.tiles.length){status.textContent+=' Exemplos: '+result.tiles.slice(0,12).map(t=>'#'+t.tile+' ('+t.edges.join('/')+', '+Math.round(t.transparentRatio*100)+'%)').join('; ');if(result.tiles.length>12)status.textContent+='; e mais '+(result.tiles.length-12)+'.'}
+  if(result.warnings.length)status.textContent+=' '+result.warnings.join(' ');
+  say(result.ok?'Verificação concluída: nenhum problema de grade ou transparência acima do limite.':'Verificação concluída: confira os avisos do tileset; nenhum pixel foi alterado.');
+ }catch(error){status.style.color='#ffb4a2';status.textContent='Não foi possível verificar o tileset: '+error.message;say(error.message)}
+};
 function showSheet(){
  if(!sheetImg)return;
  sh.width=sheetImg.width;sh.height=sheetImg.height;sx.imageSmoothingEnabled=false;sx.clearRect(0,0,sh.width,sh.height);sx.drawImage(sheetImg,0,0);
