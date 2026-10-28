@@ -14,12 +14,12 @@ O código de `APOENA_GAME_CREATOR_OFFLINE_v3_9_EDITOR_VISUAL_REORGANIZADO.html` 
 ## Como abrir o iniciador HTML no Windows / Android
 
 1. Pelo GitHub, use **Code → Download ZIP** e extraia todo o pacote. A extração deve manter a pasta `assets/` junto do `index.html`.
-2. Abra **index.html** no navegador. Não precisa de servidor nem Runner para o catálogo básico.
-3. Faça alterações e clique **Baixar catálogo editado (.json)** para guardá-las. É possível usar **Importar catálogo (.json)** depois.
+2. Abra **index.html** no navegador. Toque em **Abrir editor v3.9 completo** para acessar a versão preservada, ou utilize os módulos Pixel Art e Mapas 2.5D.
+3. No editor v3.9, também é possível **Baixar HTML único** para preservar uma cópia independente. No catálogo provisório, use **Baixar catálogo editado (.json)** para guardar alterações e **Importar catálogo (.json)** para reabrir.
 
 **Importante:** os arquivos de `assets/` são necessários para mostrar os ícones das poções. Para abrir o editor original completo, mantenha também a pasta `legacy/v3_9_parts/` e abra o botão **Abrir editor v3.9 completo** no `index.html`. O resgate não é um executável Godot.
 
-## Objetivo da versão completa
+## Recuperação e integração pendente
 
 A v3.9 recuperada contém os editores existentes no HTML original: layouts, personagens, itens, receitas e biblioteca, além de exportações de referência para Godot 4. **Disponibilidade do código não equivale a teste funcional completo**; ainda faltam validações em Android, PC e Godot real, e recuperação das versões posteriores.
 
