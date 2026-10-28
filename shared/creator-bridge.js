@@ -44,5 +44,24 @@
     });
   }
 
-  root.ApoenaCreatorBridge = Object.freeze({channel: CHANNEL, request});
+  function listen(handler){
+    if (typeof handler !== "function") throw new TypeError("O listener do Creator precisa ser uma função.");
+    const receive = event => {
+      const data = event.data;
+      let origin = "";
+      try { origin = root.location && root.location.origin ? root.location.origin : "null"; } catch (_) {}
+      if ((event.origin !== origin && event.origin !== "null") || !data || data.channel !== CHANNEL ||
+          data.type !== "request" || typeof data.id !== "string" || !event.source || event.source === root) return;
+      Promise.resolve().then(() => handler(String(data.action || ""), data.payload || {}, event)).then(value => {
+        try { event.source.postMessage({channel: CHANNEL, type: "response", id: data.id, ok: true, value}, "*"); } catch (_) {}
+      }).catch(error => {
+        try { event.source.postMessage({channel: CHANNEL, type: "response", id: data.id, ok: false,
+          error: {message: error && error.message ? error.message : "Falha na integração com o Creator."}}, "*"); } catch (_) {}
+      });
+    };
+    root.addEventListener("message", receive);
+    return () => root.removeEventListener("message", receive);
+  }
+
+  root.ApoenaCreatorBridge = Object.freeze({channel: CHANNEL, request, listen});
 })(window);
