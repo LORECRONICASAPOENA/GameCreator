@@ -36,6 +36,9 @@ for(const axis of [grid.x,grid.y])for(let i=1;i<axis.length;i++)assert.ok(axis[i
 const html=fs.readFileSync(path.join(__dirname,'../pixel-art/estudio.html'),'utf8');
 const js=fs.readFileSync(path.join(__dirname,'../pixel-art/estudio.js'),'utf8');
 const mapHtml=fs.readFileSync(path.join(__dirname,'../map-editor/index.html'),'utf8');
+const mapScript=mapHtml.match(/<script>\\s*([\\s\\S]*?)<\\/script>/);
+assert.ok(mapScript,'script do editor de mapas encontrado');
+assert.doesNotThrow(()=>new Function(mapScript[1]),'script do editor de mapas sintaticamente válido');
 assert.doesNotThrow(()=>new Function(js),'script UI válido');
 for(const id of ['meshMode','meshReset','smartSelected','smartAll','smartPanel','smartApply','smartCancel','smartUndoBatch'])
   assert.ok(html.includes('id="'+id+'"'),'falta controle '+id);
