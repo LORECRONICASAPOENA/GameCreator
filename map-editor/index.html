@@ -337,7 +337,7 @@ $('saveMapLibrary').onclick=async()=>{
   if(proposed===null)return;
   mapName=String(proposed).trim().slice(0,120)||mapName;
   const data=packageData();data.name=mapName;
-  const id=currentLibraryMapId||('map-'+mapName.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,72));
+  const id=currentLibraryMapId||('map-'+mapName.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,72));
   const serialized=JSON.stringify(data);
   if(serialized.length>18000000)throw Error('Mapa muito grande para a biblioteca. Exporte o JSON e reduza os recursos incorporados.');
   const saved=await ApoenaLibrary.saveProject({id:id,name:mapName,schema:'apoena.map2d.v1',type:'map',data:data,metadata:{width:width,height:height,tileSize:TILE,tilesetColumns:sheetCols,tilesetRows:sheetRows}});
@@ -364,9 +364,9 @@ async function applyMapData(d){
  sheetCols=Math.max(1,Math.min(32,Number(d.tilesetCols)||4));sheetRows=Math.max(1,Math.min(32,Number(d.tilesetRows)||4));
  smartTile=d.smartTile!==false;sheetProfile=d.sheetProfile||'manual';$('sheetProfile').value=sheetProfile;$('sheetCols').value=sheetCols;$('sheetRows').value=sheetRows;$('smartTile').checked=smartTile;
  objects=Array.isArray(d.objects)?d.objects.slice(0,2000):[];markers=Array.isArray(d.markers)?d.markers.slice(0,300):[];
- assets=Array.isArray(d.assets)?d.assets.filter(a=>a&&typeof a.src==='string'&&/^data:image\\/(png|webp);base64,/.test(a.src)).slice(0,50):[];
+ assets=Array.isArray(d.assets)?d.assets.filter(a=>a&&typeof a.src==='string'&&/^data:image\/(png|webp);base64,/.test(a.src)).slice(0,50):[];
  assetImages={};for(const a of assets)imageFrom(a.src,a.id);
- sheetSrc=typeof d.tileset==='string'&&/^data:image\\/(png|webp);base64,/.test(d.tileset)?d.tileset:'';
+ sheetSrc=typeof d.tileset==='string'&&/^data:image\/(png|webp);base64,/.test(d.tileset)?d.tileset:'';
  sheetImg=null;selectedTile=0;if(sheetSrc)imageFrom(sheetSrc,'sheet');
  $('width').value=width;$('height').value=height;cam={x:width*TILE/2,y:height*TILE/2};showAssets();drawSoon();scheduleSave();
 }
