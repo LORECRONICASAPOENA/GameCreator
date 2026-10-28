@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Game Creator — Abrir editor completo v3.9 recuperado</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0b1724;color:#f3f8fb;font:16px system-ui,Arial,sans-serif}main{max-width:760px;margin:6vh auto;padding:24px;background:#152b3c;border:1px solid #36576c;border-radius:14px}h1{color:#ebd18f;margin-top:0}p{line-height:1.55}button,a.link{display:inline-block;padding:12px 16px;border-radius:8px;background:#88d9dc;color:#06212a;font-weight:700;border:0;cursor:pointer;text-decoration:none;margin:6px 8px 6px 0}a.link{background:#29495d;color:#fff}.muted{color:#bdd0da;font-size:14px}#status{padding:10px 0;color:#e9d393}button:disabled{opacity:.5}
+</style>
+</head>
+<body>
+<main>
+<h1>Apoena Game Creator v3.9 — edição completa recuperada</h1>
+<p>O código do editor original foi recuperado e reunido em 23 partes para conservar o projeto inteiro no GitHub. Esta é a versão <strong>v3.9</strong>, não a v3.9.2 nem a v4.0.</p>
+<p><strong>Importante:</strong> mantenha a pasta <code>v3_9_parts</code> ao lado deste iniciador. Funciona localmente após baixar e extrair todo o repositório.</p>
+<div id="status" role="status">Conferindo as partes do programa…</div>
+<button type="button" id="start" disabled>Abrir o editor completo</button>
+<button type="button" id="download" disabled>Baixar HTML único (.html)</button>
+<a class="link" href="../index.html">Voltar ao Game Creator</a>
+<p class="muted">O editor foi preservado sem redesenhar os módulos existentes. A integração real com Godot 4 e os testes físicos Android ainda exigem validação. Faça backup dos projetos JSON antes de editar.</p>
+</main>
+<script>
+window.__APOENA_GAMECREATOR_PARTES=[];
+</script>
+<script src="v3_9_parts/parte_000.js"></script>
+<script src="v3_9_parts/parte_001.js"></script>
+<script src="v3_9_parts/parte_002.js"></script>
+<script src="v3_9_parts/parte_003.js"></script>
+<script src="v3_9_parts/parte_004.js"></script>
+<script src="v3_9_parts/parte_005.js"></script>
+<script src="v3_9_parts/parte_006.js"></script>
+<script src="v3_9_parts/parte_007.js"></script>
+<script src="v3_9_parts/parte_008.js"></script>
+<script src="v3_9_parts/parte_009.js"></script>
+<script src="v3_9_parts/parte_010.js"></script>
+<script src="v3_9_parts/parte_011.js"></script>
+<script src="v3_9_parts/parte_012.js"></script>
+<script src="v3_9_parts/parte_013.js"></script>
+<script src="v3_9_parts/parte_014.js"></script>
+<script src="v3_9_parts/parte_015.js"></script>
+<script src="v3_9_parts/parte_016.js"></script>
+<script src="v3_9_parts/parte_017.js"></script>
+<script src="v3_9_parts/parte_018.js"></script>
+<script src="v3_9_parts/parte_019.js"></script>
+<script src="v3_9_parts/parte_020.js"></script>
+<script src="v3_9_parts/parte_021.js"></script>
+<script src="v3_9_parts/parte_022.js"></script>
+<script>
+(function(){
+"use strict";
+const N=23, expectedChars=16045743;
+const status=document.getElementById("status"),start=document.getElementById("start"),download=document.getElementById("download");
+const parts=window.__APOENA_GAMECREATOR_PARTES;
+const ok=Array.isArray(parts)&&parts.length===N&&parts.every((x,i)=>typeof x==="string"&&x.length===(i===N-1?645743:700000))&&parts.reduce((a,x)=>a+x.length,0)===expectedChars;
+const msg=ok?"Fonte integral carregada: 23/23 partes. Pronto para abrir.":"Falha: partes ausentes, truncadas ou fora de ordem. Baixe o ZIP completo do repositório e extraia a pasta legacy.";
+status.textContent=msg;
+start.disabled=download.disabled=!ok;
+function raw(){const h=parts.join("");if(!h.startsWith("<!DOCTYPE html>")||!h.trimEnd().endsWith("</html>"))throw Error("Fonte incompleta");return h}
+start.onclick=function(){
+ try{status.textContent="Abrindo versão original…";const html=raw();document.open();document.write(html);document.close()}catch(e){status.textContent="Erro ao abrir: "+e.message}
+};
+download.onclick=function(){
+ try{
+ const html=raw(),blob=new Blob(["\ufeff",html],{type:"text/html;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="APOENA_GAME_CREATOR_OFFLINE_v3_9_RECUPERADO.html";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),8000);
+ status.textContent="HTML único exportado. Guarde uma cópia de segurança.";
+ }catch(e){status.textContent="Erro na exportação: "+e.message}
+};
+})();
+</script>
+</body>
+</html>
