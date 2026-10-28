@@ -37,11 +37,11 @@
     for(const item of snapshot.assets){
       const blob=api.dataURLToBlob(item.blob,item.mimeType||"image/png");
       const originalBlob=item.originalBlob?api.dataURLToBlob(item.originalBlob):null;
-      await api.saveAsset({id:item.id,name:item.name,category:item.category,type:item.type,blob:blob,originalBlob:originalBlob,width:item.width,height:item.height,sourceWidth:item.sourceWidth,sourceHeight:item.sourceHeight,tags:item.tags,metadata:item.metadata});
+      await api.saveAsset({id:item.id,name:item.name,category:item.category,type:item.type,blob:blob,originalBlob:originalBlob,width:item.width,height:item.height,sourceWidth:item.sourceWidth,sourceHeight:item.sourceHeight,tags:item.tags,metadata:item.metadata,createdAt:item.createdAt,updatedAt:item.updatedAt});
       assets++;
     }
     for(const project of snapshot.projects){
-      await api.saveProject({id:project.id,name:project.name,schema:project.schema,type:project.type,data:project.data,metadata:project.metadata});
+      await api.saveProject({id:project.id,name:project.name,schema:project.schema,type:project.type,data:project.data,metadata:project.metadata,createdAt:project.createdAt,updatedAt:project.updatedAt});
       projects++;
     }
     return {assets:assets,projects:projects};
