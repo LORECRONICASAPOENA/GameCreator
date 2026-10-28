@@ -59,6 +59,35 @@ jobs:
           $npmCode = $LASTEXITCODE
           $npmOutput | Out-File -FilePath $log -Append -Encoding utf8
           if ($npmCode -ne 0) { throw "npm --version falhou com codigo $npmCode." }
+      - name: Smoke test do loader no navegador headless quando disponivel
+        run: |
+          $ErrorActionPreference = "Stop"
+          $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
+          $candidates = @(
+            (Join-Path $env:ProgramFiles "Microsoft/Edge/Application/msedge.exe"),
+            (Join-Path ${env:ProgramFiles(x86)} "Microsoft/Edge/Application/msedge.exe"),
+            (Join-Path $env:ProgramFiles "Google/Chrome/Application/chrome.exe"),
+            (Join-Path ${env:ProgramFiles(x86)} "Google/Chrome/Application/chrome.exe")
+          )
+          $browser = $candidates | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1
+          if (-not $browser) {
+            "BROWSER_RUNTIME_NOT_INSTALLED: smoke test headless nao executado." | Set-Content -Encoding UTF8 (Join-Path $diagDir "browser-loader.log")
+            Write-Warning "Edge/Chrome nao encontrado; a verificacao de navegador fica registrada como nao testada."
+            return
+          }
+          $entryPath = Join-Path $env:GITHUB_WORKSPACE "index.html"
+          $entryUri = ([System.Uri]$entryPath).AbsoluteUri
+          $domPath = Join-Path $diagDir "browser-loader-dom.html"
+          $logPath = Join-Path $diagDir "browser-loader.log"
+          & $browser --headless --disable-gpu --no-first-run --no-default-browser-check --allow-file-access-from-files --dump-dom $entryUri 1> $domPath 2> $logPath
+          $browserCode = $LASTEXITCODE
+          if ($browserCode -ne 0) { throw "Navegador headless encerrou com codigo $browserCode." }
+          $dom = Get-Content -Raw $domPath
+          foreach ($required in @('id="page-pixelart"', 'Game Creator v4.0', 'shared/asset-library.js', 'pixel-art/natureza.js')) {
+            if (-not $dom.Contains($required)) { throw "Smoke test do loader falhou; DOM sem: $required" }
+          }
+          if ($dom.Contains("Nao foi possivel abrir a versao unificada")) { throw "O loader exibiu tela de erro." }
+          "BROWSER_LOADER_SMOKE_OK: $browser" | Tee-Object -FilePath $logPath -Append
       - name: Preservar loader e compilar Creator nativo V4.0
         run: |
           $ErrorActionPreference = "Stop"
@@ -91,6 +120,18 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --check shared/library-backup.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check shared/creator-bridge.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check pixel-art/ponte-creator.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check pixel-art/modulo-integrado.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check pixel-art/natureza.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check map-editor/modulo-integrado.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check integracao/catalogo.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Testar Corte Inteligente e contratos da interface
         run: |
           node tests/corte-inteligente.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/corte.log
@@ -112,6 +153,10 @@ jobs:
       - name: Testar exportacao de catalogo e contrato Godot
         run: |
           node tests/catalogo.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/catalogo.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Testar protocolo de sincronizacao entre V4.0 e V4.1
+        run: |
+          node tests/creator-bridge.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/creator-bridge.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Testar runtime Godot 4 quando instalado
         run: |
