@@ -45,7 +45,7 @@
         if(x>0)seed(v-1);if(x+1<w)seed(v+1);
         if(y>0)seed(v-w);if(y+1<h)seed(v+w);
       }
-      // Não limpar se a cor detectada for a maior parte de um desenho, nem minúscula.
+      // Fundo uniforme conectado às bordas pode ocupar quase toda a folha; só não há fundo detectável se a imagem inteira tiver a mesma cor.
       if(bgCount/n<.08||bgCount/n>=1){background.fill(0);bgCount=0;}
       else for(let i=0;i<n;i++)if(background[i])remove[i]=1;
     }
