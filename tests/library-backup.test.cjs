@@ -41,6 +41,8 @@ async function main() {
   assert.equal(snapshot.assets.length, 1);
   assert.equal(snapshot.projects.length, 1);
   assert.match(snapshot.assets[0].blob, /^data:image\/png;base64,/);
+  const assetCreatedAt = snapshot.assets[0].createdAt;
+  const projectCreatedAt = snapshot.projects[0].createdAt;
   await ApoenaLibrary.deleteAsset("backup-character");
   await ApoenaLibrary.deleteProject("backup-map");
   assert.equal((await ApoenaLibrary.listAssets()).length, 0);
@@ -52,8 +54,10 @@ async function main() {
   assert.equal(asset.blob.size, image.size);
   assert.equal(asset.originalBlob.size, 8);
   assert.equal(asset.metadata.columns, 4);
+  assert.equal(asset.createdAt, assetCreatedAt, "restauração preserva a data de criação do recurso");
   const project = await ApoenaLibrary.getProject("backup-map");
   assert.deepEqual(project.data, { width: 2, height: 2, tiles: [0, 1, 2, 3] });
+  assert.equal(project.createdAt, projectCreatedAt, "restauração preserva a data de criação do projeto");
 
   await assert.rejects(() => Backup.importSnapshot({ schema: "wrong", version: 1, assets: [], projects: [] }), /Backup incompatível/);
   await assert.rejects(() => Backup.importSnapshot({ schema: Backup.schema, version: 1, assets: [{ id: "x", name: "x", blob: "data:text/plain;base64,WA==" }], projects: [] }), /recurso de imagem inválido/);
