@@ -16,7 +16,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Sintaxe do editor Pixel Art
-        run: node --check pixel-art/estudio.js
+        run: |
+          node --check pixel-art/estudio.js
+          node --check pixel-art/corte-inteligente.js
+      - name: Testar grade ajustavel e Corte Inteligente
+        run: node tests/corte-inteligente.test.cjs
       - name: Garantir preservação do antigo Creator e módulos
         shell: bash
         run: |
