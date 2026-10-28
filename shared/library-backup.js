@@ -15,12 +15,15 @@
     }
     return {schema:SCHEMA,version:1,exportedAt:new Date().toISOString(),assets:serializedAssets,projects:projects.map(p=>({id:p.id,name:p.name,schema:p.schema,type:p.type,data:p.data,metadata:p.metadata||{},createdAt:p.createdAt||null,updatedAt:p.updatedAt||null}))};
   }
+  function isImageDataURL(value){
+    return typeof value==="string"&&/^data:image\/[A-Za-z0-9.+-]+;base64,[A-Za-z0-9+/]+={0,2}$/.test(value);
+  }
   function validate(snapshot){
     if(!snapshot||snapshot.schema!==SCHEMA||snapshot.version!==1||!Array.isArray(snapshot.assets)||!Array.isArray(snapshot.projects))throw new Error("Backup incompatível. Esperado apoena.gamecreator.library-backup.v1.");
     if(snapshot.assets.length+snapshot.projects.length>MAX_RECORDS)throw new Error("Backup excede o limite de registros.");
     const ids=new Set();
     for(const a of snapshot.assets){
-      if(!a||typeof a.id!=="string"||!a.id||typeof a.name!=="string"||typeof a.blob!=="string"||!a.blob.startsWith("data:image/"))throw new Error("Backup contém recurso de imagem inválido.");
+      if(!a||typeof a.id!=="string"||!a.id||typeof a.name!=="string"||!isImageDataURL(a.blob)||(a.originalBlob!==null&&a.originalBlob!==undefined&&!isImageDataURL(a.originalBlob)))throw new Error("Backup contém recurso de imagem inválido.");
       if(ids.has("asset:"+a.id))throw new Error("Backup contém IDs de recurso duplicados.");ids.add("asset:"+a.id);
     }
     for(const p of snapshot.projects){
