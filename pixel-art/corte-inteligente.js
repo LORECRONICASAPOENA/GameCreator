@@ -46,7 +46,7 @@
         if(y>0)seed(v-w);if(y+1<h)seed(v+w);
       }
       // Não limpar se a cor detectada for a maior parte de um desenho, nem minúscula.
-      if(bgCount/n<.08||bgCount/n>.94){background.fill(0);bgCount=0;}
+      if(bgCount/n<.08||bgCount/n>=1){background.fill(0);bgCount=0;}
       else for(let i=0;i<n;i++)if(background[i])remove[i]=1;
     }
     const body=new Uint8Array(n);
@@ -112,12 +112,50 @@
     return {width:w,height:h,mask:remove,removed,backgroundRemoved:bgCount,components:components.length,
       fragments:removalCandidates.length,confidence:uncertain?'revisar':'normal',
       warning:uncertain?'Confira manualmente: figuras encostadas ou fundo irregular não podem ser separados com segurança.':'',
-      opaqueBackground:opaque,foregroundPixels:total,alreadyTransparent:beforeTransparent};
+      opaqueBackground:opaque,foregroundPixels:total,alreadyTransparent:beforeTransparent,
+      backgroundMask:background,
+      componentBounds:components.map(c=>({x:c.minX,y:c.minY,w:c.maxX-c.minX+1,h:c.maxY-c.minY+1,area:c.area,touchesBorder:c.minX===0||c.minY===0||c.maxX===w-1||c.maxY===h-1}))};
   }
   function cleaned(imageData,analysis){
     const out=new Uint8ClampedArray(imageData.data);
     for(let i=0;i<analysis.mask.length;i++)if(analysis.mask[i])out[i*4+3]=0;
     return {width:imageData.width,height:imageData.height,data:out};
+  }
+  function detectSprites(src,options={}){
+    const analysis=analyze(src,options),w=src.width,h=src.height;
+    const minArea=Number.isFinite(Number(options.minArea))&&Number(options.minArea)>=1
+      ?Math.floor(Number(options.minArea)):Math.max(8,Math.floor(w*h*.00002));
+    const mergeGap=Number.isFinite(Number(options.mergeGap))
+      ?clamp(Math.floor(Number(options.mergeGap)),0,16):1;
+    const padding=Number.isFinite(Number(options.padding))
+      ?clamp(Math.floor(Number(options.padding)),0,64):0;
+    const boxes=analysis.componentBounds.filter(c=>c.area>=minArea).map(c=>({...c}));
+    let merged=true;
+    while(merged){
+      merged=false;
+      outer:for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){
+        const a=boxes[i],b=boxes[j];
+        const gapX=Math.max(0,Math.max(a.x-(b.x+b.w),b.x-(a.x+a.w)));
+        const gapY=Math.max(0,Math.max(a.y-(b.y+b.h),b.y-(a.y+a.h)));
+        if(gapX<=mergeGap&&gapY<=mergeGap){
+          const left=Math.min(a.x,b.x),top=Math.min(a.y,b.y),right=Math.max(a.x+a.w,b.x+b.w),bottom=Math.max(a.y+a.h,b.y+b.h);
+          a.x=left;a.y=top;a.w=right-left;a.h=bottom-top;a.area+=b.area;
+          a.touchesBorder=a.touchesBorder||b.touchesBorder;boxes.splice(j,1);merged=true;break outer;
+        }
+      }
+    }
+    boxes.sort((a,b)=>a.y-b.y||a.x-b.x);
+    const sprites=boxes.map(b=>({
+      x:Math.max(0,b.x-padding),y:Math.max(0,b.y-padding),
+      w:Math.min(w,b.x+b.w+padding)-Math.max(0,b.x-padding),
+      h:Math.min(h,b.y+b.h+padding)-Math.max(0,b.y-padding),
+      area:b.area,touchesBorder:b.touchesBorder
+    }));
+    const warnings=[];
+    if(analysis.warning)warnings.push(analysis.warning);
+    if(sprites.length<2)warnings.push('Foram encontrados menos de dois sprites separados; revise o resultado ou use a grade/manual.');
+    if(sprites.some(b=>b.touchesBorder))warnings.push('Um ou mais sprites tocam a borda da imagem; confira os limites.');
+    return {width:w,height:h,sprites,components:analysis.components,confidence:warnings.length?'revisar':'normal',warning:warnings.join(' '),backgroundRemoved:analysis.backgroundRemoved};
   }
   function grid(width,height,cols,rows,offsetX=0,offsetY=0,gapX=0,gapY=0){
     cols=clamp(Math.floor(cols),1,24);rows=clamp(Math.floor(rows),1,24);
@@ -129,5 +167,5 @@
     for(let i=1;i<b.length-1;i++)b[i]=clamp(b[i],b[i-1]+1,height-(rows-i));
     return {x:a,y:b};
   }
-  return {analyze,cleaned,grid};
+  return {analyze,cleaned,detectSprites,grid};
 });
