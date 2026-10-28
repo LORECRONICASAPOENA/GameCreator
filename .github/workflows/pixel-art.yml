@@ -11,6 +11,7 @@ on:
       - "map-editor/**"
       - "integracao/**"
       - "tests/**"
+      - "package.json"
       - "README.md"
       - "ORGANIZACAO_EDITOR.md"
       - ".github/workflows/pixel-art.yml"
@@ -33,7 +34,7 @@ jobs:
       - name: Instalar adaptador IndexedDB para testes
         run: |
           set -o pipefail
-          npm install --no-save --no-package-lock fake-indexeddb@6.2.6 2>&1 | tee .ci-results/install.log
+          npm install --no-package-lock --ignore-scripts --no-audit --no-fund 2>&1 | tee .ci-results/install.log
       - name: Validar sintaxe JavaScript
         run: |
           set -o pipefail
