@@ -37,6 +37,10 @@ const detected=cutoff.detectSprites(variableSheet,{minArea:8,mergeGap:0});
 assert.deepEqual(variableSheet.data,variableOriginal,'detecção não altera a imagem de origem');
 assert.equal(detected.sprites.length,2,'sprites separados detectados sem grade fixa');
 assert.deepEqual(detected.sprites.map(({x,y,w,h})=>({x,y,w,h})),[{x:10,y:12,w:12,h:16},{x:72,y:24,w:15,h:12}],'limites automáticos dos sprites');
+const noisySheet=image(120,80);
+rect(noisySheet,10,12,12,16);rect(noisySheet,72,24,15,12);rect(noisySheet,40,5,3,3,[255,0,0,255]);
+const noisyDetected=cutoff.detectSprites(noisySheet,{mergeGap:0});
+assert.equal(noisyDetected.sprites.length,2,'área mínima padrão filtra fragmentos pequenos');
 const sparseOpaque=image(100,100,[0,0,0]);
 rect(sparseOpaque,10,12,12,16);rect(sparseOpaque,72,24,15,12);
 const sparseDetected=cutoff.detectSprites(sparseOpaque,{minArea:8,mergeGap:0});
@@ -56,7 +60,7 @@ const mapScriptEnd=mapHtml.indexOf('</script>',mapScriptStart);
 assert.ok(mapScriptStart>=0&&mapScriptEnd>mapScriptStart,'script do editor de mapas encontrado');
 assert.doesNotThrow(()=>new Function(mapHtml.slice(mapScriptStart+8,mapScriptEnd)),'script do editor de mapas sintaticamente válido');
 assert.doesNotThrow(()=>new Function(js),'script UI válido');
-for(const id of ['meshMode','meshReset','smartSelected','smartAll','smartPanel','smartApply','smartCancel','smartUndoBatch','projectFile','libraryProjects','libraryProjectSave','libraryProjectOpen','libraryProjectRefresh','detectSprites','detectMergeGap','detectPadding','autoDetectPanel','autoDetectApply','autoDetectCancel'])
+for(const id of ['meshMode','meshReset','smartSelected','smartAll','smartPanel','smartApply','smartCancel','smartUndoBatch','projectFile','libraryProjects','libraryProjectSave','libraryProjectOpen','libraryProjectRefresh','detectSprites','detectMergeGap','detectPadding','detectMinArea','autoDetectPanel','autoDetectApply','autoDetectCancel'])
   assert.ok(html.includes('id="'+id+'"'),'falta controle '+id);
 assert.ok(html.includes('id="action" list="actionOptions"')&&html.includes('id="direction" list="directionOptions"'),'ações e direções são configuráveis');
 assert.ok(js.includes('async function loadProjectData')&&js.includes('ApoenaLibrary.saveProject')&&js.includes('ApoenaLibrary.getProject'),'projeto editável pode ser importado, salvo e reaberto');
