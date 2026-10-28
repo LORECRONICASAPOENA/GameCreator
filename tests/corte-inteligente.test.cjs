@@ -114,5 +114,5 @@ if(loaderHtml.includes('bundle-v4/parte_000.js'))
   assert.ok(loaderHtml.includes('window.__APOENA_V4_PARTES')&&loaderHtml.includes('document.write(full)'),'loader compacto do Creator V4.0 preservado');
 assert.ok(entryHtml.includes('shared/asset-library.js')&&entryHtml.includes('pixel-art/natureza.js'),'biblioteca central e Natureza incluídas na entrada nativa');
 assert.ok(!entryHtml.includes('<iframe'),'entrada principal não substitui o Creator por um shell com iframe');
-assert.ok(integratedModule.includes('data-pixel-tab=\\"objects\\"')&&integratedModule.includes('data-pixel-tab=\\"maps\\"'),'abas nativas de objetos e mapas preservadas');
+assert.ok(integratedModule.includes('data-pixel-tab="objects"')&&integratedModule.includes('data-pixel-tab="maps"'),'abas nativas de objetos e mapas preservadas');
 console.log('INTEGRAÇÃO V4.1 OK: entrada nativa, módulos existentes e ferramentas acessíveis');
