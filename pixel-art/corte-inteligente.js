@@ -85,7 +85,7 @@
       if(small && (edge|| (strength==='forte'&&dcenter>.62)))removalCandidates.push(c);
     }
     const uncertain=(!opaque&&alphaCount/n<.03)||!main
-      || (main.border>Math.max(4,main.area*.035))
+      || (main.border>Math.max(4,main.area*.008))
       || (total>0&&main.area/total<.36)
       || (alphaCount/n<.03&&!opaque);
     // Reconstituir componentes escolhidos localmente, com máscara pequena e sem tocar no corpo principal.
