@@ -1,41 +1,43 @@
-# APOENA GAME CREATOR — INTEGRAÇÃO 3D + PIXEL ART (V4.1)
+# APOENA GAME CREATOR — INTEGRAÇÃO NATIVA V4.0 + FERRAMENTAS V4.1
 
-## Novo ponto de entrada
-Use **index.html** no navegador do celular ou no Windows. O menu lateral/superior passa a ser o menu único do Creator, não um segundo programa. A mudança preserva o editor 3D da V4.0 e os sistemas anteriores (itens, receitas, animações 3D, personagem modular, mapas). Cada módulo mantém seus arquivos por segurança e é aberto na mesma área central. O antigo index.html permanece em \`legacy/iniciador-anterior.html\`.
+## Entrada única e preservação
 
-## Menu Pixel Art
-- Personagens: preserva o gerador modular \`pixel-art/index.html\`.
-- Animais, cenário e plantas, efeitos: abre \`pixel-art/estudio.html\` com a categoria selecionada.
-- Recortes: importar PNG/WebP/JPG, definir grade, recortar região manual com toque/arrasto, editar células, adicionar/remover/reordenar quadros.
-- Limpeza: apagar restos com pincel, restaurar pixels do quadro, remover cor por região conectada com tolerância, limpar alfa, recortar bordas vazias, desfazer.
-- Prévia: ver animação e transparência antes da exportação.
-- Exportações: quadro PNG, spritesheet PNG com células padronizadas e pés alinhados, JSON com ação/direção/corte/posição no atlas e projeto JSON com imagens embutidas.
-- Tudo funciona localmente no navegador; não pede chave de IA nem coloca desenhos gerados automaticamente sobre o personagem do usuário.
+Use `index.html` no Windows ou no navegador do dispositivo. A entrada compacta monta o Creator nativo a partir de `bundle-v4/` e injeta a biblioteca central, a ponte V4.0/V4.1 e o módulo de Natureza. Ela não usa iframe nem substitui a bancada 3D por um shell separado.
 
-## Relação com os assets feitos entre 27/10 e 28/10
-Javali (caminhada/corrida/direções), abelha (voo), tronco-colmeia (quatro vistas), Apoena (andar/correr/ataque azul), folhas/frutas/árvores, pisos e penhascos: a biblioteca do pacote ZIP local reúne os arquivos disponíveis da conversa. **Os binários de imagem não foram enviados automaticamente ao GitHub nesta PR**. Use o botão de importação no editor para trabalhar com os PNG/WebP locais. O catálogo \`pixel-art/catalogo_assets_agar.json\` lista as categorias e o estado de incorporação.
+`APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html` permanece como fonte original. No Windows, `ABRIR_GAME_CREATOR.cmd` executa `integracao/build_unificado.ps1`, que compila uma entrada nativa com a área Pixel Art. O build também está disponível em Python por meio de `integracao/build_unificado.py`.
 
-## Importante: exportação não é instalação
-O PNG e o manifesto ajudam a ligar frames no HTML ou Godot 4. Eles não corrigem sozinhos a máquina de estados do jogo e não executam integração automática. Critérios de validação para cada personagem: recorte sem fragmentos, dimensões iguais por célula, direção/ação identificadas, alinhamento dos pés e transição de animação sem deformar.
+## Ferramentas disponíveis na área Pixel Art
 
-## Organização segura do GitHub
-- Repositório **GameCreator**: só ferramentas, editores, biblioteca e documentação do editor.
-- Repositório **JOGO-APOENA-AGAR-**: gameplay, NPCs, clima e ecossistema; não copiar o editor inteiro para dentro do jogo.
-- Manter esta mudança em branch/PR para revisão, sem apagar versões antigas nem mesclar automaticamente.
-- Não duplicar módulos Pixel Art: \`pixel-art/index.html\` continua sendo o gerador modular, e \`pixel-art/estudio.html\` é o editor de imagens/sprites do mesmo programa.
+- **Gerador nativo:** o módulo existente de personagens/objetos/mapas continua na V4.0.
+- **Estúdio de spritesheets V4.1:** abre `pixel-art/estudio.html`; permite importar PNG/WebP/JPG, editar transparência, cortar por grade ou manualmente, configurar ações/direções e exportar PNG/JSON.
+- **Editor de mapas 2.5D:** abre `map-editor/index.html`; suporta salvar/reabrir mapas e trabalhar com tilesets.
+- **Biblioteca central:** abre `biblioteca/index.html`; consulta, exporta e restaura recursos/projetos armazenados em IndexedDB.
+- **Itens, receitas e Godot:** abre `integracao/index.html`; valida e exporta o catálogo portátil.
 
-## Testes
-- Sintaxe de \`pixel-art/estudio.js\` com \`node --check\`.
-- Abrir \`index.html\` em tela mobile e acessar o menu Pixel Art; verificar módulos.
-- Importar sprite com 4 quadros, separar grade, remover fundo por cor, testar desfazer e exportar PNG transparente.
-- Exportar JSON e conferir posições do atlas.
-- Testar lançamento dos módulos antigos e da bancada 3D em Windows/Android antes de mesclar.
+As ferramentas Studio e Map Editor usam `shared/creator-bridge.js` quando são abertas pelo menu nativo. Spritesheets e mapas são salvos na biblioteca central e sincronizados com a sessão V4.0. A sincronização é em memória; use **Salvar projeto editável** na aplicação principal para persistir o projeto completo em JSON.
 
-## Malha ajustável e Corte Inteligente (atualização da V4.1)
-- **Malha ajustável:** edite linhas/colunas, deslocamentos, espaçamento X/Y ou toque em **Ajustar divisórias** e arraste cada linha azul individualmente. Toque numa célula para selecionar. Clique em **Separar malha ajustada** para cortar todos os quadros de uma vez.
-- **Corte Inteligente • quadro:** avalia pixels transparentes ou fundo opaco uniforme ligado à borda, identifica a parte central e pequenos fragmentos soltos próximos às margens, mostra uma **prévia** e só modifica os pixels depois de tocar em **Aplicar limpeza**.
-- **Corte Inteligente • todos:** repete a limpeza nos quadros da spritesheet, em grupos pequenos para evitar travamento no Android; quadros incertos são preservados sem apagamento automático.
-- **Desfazer último corte em lote:** restaura todos os quadros ao estado anterior (limite de segurança de 32 MB para backup).
-- **Exportação padronizada:** mantém cada sprite dentro de células PNG com medidas iguais e apoio inferior consistente; JSON identifica ação/direção/célula.
-- **Limite importante:** quando imagens estão fisicamente coladas ou se sobrepõem, não é possível reconstruir o que está atrás delas sem informação adicional. O sistema alerta e exige borracha manual em vez de danificar o personagem. O corte de fundo com gradiente complexo também não é prometido como totalmente automático.
-- **Teste:** \`node tests/corte-inteligente.test.cjs\`; cobre fundo transparente e preto opaco, sobras separadas, toque de figura nas bordas, preservação do original e existência dos controles. A sintaxe de \`pixel-art/estudio.js\` foi verificada; tela Android real ainda exige validação.
+## Corte Inteligente e padronização
+
+- **Malha ajustável:** linhas/colunas, deslocamentos, espaçamento X/Y e divisórias arrastáveis; a separação aplica a malha atual.
+- **Corte Inteligente por quadro:** analisa transparência ou fundo opaco uniforme conectado à borda, mostra prévia e só altera pixels depois de confirmar.
+- **Corte Inteligente em lote:** quadros incertos são preservados; há desfazer de lote com limite de memória.
+- **Exportação:** mantém células padronizadas e manifesto com ação/direção. Exportar PNG/JSON não conecta sozinho as animações ao gameplay.
+
+## Catálogo e Godot
+
+`integracao/catalogo.js` exporta catálogo portátil e valida vínculos de itens/receitas. `integracao/godot/ApoenaCatalogo.gd` carrega catálogo, gerencia inventário, coleta, fabricação temporizada, efeitos consumíveis e sessões. O projeto de teste está em `integracao/godot/project.godot` com script `tests/test_catalogo.gd`.
+
+O workflow executa o teste GDScript quando Godot 4 estiver instalado. Se não estiver, o log marca explicitamente o runtime como não testado; o teste Node cobre apenas o contrato estático e o formato de exportação.
+
+## Assets existentes e limites
+
+Javali, abelha, tronco-colmeia, Apoena, folhas/frutas/árvores, pisos e penhascos: os binários disponíveis da conversa não foram enviados automaticamente ao GitHub. O catálogo `pixel-art/catalogo_assets_agar.json` lista categorias e incorporação; importe os arquivos locais pelo Estúdio quando necessário.
+
+Antes de declarar a V4.1 concluída, valide o fluxo no navegador, teste Android real, faça regressão visual da bancada 3D e importe os pacotes no Godot. A biblioteca do editor não substitui automaticamente o inventário do jogo nem comprova as transições de animação no runtime.
+
+## Organização segura
+
+- Repositório **GameCreator**: editores, biblioteca, ferramentas de exportação e documentação.
+- Repositório **JOGO-APOENA-AGAR-**: gameplay, NPCs, clima e ecossistema.
+- Não apagar a V3.9, V3.9.2 ou V4.0, nem mesclar a V4.1 na `main` antes de passar nos testes e revisar o diff.
+- Testes principais: `tests/corte-inteligente.test.cjs`, `tests/asset-library.test.cjs`, `tests/library-backup.test.cjs`, `tests/tileset-check.test.cjs`, `tests/catalogo.test.cjs` e `tests/creator-bridge.test.cjs`.
