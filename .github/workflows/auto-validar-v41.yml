@@ -1,0 +1,117 @@
+name: Auto-validar Apoena Creator V4.1
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apoena-gamecreator-v41-scheduled-validation
+  cancel-in-progress: true
+
+jobs:
+  validar:
+    name: Validar branch V4.1 sem depender de novas mensagens
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+    steps:
+      - name: Baixar a branch de desenvolvimento
+        uses: actions/checkout@v4
+        with:
+          ref: feature/estudio-unificado-pixelart-v41
+          clean: true
+
+      - name: Preparar ambiente Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Preparar pasta de diagnosticos
+        run: |
+          $ErrorActionPreference = "Stop"
+          New-Item -ItemType Directory -Force -Path ".ci-results" | Out-Null
+          "Validacao agendada: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')" | Set-Content -Encoding UTF8 ".ci-results/scheduled-validation.log"
+          "Commit: $env:GITHUB_SHA" | Add-Content -Encoding UTF8 ".ci-results/scheduled-validation.log"
+
+      - name: Instalar dependencias de teste
+        run: |
+          cmd /c "npm install --no-package-lock --ignore-scripts --no-audit --no-fund > .ci-results\install.log 2>&1"
+          $testCode = $LASTEXITCODE
+          Get-Content ".ci-results/install.log"
+          if ($testCode -ne 0) { exit $testCode }
+
+      - name: Validar sintaxe JavaScript
+        run: |
+          $ErrorActionPreference = "Continue"
+          $commands = @(
+            @{ Name = "syntax-estudio"; Command = "node --check pixel-art/estudio.js" },
+            @{ Name = "syntax-corte"; Command = "node --check pixel-art/corte-inteligente.js" },
+            @{ Name = "syntax-library"; Command = "node --check shared/asset-library.js" },
+            @{ Name = "syntax-tileset"; Command = "node --check shared/tileset-check.js" },
+            @{ Name = "syntax-backup"; Command = "node --check shared/library-backup.js" }
+          )
+          $failed = $false
+          foreach ($item in $commands) {
+            $logPath = ".ci-results/$($item.Name).log"
+            cmd /c "$($item.Command) > $logPath 2>&1"
+            $testCode = $LASTEXITCODE
+            Write-Output "CHECK: $($item.Name) (exit $testCode)"
+            if (Test-Path $logPath) { Get-Content $logPath }
+            if ($testCode -ne 0) { $failed = $true }
+          }
+          if ($failed) { exit 1 }
+
+      - name: Executar testes automatizados
+        run: |
+          $ErrorActionPreference = "Continue"
+          $commands = @(
+            @{ Name = "corte"; Command = "node tests/corte-inteligente.test.cjs" },
+            @{ Name = "tileset"; Command = "node tests/tileset-check.test.cjs" },
+            @{ Name = "library"; Command = "node tests/asset-library.test.cjs" },
+            @{ Name = "library-backup"; Command = "node tests/library-backup.test.cjs" }
+          )
+          $failed = $false
+          foreach ($item in $commands) {
+            $logPath = ".ci-results/$($item.Name).log"
+            cmd /c "$($item.Command) > $logPath 2>&1"
+            $testCode = $LASTEXITCODE
+            Write-Output "TEST: $($item.Name) (exit $testCode)"
+            if (Test-Path $logPath) { Get-Content $logPath }
+            if ($testCode -ne 0) { $failed = $true }
+          }
+          if ($failed) { exit 1 }
+
+      - name: Verificar integridade do Creator
+        run: |
+          $ErrorActionPreference = "Stop"
+          $required = @(
+            "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html",
+            "pixel-art/index.html",
+            "pixel-art/estudio.html",
+            "map-editor/index.html",
+            "integracao/index.html",
+            "legacy/iniciador-anterior.html"
+          )
+          foreach ($path in $required) {
+            if (-not (Test-Path $path)) { throw "Arquivo essencial ausente: $path" }
+          }
+          $index = Get-Content -Raw index.html
+          if ($index -notmatch 'data-page="3d"') { throw "Navegacao 3D nao encontrada." }
+          if ($index -notmatch 'data-page="pixel"') { throw "Navegacao Pixel Art nao encontrada." }
+          $map = Get-Content -Raw map-editor/index.html
+          if ($map -notmatch 'asset-library.js') { throw "Editor de mapas nao carrega a biblioteca central." }
+          "Contratos de preservacao e integracao passaram." | Set-Content -Encoding UTF8 ".ci-results/contracts.log"
+
+      - name: Publicar logs da validacao
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apoena-v41-scheduled-diagnostics
+          path: .ci-results/
+          if-no-files-found: warn
