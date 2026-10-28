@@ -35,11 +35,20 @@ assert.equal(grid.x.length,5);assert.equal(grid.y.length,4);
 for(const axis of [grid.x,grid.y])for(let i=1;i<axis.length;i++)assert.ok(axis[i]>axis[i-1],'divisórias crescentes');
 const html=fs.readFileSync(path.join(__dirname,'../pixel-art/estudio.html'),'utf8');
 const js=fs.readFileSync(path.join(__dirname,'../pixel-art/estudio.js'),'utf8');
+const mapHtml=fs.readFileSync(path.join(__dirname,'../map-editor/index.html'),'utf8');
 assert.doesNotThrow(()=>new Function(js),'script UI válido');
 for(const id of ['meshMode','meshReset','smartSelected','smartAll','smartPanel','smartApply','smartCancel','smartUndoBatch'])
   assert.ok(html.includes('id="'+id+'"'),'falta controle '+id);
 assert.ok(html.indexOf('corte-inteligente.js')<html.indexOf('estudio.js'),'ordem de scripts');
-console.log('CORTE INTELIGENTE OK: malha ajustável, transparência, isolamento, proteção e UI');
+const alphaStart=js.indexOf('function alpha()'),alphaEnd=js.indexOf('function trim()',alphaStart);
+assert.ok(alphaStart>=0&&alphaEnd>alphaStart,'rotina de limpeza de alfa presente');
+assert.match(js.slice(alphaStart,alphaEnd),/saveUndo\\(\\)/,'limpeza de alfa permite desfazer');
+assert.ok(mapHtml.includes('<script src="../shared/asset-library.js"></script>'),'editor de mapas carrega a biblioteca compartilhada');
+for(const id of ['saveMapLibrary','libraryMaps','loadMapLibrary'])
+  assert.ok(mapHtml.includes('id="'+id+'"'),'falta controle de mapas na biblioteca: '+id);
+assert.ok(mapHtml.includes('ApoenaLibrary.saveProject')&&mapHtml.includes('ApoenaLibrary.getProject'),'mapas podem ser salvos e reabertos pela biblioteca central');
+console.log('CORTE INTELIGENTE OK: malha ajustável, transparência, isolamento, proteção, desfazer e UI');
+console.log('MAPAS/BIBLIOTECA OK: biblioteca carregada e salvar/reabrir projeto conectados');
 
 /* Regressão da integração: todos os módulos apontados pelo menu unificado devem existir. */
 const root=path.join(__dirname,'..');
