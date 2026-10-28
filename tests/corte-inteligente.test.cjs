@@ -40,3 +40,21 @@ for(const id of ['meshMode','meshReset','smartSelected','smartAll','smartPanel',
   assert.ok(html.includes('id="'+id+'"'),'falta controle '+id);
 assert.ok(html.indexOf('corte-inteligente.js')<html.indexOf('estudio.js'),'ordem de scripts');
 console.log('CORTE INTELIGENTE OK: malha ajustável, transparência, isolamento, proteção e UI');
+
+/* Regressão da integração: todos os módulos apontados pelo menu unificado devem existir. */
+const root=path.join(__dirname,'..');
+const shell=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const modulePaths=[
+  'APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html',
+  'pixel-art/estudio.html',
+  'pixel-art/index.html',
+  'map-editor/index.html',
+  'integracao/index.html',
+  'legacy/iniciador-anterior.html',
+  'ORGANIZACAO_EDITOR.html'
+];
+for(const file of modulePaths)assert.ok(fs.existsSync(path.join(root,file)),'módulo do menu ausente: '+file);
+assert.ok(shell.includes('data-page="3d"')&&shell.includes('data-page="pixel"'),'menu unificado incompleto');
+assert.ok(shell.includes('data-page="animais"')&&shell.includes('data-page="cenario"')&&shell.includes('data-page="efeitos"'),'categorias de assets ausentes');
+assert.ok(shell.includes('data-page="mapa"')&&shell.includes('data-page="itens"'),'módulos existentes não integrados');
+console.log('INTEGRAÇÃO V4.1 OK: destinos do menu e módulos preservados');
