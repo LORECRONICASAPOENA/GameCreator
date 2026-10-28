@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 require("fake-indexeddb/auto");
 const ApoenaLibrary = require("../shared/asset-library.js");
+assert.ok(globalThis.indexedDB, "teste usa IndexedDB simulado, não o fallback de memória");
 
 async function main() {
   const source = new Blob(["original-source"], { type: "image/png" });
