@@ -1,0 +1,247 @@
+/* Mapa 2.5D nativo na aba Pixel Art do Game Creator. Sem iframe ou navegador adicional. */
+window.ApoenaMapaIntegrado={mount(container){
+ if(container.shadowRoot)return container.shadowRoot;
+ const mapRoot=container.attachShadow({mode:"open"});
+ const css=":host{display:block;min-height:100%;background:#0e1b29;color:#ebf6fa;font:14px system-ui,Arial} \n:root{color-scheme:dark;--bg:#0b1725;--panel:#162b3d;--line:#365567;--txt:#eef8fc;--muted:#bad0dc;--aqua:#8be1da;--gold:#e9cc8b}\n*{box-sizing:border-box}:host{margin:0;background:var(--bg);color:var(--txt);font:14px system-ui,Arial,sans-serif}h1,h2,p{margin:0}h1{font-size:21px;color:var(--gold)}h2{font-size:15px;color:var(--gold);margin:0 0 9px}\nheader{padding:12px 15px;border-bottom:1px solid var(--line);background:#102435;display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}header a{color:var(--aqua)}small,.muted{color:var(--muted);line-height:1.5}.kicker{font-size:11px;letter-spacing:1.3px;color:var(--aqua);font-weight:700}\nbutton,.button{background:#294557;color:var(--txt);border:1px solid #4b6879;border-radius:8px;padding:9px 11px;cursor:pointer;min-height:40px;font:600 13px system-ui}button.primary,.button.primary{color:#09232b;background:var(--aqua);border-color:var(--aqua)}button.selected{background:#766034;border-color:#f5d28e;color:white}button:disabled{opacity:.45}input,select{background:#0e2030;color:white;border:1px solid var(--line);border-radius:7px;padding:8px;font:inherit}input[type=\"number\"]{width:77px}input[type=\"file\"]{display:none}\nlabel{color:var(--muted);font-size:12px;display:inline-flex;align-items:center;gap:5px}.file{display:inline-flex;align-items:center;justify-content:center;background:#294557;border:1px solid #4b6879;border-radius:8px;padding:9px 11px;min-height:40px;color:white;cursor:pointer;font-weight:600;font-size:13px}\n.layout{display:grid;grid-template-columns:244px minmax(0,1fr) 234px;gap:11px;padding:11px;max-width:1650px;margin:auto}.panel{background:var(--panel);border:1px solid var(--line);padding:11px;border-radius:11px;min-width:0}.controls{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0 12px}.controls button,.controls .file{flex:1 1 auto}.fields{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.stagebox{padding:8px;overflow:hidden;border-radius:11px;border:1px solid var(--line);background:#0f1c2a;min-width:0}\n.stagehead{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}.stagehead strong{color:var(--gold)}#stage{width:100%;display:block;image-rendering:pixelated;touch-action:none;background:#365a43;border:1px solid #476477;border-radius:7px;cursor:crosshair;aspect-ratio:8/5}#minimap{display:block;image-rendering:pixelated;width:100%;max-width:205px;aspect-ratio:1;background:#345a43;border:1px solid #52707e;border-radius:6px;margin:7px auto}\n#sheet{width:100%;max-height:205px;object-fit:contain;image-rendering:pixelated;background:repeating-conic-gradient(#24394a 0 25%,#142637 0 50%) 0 0/14px 14px;border:1px solid #5e7180;cursor:crosshair;display:block;min-height:105px}\n#assetlist{max-height:245px;overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.asset{min-width:0;display:grid;justify-items:center;gap:2px;padding:6px}.asset img{width:58px;height:62px;object-fit:contain;image-rendering:pixelated}.asset small{font-size:10px;text-align:center;word-break:break-word}.asset.selected{border-color:var(--gold)}\n#msg{background:#102635;color:#bde5df;padding:9px;border:1px solid #34616b;border-radius:8px;min-height:42px;line-height:1.5}details{margin-top:12px}details summary{cursor:pointer;color:var(--gold);font-weight:650}.divider{border-top:1px solid var(--line);margin:13px 0}\n.chips{display:flex;gap:5px;flex-wrap:wrap}.chips button{min-height:38px;flex:1}#stats{font-size:12px;line-height:1.7;color:#cfdee4}\n@media(max-width:950px){.layout{grid-template-columns:200px minmax(0,1fr)}.right{grid-column:1/-1}.rightinside{display:grid;grid-template-columns:1fr 1fr;gap:14px}#minimap{max-width:155px}}\n@media(max-width:650px){header{padding:10px}.layout{display:flex;flex-direction:column;gap:8px;padding:8px}.left{order:2}.stagebox{order:1}.right{order:3}.rightinside{display:block}.controls{margin:6px 0}.controls button{min-height:40px}#stage{aspect-ratio:8/5}.stagehead{font-size:12px}#assetlist{grid-template-columns:repeat(4,minmax(0,1fr));max-height:200px}.asset img{max-width:100%;height:48px}#sheet{max-height:160px}}\n";
+ const html="\n<header>\n <div><div class=\"kicker\">APOENA AGAR · GAMECREATOR · MAPA 01</div><h1>Editor de Mapas Pixel Art 2.5D</h1><small>Monte o cenário, importe seus PNGs e teste o encaixe antes de levar ao jogo.</small></div>\n <div class=\"controls\"><span class=\"muted\">Módulo Pixel Art do Game Creator</span><button id=\"save\" class=\"primary\">Salvar projeto JSON</button><label class=\"file\">Abrir projeto<input id=\"load\" type=\"file\" accept=\".json,application/json\"></label><button id=\"png\">Exportar mapa PNG</button></div>\n</header>\n<div class=\"layout\">\n <aside class=\"panel left\">\n  <h2>1 · Pincel e terreno</h2><div class=\"controls\" id=\"tools\">\n   <button data-tool=\"paint\" class=\"selected\">✎ Pintar</button><button data-tool=\"erase\">⌫ Apagar</button><button data-tool=\"fill\">▨ Preencher</button><button data-tool=\"pan\">✥ Mover câmera</button><button data-tool=\"raise\">⛰ Elevar terreno</button><button data-tool=\"lower\">▽ Rebaixar terreno</button>\n  </div>\n  <div class=\"chips\" id=\"terrains\">\n   <button data-terrain=\"0\" class=\"selected\">🌿 Grama</button><button data-terrain=\"1\">🟫 Caminho automático</button><button data-terrain=\"2\">🪨 Pedra</button><button data-terrain=\"3\">💧 Água</button>\n  </div>\n  <p class=\"muted\" style=\"font-size:12px;margin:7px 0\">Caminhos unem-se automaticamente no editor. O atlas importado também pode ser pintado peça a peça.</p>\n  <div class=\"fields\"><label>Tamanho do pincel <select id=\"brush\"><option value=\"1\">1 bloco</option><option value=\"3\" selected>3 × 3</option><option value=\"5\">5 × 5</option></select></label></div>\n  <div class=\"divider\"></div>\n  <h2>2 · Importar sua folha de terreno</h2>\n  <label class=\"file\">＋ Importar tileset PNG<input id=\"sheetfile\" type=\"file\" accept=\"image/png,image/webp\"></label>\n  <p class=\"muted\" style=\"font-size:12px;margin:7px 0\">Para tiles de 32 × 32, selecione um quadradinho da folha abaixo; ele vira seu pincel. Aceita PNG de 128 × 128, 256 × 256 e maiores.</p>\n  <canvas id=\"sheet\" width=\"256\" height=\"160\" title=\"Clique para escolher um bloco\"></canvas>\n  <div class=\"controls\"><button id=\"useAtlas\" disabled>Usar tile selecionado</button><button id=\"clearAtlas\">Voltar aos terrenos</button></div>\n  <div class=\"fields\" style=\"margin:7px 0\"><label>Colunas <input id=\"sheetCols\" type=\"number\" min=\"1\" max=\"32\" value=\"6\"></label><label>Linhas <input id=\"sheetRows\" type=\"number\" min=\"1\" max=\"32\" value=\"4\"></label></div><label style=\"display:block;margin:9px 0 4px\">Tipo de folha importada</label><select id=\"sheetProfile\" style=\"width:100%\"><option value=\"agar24\">Apoena — 6×4 (grama, terra, rio, pontes, rochas)</option><option value=\"grass16\">Grama e terra — 4×4</option><option value=\"manual\">Folha personalizada — pintura manual</option></select><label style=\"margin:6px 0\"><input id=\"smartTile\" type=\"checkbox\" checked> Conexões automáticas de terreno</label><button id=\"inspectTile\" style=\"width:100%\">Identificar peça selecionada</button><div id=\"sheetInfo\" class=\"muted\" style=\"font-size:12px\">Nenhuma folha importada.</div>\n  <div class=\"divider\"></div>\n  <h2>3 · Objetos 2.5D</h2>\n  <label class=\"file\">＋ Importar árvores, rochas, torres<input id=\"objectsfile\" type=\"file\" accept=\"image/png,image/webp\" multiple></label>\n  <p class=\"muted\" style=\"font-size:12px;margin:7px 0\">PNG com transparência recomendado. Selecione um objeto e toque no mapa para colocá-lo. Use Apagar para removê-lo.</p>\n  <div id=\"assetlist\"></div>\n  <div class=\"controls\"><button id=\"objectMode\">Selecionar objeto</button><button id=\"moveObject\">Mover objeto</button><button id=\"grow\">Objeto +</button><button id=\"shrink\">Objeto −</button></div>\n </aside>\n <section class=\"stagebox\">\n   <div class=\"stagehead\">\n    <strong>Prévia do mapa editável</strong>\n    <div class=\"controls\" style=\"margin:0\"><button id=\"undo\">↶</button><button id=\"redo\">↷</button><button id=\"zoomout\">− Zoom</button><button id=\"zoomin\">+ Zoom</button><button id=\"center\">Centralizar</button></div>\n   </div>\n   <canvas id=\"stage\" width=\"960\" height=\"600\" aria-label=\"Área de pintura do mapa MOBA\"></canvas>\n   <small>Toque e arraste para pintar. Selecione Mover câmera para percorrer o mapa. No computador, use a roda do mouse para ampliar. Caminhos e grama são provisórios até importar a arte final.</small>\n   <div class=\"controls\"><label><input id=\"grid\" type=\"checkbox\" checked> Mostrar grade</label><label><input id=\"markers\" type=\"checkbox\" checked> Mostrar bases e torres</label><label><input id=\"showHeights\" type=\"checkbox\" checked> Mostrar relevo 2.5D</label></div>\n   <div id=\"msg\" role=\"status\">Mapa de teste carregado. Selecione Caminho automático e arraste para desenhar rotas como no RPG Maker.</div>\n </section>\n <aside class=\"panel right\"><div class=\"rightinside\">\n  <div>\n   <h2>4 · Estrutura MOBA</h2>\n   <div class=\"fields\"><label>Largura <input id=\"width\" type=\"number\" min=\"16\" max=\"160\" value=\"80\"></label><label>Altura <input id=\"height\" type=\"number\" min=\"16\" max=\"160\" value=\"80\"></label></div>\n   <div class=\"controls\"><button id=\"preset\" class=\"primary\">Criar mapa com 3 rotas</button><button id=\"empty\">Mapa vazio</button></div>\n   <label style=\"display:block\">Marcar no mapa</label><div class=\"fields\"><select id=\"markkind\"><option value=\"blue_tower\">Torre azul</option><option value=\"red_tower\">Torre vermelha</option><option value=\"blue_base\">Base azul</option><option value=\"red_base\">Base vermelha</option><option value=\"cave\">Caverna</option></select><button id=\"markMode\">Adicionar marcador</button></div>\n   <p class=\"muted\" style=\"font-size:12px;margin:9px 0\">Marcadores são posições de projeto, não torres com combate implementado.</p>\n   <h2>Visão geral</h2><canvas id=\"minimap\" width=\"200\" height=\"200\"></canvas>\n  </div>\n  <div>\n   <h2>Dados do projeto</h2><div id=\"stats\"></div><div class=\"divider\"></div>\n   <div class=\"controls\"><button id=\"exportJSON\" class=\"primary\">Exportar para o jogo (JSON)</button></div>\n   <p class=\"muted\" style=\"font-size:12px\">O JSON guarda tiles, objetos, atlas e marcadores. Pode ser importado de volta neste editor. A conexão dele com TileMapLayer no Godot e com a partida HTML ainda é a próxima integração.</p>\n   <details><summary>Como usar sem perder nada</summary>\n    <p class=\"muted\" style=\"margin:9px 0\">1. Importe seus PNGs de chão. 2. Pinte o terreno. 3. Adicione árvores, rochas e montanhas. 4. Clique em Salvar projeto JSON. 5. Abra depois usando Abrir projeto. 6. Exporte PNG para avaliar o visual.</p>\n    <p class=\"muted\">O navegador tenta guardar um rascunho local, mas não substitui o download do projeto. Seus arquivos ficam no dispositivo; não são enviados para um servidor.</p></details>\n  </div>\n </div></aside>\n</div>\n";
+ mapRoot.innerHTML='<style>'+css+'</style>'+html;
+ 
+(function(){
+'use strict';
+const $=id=>mapRoot.getElementById(id);
+const TILE=32,MAX=160,stage=$('stage'),ctx=stage.getContext('2d'),mini=$('minimap'),mx=mini.getContext('2d'),sh=$('sheet'),sx=sh.getContext('2d');
+ctx.imageSmoothingEnabled=false;mx.imageSmoothingEnabled=false;sx.imageSmoothingEnabled=false;
+let width=80,height=80,cells=[],heights=[],objects=[],assets=[],markers=[],sheetSrc='',sheetImg=null,selectedTile=0,sheetCols=6,sheetRows=4,sheetProfile='agar24',smartTile=true,showHeights=true,assetImages={};
+let movingObject=null,tool='paint',terrain=0,mode='terrain',selectedAsset='',objectScale=1,showGrid=true,showMarkers=true,zoom=.72,cam={x:0,y:0},dragging=false,panStart=null,lastCell=-1,history=[],redo=[],dirty=false,renderPending=false;
+const colors=['#52794b','#b29763','#8c8e86','#4687aa'];
+const sheetLabels=['Grama florida','Grama com variações','Pedra com musgo','Água azul','Água turquesa','Terra batida','Margem: grama acima','Margem: grama à direita','Margem: grama abaixo','Margem: grama à esquerda','Ponte horizontal sobre rio','Ponte vertical sobre rio','Curva de rio 1','Curva de rio 2','Curva de rio 3','Curva de rio 4','Ponte com margens (esquerda)','Ponte com margens (direita)','Curva de margem 5','Curva de margem 6','Curva de margem 7','Curva de margem 8','Penhasco rochoso 1','Penhasco rochoso 2'];
+function profileCols(){return sheetProfile==='agar24'?[6,4]:sheetProfile==='grass16'?[4,4]:[sheetCols,sheetRows]}
+function terrainBase(t){return sheetProfile==='agar24'?[0,5,2,3][t]:sheetProfile==='grass16'?[0,3,0,0][t]:-1}
+function say(t){$('msg').textContent=t}
+function idx(x,y){return y*width+x}
+function inside(x,y){return x>=0&&y>=0&&x<width&&y<height}
+function terrainAt(x,y){return inside(x,y)?cells[idx(x,y)]:-1}
+function elevationAt(x,y){return inside(x,y)?(heights[idx(x,y)]||0):0}
+function sourceRect(k){if(!sheetImg)return null;const cols=Math.max(1,sheetCols),rows=Math.max(1,sheetRows);const cellW=sheetImg.width/cols,cellH=sheetImg.height/rows;return {sx:(k%cols)*cellW,sy:Math.floor(k/cols)*cellH,w:cellW,h:cellH}}
+function drawSource(gc,k,x,y,w=TILE,h=TILE){let r=sourceRect(k);if(r&&r.sy<sheetImg.height)gc.drawImage(sheetImg,r.sx,r.sy,r.w,r.h,x,y,w,h)}
+function random(x,y){let n=Math.imul(x+47,374761393)^Math.imul(y+71,668265263);n=Math.imul(n^(n>>>13),1274126177);return (n^(n>>>16))>>>0}
+function snapshot(){return JSON.stringify({width,height,cells,heights,objects,markers})}
+function remember(){history.push(snapshot());if(history.length>30)history.shift();redo.length=0}
+function restore(text){let v=JSON.parse(text);width=v.width;height=v.height;cells=v.cells;heights=v.heights||Array(width*height).fill(0);objects=v.objects;markers=v.markers;$('width').value=width;$('height').value=height;drawSoon();scheduleSave()}
+function undoStep(){if(!history.length)return;redo.push(snapshot());restore(history.pop());say('Desfeito.')}
+function redoStep(){if(!redo.length)return;history.push(snapshot());restore(redo.pop());say('Refeito.')}
+function makeBlank(w,h){width=Math.max(16,Math.min(MAX,Math.round(w)||80));height=Math.max(16,Math.min(MAX,Math.round(h)||80));cells=Array(width*height).fill(0);heights=Array(width*height).fill(0);objects=[];markers=[];$('width').value=width;$('height').value=height;cam={x:width*TILE/2,y:height*TILE/2};drawSoon();scheduleSave()}
+function line(a,b,paint){let x=a[0],y=a[1],x2=b[0],y2=b[1],dx=Math.abs(x2-x),dy=Math.abs(y2-y),sx0=x<x2?1:-1,sy0=y<y2?1:-1,err=dx-dy;while(true){paint(x,y);if(x===x2&&y===y2)break;let e=2*err;if(e>-dy){err-=dy;x+=sx0}if(e<dx){err+=dx;y+=sy0}}}
+function paintTile(x,y,r=1,v=terrain){let span=Math.floor(r/2);for(let dy=-span;dy<=span;dy++)for(let dx=-span;dx<=span;dx++){let px=x+dx,py=y+dy;if(inside(px,py))cells[idx(px,py)]=v}}
+function route(points,r=3){for(let k=1;k<points.length;k++)line(points[k-1],points[k],(x,y)=>paintTile(x,y,r,1))}
+function makePreset(){remember();makeBlank(+$('width').value,+$('height').value);const X=(v)=>Math.round(v*(width-1)),Y=(v)=>Math.round(v*(height-1));
+ // Margens elevadas, rio e três rotas; desenho preliminar editável.
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++){if(x<3||y<3||x>=width-3||y>=height-3)cells[idx(x,y)]=2}
+ for(let y=0;y<height;y++){const x=X(.49+Math.sin(y*.21)*.028);paintTile(x,y,2,3)}
+ const upper=[[.12,.85],[.12,.62],[.12,.25],[.23,.12],[.55,.12],[.86,.12]];
+ const mid=[[.12,.85],[.31,.66],[.5,.49],[.69,.31],[.86,.12]];
+ const low=[[.12,.85],[.42,.87],[.72,.87],[.86,.73],[.86,.12]];
+ for(const r of [upper,mid,low])route(r.map(p=>[X(p[0]),Y(p[1])]));
+ markers=[{kind:'blue_base',x:X(.12),y:Y(.85)},{kind:'red_base',x:X(.86),y:Y(.12)},{kind:'cave',x:X(.56),y:Y(.56)}];
+ // 3 torres por equipe em cada rota: 18 posições.
+ const all=[upper,mid,low];for(let lane=0;lane<3;lane++){let r=all[lane];for(let t=1;t<=3;t++){let p=r[t],q=r[r.length-1-t];markers.push({kind:'blue_tower',x:X(p[0]),y:Y(p[1])});markers.push({kind:'red_tower',x:X(q[0]),y:Y(q[1])})}}
+ cam={x:width*TILE*.5,y:height*TILE*.5};drawSoon();scheduleSave();say('Mapa MOBA com três rotas e 18 marcadores de torres criado. Ajuste pintando os caminhos.')}
+function notifyChange(){dirty=true;drawSoon();scheduleSave()}
+function scheduleSave(){dirty=true}
+function autoDirt(gc,x,y){let px=x*TILE,py=y*TILE;gc.fillStyle=colors[1];let n=terrainAt(x,y-1)===1,e=terrainAt(x+1,y)===1,s=terrainAt(x,y+1)===1,w=terrainAt(x-1,y)===1;
+ // Centro e conectores mantêm continuidade automática nas quatro direções.
+ gc.fillRect(px+6,py+6,20,20);
+ if(n)gc.fillRect(px+6,py,20,12);if(s)gc.fillRect(px+6,py+20,20,12);
+ if(w)gc.fillRect(px,py+6,12,20);if(e)gc.fillRect(px+20,py+6,12,20);
+ if(n&&w)gc.fillRect(px,py,12,12);if(n&&e)gc.fillRect(px+20,py,12,12);
+ if(s&&w)gc.fillRect(px,py+20,12,12);if(s&&e)gc.fillRect(px+20,py+20,12,12);
+ gc.fillStyle='#c6ab77';if(random(x,y)%3===0)gc.fillRect(px+14,py+15,3,2);
+}
+function drawRoundedLayer(gc,x,y,target,colorRole){
+ // Mantém a textura original apenas onde o caminho ocupa um quadrado e as bordas arredondadas.
+ const px=x*TILE,py=y*TILE,neighbor=(dx,dy)=>terrainAt(x+dx,y+dy)===target;
+ let isTarget=terrainAt(x,y)===target;
+ if(!isTarget&&![-1,1].some(d=>neighbor(d,0)||neighbor(0,d)||neighbor(d,d)||neighbor(d,-d)))return;
+ gc.save();gc.beginPath();
+ for(let yy=-1;yy<=1;yy++)for(let xx=-1;xx<=1;xx++)if(neighbor(xx,yy)){
+   // tile com 32 pixels: bordas suaves e conexão entre vizinhos
+   const cx=(x+xx)*TILE+16,cy=(y+yy)*TILE+16;
+   gc.moveTo(cx+22,cy);gc.arc(cx,cy,22,0,Math.PI*2);
+ }
+ gc.clip();
+ drawSource(gc,colorRole,px,py);
+ gc.restore();
+}
+function smartWaterTile(x,y){
+ // Escolhe a margem existente para cada orientação.
+ const n=terrainAt(x,y-1)!==3,e=terrainAt(x+1,y)!==3,s=terrainAt(x,y+1)!==3,w=terrainAt(x-1,y)!==3;
+ const edges=Number(n)+Number(e)+Number(s)+Number(w);
+ if(edges===0)return random(x,y)%4===0?4:3;
+ if(edges===1)return n?6:e?7:s?8:9;
+ if(n&&e)return 12;if(e&&s)return 13;if(s&&w)return 14;if(w&&n)return 15;
+ return n?6:e?7:s?8:9;
+}
+function backgroundTile(gc,x,y){
+ const v=terrainAt(x,y),px=x*TILE,py=y*TILE-(showHeights?elevationAt(x,y)*12:0);
+ gc.save();gc.translate(0,py-y*TILE);
+ if(sheetImg&&smartTile&&sheetProfile==='agar24'&&v>=0&&v<4){
+   if(v===3)drawSource(gc,smartWaterTile(x,y),px,y*TILE);
+   else if(v===1){
+      drawSource(gc,5,px,y*TILE);
+   }else if(v===2){drawSource(gc,2,px,y*TILE)}
+   else{
+      drawSource(gc,random(x,y)%4===0?1:0,px,y*TILE);
+      drawRoundedLayer(gc,x,y,1,5);
+   }
+ }else if(sheetImg&&smartTile&&sheetProfile==='grass16'&&(v===0||v===1)){
+   drawSource(gc,random(x,y)%7===0?2:random(x,y)%3===0?1:0,px,y*TILE);
+   if(v===1)drawSource(gc,3,px,y*TILE);
+   else drawRoundedLayer(gc,x,y,1,3);
+ }else{
+   gc.fillStyle=['#52794b','#53784a','#81877c','#477f9d'][v===1?1:v===2?2:v===3?3:0]||'#52794b';gc.fillRect(px,y*TILE,TILE,TILE);
+   if(v===1)autoDirt(gc,x,y);
+   if(v===0){gc.fillStyle=random(x,y)%2?'#608659':'#628453';gc.fillRect(px+random(x,y)%23,y*TILE+((random(x,y)>>>8)%23),3,4)}
+   if(v===2){gc.fillStyle='#b3aea0';gc.fillRect(px+2,y*TILE+2,28,5);gc.fillStyle='#59615d';gc.fillRect(px+3,y*TILE+26,26,4)}
+   if(v===3){gc.fillStyle='#62a6be';gc.fillRect(px+3,y*TILE+8,13,3);gc.fillRect(px+19,y*TILE+24,8,2)}
+ }
+ if(v>=1000&&sheetImg)drawSource(gc,v-1000,px,y*TILE);
+ gc.restore()
+}
+function drawCliff(gc,x,y){
+ if(!showHeights)return;
+ const h=elevationAt(x,y),south=elevationAt(x,y+1);
+ if(h<=south)return;
+ const top=(y+1)*TILE-h*12,bottom=(y+1)*TILE-south*12,px=x*TILE,d=bottom-top;
+ if(sheetImg&&sheetProfile==='agar24'){
+   // Fontes 22/23 são paredes rochosas. Alongamento limitado à altura local.
+   gc.save();gc.beginPath();gc.rect(px,top,TILE,d);gc.clip();
+   drawSource(gc,random(x,y)%2?22:23,px,top-11,TILE,Math.max(44,d+15));
+   gc.restore();
+ }else{
+   gc.fillStyle='#595c56';gc.fillRect(px,top,TILE,d);gc.fillStyle='#8f9084';gc.fillRect(px,top,TILE,4);
+   gc.fillStyle='#393e3b';gc.fillRect(px,bottom-3,TILE,3);
+   for(let z=0;z<d;z+=11){const seed=random(x,y+z);gc.fillStyle=z%22===0?'#a29f92':'#747971';gc.fillRect(px+(seed%21),top+z+5,8,3)}
+ }
+}
+function drawMap(gc,rect){const x0=Math.max(0,Math.floor(rect.x/TILE)),y0=Math.max(0,Math.floor(rect.y/TILE));
+ const x1=Math.min(width-1,Math.ceil((rect.x+rect.w)/TILE)),y1=Math.min(height-1,Math.ceil((rect.y+rect.h)/TILE));
+ // Rendering uses the main drawing context; export temporarily swaps it through a separate routine.
+ for(let y=Math.max(0,y0-4);y<=y1;y++)for(let x=x0;x<=x1;x++)backgroundTile(gc,x,y);
+ for(let y=Math.max(0,y0-4);y<=y1;y++)for(let x=x0;x<=x1;x++)drawCliff(gc,x,y);
+ if(showGrid&&gc===ctx&&zoom>=.45){gc.strokeStyle='#00000024';gc.lineWidth=1;gc.beginPath();for(let x=x0;x<=x1+1;x++){gc.moveTo(x*TILE,y0*TILE);gc.lineTo(x*TILE,(y1+1)*TILE)}for(let y=y0;y<=y1+1;y++){gc.moveTo(x0*TILE,y*TILE);gc.lineTo((x1+1)*TILE,y*TILE)}gc.stroke()}
+ const sorted=objects.slice().sort((a,b)=>(a.layer||0)-(b.layer||0)||a.y-b.y);
+ for(const o of sorted){let a=assets.find(v=>v.id===o.asset),im=a&&assetImages[a.id];if(!im||!im.complete||!im.naturalWidth)continue;
+ let ww=Math.min(320,im.naturalWidth)*o.scale,hh=Math.min(320,im.naturalHeight)*o.scale;
+ let px=o.x*TILE+TILE/2,py=o.y*TILE+TILE/2;
+ if(px+ww/2<rect.x||px-ww/2>rect.x+rect.w||py-hh>rect.y+rect.h||py<rect.y)continue;
+ gc.fillStyle='#00000044';gc.fillRect(px-ww*.35,py-3,ww*.7,4);gc.drawImage(im,Math.round(px-ww/2),Math.round(py-hh),Math.round(ww),Math.round(hh));
+ }
+ if(showMarkers)for(const m of markers){const px=m.x*TILE+16,py=m.y*TILE+16;if(px<rect.x-24||px>rect.x+rect.w+24||py<rect.y-24||py>rect.y+rect.h+24)continue;
+ const blue=m.kind.startsWith('blue'),red=m.kind.startsWith('red');gc.fillStyle=blue?'#46bafa':red?'#f06d66':'#b58cfa';gc.strokeStyle='#17222b';gc.lineWidth=2;gc.beginPath();gc.arc(px,py,8,0,Math.PI*2);gc.fill();gc.stroke();gc.fillStyle='#081520';gc.font='bold 11px system-ui';gc.textAlign='center';gc.fillText(m.kind.includes('base')?'B':m.kind==='cave'?'C':'T',px,py+4)}
+}
+function render(){renderPending=false;ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#223c33';ctx.fillRect(0,0,stage.width,stage.height);ctx.setTransform(zoom,0,0,zoom,stage.width/2-cam.x*zoom,stage.height/2-cam.y*zoom);
+ const rect={x:cam.x-stage.width/(2*zoom),y:cam.y-stage.height/(2*zoom),w:stage.width/zoom,h:stage.height/zoom};
+ drawMap(ctx,rect);ctx.setTransform(1,0,0,1,0,0);drawMinimap();updateStats()}
+function drawSoon(){if(!renderPending){renderPending=true;requestAnimationFrame(render)}}
+function drawMinimap(){mx.fillStyle='#4d774e';mx.fillRect(0,0,mini.width,mini.height);const sx0=mini.width/width,sy0=mini.height/height;
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++){let v=cells[idx(x,y)];mx.fillStyle=v===1?'#bea272':v===2?'#91958a':v===3?'#4d96b7':'#4f7b4b';mx.fillRect(Math.floor(x*sx0),Math.floor(y*sy0),Math.ceil(sx0),Math.ceil(sy0))}
+ for(const m of markers){mx.fillStyle=m.kind.startsWith('blue')?'#69d6ff':m.kind.startsWith('red')?'#ff8076':'#c99bff';mx.fillRect(m.x*sx0-2,m.y*sy0-2,4,4)}
+ mx.strokeStyle='#f0e4af';mx.lineWidth=2;mx.strokeRect((cam.x-stage.width/(2*zoom))/(width*TILE)*mini.width,(cam.y-stage.height/(2*zoom))/(height*TILE)*mini.height,stage.width/zoom/(width*TILE)*mini.width,stage.height/zoom/(height*TILE)*mini.height)}
+function updateStats(){$('stats').textContent=width+' × '+height+' blocos de '+TILE+' px · '+objects.length+' objetos · '+markers.filter(m=>m.kind.includes('tower')).length+' torres · '+heights.filter(h=>h>0).length+' blocos elevados · '+assets.length+' PNGs importados'}
+function coord(ev){const r=stage.getBoundingClientRect();let xx=(ev.clientX-r.left)*stage.width/r.width,yy=(ev.clientY-r.top)*stage.height/r.height;let wx=cam.x+(xx-stage.width/2)/zoom,wy=cam.y+(yy-stage.height/2)/zoom;return {x:Math.floor(wx/TILE),y:Math.floor(wy/TILE),wx,wy}}
+function doAction(p,first=false){if(!inside(p.x,p.y))return;if(tool==='pan'||tool==='moveobject')return;const key=idx(p.x,p.y);if(key===lastCell&&!first)return;lastCell=key;
+ if(tool==='raise'||tool==='lower'){const span=Math.floor(+$('brush').value/2),delta=tool==='raise'?1:-1;for(let yy=p.y-span;yy<=p.y+span;yy++)for(let xx=p.x-span;xx<=p.x+span;xx++)if(inside(xx,yy)){const k=idx(xx,yy);heights[k]=Math.min(4,Math.max(0,(heights[k]||0)+delta))}notifyChange();return}
+ if(tool==='fill'){const old=cells[key],val=mode==='atlas'?1000+selectedTile:terrain;if(old===val)return;let q=[key],head=0;cells[key]=val;while(head<q.length){let n=q[head++],x=n%width,y=n/width|0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){let xx=x+dx,yy=y+dy,k=idx(xx,yy);if(inside(xx,yy)&&cells[k]===old){cells[k]=val;q.push(k)}}}notifyChange();return}
+ if(tool==='erase'){if(mode==='object'){let j=objects.findLastIndex(o=>Math.abs(o.x-p.x)<2&&Math.abs(o.y-p.y)<2);if(j>=0)objects.splice(j,1)}else if(mode==='marker'){let j=markers.findLastIndex(o=>Math.abs(o.x-p.x)<2&&Math.abs(o.y-p.y)<2);if(j>=0)markers.splice(j,1)}else paintTile(p.x,p.y,+$('brush').value,0)}
+ else if(mode==='object'&&selectedAsset){objects.push({asset:selectedAsset,x:p.x,y:p.y,scale:objectScale,layer:1});dragging=false}
+ else if(mode==='marker'){markers.push({kind:$('markkind').value,x:p.x,y:p.y});dragging=false}
+ else paintTile(p.x,p.y,+$('brush').value,mode==='atlas'?1000+selectedTile:terrain);
+ notifyChange()}
+stage.addEventListener('pointerdown',e=>{e.preventDefault();dragging=true;lastCell=-1;stage.setPointerCapture(e.pointerId);if(tool==='pan'){panStart={x:e.clientX,y:e.clientY,cx:cam.x,cy:cam.y};return}remember();if(tool==='moveobject'){let p=coord(e);movingObject=objects.slice().reverse().find(o=>Math.abs(o.x-p.x)<2&&Math.abs(o.y-p.y)<2)||null;if(!movingObject){history.pop();say('Toque próximo ao pé de um objeto para movê-lo.')}return}doAction(coord(e),true)});
+stage.addEventListener('pointermove',e=>{if(!dragging)return;e.preventDefault();if(tool==='pan'){const r=stage.getBoundingClientRect();cam.x=panStart.cx-(e.clientX-panStart.x)*stage.width/r.width/zoom;cam.y=panStart.cy-(e.clientY-panStart.y)*stage.height/r.height/zoom;drawSoon()}else if(tool==='moveobject'&&movingObject){let p=coord(e);if(inside(p.x,p.y)){movingObject.x=p.x;movingObject.y=p.y;notifyChange()}}else if(mode!=='object'&&mode!=='marker'&&tool!=='fill')doAction(coord(e))});
+function release(){dragging=false;panStart=null;lastCell=-1;movingObject=null}
+stage.addEventListener('pointerup',release);stage.addEventListener('pointercancel',release);stage.addEventListener('lostpointercapture',release);
+stage.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.22,Math.min(3.5,zoom*(e.deltaY<0?1.15:.87)));drawSoon()},{passive:false});
+mini.addEventListener('pointerdown',e=>{let r=mini.getBoundingClientRect();cam.x=Math.max(0,Math.min(width*TILE,(e.clientX-r.left)/r.width*width*TILE));cam.y=Math.max(0,Math.min(height*TILE,(e.clientY-r.top)/r.height*height*TILE));drawSoon()});
+function selectTool(v){tool=v;mapRoot.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('selected',b.dataset.tool===v));say(v==='pan'?'Arraste o mapa para mover a câmera.':'Ferramenta '+v+' selecionada.')}
+function selectTerrain(t){terrain=t;mode='terrain';tool='paint';selectTool('paint');mapRoot.querySelectorAll('[data-terrain]').forEach(b=>b.classList.toggle('selected',+b.dataset.terrain===t));say(t===1?'Caminho automático selecionado: arraste para unir as peças.':'Terreno selecionado. Arraste no mapa para pintar.')}
+mapRoot.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>selectTool(b.dataset.tool));
+mapRoot.querySelectorAll('[data-terrain]').forEach(b=>b.onclick=()=>selectTerrain(+b.dataset.terrain));
+$('moveObject').onclick=()=>{mode='object';selectTool('moveobject');say('Toque sobre o pé de uma árvore, torre ou pedra e arraste para reposicionar.')} ;
+$('objectMode').onclick=()=>{mode='object';selectTool('paint');say(selectedAsset?'Toque no mapa para adicionar o PNG selecionado.':'Importe um objeto e selecione sua miniatura antes de colocá-lo.')};
+$('markMode').onclick=()=>{mode='marker';selectTool('paint');say('Toque no mapa para marcar uma posição de torre, base ou caverna.')};
+$('grow').onclick=()=>{objectScale=Math.min(4,Math.round((objectScale+.25)*100)/100);say('Escala do objeto: '+objectScale+'×')};
+$('shrink').onclick=()=>{objectScale=Math.max(.25,Math.round((objectScale-.25)*100)/100);say('Escala do objeto: '+objectScale+'×')};
+$('useAtlas').onclick=()=>{if(!sheetImg)return;mode='atlas';tool='paint';selectTool('paint');say('Peça do atlas escolhida. Agora pinte no mapa.')};
+$('clearAtlas').onclick=()=>selectTerrain(0);
+$('undo').onclick=undoStep;$('redo').onclick=redoStep;
+$('zoomin').onclick=()=>{zoom=Math.min(3.5,zoom*1.25);drawSoon()};
+$('zoomout').onclick=()=>{zoom=Math.max(.22,zoom/1.25);drawSoon()};
+$('center').onclick=()=>{cam={x:width*TILE/2,y:height*TILE/2};drawSoon()};
+$('grid').onchange=e=>{showGrid=e.target.checked;drawSoon()};
+$('markers').onchange=e=>{showMarkers=e.target.checked;drawSoon()};
+$('showHeights').onchange=e=>{showHeights=e.target.checked;drawSoon()};
+$('smartTile').onchange=e=>{smartTile=e.target.checked;drawSoon();say('Conexão inteligente '+(smartTile?'ativada':'desativada'))};
+function setSheetGrid(){
+ sheetCols=Math.max(1,Math.min(32,+$('sheetCols').value||6));
+ sheetRows=Math.max(1,Math.min(32,+$('sheetRows').value||4));selectedTile=0;
+ sheetProfile=$('sheetProfile').value;const preset=profileCols();
+ if(sheetProfile!=='manual'){sheetCols=preset[0];sheetRows=preset[1];$('sheetCols').value=sheetCols;$('sheetRows').value=sheetRows}
+ if(sheetImg)showSheet();drawSoon();scheduleSave();
+}
+$('sheetProfile').onchange=setSheetGrid;
+$('inspectTile').onclick=()=>say(sheetProfile==='agar24'?(sheetLabels[selectedTile]||'Peça '+selectedTile):'Peça '+(selectedTile+1)+' selecionada; escolha terreno ou pincele diretamente pelo atlas.');
+$('sheetCols').onchange=setSheetGrid;$('sheetRows').onchange=setSheetGrid;
+$('preset').onclick=makePreset;
+$('empty').onclick=()=>{remember();makeBlank(+$('width').value,+$('height').value);say('Mapa vazio criado.')};
+function imageFrom(src,id){const im=new Image();im.onload=()=>{if(id==='sheet'){sheetImg=im;showSheet();say('Folha '+sheetCols+'×'+sheetRows+' carregada: '+Math.round(im.width/sheetCols)+'×'+Math.round(im.height/sheetRows)+' pixels por imagem. A escala será ajustada automaticamente no mapa.')}else assetImages[id]=im;drawSoon()};im.src=src;return im}
+function fileData(file){return new Promise((resolve,reject)=>{if(file.size>4*1024*1024){reject(Error('O PNG deve ter até 4 MB.'));return}let fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=()=>reject(Error('Falha ao ler imagem'));fr.readAsDataURL(file)})}
+$('sheetfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{let src=await fileData(f);sheetSrc=src;imageFrom(src,'sheet');scheduleSave();say('Tileset carregado. Selecione uma célula da folha.')}catch(err){say(err.message)}e.target.value=''};
+function showSheet(){
+ if(!sheetImg)return;
+ sh.width=sheetImg.width;sh.height=sheetImg.height;sx.imageSmoothingEnabled=false;sx.clearRect(0,0,sh.width,sh.height);sx.drawImage(sheetImg,0,0);
+ const r=sourceRect(selectedTile);sx.strokeStyle='#ffffb9';sx.lineWidth=Math.max(3,Math.round(sh.width/340));sx.strokeRect(r.sx+2,r.sy+2,r.w-4,r.h-4);
+ $('sheetInfo').textContent=sheetImg.width+'×'+sheetImg.height+' px · '+sheetCols+' colunas × '+sheetRows+' linhas · peça '+(selectedTile+1)+' ('+Math.round(r.w)+'×'+Math.round(r.h)+' px) → 32×32 no mapa'+(sheetProfile==='agar24'?' · '+(sheetLabels[selectedTile]||'peça extra'):'');
+ $('useAtlas').disabled=false;
+}
+sh.addEventListener('click',e=>{
+ if(!sheetImg)return;
+ const r=sh.getBoundingClientRect(),scale=Math.min(r.width/sh.width,r.height/sh.height),offsetX=(r.width-sh.width*scale)/2,offsetY=(r.height-sh.height*scale)/2;
+ const tx=(e.clientX-r.left-offsetX)/scale,ty=(e.clientY-r.top-offsetY)/scale;
+ const x=Math.floor(tx/(sheetImg.width/sheetCols)),y=Math.floor(ty/(sheetImg.height/sheetRows));
+ if(x<0||y<0||x>=sheetCols||y>=sheetRows)return;selectedTile=y*sheetCols+x;showSheet()
+});
+function showAssets(){const list=$('assetlist');list.replaceChildren();for(const a of assets){const btn=document.createElement('button');btn.className='asset'+(a.id===selectedAsset?' selected':'');btn.type='button';let im=document.createElement('img');im.src=a.src;im.alt='';let name=document.createElement('small');name.textContent=a.name;btn.append(im,name);btn.onclick=()=>{selectedAsset=a.id;mode='object';selectTool('paint');showAssets();say('Objeto '+a.name+' selecionado. Toque no mapa para colocá-lo.')};list.append(btn)}}
+$('objectsfile').onchange=async e=>{for(const f of Array.from(e.target.files).slice(0,20)){try{let src=await fileData(f),id='img'+Math.random().toString(36).slice(2,11);assets.push({id,name:f.name.slice(0,80),src});imageFrom(src,id);selectedAsset=id}catch(err){say('Erro ao importar '+f.name+': '+err.message)}}showAssets();mode='object';selectTool('paint');scheduleSave();say(assets.length+' objetos disponíveis; selecione uma miniatura para colocar no mapa.');e.target.value=''};
+
+const bridgeButton=document.createElement("button");
+bridgeButton.type="button";bridgeButton.textContent="Gravar mapa no Game Creator";bridgeButton.className="primary";
+bridgeButton.addEventListener("click",()=>{
+  if(!window.ApoenaCreatorIntegrated?.saveMap){say("A ponte com o catálogo do Game Creator não está disponível.");return}
+  try{window.ApoenaCreatorIntegrated.saveMap(packageData());say("Mapa gravado no projeto atual. Use Salvar projeto editável na barra superior.");}
+  catch(e){say("Não foi possível gravar o mapa: "+e.message)}
+});
+const controls=mapRoot.querySelector("header .controls");
+if(controls)controls.append(bridgeButton);
+
+function packageData(){return {schema:'apoena.map2d.v1',name:'Mapa 01 — Desfiladeiro de Agar',tileSize:TILE,width,height,tiles:cells,heights,objects,assets,markers,tileset:sheetSrc,tilesetCols:sheetCols,tilesetRows:sheetRows,smartTile,sheetProfile,notes:'Editor 2.5D visual; importar PNGs e JSON não ativa cenas do Godot automaticamente.'}}
+function download(content,name,type){const blob=content instanceof Blob?content:new Blob([content],{type});const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000)}
+$('save').onclick=()=>download(JSON.stringify(packageData()),'apoena_mapa01_editavel.json','application/json');
+$('exportJSON').onclick=$('save').onclick;
+$('load').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>18e6)throw Error('Arquivo maior que 18 MB');let d=JSON.parse(await f.text());if(d.schema!=='apoena.map2d.v1'||!Number.isInteger(d.width)||!Number.isInteger(d.height)||d.width<16||d.height<16||d.width>MAX||d.height>MAX||!Array.isArray(d.tiles)||d.tiles.length!==d.width*d.height)throw Error('Projeto incompatível ou inválido');remember();width=d.width;height=d.height;cells=d.tiles.map(n=>Number.isInteger(n)&&n>=0&&n<10000?n:0);heights=Array.isArray(d.heights)&&d.heights.length===width*height?d.heights.map(h=>Math.max(0,Math.min(4,Number(h)||0))):Array(width*height).fill(0);sheetCols=Math.max(1,Math.min(32,Number(d.tilesetCols)||4));sheetRows=Math.max(1,Math.min(32,Number(d.tilesetRows)||4));smartTile=d.smartTile!==false;sheetProfile=d.sheetProfile||'manual';$('sheetProfile').value=sheetProfile;$('sheetCols').value=sheetCols;$('sheetRows').value=sheetRows;$('smartTile').checked=smartTile;objects=Array.isArray(d.objects)?d.objects.slice(0,2000):[];markers=Array.isArray(d.markers)?d.markers.slice(0,300):[];assets=Array.isArray(d.assets)?d.assets.filter(a=>typeof a.src==='string'&&/^data:image\/(png|webp);base64,/.test(a.src)).slice(0,50):[];assetImages={};for(const a of assets)imageFrom(a.src,a.id);sheetSrc=typeof d.tileset==='string'&&/^data:image\/(png|webp);base64,/.test(d.tileset)?d.tileset:'';sheetImg=null;selectedTile=0;if(sheetSrc)imageFrom(sheetSrc,'sheet');showAssets();$('width').value=width;$('height').value=height;cam={x:width*TILE/2,y:height*TILE/2};drawSoon();scheduleSave();say('Projeto importado com sucesso.')}catch(err){say('Não foi possível abrir o projeto: '+err.message)}e.target.value=''};
+$('png').onclick=()=>{
+ const w=width*TILE,h=height*TILE;if(w*h>35000000){say('Mapa muito grande para exportação PNG neste navegador. Reduza as dimensões.');return}
+ const off=document.createElement('canvas');off.width=w;off.height=h;const oc=off.getContext('2d');oc.imageSmoothingEnabled=false;
+ try{drawMap(oc,{x:0,y:0,w,h});off.toBlob(b=>{if(b)download(b,'apoena_mapa01_previa.png','image/png');else say('Falha ao exportar PNG.')},'image/png')}
+ catch(err){say('Falha ao exportar PNG: '+err.message)}
+};
+document.addEventListener('keydown',e=>{if(!mapRoot.host.closest('#page-pixelart')?.classList.contains('active')||mapRoot.host.hidden)return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redoStep():undoStep()}});
+function autosave(){if(!dirty)return;dirty=false;try{const text=JSON.stringify(packageData());if(text.length<3.5e6)localStorage.setItem('apoena-map-editor-v1',text)}catch(_){}}
+window.addEventListener('pagehide',autosave);setInterval(autosave,12000);
+try{const raw=localStorage.getItem('apoena-map-editor-v1');if(raw){const d=JSON.parse(raw);if(d.schema==='apoena.map2d.v1'&&Array.isArray(d.tiles)&&d.tiles.length===d.width*d.height&&d.width<=MAX&&d.height<=MAX){width=d.width;height=d.height;cells=d.tiles;heights=Array.isArray(d.heights)&&d.heights.length===cells.length?d.heights:Array(width*height).fill(0);sheetCols=Math.max(1,Math.min(32,Number(d.tilesetCols)||4));sheetRows=Math.max(1,Math.min(32,Number(d.tilesetRows)||4));smartTile=d.smartTile!==false;sheetProfile=d.sheetProfile||'manual';$('sheetProfile').value=sheetProfile;$('sheetCols').value=sheetCols;$('sheetRows').value=sheetRows;$('smartTile').checked=smartTile;objects=d.objects||[];markers=d.markers||[];assets=d.assets||[];sheetSrc=d.tileset||'';for(const a of assets)if(/^data:image\/(png|webp);base64,/.test(a.src))imageFrom(a.src,a.id);if(sheetSrc)imageFrom(sheetSrc,'sheet');$('width').value=width;$('height').value=height;cam={x:width*TILE/2,y:height*TILE/2};showAssets();say('Rascunho local restaurado. Salve um JSON para ter seu backup.')}}}catch(_){}
+if(!cells.length){makeBlank(80,80);makePreset();history=[]}
+drawSoon();
+})();
+
+ return mapRoot;
+ }};
