@@ -1,81 +1,45 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f1c2a"><title>Apoena Game Creator v4.0 • Editor unificado</title>
-<style>
-:root{color-scheme:dark;--bg:#0b1520;--panel:#142838;--edge:#355164;--fg:#edf5ff;--gold:#f1d08c;--aqua:#8bdae0}
-*{box-sizing:border-box}body{margin:0;color:var(--fg);background:var(--bg);font:14px system-ui,-apple-system,"Segoe UI",Arial}
-header{background:#102335;border-bottom:1px solid var(--edge);display:flex;gap:12px;align-items:center;padding:9px 14px;flex-wrap:wrap}
-.brand{display:flex;gap:9px;align-items:center;flex:1;min-width:200px}.logo{width:34px;height:34px;background:#305467;color:var(--gold);border:1px solid #698795;border-radius:9px;display:grid;place-items:center;font-weight:bold;font-size:21px}
-h1{font-size:17px;margin:0;color:var(--gold)}.sub{font-size:11px;color:#b9cbd6}.toplink{color:var(--aqua);font-size:12px;text-decoration:none}
-nav{background:#132a3b;border-bottom:1px solid var(--edge);display:flex;align-items:center;gap:7px;overflow-x:auto;padding:8px 12px;scrollbar-width:thin;white-space:nowrap;position:sticky;top:0;z-index:10}
-nav button{border:1px solid #3b5f73;background:#213d51;color:var(--fg);border-radius:8px;padding:11px 15px;min-width:max-content;min-height:44px;font:600 13px system-ui;cursor:pointer}
-nav button[aria-selected=true]{background:var(--gold);border-color:var(--gold);color:#1b242e}
-nav button:focus-visible{outline:3px solid #8de3ea}
-.bar{background:#0c1d2a;border-bottom:1px solid #2d4554;min-height:32px;display:flex;gap:10px;align-items:center;padding:6px 14px;flex-wrap:wrap}
-.bar span{flex:1;color:#c7d7e0;font-size:11px}
-.bar button{font-size:11px;padding:5px 10px;border:1px solid #567488;background:#234354;color:var(--fg);border-radius:6px;cursor:pointer}
-#workspace{position:relative;width:100%;height:calc(100dvh - 144px);min-height:380px}
-.workspace-pane{position:absolute;inset:0;display:none;background:var(--bg)}
-.workspace-pane.active{display:block}
-.workspace-pane iframe{width:100%;height:100%;border:0;background:#0b1520}
-#loading{position:absolute;top:18px;left:18px;right:18px;background:#1c3447;border:1px solid #5b7280;border-radius:8px;padding:14px;z-index:5}
-footer{font-size:10px;text-align:center;color:#90aab8;padding:6px}
-@media(max-width:550px){header{padding:7px 10px}nav{padding:6px 8px}nav button{padding:10px 12px}#workspace{height:calc(100dvh - 146px)}h1{font-size:15px}}
-</style></head>
-<body>
-<header>
- <div class="brand"><div class="logo">◈</div><div><h1>APOENA • GAME CREATOR v4.0</h1><div class="sub">Uma central de criação • HTML e Godot 4</div></div></div>
- <a class="toplink" href="integracao/README.md" download>Guia de integração</a>
-</header>
-<nav aria-label="Ferramentas do Game Creator">
- <button type="button" data-module="creator" aria-selected="true">◈ Game Creator / Itens / Receitas</button>
- <button type="button" data-module="pixel" aria-selected="false">▧ Pixel Art • Personagens e Objetos</button>
- <button type="button" data-module="mapa" aria-selected="false">▤ Pixel Art • Mapas e Cenários</button>
- <button type="button" data-module="integracao" aria-selected="false">⇄ Integrar com meus jogos</button>
-</nav>
-<div class="bar"><span id="hint">Editor oficial v4.0: personagens, itens, poções, receitas, layouts, inventário e sistemas do jogo.</span>
-<button id="fullscreen" type="button">Expandir área</button>
-<button id="reload" type="button">Reabrir ferramenta</button></div>
-<div id="workspace">
- <div class="workspace-pane active" id="pane-creator"><iframe id="frame-creator" title="Game Creator v4.0 — editor principal" data-src="APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"></iframe></div>
- <div class="workspace-pane" id="pane-pixel"><iframe id="frame-pixel" title="Pixel Art — personagens e objetos" data-src="pixel-art/index.html"></iframe></div>
- <div class="workspace-pane" id="pane-mapa"><iframe id="frame-mapa" title="Pixel Art — mapas e cenários" data-src="map-editor/index.html"></iframe></div>
- <div class="workspace-pane" id="pane-integracao"><iframe id="frame-integracao" title="Integração de dados do Game Creator com jogos" data-src="integracao/index.html"></iframe></div>
- <div id="loading" role="status" hidden>Carregando ferramenta... Se estiver no celular, aguarde a abertura do editor.</div>
-</div>
-<footer>A versão v3.9 e o backup v3.9.2 continuam preservados nos arquivos do repositório. Salve seus projetos em JSON regularmente.</footer>
+<title>APOENA Game Creator v4.0 — Editor Unificado</title>
+<style>html,body{margin:0;min-height:100%;background:#091522;color:#f2e0ae;font:16px system-ui,Arial}#boot{padding:23px;line-height:1.5}#boot p{color:#abc6d3}</style>
+</head><body>
+<div id="boot" role="status"><strong>APOENA GAME CREATOR v4.0</strong><p>Abrindo o editor integrado de layouts, itens, personagens, Pixel Art e mapas. Aguarde o carregamento offline...</p></div>
+<script src="bundle-v4/parte_000.js"></script>
+<script src="bundle-v4/parte_001.js"></script>
+<script src="bundle-v4/parte_002.js"></script>
+<script src="bundle-v4/parte_003.js"></script>
+<script src="bundle-v4/parte_004.js"></script>
+<script src="bundle-v4/parte_005.js"></script>
+<script src="bundle-v4/parte_006.js"></script>
+<script src="bundle-v4/parte_007.js"></script>
+<script src="bundle-v4/parte_008.js"></script>
+<script src="bundle-v4/parte_009.js"></script>
+<script src="bundle-v4/parte_010.js"></script>
+<script src="bundle-v4/parte_011.js"></script>
+<script src="bundle-v4/parte_012.js"></script>
+<script src="bundle-v4/parte_013.js"></script>
+<script src="bundle-v4/parte_014.js"></script>
+<script src="bundle-v4/parte_015.js"></script>
+<script src="bundle-v4/parte_016.js"></script>
+<script src="bundle-v4/parte_017.js"></script>
+<script src="bundle-v4/parte_018.js"></script>
+<script src="bundle-v4/parte_019.js"></script>
+<script src="bundle-v4/parte_020.js"></script>
+<script src="bundle-v4/parte_021.js"></script>
+<script src="bundle-v4/parte_022.js"></script>
+<script src="bundle-v4/parte_023.js"></script>
 <script>
-(()=>{
-"use strict";
-const messages={creator:"Editor oficial v4.0: personagens, itens, poções, receitas, layouts, inventário e sistemas do jogo.",pixel:"Pixel Art: crie personagens e configure objetos, funções, estatísticas e reações ao clima.",mapa:"Editor Pixel Art: monte mapas 2.5D e cenários com tilesets, relevo e objetos.",integracao:"Compartilhe itens e receitas com os jogos HTML e Godot 4 por JSON validado."};
-const buttons=[...document.querySelectorAll("[data-module]")];
-const panes=[...document.querySelectorAll(".workspace-pane")];
-let active="creator";
-function open(name){
- if(!messages[name])return;
- active=name;
- for(const b of buttons)b.setAttribute("aria-selected",String(b.dataset.module===name));
- for(const pane of panes)pane.classList.toggle("active",pane.id==="pane-"+name);
- const frame=document.getElementById("frame-"+name);
- document.getElementById("hint").textContent=messages[name];
- const loading=document.getElementById("loading");
- if(!frame.getAttribute("src")){
-   loading.hidden=false;
-   frame.addEventListener("load",()=>{loading.hidden=true},{once:true});
-   frame.setAttribute("src",frame.dataset.src);
- }else loading.hidden=true;
- try{history.replaceState(null,"","#"+name)}catch(e){}
-}
-buttons.forEach(b=>b.addEventListener("click",()=>open(b.dataset.module)));
-document.getElementById("reload").addEventListener("click",()=>{
- const frame=document.getElementById("frame-"+active);
- if(confirm("Reabrir esta ferramenta? Salve as alterações antes: dados que não foram exportados podem ser perdidos."))frame.setAttribute("src",frame.dataset.src);
-});
-document.getElementById("fullscreen").addEventListener("click",()=>{
- const el=document.getElementById("workspace");
- if(el.requestFullscreen)el.requestFullscreen().catch(()=>{});
-});
-open(["creator","pixel","mapa","integracao"].includes(location.hash.slice(1))?location.hash.slice(1):"creator");
+(function(){
+ try{
+  const pieces=window.__APOENA_V4_PARTES||[];
+  if(pieces.length!==24||pieces.some(p=>typeof p!=="string"||!p.length))throw Error("Arquivos do editor incompletos. Extraia o ZIP inteiro: precisa manter a pasta bundle-v4.");
+  const full=pieces.join("");
+  if(full.length!==16324651||!full.startsWith("<!DOCTYPE html>")||!full.includes('id="page-pixelart"')||!full.includes('Game Creator v4.0'))throw Error("Versão 4.0 inválida ou incompleta. Não use partes de versões diferentes.");
+  window.__APOENA_V4_PARTES=null;
+  document.open();document.write(full);document.close();
+ }catch(e){
+  document.getElementById("boot").innerHTML="<strong>Não foi possível abrir a versão unificada.</strong><p>"+String(e.message).replace(/[&<>]/g,"")+"</p>";
+ }
 })();
 </script>
 </body></html>
