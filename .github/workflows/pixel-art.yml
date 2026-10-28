@@ -98,7 +98,7 @@ jobs:
           $buildCode = $LASTEXITCODE
           if ($buildCode -ne 0) { throw "Falha ao compilar a entrada nativa V4.0 (codigo $buildCode)." }
           $built = Get-Content -Raw (Join-Path $env:GITHUB_WORKSPACE "index.html")
-          foreach ($required in @('id="page-pixelart"', 'shared/asset-library.js', 'pixel-art/natureza.js', 'pixel-art/modulo-integrado.js', 'pixel-art/ponte-creator.js')) {
+          foreach ($required in @('id="page-pixelart"', 'shared/asset-library.js', 'shared/creator-bridge.js', 'pixel-art/natureza.js', 'pixel-art/modulo-integrado.js', 'pixel-art/ponte-creator.js')) {
             if (-not $built.Contains($required)) { throw "Build nativo incompleto: $required" }
           }
           if ($built.Contains("<iframe")) { throw "A entrada nativa nao pode substituir o Creator por iframe." }
