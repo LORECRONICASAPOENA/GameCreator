@@ -61,7 +61,7 @@ O menu **Pixel Art** do shell V4.1 abre `estudio.html`. Esse módulo trabalha co
 
 - **Projeto editável:** use **Projeto JSON** para exportar os quadros e seus metadados; **Projeto editável JSON** permite reabrir esse pacote.
 - **Detecção:** os contornos verdes são uma prévia; clicar em um contorno carrega X/Y/largura/altura para correção manual. A detecção não altera a imagem original, não separa objetos fisicamente conectados e pede revisão quando os limites tocam as bordas ou o fundo ocupa quase toda a folha.
-- **Ações/direções:** podem ser definidas por quadro, incluindo ações personalizadas como andar, correr, atacar, beber, crescer, florescer ou frutificar.
+- **Ações/direções:** podem ser definidas por quadro, incluindo ações personalizadas como andar, correr, atacar, beber, crescer, florescer ou frutificar. A prévia anima os quadros da ação/direção selecionadas.
 - **Biblioteca central:** **Salvar projeto editável** guarda o projeto; **Abrir projeto salvo** recupera os quadros e seus metadados. **Salvar na biblioteca central** guarda a imagem final e preserva o original quando disponível.
 - **Mapas e tilesets:** o editor 2.5D possui controles para salvar/reabrir mapas e reutilizar tilesets pela mesma biblioteca. **Verificar encaixes** sinaliza bordas transparentes/semitransparentes e grades cujas dimensões não se dividem uniformemente; é um diagnóstico, não uma correção automática.
 
