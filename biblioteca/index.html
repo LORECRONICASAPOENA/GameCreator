@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#102738">
+<title>Apoena Game Creator — Biblioteca Central</title>
+<style>
+:root{color-scheme:dark;--bg:#0a1924;--panel:#172f40;--line:#39586c;--fg:#f1f9ff;--muted:#b9d0dc;--gold:#f5d48c;--aqua:#87dee1}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,Arial}header{padding:16px;background:#102738;border-bottom:1px solid var(--line)}h1{font-size:21px;color:var(--gold);margin:3px 0}header a{color:var(--aqua)}main{max-width:1400px;margin:auto;padding:16px}.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}input,select,button{font:inherit;color:var(--fg);background:#172f40;border:1px solid var(--line);border-radius:8px;padding:10px}input,select{min-height:42px}input{flex:1;min-width:180px}button{cursor:pointer;font-weight:650}button.primary{background:#237d83;border-color:var(--aqua)}#status{min-height:26px;color:var(--aqua)}#assets{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}.asset{min-width:0;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel)}.asset img{width:100%;height:170px;object-fit:contain;image-rendering:pixelated;background:repeating-conic-gradient(#435766 0 25%,#273c4a 0 50%) 50%/18px 18px;border-radius:7px}.asset h2{font-size:15px;margin:8px 0 2px;overflow-wrap:anywhere}.asset p{font-size:12px;color:var(--muted);margin:4px 0}.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.actions button{flex:1 1 90px;font-size:12px;padding:8px}.empty{padding:28px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}@media(max-width:520px){main{padding:10px}.asset img{height:130px}}
+</style>
+</head>
+<body>
+<header><small>APOENA GAME CREATOR · RECURSOS REUTILIZÁVEIS</small><h1>Biblioteca Central</h1><p>Recursos salvos pelo Pixel Art e reutilizáveis nos editores compatíveis.</p><a href="../index.html">← Voltar ao Creator</a></header>
+<main>
+<div class="tools"><input id="search" type="search" placeholder="Buscar por nome, categoria ou etiqueta"><select id="category"><option value="all">Todas as categorias</option><option value="personagem">Personagens</option><option value="animal">Animais</option><option value="cenario">Cenários</option><option value="planta">Plantas</option><option value="efeito">Efeitos</option><option value="tileset">Tilesets</option><option value="objeto">Objetos</option><option value="outro">Outros</option></select><button id="refresh" class="primary">Atualizar biblioteca</button></div>
+<p id="status" role="status">Carregando recursos salvos…</p><div id="assets"></div>
+</main>
+<script src="../shared/asset-library.js"></script>
+<script>
+(function(){
+'use strict';
+const $=function(id){return document.getElementById(id)};
+let urls=[];
+function releaseURLs(){urls.forEach(function(url){URL.revokeObjectURL(url)});urls=[]}
+function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(url)},1500)}
+function makeButton(label,handler){const button=document.createElement('button');button.type='button';button.textContent=label;button.onclick=handler;return button}
+function dateLabel(value){const date=new Date(value);return Number.isNaN(date.getTime())?'Data desconhecida':date.toLocaleString()}
+async function load(){
+  const status=$('status'),host=$('assets');status.textContent='Lendo biblioteca…';releaseURLs();host.replaceChildren();
+  try{
+    const items=await ApoenaLibrary.listAssets({search:$('search').value,category:$('category').value});
+    if(!items.length){status.textContent='Nenhum recurso encontrado. Importe uma imagem no Pixel Art e use “Salvar na biblioteca central”.';const empty=document.createElement('div');empty.className='empty';empty.textContent='Sua biblioteca está pronta para receber personagens, animais, plantas, cenários, spritesheets e tilesets.';host.append(empty);return}
+    status.textContent=items.length+' recurso(s) encontrado(s). Os arquivos ficam no armazenamento local do navegador.';
+    items.forEach(function(item){
+      const card=document.createElement('article');card.className='asset';
+      const image=document.createElement('img');image.alt=item.name;image.loading='lazy';
+      const blobURL=URL.createObjectURL(item.blob);urls.push(blobURL);image.src=blobURL;card.append(image);
+      const title=document.createElement('h2');title.textContent=item.name;card.append(title);
+      const info=document.createElement('p');info.textContent=item.category+' · '+item.type+' · '+item.width+'×'+item.height+' px';card.append(info);
+      const size=document.createElement('p');size.textContent=Math.max(1,Math.round((item.size||0)/1024))+' KB · Atualizado '+dateLabel(item.updatedAt);card.append(size);
+      const actions=document.createElement('div');actions.className='actions';
+      actions.append(makeButton('Baixar PNG',function(){download(item.blob,(item.name||'recurso')+'.png')}));
+      if(item.originalBlob)actions.append(makeButton('Original',function(){download(item.originalBlob,(item.name||'recurso')+'-original')}));
+      actions.append(makeButton('Excluir',async function(){
+        if(!confirm('Excluir “'+item.name+'” da biblioteca central?'))return;
+        try{await ApoenaLibrary.deleteAsset(item.id);await load()}catch(error){status.textContent='Falha ao excluir: '+error.message}
+      }));
+      card.append(actions);host.append(card);
+    });
+  }catch(error){status.textContent='Não foi possível acessar a biblioteca: '+error.message}
+}
+$('refresh').onclick=load;$('search').addEventListener('input',load);$('category').onchange=load;
+if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(function(){load()});
+load();
+})();
+</script>
+</body>
+</html>
