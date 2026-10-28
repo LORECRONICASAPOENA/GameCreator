@@ -23,4 +23,4 @@ assert html.count('id="page-pixelart"')==1
 for path in ('map-editor/modulo-integrado.js','pixel-art/modulo-integrado.js','pixel-art/ponte-creator.js'):
  assert (root/path).is_file(), f'Módulo integrado não encontrado: {path}'
 out.write_text(html,encoding='utf-8')
-print('index.html unificado:',out.stat().st_size,hashlib.sha256(out.read_bytes()).hexdigest())
+print('Editor v4.0 integrado e pronto:',out.stat().st_size,hashlib.sha256(out.read_bytes()).hexdigest())
