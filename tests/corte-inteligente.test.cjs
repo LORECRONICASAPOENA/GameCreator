@@ -60,11 +60,12 @@ const mapScriptEnd=mapHtml.indexOf('</script>',mapScriptStart);
 assert.ok(mapScriptStart>=0&&mapScriptEnd>mapScriptStart,'script do editor de mapas encontrado');
 assert.doesNotThrow(()=>new Function(mapHtml.slice(mapScriptStart+8,mapScriptEnd)),'script do editor de mapas sintaticamente válido');
 assert.doesNotThrow(()=>new Function(js),'script UI válido');
-for(const id of ['meshMode','meshReset','smartSelected','smartAll','smartPanel','smartApply','smartCancel','smartUndoBatch','projectFile','libraryProjects','libraryProjectSave','libraryProjectOpen','libraryProjectRefresh','detectSprites','detectMergeGap','detectPadding','detectMinArea','autoDetectPanel','autoDetectApply','autoDetectCancel'])
+for(const id of ['meshMode','meshReset','smartSelected','smartAll','smartPanel','smartApply','smartCancel','smartUndoBatch','projectFile','libraryProjects','libraryProjectSave','libraryProjectOpen','libraryProjectRefresh','detectSprites','detectMergeGap','detectPadding','detectMinArea','habitat','behavior','resourceMetadata','autoDetectPanel','autoDetectApply','autoDetectCancel'])
   assert.ok(html.includes('id="'+id+'"'),'falta controle '+id);
 assert.ok(html.includes('id="action" list="actionOptions"')&&html.includes('id="direction" list="directionOptions"'),'ações e direções são configuráveis');
 assert.ok(js.includes('async function loadProjectData')&&js.includes('ApoenaLibrary.saveProject')&&js.includes('ApoenaLibrary.getProject'),'projeto editável pode ser importado, salvo e reaberto');
 assert.ok(js.includes('frames.filter(f=>f.action===action&&f.direction===direction)'),'prévia animada filtra quadros pela ação e direção selecionadas');
+assert.ok(js.includes('function readResourceMetadata()')&&js.includes('resource:{habitat:')&&js.includes("$('resourceMetadata').value=JSON.stringify(resource.metadata"),'metadados específicos são validados e persistidos no projeto');
 assert.ok(js.includes('ApoenaCorte.detectSprites')&&js.includes('runSpriteDetection'),'detecção automática tem implementação e handler real');
 assert.ok(js.includes('Limites detectados carregados nos campos de recorte'),'limites detectados podem ser corrigidos manualmente');
 assert.ok(html.indexOf('corte-inteligente.js')<html.indexOf('estudio.js'),'ordem de scripts');
