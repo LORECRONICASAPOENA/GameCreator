@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Apoena Game Creator v3.9 — Recuperação do editor</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;background:#0b1520;color:#eaf4fb;font:16px system-ui,Arial,sans-serif}
+main{max-width:670px;margin:6vh auto;padding:20px}
+section{background:#152a39;border:1px solid #35566a;border-radius:15px;padding:24px}
+h1{color:#efd18d;font-size:24px;margin:0 0 12px}
+small,p{color:#bfd3dc;line-height:1.5}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+button,a{border:0;background:#83d1d7;color:#071820;text-decoration:none;border-radius:9px;padding:12px 15px;font:bold 15px system-ui;cursor:pointer}
+a.secondary,button.secondary{background:#2c4657;color:#eaf4fb}
+button:disabled{opacity:.45;cursor:wait}
+#status{font-weight:600;color:#efd18d}
+</style>
+</head>
+<body>
+<main><section>
+<h1>Apoena Game Creator — Editor completo v3.9</h1>
+<p>Fonte histórica preservada em 23 partes no próprio repositório. Este iniciador remonta o HTML original sem alterar os dados do editor.</p>
+<p id="status" role="status">Carregando os módulos originais…</p>
+<div class="actions">
+<button type="button" id="open" disabled>Abrir editor completo</button>
+<button type="button" class="secondary" id="download" disabled>Salvar HTML completo</button>
+<a class="secondary" href="../index.html">Voltar à central</a>
+</div>
+<small>O editor é grande (aproximadamente 16 MB). No celular, abra uma ferramenta de cada vez. O HTML funciona offline quando todas as 23 partes estiverem na pasta v3_9_parts.</small>
+</section></main>
+<script src="v3_9_parts/parte_000.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_001.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_002.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_003.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_004.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_005.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_006.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_007.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_008.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_009.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_010.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_011.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_012.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_013.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_014.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_015.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_016.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_017.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_018.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_019.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_020.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_021.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script src="v3_9_parts/parte_022.js" onerror="window.__APOENA_PARTES_ERRO=true"></script>
+<script>
+(function(){
+"use strict";
+const status=document.getElementById("status");
+const open=document.getElementById("open");
+const download=document.getElementById("download");
+const parts=window.__APOENA_GAMECREATOR_PARTES;
+const EXPECTED_COUNT=23, EXPECTED_CHARS=16045743;
+if(window.__APOENA_PARTES_ERRO || !Array.isArray(parts) || parts.length!==EXPECTED_COUNT || parts.some(x=>typeof x!=="string")){
+status.textContent="Falha de carregamento: uma ou mais partes do editor estão ausentes. Verifique se extraiu o ZIP completo.";
+return;
+}
+const html=parts.join("");
+if(html.length!==EXPECTED_CHARS || !/^<!doctype html>/i.test(html) || !/<\/html>\s*$/i.test(html)){
+status.textContent="Integridade não confirmada: o editor não será aberto com partes incompletas.";
+return;
+}
+status.textContent="Fonte recuperada: 23 de 23 partes carregadas. Pronto para abrir.";
+open.disabled=false;
+download.disabled=false;
+open.addEventListener("click",()=>{
+  // Abrir o HTML original no mesmo endereço conserva a origem/localStorage do projeto.
+  document.open();
+  document.write(html);
+  document.close();
+});
+download.addEventListener("click",()=>{
+  const blob=new Blob([html],{type:"text/html;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="APOENA_GAME_CREATOR_OFFLINE_v3_9_RECUPERADO.html";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),10000);
+});
+})();
+</script>
+</body>
+</html>
