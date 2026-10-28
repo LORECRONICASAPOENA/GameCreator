@@ -8,7 +8,7 @@ src=root/'APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html'
 out=root/'index.html'
 assert src.is_file(), 'A fonte completa v4.0 não está no GitHub'
 html=src.read_text(encoding='utf-8-sig')
-menu_pattern=r'<button\\b[^>]*data-page="controles"[^>]*>.*?</button>\\s*</nav>'
+menu_pattern=r'<button\b[^>]*data-page="controles"[^>]*>.*?</button>\s*</nav>'
 menu_matches=list(re.finditer(menu_pattern,html,re.S))
 assert len(menu_matches)==1, 'Nao foi possivel identificar de forma inequivoca o fim do menu original'
 assert html.count('</main>')>=1 and html.count('</body>')==1
