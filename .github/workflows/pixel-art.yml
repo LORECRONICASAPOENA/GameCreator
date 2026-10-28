@@ -23,59 +23,75 @@ permissions:
   actions: write
 jobs:
   validar:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64]
+    defaults:
+      run:
+        shell: pwsh
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Preparar diagnósticos
+      - name: Preparar diagnósticos do runner Windows
         run: |
-          mkdir -p .ci-results
-          { node --version; npm --version; } 2>&1 | tee .ci-results/runner.log
-      - name: Instalar adaptador IndexedDB para testes
+          New-Item -ItemType Directory -Force -Path .ci-results | Out-Null
+          "Runner OS: $env:RUNNER_OS" | Tee-Object -FilePath .ci-results/runner.log
+          "Runner name: $env:RUNNER_NAME" | Tee-Object -FilePath .ci-results/runner.log -Append
+          node --version 2>&1 | Tee-Object -FilePath .ci-results/runner.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --version 2>&1 | Tee-Object -FilePath .ci-results/runner.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Instalar dependências de teste
         run: |
-          set -o pipefail
-          npm install --no-package-lock --ignore-scripts --no-audit --no-fund 2>&1 | tee .ci-results/install.log
+          npm install --no-package-lock --ignore-scripts --no-audit --no-fund 2>&1 | Tee-Object -FilePath .ci-results/install.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Validar sintaxe JavaScript
         run: |
-          set -o pipefail
-          node --check pixel-art/estudio.js 2>&1 | tee .ci-results/syntax.log
-          node --check pixel-art/corte-inteligente.js 2>&1 | tee -a .ci-results/syntax.log
-          node --check shared/asset-library.js 2>&1 | tee -a .ci-results/syntax.log
-          node --check shared/tileset-check.js 2>&1 | tee -a .ci-results/syntax.log
-          node --check shared/library-backup.js 2>&1 | tee -a .ci-results/syntax.log
+          node --check pixel-art/estudio.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check pixel-art/corte-inteligente.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check shared/asset-library.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check shared/tileset-check.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check shared/library-backup.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Testar Corte Inteligente e contratos da interface
         run: |
-          set -o pipefail
-          node tests/corte-inteligente.test.cjs 2>&1 | tee .ci-results/corte.log
+          node tests/corte-inteligente.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/corte.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Testar verificador de encaixe dos tilesets
         run: |
-          set -o pipefail
-          node tests/tileset-check.test.cjs 2>&1 | tee .ci-results/tileset.log
+          node tests/tileset-check.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/tileset.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Testar biblioteca e persistência IndexedDB
         run: |
-          set -o pipefail
-          node tests/asset-library.test.cjs 2>&1 | tee .ci-results/library.log
+          node tests/asset-library.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/library.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Testar backup e restauração da biblioteca
         run: |
-          set -o pipefail
-          node tests/library-backup.test.cjs 2>&1 | tee .ci-results/library-backup.log
+          node tests/library-backup.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/library-backup.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Garantir preservação do Creator original e dos módulos
-        shell: bash
         run: |
-          set -euo pipefail
-          {
-            test -f APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html
-            test -f pixel-art/index.html
-            test -f pixel-art/estudio.html
-            test -f map-editor/index.html
-            test -f integracao/index.html
-            test -f legacy/iniciador-anterior.html
-            grep -q 'data-page="3d"' index.html
-            grep -q 'data-page="pixel"' index.html
-            grep -q 'asset-library.js' map-editor/index.html
-          } 2>&1 | tee .ci-results/contracts.log
+          $required = @(
+            "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html",
+            "pixel-art/index.html",
+            "pixel-art/estudio.html",
+            "map-editor/index.html",
+            "integracao/index.html",
+            "legacy/iniciador-anterior.html"
+          )
+          foreach ($path in $required) {
+            if (-not (Test-Path $path)) { throw "Arquivo essencial ausente: $path" }
+          }
+          $index = Get-Content -Raw index.html
+          if ($index -notmatch 'data-page="3d"') { throw "A navegação 3D não foi encontrada no Creator." }
+          if ($index -notmatch 'data-page="pixel"') { throw "A navegação Pixel Art não foi encontrada no Creator." }
+          $map = Get-Content -Raw map-editor/index.html
+          if ($map -notmatch 'asset-library.js') { throw "O editor de mapas não carrega a biblioteca central." }
+          "Contratos de preservação e integração passaram." | Tee-Object -FilePath .ci-results/contracts.log
       - name: Anexar logs de diagnóstico
         if: always()
         uses: actions/upload-artifact@v4
