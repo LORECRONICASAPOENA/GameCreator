@@ -10,7 +10,7 @@ function scale(){return clamp(num('zoom')/100,.25,1.6)}
 function drawSource(){if(!image)return;const z=scale();source.width=Math.max(1,Math.round(image.width*z));source.height=Math.max(1,Math.round(image.height*z));sc.imageSmoothingEnabled=false;sc.clearRect(0,0,source.width,source.height);sc.drawImage(image,0,0,source.width,source.height);if((grid||meshMode)&&mesh.x.length){sc.strokeStyle='#47eee9cb';sc.lineWidth=meshMode?2:1;for(let i=1;i<mesh.x.length-1;i++){sc.beginPath();sc.moveTo(mesh.x[i]*z,0);sc.lineTo(mesh.x[i]*z,source.height);sc.stroke()}for(let i=1;i<mesh.y.length-1;i++){sc.beginPath();sc.moveTo(0,mesh.y[i]*z);sc.lineTo(source.width,mesh.y[i]*z);sc.stroke()}}const r=crop();sc.lineWidth=2;sc.strokeStyle='#ffcf4e';sc.strokeRect(r.x*z,r.y*z,r.w*z,r.h*z)}
 function add(rect,silent=false){if(!image){msg('Importe uma imagem primeiro.');return}if(rect.w<1||rect.h<1){msg('Recorte vazio: ajuste a malha.');return}if(frames.length>=160){msg('Limite de 160 quadros, para proteger o desempenho do celular.');return}const c=document.createElement('canvas');c.width=rect.w;c.height=rect.h;c.getContext('2d').drawImage(image,rect.x,rect.y,rect.w,rect.h,0,0,rect.w,rect.h);frames.push({canvas:c,original:canvasCopy(c),rect,action:$('action').value,direction:$('direction').value});if(!silent)pick(frames.length-1)}
 function list(){const host=$('frames');host.replaceChildren();$('frameCount').textContent='('+frames.length+')';frames.forEach((f,i)=>{const b=document.createElement('button');if(i===current)b.className='selected';const thumb=document.createElement('canvas');thumb.width=55;thumb.height=52;const scale=Math.min(54/f.canvas.width,51/f.canvas.height);thumb.getContext('2d').drawImage(f.canvas,(55-f.canvas.width*scale)/2,52-f.canvas.height*scale,f.canvas.width*scale,f.canvas.height*scale);const title=document.createElement('div');title.textContent=i+1;b.append(thumb,title);b.onclick=()=>pick(i);host.append(b)})}
-function pick(i){current=i;undo=[];smartPending=null;$('smartPanel').hidden=true;list();drawEdit()}
+function pick(i){current=i;undo=[];smartPending=null;$('smartPanel').hidden=true;const f=selected();if(f){$('action').value=f.action||'parado';$('direction').value=f.direction||'nenhuma'}list();drawEdit()}
 function drawEdit(){const f=selected();if(!f){ec.clearRect(0,0,edit.width,edit.height);return}const z=Math.max(.3,Math.min(1.8,380/Math.max(f.canvas.width,f.canvas.height)));edit.width=Math.max(1,Math.round(f.canvas.width*z));edit.height=Math.max(1,Math.round(f.canvas.height*z));ec.imageSmoothingEnabled=false;ec.drawImage(f.canvas,0,0,edit.width,edit.height);$('editStatus').textContent='Quadro '+(current+1)+' • '+f.action+' • '+f.direction+' • '+f.canvas.width+'×'+f.canvas.height+' px'}
 function saveUndo(){if(batchBackup){batchBackup=null;$('smartUndoBatch').disabled=true}const f=selected();if(!f)return;undo.push(canvasCopy(f.canvas));if(undo.length>12)undo.shift()}
 function xy(ev,canvas,width,height){const r=canvas.getBoundingClientRect();return{x:clamp(Math.floor((ev.clientX-r.left)*width/r.width),0,width-1),y:clamp(Math.floor((ev.clientY-r.top)*height/r.height),0,height-1)}}
@@ -109,13 +109,90 @@ async function refreshLibrary(){
     msg(items.length+' recurso(s) disponíveis na biblioteca central.');
   }catch(error){msg('Biblioteca indisponível: '+error.message)}
 }
+async function refreshLibraryProjects(){
+  const select=$('libraryProjects'),prior=select.value;
+  try{
+    const all=await ApoenaLibrary.listProjects({});
+    const projects=all.filter(p=>p&&p.schema==='apoena.pixelart.v1');
+    select.replaceChildren(new Option('Selecione um projeto…',''));
+    projects.forEach(p=>select.add(new Option(p.name+' · '+((p.data&&p.data.frames)||[]).length+' quadros',p.id)));
+    if(projects.some(p=>p.id===prior))select.value=prior;
+  }catch(error){msg('Não foi possível listar projetos: '+error.message)}
+}
+function projectData(){
+  const data=manifest();
+  data.name=String($('name').value||safeName()).trim().slice(0,80)||safeName();
+  data.frames=frames.map((f,i)=>({...data.frames[i],dataUrl:f.canvas.toDataURL('image/png')}));
+  return data;
+}
+async function loadProjectData(data){
+  if(!data||data.schema!=='apoena.pixelart.v1'||!Array.isArray(data.frames)||data.frames.length<1||data.frames.length>160)
+    throw Error('Projeto editável incompatível. Use o JSON de projeto exportado pelo Estúdio Pixel Art.');
+  const loaded=[];let totalPixels=0;
+  for(const item of data.frames){
+    if(!item||typeof item.dataUrl!=='string'||!/^data:image\\/(png|webp);base64,/.test(item.dataUrl))
+      throw Error('O projeto não contém as imagens dos quadros. Exporte como Projeto JSON editável.');
+    const canvas=await new Promise((resolve,reject)=>{
+      const im=new Image();
+      im.onload=()=>{
+        try{
+          if(!im.width||!im.height||im.width*im.height>32000000)throw Error('Quadro de imagem inválido ou grande demais.');
+          totalPixels+=im.width*im.height;
+          if(totalPixels*4>32000000)throw Error('Projeto excede 32 MB de quadros descompactados. Importe em partes menores.');
+          const c=document.createElement('canvas');c.width=im.width;c.height=im.height;c.getContext('2d').drawImage(im,0,0);resolve(c);
+        }catch(error){reject(error)}
+      };
+      im.onerror=()=>reject(Error('Não foi possível decodificar um quadro do projeto.'));
+      im.src=item.dataUrl;
+    });
+    const source=item.source||{};
+    const rect=[source.x,source.y,source.w,source.h].every(Number.isFinite)
+      ?{x:source.x,y:source.y,w:source.w,h:source.h}:{x:0,y:0,w:canvas.width,h:canvas.height};
+    loaded.push({canvas,original:canvasCopy(canvas),rect,action:String(item.action||'parado').trim().slice(0,40)||'parado',direction:String(item.direction||'nenhuma').trim().slice(0,20)||'nenhuma'});
+  }
+  if(imageUrl)URL.revokeObjectURL(imageUrl);
+  imageUrl='';image=null;frames=loaded;current=-1;undo=[];batchBackup=null;smartPending=null;
+  mesh={x:[],y:[]};grid=false;meshMode=false;
+  $('smartUndoBatch').disabled=true;$('smartPanel').hidden=true;
+  $('meshMode').classList.remove('selected');$('meshMode').setAttribute('aria-pressed','false');
+  source.width=400;source.height=260;sc.clearRect(0,0,source.width,source.height);
+  $('name').value=String(data.name||'apoena_sprite').slice(0,80);
+  $('fps').value=clamp(Number(data.fps)||8,1,30);
+  const cell=String(Number(data.cell_px)||256);
+  $('cell').value=[...$('cell').options].some(o=>o.value===cell)?cell:'256';
+  $('cols').value=clamp(Number(data.columns)||4,1,24);
+  $('rows').value=clamp(Number(data.rows)||Math.ceil(loaded.length/Number($('cols').value)),1,24);
+  if(data.kind){const button=$('categories').querySelector('[data-kind="'+String(data.kind).replace(/["\\\\]/g,'')+'"]');if(button)button.click()}
+  $('sourceInfo').textContent='Projeto editável carregado · '+loaded.length+' quadros · a imagem de origem completa não está incluída.';
+  $('cropStatus').textContent='Quadros restaurados do projeto editável.';
+  pick(0);
+  msg('Projeto editável importado: '+loaded.length+' quadros. Selecione um quadro para revisar ação e direção.');
+}
 $('libraryRefresh').onclick=refreshLibrary;
+$('libraryProjectRefresh').onclick=refreshLibraryProjects;
+$('libraryProjectSave').onclick=async()=>{
+  if(!ready())return;
+  const button=$('libraryProjectSave');button.disabled=true;
+  try{
+    const data=projectData(),serialized=JSON.stringify(data);
+    if(serialized.length>18000000)throw Error('Projeto acima de 18 MB. Exporte em partes menores.');
+    const name=String($('name').value||safeName()).trim().slice(0,80)||safeName();
+    const saved=await ApoenaLibrary.saveProject({id:'pixelart-'+safeName(),name,schema:'apoena.pixelart.v1',type:'pixelart',data,metadata:{kind:kind,frames:frames.length,cell_px:data.cell_px,fps:data.fps}});
+    await refreshLibraryProjects();$('libraryProjects').value=saved.id;
+    msg('Projeto editável salvo na biblioteca central: '+saved.name+' ('+frames.length+' quadros).');
+  }catch(error){msg('Falha ao salvar projeto editável: '+error.message)}
+  finally{button.disabled=false}
+};
+$('libraryProjectOpen').onclick=async()=>{
+  const id=$('libraryProjects').value;if(!id)return msg('Selecione um projeto editável salvo.');
+  try{const project=await ApoenaLibrary.getProject(id);if(!project)throw Error('Projeto não encontrado.');await loadProjectData(project.data);$('libraryProjects').value=project.id}
+  catch(error){msg('Falha ao abrir projeto: '+error.message)}
+};
 $('librarySave').onclick=async()=>{
   if(!ready())return;
   const button=$('librarySave');button.disabled=true;
   try{
-    const output=sheet().out;
-    const blob=await canvasBlob(output);
+    const output=sheet().out,blob=await canvasBlob(output);
     const sourceBlob=image?await new Promise((resolve,reject)=>{const c=document.createElement('canvas');c.width=image.width;c.height=image.height;const ctx=c.getContext('2d');ctx.drawImage(image,0,0);c.toBlob(b=>b?resolve(b):reject(new Error('Falha ao preservar o original.')),'image/png')}):null;
     const item=await ApoenaLibrary.saveAsset({
       name:safeName(),category:kind==='cenario'?'cenario':kind==='personagem'?'personagem':kind,
@@ -136,19 +213,26 @@ $('libraryAssets').onchange=async()=>{
     im.onload=()=>{
       if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=url;image=im;frames=[];current=-1;batchBackup=null;
       $('smartUndoBatch').disabled=true;
-      const cols=clamp(num('cols'),1,24),rows=clamp(num('rows'),1,24);resetMesh();
-      setCrop({x:0,y:0,w:im.width,h:im.height});
+      resetMesh();setCrop({x:0,y:0,w:im.width,h:im.height});
       list();drawEdit();$('sourceInfo').textContent=item.name+' · biblioteca central · '+im.width+'×'+im.height+' px';
       msg('Recurso carregado. Se for uma spritesheet, ajuste linhas e colunas antes de separar os quadros.');
     };
     im.onerror=()=>{URL.revokeObjectURL(url);msg('Não foi possível abrir a imagem salva.')};im.src=url;
   }catch(error){msg('Falha ao carregar recurso: '+error.message)}
 };
-if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(()=>refreshLibrary());
-refreshLibrary();
+if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(()=>{refreshLibrary();refreshLibraryProjects()});
+refreshLibrary();refreshLibraryProjects();
 function ready(){if(frames.length)return true;msg('Adicione quadros antes de exportar.');return false}
 function animate(t){if(t-lastPreview>1000/clamp(num('fps'),1,30)){pc.clearRect(0,0,preview.width,preview.height);const index=$('playing').checked?Math.floor(t/(1000/clamp(num('fps'),1,30)))%Math.max(1,frames.length):Math.max(0,current),f=frames[index];if(f){const c=f.canvas,k=Math.min(178/c.width,178/c.height);pc.imageSmoothingEnabled=false;pc.drawImage(c,(192-c.width*k)/2,185-c.height*k,c.width*k,c.height*k)}lastPreview=t}requestAnimationFrame(animate)}
 $('file').onchange=ev=>{const f=ev.target.files?.[0];if(!f)return;if(!/^image\/(png|webp|jpeg)$/.test(f.type)||f.size>22*1024*1024)return msg('Use PNG, WebP ou JPG com até 22MB.');if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(f);const im=new Image();im.onload=()=>{if(im.width*im.height>32000000)return msg('Imagem muito grande para celular.');image=im;frames=[];current=-1;batchBackup=null;$('smartUndoBatch').disabled=true;const cols=clamp(num('cols'),1,24),rows=clamp(num('rows'),1,24);resetMesh();setCrop({x:0,y:0,w:Math.floor(im.width/cols),h:Math.floor(im.height/rows)});list();drawEdit();$('sourceInfo').textContent=f.name+' • '+im.width+'×'+im.height+' px';msg('Importado. Ajuste recortes e limpe antes de exportar.')};im.src=imageUrl};
+$('projectFile').onchange=async ev=>{
+ const file=ev.target.files?.[0];if(!file)return;
+ try{if(file.size>18000000)throw Error('Arquivo acima de 18 MB.');const data=JSON.parse(await file.text());await loadProjectData(data)}
+ catch(error){msg('Falha ao importar projeto editável: '+error.message)}
+ ev.target.value='';
+};
+$('action').addEventListener('change',()=>{const f=selected();if(!f)return;f.action=String($('action').value||'parado').trim().slice(0,40)||'parado';list();drawEdit();msg('Ação do quadro atual atualizada.')});
+$('direction').addEventListener('change',()=>{const f=selected();if(!f)return;f.direction=String($('direction').value||'nenhuma').trim().slice(0,20)||'nenhuma';list();drawEdit();msg('Direção do quadro atual atualizada.')});
 for(const id of ['zoom','cols','rows','cropX','cropY','cropW','cropH','meshOffsetX','meshOffsetY','meshGapX','meshGapY'])$(id).addEventListener('input',()=>{if(image){if(['cols','rows','meshOffsetX','meshOffsetY','meshGapX','meshGapY'].includes(id)){resetMesh();if(id==='cols'||id==='rows')setCrop({x:0,y:0,w:Math.floor(image.width/clamp(num('cols'),1,24)),h:Math.floor(image.height/clamp(num('rows'),1,24))});else drawSource()}else drawSource()}});
 $('grid').onclick=()=>{grid=!grid;drawSource()};
 $('meshMode').onclick=()=>{meshMode=!meshMode;if(meshMode)grid=true;$('meshMode').classList.toggle('selected',meshMode);$('meshMode').setAttribute('aria-pressed',String(meshMode));drawSource();msg(meshMode?'Arraste uma linha azul para ajustar a malha. Toque numa célula para selecionar.':'Arraste para fazer um recorte livre.')};
@@ -188,6 +272,6 @@ $('tools').querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>{tool=b.data
 edit.onpointerdown=ev=>{if(!selected())return;ev.preventDefault();edit.setPointerCapture(ev.pointerId);saveUndo();if(tool==='remove')removeColor(ev);else{drawing=true;brush(ev)}};edit.onpointermove=ev=>{if(drawing)brush(ev)};edit.onpointerup=edit.onpointercancel=()=>{if(drawing){drawing=false;list()}};
 $('undo').onclick=()=>{const f=selected();if(!f||!undo.length)return;f.canvas=undo.pop();drawEdit();list()};$('applyAlpha').onclick=alpha;$('trim').onclick=trim;$('resetFrame').onclick=()=>{const f=selected();if(!f)return;saveUndo();f.canvas=canvasCopy(f.original);drawEdit();list()};
 $('previous').onclick=()=>{if(frames.length)pick((current+frames.length-1)%frames.length)};$('next').onclick=()=>{if(frames.length)pick((current+1)%frames.length)};$('duplicate').onclick=()=>{const f=selected();if(f){frames.splice(current+1,0,{...f,canvas:canvasCopy(f.canvas),original:canvasCopy(f.original)});pick(current+1)}};$('deleteFrame').onclick=()=>{if(current<0)return;frames.splice(current,1);pick(frames.length?Math.min(current,frames.length-1):-1)};$('moveLeft').onclick=()=>{if(current>0){[frames[current-1],frames[current]]=[frames[current],frames[current-1]];pick(current-1)}};$('moveRight').onclick=()=>{if(current<frames.length-1&&current>=0){[frames[current],frames[current+1]]=[frames[current+1],frames[current]];pick(current+1)}};
-$('exportFrame').onclick=()=>{if(selected())download(selected().canvas,safeName()+'_'+(current+1)+'.png')};$('exportSheet').onclick=()=>{if(ready()){download(sheet().out,safeName()+'.png');msg('Spritesheet transparente exportada.')}};$('exportManifest').onclick=()=>{if(ready())download(JSON.stringify(manifest(),null,2),safeName()+'.godot.json')};$('exportProject').onclick=()=>{if(!ready())return;const data=manifest();data.frames=frames.map((f,i)=>({...data.frames[i],dataUrl:f.canvas.toDataURL('image/png')}));download(JSON.stringify(data),safeName()+'.projeto.json')};
+$('exportFrame').onclick=()=>{if(selected())download(selected().canvas,safeName()+'_'+(current+1)+'.png')};$('exportSheet').onclick=()=>{if(ready()){download(sheet().out,safeName()+'.png');msg('Spritesheet transparente exportada.')}};$('exportManifest').onclick=()=>{if(ready())download(JSON.stringify(manifest(),null,2),safeName()+'.godot.json')};$('exportProject').onclick=()=>{if(!ready())return;try{const serialized=JSON.stringify(projectData());if(serialized.length>18000000)throw Error('Projeto acima de 18 MB. Exporte em partes menores.');download(serialized,safeName()+'.projeto.json');msg('Projeto editável JSON exportado.')}catch(error){msg('Falha ao exportar projeto: '+error.message)}};
 $('categories').querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{kind=b.dataset.kind;$('categories').querySelectorAll('[data-kind]').forEach(v=>v.classList.toggle('selected',v===b));msg('Categoria: '+kind)});const kindQuery=new URLSearchParams(location.search).get('tipo');if(kindQuery){const btn=$('categories').querySelector('[data-kind="'+kindQuery+'"]');if(btn)btn.click()}requestAnimationFrame(animate);
 })();
