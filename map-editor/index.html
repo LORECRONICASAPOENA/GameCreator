@@ -24,7 +24,7 @@ label{color:var(--muted);font-size:12px;display:inline-flex;align-items:center;g
 <body>
 <header>
  <div><div class="kicker">APOENA AGAR · GAMECREATOR · MAPA 01</div><h1>Editor de Mapas Pixel Art 2.5D</h1><small>Monte o cenário, importe seus PNGs e teste o encaixe antes de levar ao jogo.</small></div>
- <div class="controls"><a href="../index.html" class="button">← Creator</a><button id="save" class="primary">Salvar projeto JSON</button><label class="file">Abrir projeto<input id="load" type="file" accept=".json,application/json"></label><button id="png">Exportar mapa PNG</button></div>
+ <div class="controls"><a href="../index.html" class="button">← Creator</a><button id="save" class="primary">Salvar projeto JSON</button><button id="saveMapLibrary">Salvar mapa na biblioteca</button><select id="libraryMaps" aria-label="Mapas salvos na biblioteca"><option value="">Mapas da biblioteca…</option></select><button id="loadMapLibrary">Abrir mapa salvo</button><label class="file">Abrir projeto<input id="load" type="file" accept=".json,application/json"></label><button id="png">Exportar mapa PNG</button></div>
 </header>
 <div class="layout">
  <aside class="panel left">
@@ -80,12 +80,14 @@ label{color:var(--muted);font-size:12px;display:inline-flex;align-items:center;g
   </div>
  </div></aside>
 </div>
+<script src="../shared/asset-library.js"></script>
 <script>
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
 const TILE=32,MAX=160,stage=$('stage'),ctx=stage.getContext('2d'),mini=$('minimap'),mx=mini.getContext('2d'),sh=$('sheet'),sx=sh.getContext('2d');
 ctx.imageSmoothingEnabled=false;mx.imageSmoothingEnabled=false;sx.imageSmoothingEnabled=false;
+let mapName='Mapa 01 — Desfiladeiro de Agar',currentLibraryMapId='';
 let width=80,height=80,cells=[],heights=[],objects=[],assets=[],markers=[],sheetSrc='',sheetImg=null,selectedTile=0,sheetCols=6,sheetRows=4,sheetProfile='agar24',smartTile=true,showHeights=true,assetImages={};
 let movingObject=null,tool='paint',terrain=0,mode='terrain',selectedAsset='',objectScale=1,showGrid=true,showMarkers=true,zoom=.72,cam={x:0,y:0},dragging=false,panStart=null,lastCell=-1,history=[],redo=[],dirty=false,renderPending=false;
 const colors=['#52794b','#b29763','#8c8e86','#4687aa'];
@@ -296,8 +298,8 @@ $('loadTileset').onclick=async()=>{
   const im=new Image();im.onload=()=>{sheetImg=im;sheetCols=Math.max(1,Math.min(32,Number(item.metadata&&item.metadata.columns)||6));sheetRows=Math.max(1,Math.min(32,Number(item.metadata&&item.metadata.rows)||4));$('sheetCols').value=sheetCols;$('sheetRows').value=sheetRows;selectedTile=0;showSheet();drawSoon();scheduleSave();say('Tileset carregado da biblioteca central: '+item.name)};im.onerror=()=>say('Falha ao abrir o tileset salvo.');im.src=sheetSrc;
  }catch(error){say('Falha ao carregar tileset: '+error.message)}
 };
-if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(()=>refreshLibraryTilesets());
-refreshLibraryTilesets();
+if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(()=>{refreshLibraryTilesets();refreshLibraryMaps();});
+refreshLibraryTilesets();refreshLibraryMaps();
 $('sheetfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{let src=await fileData(f);sheetSrc=src;imageFrom(src,'sheet');scheduleSave();say('Tileset carregado. Selecione uma célula da folha.')}catch(err){say(err.message)}e.target.value=''};
 function showSheet(){
  if(!sheetImg)return;
@@ -315,11 +317,67 @@ sh.addEventListener('click',e=>{
 });
 function showAssets(){const list=$('assetlist');list.replaceChildren();for(const a of assets){const btn=document.createElement('button');btn.className='asset'+(a.id===selectedAsset?' selected':'');btn.type='button';let im=document.createElement('img');im.src=a.src;im.alt='';let name=document.createElement('small');name.textContent=a.name;btn.append(im,name);btn.onclick=()=>{selectedAsset=a.id;mode='object';selectTool('paint');showAssets();say('Objeto '+a.name+' selecionado. Toque no mapa para colocá-lo.')};list.append(btn)}}
 $('objectsfile').onchange=async e=>{for(const f of Array.from(e.target.files).slice(0,20)){try{let src=await fileData(f),id='img'+Math.random().toString(36).slice(2,11);assets.push({id,name:f.name.slice(0,80),src});imageFrom(src,id);selectedAsset=id}catch(err){say('Erro ao importar '+f.name+': '+err.message)}}showAssets();mode='object';selectTool('paint');scheduleSave();say(assets.length+' objetos disponíveis; selecione uma miniatura para colocar no mapa.');e.target.value=''};
-function packageData(){return {schema:'apoena.map2d.v1',name:'Mapa 01 — Desfiladeiro de Agar',tileSize:TILE,width,height,tiles:cells,heights,objects,assets,markers,tileset:sheetSrc,tilesetCols:sheetCols,tilesetRows:sheetRows,smartTile,sheetProfile,notes:'Editor 2.5D visual; importar PNGs e JSON não ativa cenas do Godot automaticamente.'}}
+function packageData(){return {schema:'apoena.map2d.v1',name:mapName,tileSize:TILE,width,height,tiles:cells,heights,objects,assets,markers,tileset:sheetSrc,tilesetCols:sheetCols,tilesetRows:sheetRows,smartTile,sheetProfile,notes:'Editor 2.5D visual; importar PNGs e JSON não ativa cenas do Godot automaticamente.'}}
 function download(content,name,type){const blob=content instanceof Blob?content:new Blob([content],{type});const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000)}
 $('save').onclick=()=>download(JSON.stringify(packageData()),'apoena_mapa01_editavel.json','application/json');
 $('exportJSON').onclick=$('save').onclick;
-$('load').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>18e6)throw Error('Arquivo maior que 18 MB');let d=JSON.parse(await f.text());if(d.schema!=='apoena.map2d.v1'||!Number.isInteger(d.width)||!Number.isInteger(d.height)||d.width<16||d.height<16||d.width>MAX||d.height>MAX||!Array.isArray(d.tiles)||d.tiles.length!==d.width*d.height)throw Error('Projeto incompatível ou inválido');remember();width=d.width;height=d.height;cells=d.tiles.map(n=>Number.isInteger(n)&&n>=0&&n<10000?n:0);heights=Array.isArray(d.heights)&&d.heights.length===width*height?d.heights.map(h=>Math.max(0,Math.min(4,Number(h)||0))):Array(width*height).fill(0);sheetCols=Math.max(1,Math.min(32,Number(d.tilesetCols)||4));sheetRows=Math.max(1,Math.min(32,Number(d.tilesetRows)||4));smartTile=d.smartTile!==false;sheetProfile=d.sheetProfile||'manual';$('sheetProfile').value=sheetProfile;$('sheetCols').value=sheetCols;$('sheetRows').value=sheetRows;$('smartTile').checked=smartTile;objects=Array.isArray(d.objects)?d.objects.slice(0,2000):[];markers=Array.isArray(d.markers)?d.markers.slice(0,300):[];assets=Array.isArray(d.assets)?d.assets.filter(a=>typeof a.src==='string'&&/^data:image\/(png|webp);base64,/.test(a.src)).slice(0,50):[];assetImages={};for(const a of assets)imageFrom(a.src,a.id);sheetSrc=typeof d.tileset==='string'&&/^data:image\/(png|webp);base64,/.test(d.tileset)?d.tileset:'';sheetImg=null;selectedTile=0;if(sheetSrc)imageFrom(sheetSrc,'sheet');showAssets();$('width').value=width;$('height').value=height;cam={x:width*TILE/2,y:height*TILE/2};drawSoon();scheduleSave();say('Projeto importado com sucesso.')}catch(err){say('Não foi possível abrir o projeto: '+err.message)}e.target.value=''};
+async function refreshLibraryMaps(){
+ try{
+  const projects=await ApoenaLibrary.listProjects({});
+  const maps=projects.filter(p=>p&&p.schema==='apoena.map2d.v1'&&p.data&&Array.isArray(p.data.tiles));
+  const select=$('libraryMaps'),prior=select.value||currentLibraryMapId;
+  select.replaceChildren(new Option('Mapas da biblioteca…',''));
+  maps.forEach(p=>select.add(new Option(p.name+' · '+(p.data.width||'?')+'×'+(p.data.height||'?'),p.id)));
+  if(maps.some(p=>p.id===prior))select.value=prior;
+ }catch(error){say('Biblioteca de mapas indisponível: '+error.message)}
+}
+$('saveMapLibrary').onclick=async()=>{
+ try{
+  const proposed=prompt('Nome do mapa na biblioteca:',mapName);
+  if(proposed===null)return;
+  mapName=String(proposed).trim().slice(0,120)||mapName;
+  const data=packageData();data.name=mapName;
+  const id=currentLibraryMapId||('map-'+mapName.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,72));
+  const serialized=JSON.stringify(data);
+  if(serialized.length>18000000)throw Error('Mapa muito grande para a biblioteca. Exporte o JSON e reduza os recursos incorporados.');
+  const saved=await ApoenaLibrary.saveProject({id:id,name:mapName,schema:'apoena.map2d.v1',type:'map',data:data,metadata:{width:width,height:height,tileSize:TILE,tilesetColumns:sheetCols,tilesetRows:sheetRows}});
+  currentLibraryMapId=saved.id;
+  await refreshLibraryMaps();$('libraryMaps').value=saved.id;
+  say('Mapa salvo na biblioteca central: '+saved.name+' ('+width+'×'+height+').');
+ }catch(error){say('Falha ao salvar mapa na biblioteca: '+error.message)}
+};
+$('loadMapLibrary').onclick=async()=>{
+ const id=$('libraryMaps').value;if(!id)return say('Selecione um mapa salvo na biblioteca.');
+ try{
+  const project=await ApoenaLibrary.getProject(id);
+  if(!project||!project.data)throw Error('O projeto salvo não foi encontrado.');
+  applyMapData(project.data);currentLibraryMapId=project.id;mapName=project.name||project.data.name||mapName;
+  await refreshLibraryMaps();$('libraryMaps').value=project.id;
+  say('Mapa reaberto da biblioteca central: '+mapName+'.');
+ }catch(error){say('Falha ao reabrir mapa: '+error.message)}
+};
+async function applyMapData(d){
+ if(!d||d.schema!=='apoena.map2d.v1'||!Number.isInteger(d.width)||!Number.isInteger(d.height)||d.width<16||d.height<16||d.width>MAX||d.height>MAX||!Array.isArray(d.tiles)||d.tiles.length!==d.width*d.height)throw Error('Projeto incompatível ou inválido');
+ remember();mapName=String(d.name||'Mapa importado').trim().slice(0,120)||'Mapa importado';width=d.width;height=d.height;
+ cells=d.tiles.map(n=>Number.isInteger(n)&&n>=0&&n<10000?n:0);
+ heights=Array.isArray(d.heights)&&d.heights.length===width*height?d.heights.map(h=>Math.max(0,Math.min(4,Number(h)||0))):Array(width*height).fill(0);
+ sheetCols=Math.max(1,Math.min(32,Number(d.tilesetCols)||4));sheetRows=Math.max(1,Math.min(32,Number(d.tilesetRows)||4));
+ smartTile=d.smartTile!==false;sheetProfile=d.sheetProfile||'manual';$('sheetProfile').value=sheetProfile;$('sheetCols').value=sheetCols;$('sheetRows').value=sheetRows;$('smartTile').checked=smartTile;
+ objects=Array.isArray(d.objects)?d.objects.slice(0,2000):[];markers=Array.isArray(d.markers)?d.markers.slice(0,300):[];
+ assets=Array.isArray(d.assets)?d.assets.filter(a=>a&&typeof a.src==='string'&&/^data:image\\/(png|webp);base64,/.test(a.src)).slice(0,50):[];
+ assetImages={};for(const a of assets)imageFrom(a.src,a.id);
+ sheetSrc=typeof d.tileset==='string'&&/^data:image\\/(png|webp);base64,/.test(d.tileset)?d.tileset:'';
+ sheetImg=null;selectedTile=0;if(sheetSrc)imageFrom(sheetSrc,'sheet');
+ $('width').value=width;$('height').value=height;cam={x:width*TILE/2,y:height*TILE/2};showAssets();drawSoon();scheduleSave();
+}
+$('load').onchange=async e=>{
+ const f=e.target.files[0];if(!f)return;
+ try{
+  if(f.size>18000000)throw Error('Arquivo maior que 18 MB');
+  const d=JSON.parse(await f.text());currentLibraryMapId='';await applyMapData(d);say('Projeto importado com sucesso.');
+ }catch(err){say('Não foi possível abrir o projeto: '+err.message)}
+ e.target.value='';
+};
 $('png').onclick=()=>{
  const w=width*TILE,h=height*TILE;if(w*h>35000000){say('Mapa muito grande para exportação PNG neste navegador. Reduza as dimensões.');return}
  const off=document.createElement('canvas');off.width=w;off.height=h;const oc=off.getContext('2d');oc.imageSmoothingEnabled=false;
