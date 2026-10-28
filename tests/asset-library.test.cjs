@@ -49,7 +49,8 @@ async function main() {
     name: "Mapa de teste",
     schema: "apoena.map2d.v1",
     type: "map",
-    data: { width: 16, height: 16, tiles: [0, 1, 2] }
+    data: { width: 16, height: 16, tiles: [0, 1, 2] },
+    metadata: { width: 16, height: 16, tileSize: 32 }
   });
   // Recarrega o módulo para provar que os registros não dependem do cache em memória da API.
   const modulePath = require.resolve("../shared/asset-library.js");
@@ -58,6 +59,10 @@ async function main() {
   const reopened = await ReopenedLibrary.getProject("mapa-teste");
   assert.deepEqual(reopened.data, { width: 16, height: 16, tiles: [0, 1, 2] });
   assert.equal((await ReopenedLibrary.listProjects({ search: "mapa" })).length, 1);
+  const summaries = await ReopenedLibrary.listProjects({ search: "mapa", includeData: false });
+  assert.equal(summaries.length, 1);
+  assert.equal(summaries[0].data, undefined, "listagem resumida não carrega o mapa completo");
+  assert.equal(summaries[0].metadata.width, 16, "metadados leves preservam dimensões do mapa");
   const persistedAsset = await ReopenedLibrary.getAsset(first.id);
   assert.equal(persistedAsset.blob.size, edited.size, "imagem salva sobrevive à reabertura da API");
   assert.equal(persistedAsset.originalBlob.size, source.size, "imagem original também sobrevive à reabertura");
