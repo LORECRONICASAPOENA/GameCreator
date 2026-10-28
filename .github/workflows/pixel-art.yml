@@ -1,5 +1,7 @@
 name: Validar Apoena Creator Pixel Art
 on:
+  push:
+    branches: [feature/estudio-unificado-pixelart-v41]
   pull_request:
     branches: [main]
     paths:
