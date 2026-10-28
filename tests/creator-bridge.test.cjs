@@ -6,6 +6,7 @@ const vm = require("node:vm");
 const root = path.join(__dirname, "..");
 const bridgeSource = fs.readFileSync(path.join(root, "shared/creator-bridge.js"), "utf8");
 const nativeBridgeSource = fs.readFileSync(path.join(root, "pixel-art/ponte-creator.js"), "utf8");
+const pixelModuleSource = fs.readFileSync(path.join(root, "pixel-art/modulo-integrado.js"), "utf8");
 const studioHtml = fs.readFileSync(path.join(root, "pixel-art/estudio.html"), "utf8");
 const studioJs = fs.readFileSync(path.join(root, "pixel-art/estudio.js"), "utf8");
 const mapHtml = fs.readFileSync(path.join(root, "map-editor/index.html"), "utf8");
@@ -91,6 +92,7 @@ async function flush() {
   assert.ok(nativeBridgeSource.includes('action==="saveAsset"') && nativeBridgeSource.includes('action==="saveMap"'), "ponte grava spritesheets e mapas no estado V4.0");
   assert.ok(studioHtml.includes("../shared/creator-bridge.js") && studioJs.includes("ApoenaCreatorBridge.request('saveAsset'"), "Estúdio carrega e usa a ponte compartilhada");
   assert.ok(mapHtml.includes("../shared/creator-bridge.js") && mapHtml.includes("ApoenaCreatorBridge.request('saveMap'"), "editor de mapas envia alterações ao Creator");
+  assert.ok(pixelModuleSource.includes(String.raw\`rel="opener"\`) || pixelModuleSource.includes(String.raw\`rel=\\\"opener\\\"\`), "links locais preservam window.opener para a ponte");
   console.log("CREATOR BRIDGE OK: request/response, validação de origem, erros e contratos de sincronização");
 })().catch(error => {
   console.error(error);
