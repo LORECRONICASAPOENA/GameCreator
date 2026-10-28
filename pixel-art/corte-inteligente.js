@@ -124,7 +124,7 @@
   function detectSprites(src,options={}){
     const analysis=analyze(src,options),w=src.width,h=src.height;
     const minArea=Number.isFinite(Number(options.minArea))&&Number(options.minArea)>=1
-      ?Math.floor(Number(options.minArea)):Math.max(8,Math.floor(w*h*.00002));
+      ?Math.floor(Number(options.minArea)):Math.max(12,Math.floor(w*h*.00002));
     const mergeGap=Number.isFinite(Number(options.mergeGap))
       ?clamp(Math.floor(Number(options.mergeGap)),0,16):1;
     const padding=Number.isFinite(Number(options.padding))
