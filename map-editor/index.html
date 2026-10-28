@@ -325,11 +325,11 @@ $('save').onclick=()=>download(JSON.stringify(packageData()),'apoena_mapa01_edit
 $('exportJSON').onclick=$('save').onclick;
 async function refreshLibraryMaps(){
  try{
-  const projects=await ApoenaLibrary.listProjects({});
-  const maps=projects.filter(p=>p&&p.schema==='apoena.map2d.v1'&&p.data&&Array.isArray(p.data.tiles));
+  const projects=await ApoenaLibrary.listProjects({includeData:false});
+  const maps=projects.filter(p=>p&&p.schema==='apoena.map2d.v1');
   const select=$('libraryMaps'),prior=select.value||currentLibraryMapId;
   select.replaceChildren(new Option('Mapas da biblioteca…',''));
-  maps.forEach(p=>select.add(new Option(p.name+' · '+(p.data.width||'?')+'×'+(p.data.height||'?'),p.id)));
+  maps.forEach(p=>{const meta=p.metadata||{};select.add(new Option(p.name+' · '+(meta.width||'?')+'×'+(meta.height||'?'),p.id))});
   if(maps.some(p=>p.id===prior))select.value=prior;
  }catch(error){say('Biblioteca de mapas indisponível: '+error.message)}
 }
