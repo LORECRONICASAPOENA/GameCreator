@@ -1,0 +1,51 @@
+name: Validar Apoena Creator Pixel Art
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
+      - "pixel-art/**"
+      - "shared/**"
+      - "biblioteca/**"
+      - "map-editor/**"
+      - "integracao/**"
+      - "tests/**"
+      - "README.md"
+      - "ORGANIZACAO_EDITOR.md"
+      - ".github/workflows/pixel-art.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar adaptador IndexedDB para testes
+        run: npm install --no-save --no-package-lock fake-indexeddb@6.2.4
+      - name: Validar sintaxe JavaScript
+        run: |
+          node --check pixel-art/estudio.js
+          node --check pixel-art/corte-inteligente.js
+          node --check shared/asset-library.js
+      - name: Testar Corte Inteligente, biblioteca e contratos de integração
+        run: |
+          node tests/corte-inteligente.test.cjs
+          node tests/asset-library.test.cjs
+      - name: Garantir preservação do Creator original e dos módulos
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html
+          test -f pixel-art/index.html
+          test -f pixel-art/estudio.html
+          test -f map-editor/index.html
+          test -f integracao/index.html
+          test -f legacy/iniciador-anterior.html
+          grep -q 'data-page="3d"' index.html
+          grep -q 'data-page="pixel"' index.html
+          grep -q 'asset-library.js' map-editor/index.html
