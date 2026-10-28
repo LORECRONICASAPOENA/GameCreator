@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+require("fake-indexeddb/auto");
 const ApoenaLibrary = require("../shared/asset-library.js");
 
 async function main() {
@@ -48,13 +49,22 @@ async function main() {
     type: "map",
     data: { width: 16, height: 16, tiles: [0, 1, 2] }
   });
-  const reopened = await ApoenaLibrary.getProject("mapa-teste");
+  // Recarrega o módulo para provar que os registros não dependem do cache em memória da API.
+  const modulePath = require.resolve("../shared/asset-library.js");
+  delete require.cache[modulePath];
+  const ReopenedLibrary = require(modulePath);
+  const reopened = await ReopenedLibrary.getProject("mapa-teste");
   assert.deepEqual(reopened.data, { width: 16, height: 16, tiles: [0, 1, 2] });
-  assert.equal((await ApoenaLibrary.listProjects({ search: "mapa" })).length, 1);
+  assert.equal((await ReopenedLibrary.listProjects({ search: "mapa" })).length, 1);
+  const persistedAsset = await ReopenedLibrary.getAsset(first.id);
+  assert.equal(persistedAsset.blob.size, edited.size, "imagem salva sobrevive à reabertura da API");
+  assert.equal(persistedAsset.originalBlob.size, source.size, "imagem original também sobrevive à reabertura");
 
-  const deleted = await ApoenaLibrary.deleteAsset(first.id);
+  const deleted = await ReopenedLibrary.deleteAsset(first.id);
   assert.equal(deleted.deleted, true);
-  assert.equal((await ApoenaLibrary.listAssets()).length, 0);
-  console.log("BIBLIOTECA CENTRAL OK: CRUD, filtros, deduplicação, original e persistência de projeto");
+  assert.equal((await ReopenedLibrary.listAssets()).length, 0);
+  await ReopenedLibrary.deleteProject("mapa-teste");
+  assert.equal((await ReopenedLibrary.listProjects({ search: "mapa" })).length, 0);
+  console.log("BIBLIOTECA CENTRAL OK: IndexedDB, CRUD, filtros, deduplicação, originais e reabertura de projetos");
 }
 main().catch(function(error) { console.error(error); process.exitCode = 1; });
