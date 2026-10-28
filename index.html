@@ -1,45 +1,29 @@
-<!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>APOENA Game Creator v4.0 — Editor Unificado</title>
-<style>html,body{margin:0;min-height:100%;background:#091522;color:#f2e0ae;font:16px system-ui,Arial}#boot{padding:23px;line-height:1.5}#boot p{color:#abc6d3}</style>
-</head><body>
-<div id="boot" role="status"><strong>APOENA GAME CREATOR v4.0</strong><p>Abrindo o editor integrado de layouts, itens, personagens, Pixel Art e mapas. Aguarde o carregamento offline...</p></div>
-<script src="bundle-v4/parte_000.js"></script>
-<script src="bundle-v4/parte_001.js"></script>
-<script src="bundle-v4/parte_002.js"></script>
-<script src="bundle-v4/parte_003.js"></script>
-<script src="bundle-v4/parte_004.js"></script>
-<script src="bundle-v4/parte_005.js"></script>
-<script src="bundle-v4/parte_006.js"></script>
-<script src="bundle-v4/parte_007.js"></script>
-<script src="bundle-v4/parte_008.js"></script>
-<script src="bundle-v4/parte_009.js"></script>
-<script src="bundle-v4/parte_010.js"></script>
-<script src="bundle-v4/parte_011.js"></script>
-<script src="bundle-v4/parte_012.js"></script>
-<script src="bundle-v4/parte_013.js"></script>
-<script src="bundle-v4/parte_014.js"></script>
-<script src="bundle-v4/parte_015.js"></script>
-<script src="bundle-v4/parte_016.js"></script>
-<script src="bundle-v4/parte_017.js"></script>
-<script src="bundle-v4/parte_018.js"></script>
-<script src="bundle-v4/parte_019.js"></script>
-<script src="bundle-v4/parte_020.js"></script>
-<script src="bundle-v4/parte_021.js"></script>
-<script src="bundle-v4/parte_022.js"></script>
-<script src="bundle-v4/parte_023.js"></script>
-<script>
-(function(){
- try{
-  const pieces=window.__APOENA_V4_PARTES||[];
-  if(pieces.length!==24||pieces.some(p=>typeof p!=="string"||!p.length))throw Error("Arquivos do editor incompletos. Extraia o ZIP inteiro: precisa manter a pasta bundle-v4.");
-  const full=pieces.join("");
-  if(full.length!==16324651||!full.startsWith("<!DOCTYPE html>")||!full.includes('id="page-pixelart"')||!full.includes('Game Creator v4.0'))throw Error("Versão 4.0 inválida ou incompleta. Não use partes de versões diferentes.");
-  window.__APOENA_V4_PARTES=null;
-  document.open();document.write(full);document.close();
- }catch(e){
-  document.getElementById("boot").innerHTML="<strong>Não foi possível abrir a versão unificada.</strong><p>"+String(e.message).replace(/[&<>]/g,"")+"</p>";
- }
-})();
-</script>
-</body></html>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#102738"><title>Apoena Game Creator — Estúdio Unificado</title>
+<style>:root{color-scheme:dark;--bg:#0a1924;--side:#102738;--panel:#172f40;--border:#39586c;--fg:#f1f9ff;--muted:#b9d0dc;--gold:#f5d48c;--aqua:#87dee1}*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,Arial}header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 15px;background:var(--side);border-bottom:1px solid var(--border)}h1{font-size:18px;margin:0;color:var(--gold)}small{color:var(--muted)}#layout{display:grid;grid-template-columns:220px minmax(0,1fr);height:calc(100dvh - 65px);min-height:350px}nav{overflow:auto;background:var(--side);border-right:1px solid var(--border);padding:11px;display:flex;flex-direction:column;gap:7px}button{font:600 14px system-ui;border:1px solid var(--border);background:var(--panel);border-radius:9px;padding:11px 10px;min-height:44px;text-align:left;color:var(--fg);cursor:pointer}button.active{border-color:var(--aqua);background:#1e5360}button.sub{margin-left:11px;font-size:13px;min-height:39px;padding:9px}.group{font-size:11px;letter-spacing:.12em;color:var(--gold);margin-top:10px}#viewer{display:flex;flex-direction:column;min-width:0}#crumb{display:flex;justify-content:space-between;padding:8px 13px;gap:8px;background:#142b3b;border-bottom:1px solid var(--border);font-size:13px;color:var(--aqua)}#crumb a{color:var(--muted)}iframe{width:100%;height:100%;border:0;flex:1;min-height:0;background:#0b1823}#notice{font-size:11px;color:var(--muted);padding:10px;border:1px solid var(--border);border-radius:9px;margin-top:auto}@media(max-width:800px){#layout{display:flex;flex-direction:column;height:calc(100dvh - 60px)}nav{flex-direction:row;overflow-x:auto;overflow-y:hidden;min-height:68px;max-height:68px;padding:8px;gap:7px;border-right:0;border-bottom:1px solid var(--border)}nav button,nav button.sub{flex:0 0 auto;white-space:nowrap;margin:0}nav .group,nav #notice{display:none}#viewer{flex:1;min-height:0}h1{font-size:15px}}</style></head><body>
+<header><div><small>UNIVERSO AGAR • EDITOR OFFLINE</small><h1>Apoena Game Creator <small>V4.1 • 3D + Pixel Art</small></h1></div><small>Um programa, várias ferramentas</small></header>
+<div id="layout"><nav aria-label="Menu unificado"><div class="group">CRIAR</div><button data-page="3d" class="active">🧊 Creator e editor 3D</button><button data-page="pixel">🎨 Pixel Art</button><button data-page="personagens" class="sub">🧍 Personagens</button><button data-page="animais" class="sub">🐗 Animais</button><button data-page="cenario" class="sub">🌳 Cenários e plantas</button><button data-page="efeitos" class="sub">✨ Efeitos e ataques</button><div class="group">SISTEMAS EXISTENTES</div><button data-page="mapa">🗺️ Mapas 2.5D</button><button data-page="itens">⚗️ Itens e receitas</button><button data-page="biblioteca">🗃️ Biblioteca central</button><button data-page="catalogo">📋 Catálogo anterior</button><button data-page="manual">📖 Guia do estúdio</button><div id="notice">O Creator original, o gerador modular, o editor de mapas e a fábrica de itens permanecem no mesmo repositório. A troca de tela não cria outro projeto.</div></nav>
+<div id="viewer"><div id="crumb"><span id="here">Creator e editor 3D</span><a id="full" href="APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html" target="_blank" rel="noopener">Abrir tela inteira</a></div><iframe id="module" title="Ferramenta atual do Apoena Game Creator" src="APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html" loading="eager"></iframe></div></div>
+<script src="shared/asset-library.js"></script><script>(function(){'use strict';const pages={
+"3d":["Creator e editor 3D","APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"],
+"pixel":["Pixel Art • recorte, limpeza e exportação","pixel-art/estudio.html"],
+"personagens":["Personagens • Creator Pixel Art nativo","APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html#pixelart"],
+"animais":["Pixel Art • animais","pixel-art/estudio.html?tipo=animal"],
+"cenario":["Pixel Art • cenários e plantas","pixel-art/estudio.html?tipo=cenario"],
+"efeitos":["Pixel Art • efeitos de poderes","pixel-art/estudio.html?tipo=efeito"],
+"mapa":["Editor de mapas 2.5D","map-editor/index.html"],
+"itens":["Itens, receitas e integração","integracao/index.html"],
+"biblioteca":["Biblioteca central de recursos","biblioteca/index.html"],
+"catalogo":["Iniciador e catálogo anterior","legacy/iniciador-anterior.html"],
+"manual":["Organização do Creator","ORGANIZACAO_EDITOR.html"]};
+const frame=document.getElementById('module'),title=document.getElementById('here'),link=document.getElementById('full');
+window.addEventListener('message',async function(event){
+  if(event.source!==frame.contentWindow||!event.data||event.data.channel!=='apoena.gamecreator.library.v1'||event.data.type!=='request')return;
+  const message=event.data;
+  try{
+    const value=await ApoenaLibrary.dispatch(message.action,message.payload||{});
+    frame.contentWindow.postMessage({channel:'apoena.gamecreator.library.v1',type:'response',id:message.id,ok:true,value:value},'*');
+  }catch(error){
+    frame.contentWindow.postMessage({channel:'apoena.gamecreator.library.v1',type:'response',id:message.id,ok:false,error:{message:error&&error.message?error.message:'Falha na biblioteca central.'}},'*');
+  }
+});
+function choose(id,changeHash){const key=pages[id]?id:'3d',p=pages[key];if(frame.getAttribute('src')!==p[1])frame.src=p[1];title.textContent=p[0];link.href=p[1];document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===key));if(changeHash)location.hash=key}document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.page,true)));addEventListener('hashchange',()=>choose(location.hash.slice(1),false));choose(location.hash.slice(1)||'3d',false)})();</script></body></html>
