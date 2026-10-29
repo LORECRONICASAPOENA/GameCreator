@@ -28,22 +28,25 @@ if not html.strip():
     assert 'full.length!==16324808' in loader, 'Integridade do loader não corresponde ao bundle atualizado'
     print('Fonte monolítica vazia; bundle-v4 validado. index.html foi preservado.')
     raise SystemExit(0)
-nav_match = re.search(r'(?is)<nav\b[^>]*>.*?data-page="controles".*?</nav>', html)
-assert nav_match, 'Menu principal com a aba Controles não foi encontrado'
+menu_pattern = r'<button\b[^>]*data-page="controles"[^>]*>.*?</button>\s*</nav>'
+menu_matches = list(re.finditer(menu_pattern, html, re.S))
+assert len(menu_matches)==1, 'Nao foi possivel identificar de forma inequivoca o fim do menu original'
+menu_match = menu_matches[0]
 assert 'data-page="pixelart"' not in html, 'A fonte já contém Pixel Art'
 assert html.count('</main>')>=1 and html.count('</body>')==1
 html=html.replace('Game Creator v3.9.2 — Editor Visual Livre','Game Creator v4.0 — Editor Integrado',1)
 html=html.replace('— Game Creator v3.9.2','— Game Creator v4.0',1)
 html=html.replace('v3.9.2','v4.0')
-nav_html = nav_match.group(0)
-nav_new = nav_html.replace('</nav>','<button class="tab" data-page="pixelart">▧ Pixel Art • Personagens / Objetos / Mapas</button></nav>',1)
-html = html[:nav_match.start()] + nav_new + html[nav_match.end():]
+menu_original = menu_match.group(0)
+menu_new = menu_original.replace('</nav>','<button class="tab" data-page="pixelart">▧ Pixel Art • Personagens / Objetos / Mapas</button></nav>',1)
+html = html[:menu_match.start()] + menu_new + html[menu_match.end():]
 html=html.replace('</main>','<section class="page" id="page-pixelart"><div id="gc40PixelRoot"><div class="panel"><h2>Pixel Art</h2><p>Carregando personagens, objetos e mapas...</p></div></div></section>\n</main>',1)
-imports='\n<script src="map-editor/terrain-system.js"></script>\n<script src="map-editor/world-object-system.js"></script>\n<script src="map-editor/modulo-integrado.js"></script>\n<script src="pixel-art/natureza.js"></script>\n<script src="pixel-art/modulo-integrado.js"></script>\n<script src="pixel-art/ponte-creator.js"></script>\n'
+imports='\n<script src="shared/asset-library.js"></script>\n<script src="shared/creator-bridge.js"></script>\n<script src="map-editor/terrain-system.js"></script>\n<script src="map-editor/world-object-system.js"></script>\n<script src="map-editor/modulo-integrado.js"></script>\n<script src="pixel-art/natureza.js"></script>\n<script src="pixel-art/modulo-integrado.js"></script>\n<script src="pixel-art/ponte-creator.js"></script>\n'
 html=html.replace('</body>',imports+'</body>',1)
 assert '<iframe' not in html, 'Editor integrado não utiliza iframe'
+assert 'shared/asset-library.js' in html and 'shared/creator-bridge.js' in html, 'Biblioteca e ponte compartilhadas não foram incluídas'
 assert html.count('id="page-pixelart"')==1
-for path in ('map-editor/terrain-system.js','map-editor/world-object-system.js','map-editor/modulo-integrado.js','pixel-art/natureza.js','pixel-art/modulo-integrado.js','pixel-art/ponte-creator.js'):
+for path in ('shared/asset-library.js','shared/creator-bridge.js','map-editor/terrain-system.js','map-editor/world-object-system.js','map-editor/modulo-integrado.js','pixel-art/natureza.js','pixel-art/modulo-integrado.js','pixel-art/ponte-creator.js'):
  assert (root/path).is_file(), f'Módulo integrado não encontrado: {path}'
 out.write_text(html,encoding='utf-8')
 print('Editor v4.0 integrado e pronto:',out.stat().st_size,hashlib.sha256(out.read_bytes()).hexdigest())

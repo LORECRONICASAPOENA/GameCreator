@@ -1,57 +1,56 @@
-# APOENA GAME CREATOR — BASE v4.0 + PIXEL ART INTEGRADO
+# Apoena Game Creator — V4.1 em desenvolvimento
 
-> **Programa único, um único projeto.** O Game Creator v4.0 é a base da aplicação. Personagens, objetos e mapas Pixel Art são ferramentas da navegação interna, não outro game editor e não outro repositório.
+## Base e entrada do programa
 
-## Estado real — 28/10/2026
+- Repositório: `apoenalore/GameCreator`.
+- Branch de desenvolvimento: `feature/estudio-unificado-pixelart-v41`.
+- A fonte `APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html` e os módulos anteriores são preservados. A V4.0 nativa continua sendo a base do Creator.
+- `index.html` é o carregador compacto do Creator nativo: monta as 24 partes de `bundle-v4/` e inclui a biblioteca compartilhada, a ponte V4.0/V4.1 e o módulo de Natureza. A entrada principal não usa iframe.
+- `ABRIR_GAME_CREATOR.cmd` executa `integracao/build_unificado.ps1` no Windows e abre a entrada integrada. `integracao/build_unificado.py` oferece o mesmo build para ambientes com Python.
+- O build adiciona a área Pixel Art à fonte V4.0 sem sobrescrever o arquivo original. O CI testa o build em um checkout descartável e entrega o resultado compilado no pacote.
+- O Estúdio Pixel Art e o editor de mapas são ferramentas especializadas abertas pelo menu Pixel Art nativo. Quando abertos por esses links, sincronizam spritesheets/mapas com a sessão V4.0 pela ponte `apoena.creator.v4.bridge.v1`, além de salvar na biblioteca IndexedDB.
 
-- Fonte integral **v4.0 original** preservada: `APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html` (16,3 MB, possui os módulos 3.9, 3.9.2 e a bancada 4.0).
-- **v3.9.2** original preservada como backup histórico; código antigo da v3.9 também está em `legacy/`.
-- Editor nativo integrado: construção determinística com `integracao/build_unificado.py` ou `integracao/build_unificado.ps1`, que **substitui `index.html` pelo conteúdo da v4.0** com aba adicional Pixel Art. **Não usa iframe, não abre um segundo editor e não cria um segundo inventário.**
-- **Importante:** o GitHub Actions que deveria compilar/publicar automaticamente `index.html` falhou antes das etapas executarem. Até a publicação bem-sucedida, o `index.html` existente no branch pode continuar sendo o iniciador antigo. **Não confundir** o iniciador que aparece no GitHub com a v4.0 já integrada. A fonte v4.0 continua íntegra.
+## Ferramentas V4.1
 
-## Como abrir a versão realmente integrada no Windows 10/11
+- **Estúdio Pixel Art:** importação PNG/WebP/JPG, recorte livre e por grade, divisórias ajustáveis, transparência, borracha, remoção de fundo por região conectada, detecção de sprites separados, prévia dos limites e desfazer da limpeza em lote.
+- **Spritesheets:** células padronizadas, âncora inferior, prévia animada, ações e direções configuráveis por quadro, exportação PNG/JSON e importação de projetos JSON editáveis.
+- **Biblioteca central:** assets, imagens originais, metadados, categorias, etiquetas e projetos editáveis em IndexedDB, com atualização por ID para evitar duplicação.
+- **Backup:** `biblioteca/index.html` exporta recursos e projetos para JSON versionado e restaura o conteúdo sem apagar registros que não estejam no backup. IDs iguais são atualizados após confirmação.
+- **Mapas 2.5D e tilesets:** edição de grade, salvamento/reabertura pela biblioteca, verificação de bordas transparentes, repetição de tiles e compatibilidade das dimensões com a grade.
+- **Itens, receitas e Godot:** `integracao/index.html` valida/exporta um catálogo portátil; `integracao/godot/ApoenaCatalogo.gd` implementa carga de catálogo, inventário, coleta, fabricação temporizada, efeitos e salvamento/restauração de sessão.
 
-1. Baixe o repositório pelo botão **Code → Download ZIP** e extraia todas as pastas.
-2. Abra **`ABRIR_GAME_CREATOR.cmd`** (já atualizado). O arquivo executa o PowerShell de compilação e abre `index.html` com a v4.0 e suas abas integradas.
-3. Na barra do próprio Game Creator, escolha **Pixel Art**. Dentro dessa aba estão Personagens / Animações, Objetos / Funções / Clima e Mapas / Cenários.
-4. Use o botão original **Salvar projeto editável** na barra superior. Salva o mesmo projeto `apoena.central.v1` com itens, receitas, imagens, personagens e mapas.
+## Validação automatizada
 
-**Celular/Android:** para abrir a versão integrada diretamente no navegador, o arquivo `index.html` compilado precisa estar no pacote ou no repositório. O PowerShell acima só é executado no Windows. O HTML original v4.0 isolado funciona no celular, mas não inclui a aba Pixel Art até a compilação. Não prometer que o iniciador antigo do GitHub já esteja correto.
+- `tests/corte-inteligente.test.cjs`: limpeza/transparência, fragmentos, malha e contratos de integração.
+- `tests/asset-library.test.cjs`: operações da biblioteca com IndexedDB simulado por `fake-indexeddb`.
+- `tests/library-backup.test.cjs`: exportação/restauração, originais, metadados, projetos e rejeição de backups incompatíveis.
+- `tests/tileset-check.test.cjs`: bordas transparentes, repetição, grade e limites de imagens.
+- `tests/catalogo.test.cjs`: exportação portátil, vínculos de itens/receitas e contrato de integração Godot.
+- `tests/creator-bridge.test.cjs`: protocolo request/response, rejeição de origem externa e contratos de sincronização V4.0/V4.1.
+- `.github/workflows/pixel-art.yml`: build nativo pelo PowerShell do Windows, verificações JavaScript, testes Node, verificação DOM responsiva em Edge/Chrome e teste headless do Godot 4.7.2 com SHA-256 verificado.
+- A validação agendada executa a cada hora UTC enquanto o workflow estiver ativo na branch padrão.
 
-## Um único banco de itens
+## Limites que impedem declarar o projeto concluído
 
-A Fábrica Universal de Itens da v4.0 é a **fonte oficial**. Não criar uma segunda fábrica no Pixel Art.
+- A sincronização da ponte altera a sessão V4.0 em memória. Depois de sincronizar personagens/mapas, use **Salvar projeto editável** na aplicação principal para persistir a sessão em JSON.
+- O salvamento IndexedDB e a sessão V4.0 são duas persistências distintas; a ponte atualiza ambas para spritesheets/mapas quando a ferramenta é aberta pelo Creator, mas não instala automaticamente assets no runtime do jogo.
+- O PNG e o manifesto não garantem, sozinhos, animações funcionais no gameplay. As transições, estados e importação no Godot precisam de validação específica.
+- O CI instala o Godot 4.7.2 oficial quando necessário, verifica o SHA-256 do pacote e executa testes headless de catálogo. A validação em dispositivo Android físico continua sendo uma verificação manual separada.
+- Android físico, regressão visual manual da bancada 3D e validação completa de importação/exportação no Godot não devem ser declarados aprovados sem evidência.
 
-- Objeto Pixel Art: seleciona pelo **mesmo ID** de `state.items` ou cadastra item novo em `state.items`, sem substituir descrições, dados de receita e propriedades já configuradas.
-- Comportamento visual e funcional: `item.worldBehavior` com tipo de objeto, interações, ataque, defesa, HP, durabilidade, colisão, coleta, destruição, reações à chuva, sol, vento, frio e tempestade. Essas são **regras salvas de dados**, não a execução automática do clima no jogo.
-- Imagem Pixel Art transparente: PNG cadastrado em `state.assets` e vinculado ao `item.iconId`; inclui recorte simples, remoção de fundo externo e borracha.
-- Personagens Pixel Art: o desenho e as animações originais são preservados. Ao clicar em **Gravar personagem no Game Creator**, salva a ficha e o spritesheet no projeto principal.
-- Mapas 2.5D: editor original preservado e disponibilizado dentro da aba Pixel Art. **Gravar mapa no Game Creator** acrescenta o projeto em `state.pixelArtMaps`, sem apagar as telas ou a geografia já criada.
+## Arquivos principais
 
-## Módulos internos — não são iniciadores
-
-- `pixel-art/modulo-integrado.js`: interface Pixel Art 2D (personagens e objetos) incorporada.
-- `pixel-art/objetos.js`: fonte do editor de objetos e clima.
-- `map-editor/modulo-integrado.js`: montador 2.5D incorporado.
-- `pixel-art/ponte-creator.js`: acesso à base `state`, persistência e atualização de cadastros.
-- `pixel-art/index.html` e `map-editor/index.html`: fontes independentes preservadas **para manutenção e comparação**; não precisam aparecer como aplicativos na navegação principal.
-- `integracao/`: regras de contrato para outros jogos HTML/Godot 4; não é um segundo Game Creator.
-
-Os dois redirecionadores redundantes `INICIO_RAPIDO.html` e `INICIO_RAPIDO_V39_2.html` foram removidos. **Não apagar fontes históricas, inventários ou backups sem validação da versão unificada**.
-
-## Testes realizados e pendências
-
-**Verificados:** sintaxe dos módulos JavaScript incorporados; presença dos arquivos originais, navegação e contrato de dados analisados por código. **Pendentes:** compilação automática do `index.html` no GitHub Actions, teste visual ponta a ponta no Android, abertura de projetos de versões anteriores, exportação de sprites/objetos, persistência de clima, ligação efetiva ao jogo Godot e regressão completa.
-
-Os efeitos de clima, combate, inventário e produção precisam de adaptadores/runtime nos jogos consumidores; editar uma propriedade no Creator não a executa sozinho em todo jogo.
-
-**Orientação de preservação:** usar o código v4.0 como base e implementar em cima dele. Não reiniciar o projeto, não duplicar funções, não descartar trabalho 3.9 ou 3.9.2.
-
-## Natureza no mesmo Editor Pixel Art
-
-A aba **Pixel Art → Natureza / Plantas** registra espécies, necessidades do solo, germinação, reprodução, vida, decomposição e 14 PNGs separados (semente, muda, planta adulta, fruto, tronco, pó). Permite importar PNG, verificar transparência, baixar PNG com nomes estáveis e exportar ficha JSON `apoena.natureza.asset.v1`. Não é um segundo gerador e não altera a biblioteca de itens nem a ferramenta 3D. Consulte `pixel-art/NATUREZA_CONTRATO.md`.
-
-**Importante:** o GameCreator não gera automaticamente as ilustrações; a pessoa produz as imagens e as cadastra. Para abrir como aba do editor principal é preciso recompilar a versão v4.0 com `integracao/build_unificado.py` ou `.ps1`; abrir `pixel-art/index.html` oferece a aba local imediatamente.
+- `index.html`: entrada principal gerada pelo build nativo; o carregador compacto de desenvolvimento é compilado para a página integrada pelo workflow de publicação.
+- `bundle-v4/`: partes preservadas do Creator integrado.
+- `pixel-art/estudio.html` e `pixel-art/estudio.js`: edição de spritesheets.
+- `pixel-art/corte-inteligente.js`: análise conservadora do fundo e de sobras.
+- `pixel-art/modulo-integrado.js` e `pixel-art/ponte-creator.js`: UI nativa e integração com a sessão V4.0.
+- `shared/asset-library.js` e `shared/creator-bridge.js`: biblioteca IndexedDB e comunicação entre ferramentas.
+- `biblioteca/index.html`: consulta, exportação e restauração de recursos/projetos.
+- `map-editor/index.html`: mapas e tilesets.
+- `integracao/build_unificado.ps1` e `integracao/build_unificado.py`: build nativo.
+- `integracao/godot/`: catálogo e testes headless de runtime.
+- `APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html`: fonte original preservada.
 
 ## Plano geral e fundação de mapas
 

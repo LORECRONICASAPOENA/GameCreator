@@ -1,0 +1,42 @@
+{
+  "schema": "apoena.assets.catalog.v1",
+  "updated": "2026-10-28",
+  "usage": "Originais do usuário devem ser importados no editor Pixel Art. Binários distribuídos no ZIP local; ainda não versionados no GitHub.",
+  "categories": [
+    {
+      "id": "personagem",
+      "name": "Personagens",
+      "files": [
+        "apoena/apoena_andar.webp",
+        "apoena/apoena_correr.webp",
+        "apoena/apoena_esfera_azul.webp"
+      ]
+    },
+    {
+      "id": "animal",
+      "name": "Animais",
+      "files": [
+        "animais/javali_agar_sprites.webp",
+        "animais/abelha_agar_sprites.webp"
+      ]
+    },
+    {
+      "id": "cenario",
+      "name": "Cenários e plantas",
+      "files": [
+        "animais/colmeia_tronco_frente.webp",
+        "animais/colmeia_tronco_direita.webp",
+        "animais/colmeia_tronco_costas.webp",
+        "animais/colmeia_tronco_esquerda.webp"
+      ]
+    },
+    {
+      "id": "efeito",
+      "name": "Efeitos",
+      "files": [
+        "apoena/energia_azul_efeitos.png"
+      ]
+    }
+  ],
+  "source": "Conjunto de imagens enviadas pelo usuário entre 27 e 28 de outubro."
+}
