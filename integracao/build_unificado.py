@@ -28,7 +28,7 @@ if not html.strip():
     assert 'full.length!==16324808' in loader, 'Integridade do loader não corresponde ao bundle atualizado'
     print('Fonte monolítica vazia; bundle-v4 validado. index.html foi preservado.')
     raise SystemExit(0)
-nav_match = re.search(r'(?is)<nav\\b[^>]*>.*?data-page="controles".*?</nav>', html)
+nav_match = re.search(r'(?is)<nav\b[^>]*>.*?data-page="controles".*?</nav>', html)
 assert nav_match, 'Menu principal com a aba Controles não foi encontrado'
 assert 'data-page="pixelart"' not in html, 'A fonte já contém Pixel Art'
 assert html.count('</main>')>=1 and html.count('</body>')==1
