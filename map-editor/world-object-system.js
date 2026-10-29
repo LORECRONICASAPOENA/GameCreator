@@ -63,7 +63,7 @@
   }
 
   function validateBehavior(source, label) {
-    const behavior = source && source.schema === SCHEMA ? source : normalizeBehavior(source);
+    const behavior = normalizeBehavior(source);
     const errors = [];
     const warnings = [];
     const prefix = label ? label + ': ' : '';
