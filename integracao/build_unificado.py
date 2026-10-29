@@ -8,6 +8,25 @@ src=root/'APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html'
 out=root/'index.html'
 assert src.is_file(), 'A fonte completa v4.0 não está no GitHub'
 html=src.read_text(encoding='utf-8-sig')
+if not html.strip():
+    loader = out.read_text(encoding='utf-8-sig')
+    part_path = root/'bundle-v4'/'parte_023.js'
+    assert part_path.is_file(), 'Bundle v4 ausente'
+    part = part_path.read_text(encoding='utf-8-sig')
+    required = (
+        'map-editor/terrain-system.js',
+        'map-editor/world-object-system.js',
+        'map-editor/modulo-integrado.js',
+        'pixel-art/natureza.js',
+        'pixel-art/modulo-integrado.js',
+        'pixel-art/ponte-creator.js',
+    )
+    for module in required:
+        assert module in part, f'Módulo ausente no bundle: {module}'
+        assert (root/module).is_file(), f'Arquivo de módulo não encontrado: {module}'
+    assert 'full.length!==16324808' in loader, 'Integridade do loader não corresponde ao bundle atualizado'
+    print('Fonte monolítica vazia; bundle-v4 validado. index.html foi preservado.')
+    raise SystemExit(0)
 needle='<button class="tab" data-page="controles">🎮 Controles PC / Android</button></nav>'
 assert html.count(needle)==1, 'Menu alterado: revisar o diff manualmente'
 assert html.count('</main>')>=1 and html.count('</body>')==1
