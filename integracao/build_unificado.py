@@ -34,6 +34,7 @@ assert 'data-page="pixelart"' not in html, 'A fonte já contém Pixel Art'
 assert html.count('</main>')>=1 and html.count('</body>')==1
 html=html.replace('Game Creator v3.9.2 — Editor Visual Livre','Game Creator v4.0 — Editor Integrado',1)
 html=html.replace('— Game Creator v3.9.2','— Game Creator v4.0',1)
+html=html.replace('v3.9.2','v4.0')
 nav_html = nav_match.group(0)
 nav_new = nav_html.replace('</nav>','<button class="tab" data-page="pixelart">▧ Pixel Art • Personagens / Objetos / Mapas</button></nav>',1)
 html = html[:nav_match.start()] + nav_new + html[nav_match.end():]
