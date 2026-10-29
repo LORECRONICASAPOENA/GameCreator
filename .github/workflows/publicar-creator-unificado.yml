@@ -6,6 +6,7 @@ on:
       - 'integracao/build_unificado.py'
       - 'pixel-art/modulo-integrado.js'
       - 'pixel-art/ponte-creator.js'
+      - 'map-editor/terrain-system.js'
       - 'map-editor/modulo-integrado.js'
       - 'APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html'
   workflow_dispatch:
