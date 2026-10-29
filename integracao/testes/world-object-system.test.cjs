@@ -48,4 +48,8 @@ const assets = World.validateAssets([
 ]);
 assert.equal(assets.valid, false);
 assert.ok(assets.errors.some(e => e.includes('duplicado')));
+
+const legacyAsset = World.normalizeAsset({ id: 'old-tree', name: 'Árvore antiga', src: 'data:image/png;base64,AA==' });
+assert.equal(legacyAsset.worldBehavior.schema, 'apoena.world-object.v1');
+assert.equal(legacyAsset.worldBehavior.category, 'decoration');
 console.log('PASSOU: perfis de objetos, recursos, montarias, ecologia e validação de assets.');
