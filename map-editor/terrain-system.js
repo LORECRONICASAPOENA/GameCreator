@@ -64,7 +64,7 @@
     const base = createDefaultCatalog();
     if (!input || typeof input !== 'object' || !input.tiles || typeof input.tiles !== 'object') return base;
     for (const [key, value] of Object.entries(input.tiles)) {
-      if (!/^(builtin:[0-3]|atlas:[0-9]{1,3})$/.test(key)) continue;
+      if (!/^(builtin:[0-3]|atlas:[0-9]{1,4})$/.test(key)) continue;
       base.tiles[key] = normalizeDefinition(value, key);
     }
     return { schema: SCHEMA, version: 1, tiles: base.tiles };
@@ -78,9 +78,9 @@
   }
 
   function getTileDefinition(catalogInput, key) {
-    const catalog = normalizeCatalog(catalogInput);
+    const catalog = catalogInput && typeof catalogInput === 'object' && catalogInput.tiles && typeof catalogInput.tiles === 'object' ? catalogInput : createDefaultCatalog();
     if (catalog.tiles[key]) return catalog.tiles[key];
-    if (/^atlas:[0-9]{1,3}$/.test(key)) {
+    if (/^atlas:[0-9]{1,4}$/.test(key)) {
       const index = Number(key.slice(6));
       return defaultTile('Tile de atlas ' + (index + 1), 'terrain', '', 'walkable', 0, ['imported']);
     }
@@ -137,7 +137,7 @@
       return { valid: false, errors, warnings };
     }
     for (const [key, value] of Object.entries(input.tiles)) {
-      if (!/^(builtin:[0-3]|atlas:[0-9]{1,3})$/.test(key)) errors.push('Identificador de tile inválido: ' + key);
+      if (!/^(builtin:[0-3]|atlas:[0-9]{1,4})$/.test(key)) errors.push('Identificador de tile inválido: ' + key);
       if (!value || typeof value !== 'object') {
         errors.push('Definição ausente para ' + key + '.');
         continue;
