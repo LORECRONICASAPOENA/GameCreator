@@ -6,6 +6,8 @@ on:
       - 'pixel-art/modulo-integrado.js'
       - 'integracao/testes/natureza.test.cjs'
       - 'integracao/catalogo.js'
+      - 'integracao/modos-partida.js'
+      - 'integracao/sistemas-mundo.js'
       - 'integracao/testes/**'
       - 'map-editor/terrain-system.js'
       - 'map-editor/world-object-system.js'
@@ -16,6 +18,8 @@ on:
   pull_request:
     paths:
       - 'integracao/catalogo.js'
+      - 'integracao/modos-partida.js'
+      - 'integracao/sistemas-mundo.js'
       - 'integracao/testes/**'
       - 'map-editor/terrain-system.js'
       - 'map-editor/world-object-system.js'
@@ -62,9 +66,21 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --check integracao/testes/catalogo.test.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check integracao/modos-partida.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check integracao/sistemas-mundo.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check integracao/testes/modos-partida.test.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check integracao/testes/sistemas-mundo.test.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Executar testes isolados do catálogo
         run: |
           node integracao/testes/catalogo.test.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node integracao/testes/modos-partida.test.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node integracao/testes/sistemas-mundo.test.cjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node integracao/testes/terrain-system.test.cjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
