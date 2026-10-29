@@ -4,43 +4,51 @@ on:
     branches: [main]
     paths:
       - 'integracao/build_unificado.py'
+      - 'integracao/build_unificado.ps1'
       - 'pixel-art/modulo-integrado.js'
       - 'pixel-art/ponte-creator.js'
       - 'map-editor/terrain-system.js'
       - 'map-editor/world-object-system.js'
       - 'map-editor/modulo-integrado.js'
       - 'APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html'
+      - '.github/workflows/publicar-creator-unificado.yml'
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
   unificar:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
     steps:
       - name: Obter projeto sem perder arquivos
         uses: actions/checkout@v4
         with:
           persist-credentials: true
       - name: Montar v4.0 com abas nativas
-        run: python3 integracao/build_unificado.py
+        run: .\integracao\build_unificado.ps1
       - name: Conferir estrutura essencial
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          s=Path('index.html').read_text(encoding='utf-8')
-          assert s.count('id="page-pixelart"')==1
-          assert s.count('data-page="pixelart"')==1
-          assert '<iframe' not in s
-          assert 'id="page-layouts"' in s and 'id="page-recipes"' in s
-          assert 'ApoenaBancada40' in s
-          print('Estrutura principal e v4.0 preservadas.')
-          PY
+          $html = Get-Content .\index.html -Raw
+          if ([regex]::Matches($html, 'id="page-pixelart"').Count -ne 1) { throw "A aba Pixel Art deve aparecer exatamente uma vez." }
+          if ([regex]::Matches($html, 'data-page="pixelart"').Count -ne 1) { throw "O botão da aba Pixel Art deve aparecer exatamente uma vez." }
+          if ($html.Contains('<iframe')) { throw "O editor integrado não pode usar iframe." }
+          if (-not $html.Contains('<script src="map-editor/terrain-system.js"></script>')) { throw "Módulo de terrenos ausente no build." }
+          if (-not $html.Contains('<script src="map-editor/world-object-system.js"></script>')) { throw "Módulo de comportamento de objetos ausente no build." }
+          if (-not $html.Contains('id="page-layouts"') -or -not $html.Contains('id="page-recipes"')) { throw "As abas originais do Creator precisam ser preservadas." }
+          if (-not $html.Contains('ApoenaBancada40')) { throw "A bancada original do Creator não foi preservada." }
+          Write-Host "Estrutura v4.0 e módulos de terreno/objetos validados."
       - name: Publicar somente se houver alteração
         run: |
-          if ! git diff --quiet -- index.html; then
+          git diff --quiet -- index.html
+          if ($LASTEXITCODE -ne 0) {
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
             git add index.html
             git commit -m "Publicar Game Creator v4.0 integrado em pagina unica"
             git push
-          fi
+          } else {
+            Write-Host "O index.html já está atualizado."
+          }
