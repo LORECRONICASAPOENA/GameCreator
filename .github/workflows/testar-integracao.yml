@@ -1,4 +1,4 @@
-name: Game Creator - integração de catálogo
+name: Diagnóstico manual — integração de catálogo
 on:
   # Os testes de integração agora são executados pela validação principal pixel-art.yml.
   # Este workflow permanece disponível para diagnóstico manual.
