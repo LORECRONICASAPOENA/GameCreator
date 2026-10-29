@@ -10,6 +10,55 @@
   const ROLES = new Set(['terrain', 'water', 'slope', 'decoration', 'structure', 'resource', 'entity']);
   const COLLISIONS = new Set(['walkable', 'blocked', 'conditional', 'none']);
   const MAP_TYPES = new Set(['story', 'exploration', 'moba']);
+  const SEASONS = Object.freeze(['spring', 'summer', 'autumn', 'winter']);
+  const TERRAIN_KINDS = new Set(['grassland', 'forest', 'soil', 'sand_beach', 'sand_desert', 'rock', 'stone', 'water', 'wetland', 'snow', 'wood', 'custom']);
+
+  function defaultHydrology(kind = 'grassland', role = 'terrain') {
+    const profiles = {
+      grassland: { permeability: 0.38, retention: 0.55, erosionResistance: 0.62, runoff: 0.30, source: false },
+      forest: { permeability: 0.48, retention: 0.68, erosionResistance: 0.70, runoff: 0.22, source: false },
+      soil: { permeability: 0.42, retention: 0.60, erosionResistance: 0.46, runoff: 0.32, source: false },
+      sand_beach: { permeability: 0.78, retention: 0.18, erosionResistance: 0.24, runoff: 0.12, source: false },
+      sand_desert: { permeability: 0.66, retention: 0.10, erosionResistance: 0.20, runoff: 0.18, source: false },
+      rock: { permeability: 0.08, retention: 0.12, erosionResistance: 0.92, runoff: 0.82, source: false },
+      stone: { permeability: 0.06, retention: 0.08, erosionResistance: 0.96, runoff: 0.88, source: false },
+      water: { permeability: 0.02, retention: 0.98, erosionResistance: 0.98, runoff: 0.02, source: true },
+      wetland: { permeability: 0.24, retention: 0.88, erosionResistance: 0.34, runoff: 0.16, source: false },
+      snow: { permeability: 0.20, retention: 0.52, erosionResistance: 0.42, runoff: 0.36, source: false },
+      wood: { permeability: 0.12, retention: 0.18, erosionResistance: 0.88, runoff: 0.68, source: false },
+      custom: { permeability: 0.35, retention: 0.45, erosionResistance: 0.50, runoff: 0.30, source: false }
+    };
+    const base = profiles[kind] || profiles.custom;
+    return { ...base, source: role === 'water' || base.source };
+  }
+
+  function normalizeHydrology(source, kind = 'grassland', role = 'terrain') {
+    const input = source && typeof source === 'object' ? source : {};
+    const base = defaultHydrology(kind, role);
+    const number = (value, fallback) => {
+      const n = Number(value);
+      return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : fallback;
+    };
+    return {
+      permeability: number(input.permeability, base.permeability),
+      retention: number(input.retention, base.retention),
+      erosionResistance: number(input.erosionResistance, base.erosionResistance),
+      runoff: number(input.runoff, base.runoff),
+      source: input.source === true || (input.source === undefined && base.source)
+    };
+  }
+
+  function normalizeSeasonalVariants(source) {
+    const input = source && typeof source === 'object' && !Array.isArray(source) ? source : {};
+    const result = {};
+    for (const season of SEASONS) {
+      const value = input[season];
+      result[season] = value === null || value === undefined || value === ''
+        ? null
+        : (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) < 1024 ? Number(value) : null);
+    }
+    return result;
+  }
 
   function defaultEnvironment() {
     return {
@@ -19,44 +68,13 @@
     };
   }
 
-  function normalizeEnvironment(source) {
-    const input = source && typeof source === 'object' ? source : {};
-    const number = (value, fallback, min, max) => {
-      const n = Number(value);
-      return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
-    };
-    const variant = value => value === null || value === undefined || value === '' ? null :
-      (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) < 1024 ? Number(value) : null);
-    return {
-      enabled: input.enabled === true,
-      waterMin: number(input.waterMin, 0.25, 0, 1),
-      nutrientMin: number(input.nutrientMin, 0.2, 0, 1),
-      lightMin: number(input.lightMin, 0.2, 0, 1),
-      tempMin: number(input.tempMin, -10, -50, 70),
-      tempMax: number(input.tempMax, 50, -50, 70),
-      healthyVariant: variant(input.healthyVariant),
-      dryVariant: variant(input.dryVariant),
-      recovery: input.recovery === 'immediate' ? 'immediate' : 'gradual'
-    };
-  }
-
   function defaultTile(name, role, connectGroup, collision, height, tags) {
+    const terrainKind = role === 'water' ? 'water' : (tags || []).includes('mineral') ? 'rock' : (tags || []).includes('path') ? 'soil' : 'grassland';
     return {
       name, role, connectGroup, collision, height,
-      tags: tags || [], autotile: false, variants: {}, environment: defaultEnvironment()
-    };
-  }
-
-  function createDefaultCatalog() {
-    return {
-      schema: SCHEMA,
-      version: 1,
-      tiles: {
-        'builtin:0': defaultTile('Grama', 'terrain', 'grass', 'walkable', 0, ['natural', 'ground']),
-        'builtin:1': defaultTile('Caminho', 'terrain', 'path', 'walkable', 0, ['ground', 'path']),
-        'builtin:2': defaultTile('Pedra', 'terrain', 'rock', 'conditional', 0, ['mineral', 'ground']),
-        'builtin:3': defaultTile('Água', 'water', 'water', 'blocked', 0, ['water', 'natural'])
-      }
+      tags: tags || [], biomeTags: tags || [], terrainKind,
+      autotile: false, variants: {}, seasonalVariants: normalizeSeasonalVariants(null),
+      hydrology: defaultHydrology(terrainKind, role), environment: defaultEnvironment()
     };
   }
 
@@ -67,6 +85,12 @@
     const tags = Array.isArray(input.tags)
       ? [...new Set(input.tags.map(v => String(v).trim().toLowerCase()).filter(Boolean))].slice(0, 32)
       : [];
+    const biomeTags = Array.isArray(input.biomeTags)
+      ? [...new Set(input.biomeTags.map(v => String(v).trim().toLowerCase().replace(/[^a-z0-9_-]/g, '')).filter(Boolean))].slice(0, 32)
+      : tags.slice();
+    const terrainKind = TERRAIN_KINDS.has(input.terrainKind) ? input.terrainKind :
+      role === 'water' ? 'water' : tags.includes('mineral') || tags.includes('rock') ? 'rock' :
+      tags.includes('path') ? 'soil' : 'grassland';
     const variants = {};
     if (input.variants && typeof input.variants === 'object' && !Array.isArray(input.variants)) {
       for (const [rawMask, rawTile] of Object.entries(input.variants)) {
@@ -84,8 +108,12 @@
       collision,
       height: Number.isFinite(Number(input.height)) ? Math.max(0, Math.min(16, Math.round(Number(input.height)))) : 0,
       tags,
+      biomeTags,
+      terrainKind,
       autotile: input.autotile === true,
       variants,
+      seasonalVariants: normalizeSeasonalVariants(input.seasonalVariants),
+      hydrology: normalizeHydrology(input.hydrology, terrainKind, role),
       environment: normalizeEnvironment(input.environment)
     };
   }
@@ -187,6 +215,23 @@
           if (env.enabled && (env.healthyVariant === null || env.dryVariant === null)) warnings.push(key + ' reage ao ambiente, mas ainda não tem variante saudável e seca configuradas.');
         }
       }
+      if (!TERRAIN_KINDS.has(value.terrainKind || 'grassland')) errors.push('Tipo de terreno inválido em ' + key + '.');
+      if (value.biomeTags !== undefined && (!Array.isArray(value.biomeTags) || value.biomeTags.length > 32)) errors.push('Tags de bioma inválidas em ' + key + '.');
+      if (value.seasonalVariants !== undefined) {
+        const seasons = value.seasonalVariants;
+        if (!seasons || typeof seasons !== 'object' || Array.isArray(seasons)) errors.push('Variantes sazonais inválidas em ' + key + '.');
+        else for (const season of SEASONS) {
+          const variant = seasons[season];
+          if (variant !== null && variant !== undefined && (!Number.isInteger(variant) || variant < 0 || variant >= 1024)) errors.push('Índice de variante sazonal inválido em ' + key + ' (' + season + ').');
+        }
+      }
+      if (value.hydrology !== undefined) {
+        const hydro = value.hydrology;
+        if (!hydro || typeof hydro !== 'object') errors.push('Perfil hidrológico inválido em ' + key + '.');
+        else for (const field of ['permeability', 'retention', 'erosionResistance', 'runoff']) {
+          if (!Number.isFinite(Number(hydro[field])) || Number(hydro[field]) < 0 || Number(hydro[field]) > 1) errors.push('Parâmetro hidrológico ' + field + ' inválido em ' + key + '.');
+        }
+      }
       if (value.variants && typeof value.variants === 'object') {
         for (const [mask, tile] of Object.entries(value.variants)) {
           if (!/^(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/.test(mask) ||
@@ -238,10 +283,153 @@
     };
   }
 
+  function materialProfileForCell(value, catalog) {
+    const def = definitionForCell(value, catalog);
+    if (!def) return { ...defaultHydrology('grassland', 'terrain'), terrainKind: 'grassland', role: 'terrain' };
+    return { ...normalizeHydrology(def.hydrology, def.terrainKind, def.role), terrainKind: def.terrainKind || 'grassland', role: def.role || 'terrain' };
+  }
+
+  function createHydrologySimulation(mapInput) {
+    const map = mapInput && typeof mapInput === 'object' ? mapInput : {};
+    const width = Math.max(1, Math.min(160, Math.floor(Number(map.width) || 1)));
+    const height = Math.max(1, Math.min(160, Math.floor(Number(map.height) || 1)));
+    const tiles = Array.isArray(map.tiles) ? map.tiles : Array.isArray(map.cells) ? map.cells : [];
+    const heights = Array.isArray(map.heights) ? map.heights : [];
+    const catalog = normalizeCatalog(map.terrainCatalog);
+    const count = width * height;
+    const elevation = new Array(count);
+    const originalElevation = new Array(count);
+    const profiles = new Array(count);
+    const soilMoisture = new Array(count).fill(0.28);
+    const waterDepth = new Array(count).fill(0);
+    const snowpack = new Array(count).fill(0);
+    const erosion = new Array(count).fill(0);
+    const flowAccumulation = new Array(count).fill(0);
+    const channels = new Array(count).fill(false);
+    const sources = new Array(count).fill(false);
+    for (let i = 0; i < count; i++) {
+      const tile = Number.isInteger(tiles[i]) ? tiles[i] : 0;
+      const def = definitionForCell(tile, catalog);
+      const profile = materialProfileForCell(tile, catalog);
+      const rawHeight = Number(heights[i]);
+      const h = Math.max(0, Math.min(8, (Number.isFinite(rawHeight) ? rawHeight : 0) + (def ? Number(def.height || 0) / 4 : 0)));
+      elevation[i] = h;
+      originalElevation[i] = h;
+      profiles[i] = profile;
+      sources[i] = profile.source === true || profile.role === 'water';
+      if (sources[i]) waterDepth[i] = 0.28;
+    }
+    return {
+      schema: 'apoena.hydrology.preview.v1', width, height,
+      elevation, originalElevation, profiles, soilMoisture, waterDepth, snowpack,
+      erosion, flowAccumulation, channels, sources, elapsedDays: 0, erodedCells: 0
+    };
+  }
+
+  function stepHydrology(sim, weather = {}, days = 1) {
+    if (!sim || !Number.isInteger(sim.width) || !Number.isInteger(sim.height)) throw new Error('Simulação hidrológica inválida.');
+    let remaining = Math.max(0, Math.min(30, Number(days) || 0));
+    if (!remaining) return sim;
+    const rainName = String(weather.tempo || weather.weather || 'Sol');
+    const season = String(weather.estacao || weather.season || 'summer').toLowerCase();
+    const temperature = Number.isFinite(Number(weather.temperatura ?? weather.temperature)) ? Number(weather.temperatura ?? weather.temperature) : 25;
+    const rainfall = Number.isFinite(Number(weather.rainfall)) ? Math.max(0, Math.min(2, Number(weather.rainfall))) :
+      rainName === 'Tempestade' || rainName === 'storm' ? 1.35 :
+      rainName === 'Chuva' || rainName === 'rain' ? 0.82 : 0;
+    const count = sim.width * sim.height;
+    while (remaining > 0.000001) {
+      const dt = Math.min(0.1, remaining);
+      remaining -= dt;
+      const deltaWater = new Array(count).fill(0);
+      const outgoing = new Array(count).fill(0);
+      for (let i = 0; i < count; i++) {
+        const profile = sim.profiles[i] || defaultHydrology();
+        const permeability = profile.permeability;
+        const retention = profile.retention;
+        if (rainName === 'Neve' || rainName === 'snow') sim.snowpack[i] = Math.min(3, sim.snowpack[i] + 0.58 * dt);
+        else sim.waterDepth[i] += rainfall * dt * (1 - permeability * 0.62);
+        sim.soilMoisture[i] = Math.max(0, Math.min(1,
+          sim.soilMoisture[i] + rainfall * dt * permeability * 0.28 - (season === 'summer' || season === 'verão' ? 0.045 : 0.025) * dt
+        ));
+        const melt = (temperature > 1 || (season !== 'winter' && season !== 'inverno')) ? Math.min(sim.snowpack[i], 0.18 * dt) : 0;
+        sim.snowpack[i] -= melt;
+        sim.waterDepth[i] += melt;
+        const infiltration = Math.min(sim.waterDepth[i], permeability * dt * 0.24, Math.max(0, 1 - sim.soilMoisture[i]) * retention);
+        sim.waterDepth[i] -= infiltration;
+        sim.soilMoisture[i] = Math.max(0, Math.min(1, sim.soilMoisture[i] + infiltration * retention * 0.5));
+        const evaporation = season === 'summer' || season === 'verão' ? 0.07 : season === 'winter' || season === 'inverno' ? 0.018 : 0.04;
+        if (!sim.sources[i]) sim.waterDepth[i] = Math.max(0, sim.waterDepth[i] - evaporation * dt);
+        else sim.waterDepth[i] = Math.max(0.22, sim.waterDepth[i] - evaporation * dt);
+        sim.waterDepth[i] = Math.min(4, sim.waterDepth[i]);
+      }
+      for (let y = 0; y < sim.height; y++) for (let x = 0; x < sim.width; x++) {
+        const i = y * sim.width + x;
+        if (sim.waterDepth[i] <= 0.025) continue;
+        const surface = sim.elevation[i] + sim.waterDepth[i];
+        let best = -1, lowest = surface;
+        for (const [dx, dy] of [[0,-1],[1,0],[0,1],[-1,0]]) {
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= sim.width || ny >= sim.height) continue;
+          const j = ny * sim.width + nx;
+          const other = sim.elevation[j] + sim.waterDepth[j];
+          if (other < lowest - 0.025) { lowest = other; best = j; }
+        }
+        if (best < 0) continue;
+        const difference = surface - lowest;
+        const transfer = Math.min(sim.waterDepth[i] * 0.22, difference * 0.12, 0.16 * dt + 0.002);
+        if (transfer <= 0) continue;
+        deltaWater[i] -= transfer;
+        deltaWater[best] += transfer;
+        outgoing[i] += transfer;
+        sim.flowAccumulation[i] = Math.min(1000, sim.flowAccumulation[i] + transfer);
+      }
+      for (let i = 0; i < count; i++) {
+        sim.waterDepth[i] = Math.max(sim.sources[i] ? 0.22 : 0, Math.min(4, sim.waterDepth[i] + deltaWater[i]));
+        const profile = sim.profiles[i] || defaultHydrology();
+        if (outgoing[i] > 0.002) {
+          sim.erosion[i] += outgoing[i] * (1 - profile.erosionResistance) * 4;
+          if (sim.erosion[i] >= 1 && sim.elevation[i] > 0) {
+            sim.elevation[i] = Math.max(0, sim.elevation[i] - 1);
+            sim.erosion[i] -= 1;
+            sim.erodedCells++;
+            sim.channels[i] = true;
+          }
+        }
+        if (sim.flowAccumulation[i] >= 1.2 && sim.waterDepth[i] > 0.06) sim.channels[i] = true;
+      }
+      sim.elapsedDays += dt;
+    }
+    return sim;
+  }
+
+  function simulateHydrology(sim, days, weatherAtDay) {
+    const total = Math.max(0, Math.min(3650, Math.floor(Number(days) || 0)));
+    for (let day = 0; day < total; day++) {
+      const weather = typeof weatherAtDay === 'function'
+        ? weatherAtDay(day, sim)
+        : { tempo: day % 5 < 2 ? 'Chuva' : 'Sol', estacao: 'summer' };
+      stepHydrology(sim, weather, 1);
+    }
+    return sim;
+  }
+
+  function hydrologyStats(sim) {
+    if (!sim) return { puddles: 0, channels: 0, erodedCells: 0, wetCells: 0, maxDepth: 0 };
+    let puddles = 0, channels = 0, wetCells = 0, maxDepth = 0;
+    for (let i = 0; i < sim.waterDepth.length; i++) {
+      if (sim.waterDepth[i] > 0.12 && !sim.sources[i]) puddles++;
+      if (sim.channels[i]) channels++;
+      if (sim.soilMoisture[i] >= 0.7) wetCells++;
+      maxDepth = Math.max(maxDepth, sim.waterDepth[i]);
+    }
+    return { puddles, channels, erodedCells: sim.erodedCells || 0, wetCells, maxDepth: Number(maxDepth.toFixed(3)), elapsedDays: Number((sim.elapsedDays || 0).toFixed(2)) };
+  }
+
   const api = Object.freeze({
     SCHEMA, MAP_SCHEMA, MAP_TYPES: Object.freeze(Array.from(MAP_TYPES)),
-    createDefaultCatalog, normalizeCatalog, normalizeDefinition, normalizeEnvironment, keyForCell,
+    createDefaultCatalog, normalizeCatalog, normalizeDefinition, normalizeEnvironment, normalizeHydrology, normalizeSeasonalVariants, keyForCell,
     getTileDefinition, definitionForCell, connectivityMask, resolveVariant,
+    createHydrologySimulation, stepHydrology, simulateHydrology, hydrologyStats,
     validateCatalog, validateMap, prepareMap
   });
   root.ApoenaTerrainSystem = api;
