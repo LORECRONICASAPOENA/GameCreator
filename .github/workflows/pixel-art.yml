@@ -218,6 +218,43 @@ jobs:
         run: |
           node tests/creator-bridge.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/creator-bridge.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Validar contratos de integração do Creator
+        run: |
+          $ErrorActionPreference = "Continue"
+          $required = @(
+            @{ Name = "integration-catalog"; Command = "node --check integracao/catalogo.js" },
+            @{ Name = "integration-terrain"; Command = "node --check map-editor/terrain-system.js" },
+            @{ Name = "integration-world"; Command = "node --check map-editor/world-object-system.js" },
+            @{ Name = "integration-nature"; Command = "node --check pixel-art/natureza.js" },
+            @{ Name = "integration-test-catalog"; Command = "node integracao/testes/catalogo.test.js" },
+            @{ Name = "integration-test-terrain"; Command = "node integracao/testes/terrain-system.test.cjs" },
+            @{ Name = "integration-test-world"; Command = "node integracao/testes/world-object-system.test.cjs" },
+            @{ Name = "integration-test-nature"; Command = "node integracao/testes/natureza.test.cjs" }
+          )
+          $optional = @()
+          if (Test-Path -LiteralPath "integracao/modos-partida.js") {
+            $optional += @{ Name = "integration-mode"; Command = "node --check integracao/modos-partida.js" }
+            $optional += @{ Name = "integration-test-modes"; Command = "node integracao/testes/modos-partida.test.cjs" }
+          } else {
+            Write-Output "SKIP: contratos de modos ainda não estão neste branch."
+          }
+          if (Test-Path -LiteralPath "integracao/sistemas-mundo.js") {
+            $optional += @{ Name = "integration-systems"; Command = "node --check integracao/sistemas-mundo.js" }
+            $optional += @{ Name = "integration-test-systems"; Command = "node integracao/testes/sistemas-mundo.test.cjs" }
+          } else {
+            Write-Output "SKIP: contratos de sistemas de mundo ainda não estão neste branch."
+          }
+          $failed = $false
+          foreach ($item in @($required) + @($optional)) {
+            $logPath = ".ci-results/$($item.Name).log"
+            cmd /c "$($item.Command) > $logPath 2>&1"
+            $testCode = $LASTEXITCODE
+            Write-Output "$($item.Name) (exit $testCode)"
+            if (Test-Path $logPath) { Get-Content $logPath }
+            if ($testCode -ne 0) { $failed = $true }
+          }
+          if ($failed) { exit 1 }
       - name: Testar runtime Godot 4 (instalacao portatil verificada)
         run: |
           $ErrorActionPreference = "Stop"
