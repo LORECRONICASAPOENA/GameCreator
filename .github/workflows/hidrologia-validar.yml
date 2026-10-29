@@ -11,5 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Conferir Node.js
         run: node --version
+        shell: cmd
       - name: Testar motor de chuva e erosao
         run: node tests/hidrologia.test.cjs
+        shell: cmd
