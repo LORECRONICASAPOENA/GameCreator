@@ -1,0 +1,15 @@
+name: Validar Hidrologia Apoena
+on:
+  push:
+    branches: ['feature/hidrologia-erosao-niveis-20261029']
+  workflow_dispatch:
+jobs:
+  testar-hidrologia:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Conferir Node.js
+        run: node --version
+      - name: Testar motor de chuva e erosao
+        run: node tests/hidrologia.test.cjs
