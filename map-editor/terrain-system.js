@@ -68,6 +68,41 @@
     };
   }
 
+  function normalizeEnvironment(source) {
+    const input = source && typeof source === 'object' ? source : {};
+    const number = (value, fallback, min, max) => {
+      const n = Number(value);
+      return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
+    };
+    const variant = value => value === null || value === undefined || value === ''
+      ? null
+      : (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) < 1024 ? Number(value) : null);
+    return {
+      enabled: input.enabled === true,
+      waterMin: number(input.waterMin, 0.25, 0, 1),
+      nutrientMin: number(input.nutrientMin, 0.2, 0, 1),
+      lightMin: number(input.lightMin, 0.2, 0, 1),
+      tempMin: number(input.tempMin, -10, -50, 70),
+      tempMax: number(input.tempMax, 50, -50, 70),
+      healthyVariant: variant(input.healthyVariant),
+      dryVariant: variant(input.dryVariant),
+      recovery: input.recovery === 'immediate' ? 'immediate' : 'gradual'
+    };
+  }
+
+  function createDefaultCatalog() {
+    return {
+      schema: SCHEMA,
+      version: 1,
+      tiles: {
+        'builtin:0': defaultTile('Grama', 'terrain', 'grass', 'walkable', 0, ['natural', 'ground']),
+        'builtin:1': defaultTile('Caminho', 'terrain', 'path', 'walkable', 0, ['ground', 'path']),
+        'builtin:2': defaultTile('Pedra', 'terrain', 'rock', 'conditional', 0, ['mineral', 'ground']),
+        'builtin:3': defaultTile('Água', 'water', 'water', 'blocked', 0, ['water', 'natural'])
+      }
+    };
+  }
+
   function defaultTile(name, role, connectGroup, collision, height, tags) {
     const terrainKind = role === 'water' ? 'water' : (tags || []).includes('mineral') ? 'rock' : (tags || []).includes('path') ? 'soil' : 'grassland';
     return {
