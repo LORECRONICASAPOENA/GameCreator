@@ -1,6 +1,7 @@
 "use strict";
 const assert=require("node:assert/strict");
 const A=require("../catalogo.js");
+const T=require("../../map-editor/terrain-system.js");
 
 function source(){
   return {
@@ -79,3 +80,41 @@ test("IDs duplicados são rejeitados",()=>{
   assert.throws(()=>A.portable(s,"rpg"),/duplicado/);
 });
 console.log("Concluído: "+passed+" testes de contrato e regras isoladas.");
+
+test("Registra material físico, biomas e variantes das quatro estações",()=>{
+  const d=T.normalizeDefinition({
+    name:"Areia de praia",role:"terrain",terrainKind:"sand_beach",
+    biomeTags:["litoral","praia"],
+    seasonalVariants:{spring:1,summer:2,autumn:3,winter:4},
+    hydrology:{permeability:0.9,retention:0.15,erosionResistance:0.2,runoff:0.1,source:false}
+  },"atlas:0");
+  assert.equal(d.terrainKind,"sand_beach");
+  assert.deepEqual(d.biomeTags,["litoral","praia"]);
+  assert.deepEqual(d.seasonalVariants,{spring:1,summer:2,autumn:3,winter:4});
+  assert.equal(d.hydrology.permeability,0.9);
+  assert.equal(T.validateCatalog({schema:T.SCHEMA,version:1,tiles:{"atlas:0":d}}).valid,true);
+});
+test("Limita índices sazonais e valores hidrológicos inválidos",()=>{
+  const d=T.normalizeDefinition({terrainKind:"sand_desert",seasonalVariants:{winter:9999},hydrology:{permeability:4,retention:-1,erosionResistance:0.2,runoff:0.3}});
+  assert.equal(d.seasonalVariants.winter,null);
+  assert.equal(d.hydrology.permeability,0.66);
+  assert.equal(d.hydrology.retention,0.1);
+});
+test("Simula chuva, escoamento, acúmulo e erosão sem valores inválidos",()=>{
+  const catalog=T.createDefaultCatalog();
+  catalog.tiles["atlas:0"]=T.normalizeDefinition({name:"Areia frágil",role:"terrain",terrainKind:"sand_desert",hydrology:{permeability:0.05,retention:0.1,erosionResistance:0.1,runoff:0.9,source:false}});
+  const map={width:8,height:8,tiles:Array(64).fill(1000),heights:Array.from({length:64},(_,i)=>Math.max(0,4-(i%8))),terrainCatalog:catalog};
+  const sim=T.createHydrologySimulation(map);
+  T.simulateHydrology(sim,30,day=>({tempo:day%5<3?"Tempestade":"Sol",estacao:"summer",temperatura:29}));
+  assert.ok(sim.flowAccumulation.some(v=>v>0),"a água deve escoar em terreno inclinado");
+  assert.ok(sim.waterDepth.every(v=>Number.isFinite(v)&&v>=0&&v<=4),"a profundidade deve permanecer limitada");
+  assert.ok(sim.soilMoisture.every(v=>Number.isFinite(v)&&v>=0&&v<=1),"a umidade deve permanecer normalizada");
+  assert.ok(sim.elevation.some((v,i)=>v<sim.originalElevation[i]),"o fluxo deve erodir ao menos uma célula vulnerável");
+  assert.ok(T.hydrologyStats(sim).puddles>0,"o sistema deve identificar poças fora das fontes permanentes");
+});
+test("Mapas antigos recebem os perfis ambientais padrão",()=>{
+  const prepared=T.prepareMap({schema:"apoena.map2d.v1",width:16,height:16,tiles:Array(256).fill(0)});
+  assert.equal(prepared.terrainCatalog.tiles["builtin:0"].terrainKind,"grassland");
+  assert.equal(prepared.terrainCatalog.tiles["builtin:3"].hydrology.source,true);
+});
+
