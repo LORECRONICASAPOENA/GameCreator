@@ -59,3 +59,16 @@ O plano consolidado de História, Exploração Livre, MOBA, ecossistema, NPCs, e
 
 A implementação incremental está na branch feat/apoena-world-foundation. Ela adiciona catálogo de terreno, propriedades ambientais e autotile, metadados de interação para objetos, perfis de plantas/animais/montarias, profissão e rotina de NPCs, papel econômico, perfis de mapa e validação. O editor inicia com a Cidade Capital de Agar no perfil História e mantém o preset de MOBA. Esses dados são a fundação de autoria/exportação; a simulação ecológica, as transações, as rotinas autônomas e o comportamento no jogo ainda exigem implementação e testes no runtime.
 
+
+
+## Contratos de modos, salas e sistemas de mundo
+
+A branch `feat/contratos-sessoes-5v5-20261029` introduz contratos testáveis em `integracao/modos-partida.js` e `integracao/sistemas-mundo.js`, sem substituir os módulos 3D nem o catálogo original.
+
+- História permanece individual e offline.
+- Exploração Livre admite solo, coop por anfitrião e opções de conexão local/remota como configuração; a conexão remota real ainda depende de transporte, sinalização/relay e testes de rede.
+- O MOBA padrão é duas equipes de cinco. A sala valida IDs, limita vagas, aceita seleção de campeões e pode preencher vagas com bots de teste.
+- O elenco inicial conserva Apoena, Serena, Órion, Birará (alias Agan), Aqua, Rufy, Blim e Kael. Akniel, Luna/Oluna, os Arcontes sem nome e Lucas ficam no registro de lore; nomes pendentes não são inventados como campeões.
+- Coleta e construção apontam para os IDs do catálogo existente. O contrato exige crafting atômico, regras de posicionamento e persistência no save local do anfitrião, sem simular o mundo cooperativo quando ele estiver fechado.
+
+**Limite importante:** estes arquivos definem e testam contratos de dados e uma simulação de sala em Node.js. Eles não implementam por si só transporte de rede, voz, sincronização Godot nem UI final. Essas integrações precisam de etapas e testes próprios.
