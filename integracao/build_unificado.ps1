@@ -9,6 +9,19 @@ foreach($mod in @('pixel-art\natureza.js','pixel-art\modulo-integrado.js','pixel
   if(-not (Test-Path (Join-Path $repo $mod))) {throw "Modulo Pixel Art ausente: $mod"}
 }
 $s=[System.IO.File]::ReadAllText($orig,[System.Text.Encoding]::UTF8)
+if ([string]::IsNullOrWhiteSpace($s)) {
+  $loader=[System.IO.File]::ReadAllText($index,[System.Text.Encoding]::UTF8)
+  $partPath=Join-Path $repo 'bundle-v4\parte_023.js'
+  if (-not (Test-Path $partPath)) { throw "Bundle v4 ausente: $partPath" }
+  $part=[System.IO.File]::ReadAllText($partPath,[System.Text.Encoding]::UTF8)
+  foreach($required in @('map-editor/terrain-system.js','map-editor/world-object-system.js','map-editor/modulo-integrado.js','pixel-art/natureza.js','pixel-art/modulo-integrado.js','pixel-art/ponte-creator.js')) {
+    if (-not $part.Contains($required)) { throw "Módulo não está incluído no bundle: $required" }
+    if (-not (Test-Path (Join-Path $repo $required))) { throw "Arquivo de módulo ausente: $required" }
+  }
+  if (-not $loader.Contains('full.length!==16324808')) { throw "Integridade do loader não corresponde ao bundle atualizado." }
+  Write-Host "Fonte monolítica vazia; bundle-v4 validado. O index.html não foi sobrescrito."
+  return
+}
 $old='<button class="tab" data-page="controles">🎮 Controles PC / Android</button></nav>'
 if(-not $s.Contains($old)) {throw "Menu original mudou; nao sera substituido"}
 if($s.Contains('data-page="pixelart"')) {throw "A fonte ja contem Pixel Art"}
