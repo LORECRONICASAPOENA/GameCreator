@@ -112,3 +112,15 @@ Exportar dados e imagens com IDs estáveis, dimensões e propriedades preservada
 ## 10. Escopo desta primeira fatia
 
 A primeira implementação técnica no Game Creator cria um contrato reutilizável de terrenos, máscara de vizinhança, variantes de autotile, regras ambientais por tile, comportamento declarativo de objetos, perfis de NPC/profissão/rotina/comércio, perfis de mapa e validação de mapas/assets. O mapa inicial do editor passa a ser a Cidade Capital de Agar no perfil História, mantendo o preset de três rotas para o MOBA. Isso estabelece a base de autoria e exportação; não substitui o runtime ecológico, a economia, a IA de NPCs nem a integração final com Godot. Esses itens devem ser entregues em etapas separadas e verificadas.
+
+## Sistema ambiental 2D — calendário, biomas e hidrologia
+
+A arquitetura ambiental passa a separar três responsabilidades:
+
+1. **Catálogo do tile:** define o tipo físico, os biomas compatíveis, permeabilidade, retenção, escoamento, resistência à erosão e variantes visuais de primavera, verão, outono e inverno.
+2. **Editor de mapa:** permite escolher a estação visual e simular uma sequência de chuva/sol em uma grade 2D, mostrando umidade, poças e canais. A simulação de prévia não modifica as alturas originais do mapa.
+3. **Runtime do jogo:** usa calendário virtual, perfis climáticos regionais, infiltração, escoamento, evaporação, neve e erosão. O Godot e o HTML têm motores ambientais próprios para a Floresta Viva.
+
+**Decisão de arquitetura:** não migrar para 3D apenas para representar relevo e água. A altura lógica da célula controla o escoamento; a profundidade da água é uma camada separada. O custo da simulação é limitado por células e passos discretos, priorizando desempenho em celulares.
+
+**Estado:** metadados de bioma/hidrologia e variantes sazonais, prévia ambiental no Creator e motores iniciais no HTML/Godot foram adicionados na branch feat/tempo-biomas-hidrologia. A importação automática do JSON/atlas do Creator como mapa jogável continua pendente e precisa de um teste ponta a ponta antes de ser declarada concluída.
