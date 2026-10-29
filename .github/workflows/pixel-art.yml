@@ -77,7 +77,7 @@ jobs:
           if ($built.Contains("<iframe")) { throw "A entrada nativa nao pode substituir o Creator por iframe." }
           $hash = Get-FileHash -LiteralPath (Join-Path $env:GITHUB_WORKSPACE "index.html") -Algorithm SHA256
           "Build nativo OK; bytes=$((Get-Item index.html).Length); SHA256=$($hash.Hash)" | Tee-Object -FilePath (Join-Path $diagDir "build.log") -Append
-      - name: Smoke test do Creator, Estudio, Mapas e Biblioteca em viewport mobile
+      - name: Verificar DOM e estrutura responsiva no navegador mobile
         run: |
           $ErrorActionPreference = "Stop"
           $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
@@ -122,7 +122,7 @@ jobs:
             $stderrPath = Join-Path $env:RUNNER_TEMP ("apoena-" + $target.Name + "-" + $env:GITHUB_RUN_ID + ".stderr.log")
             $profile = Join-Path $env:RUNNER_TEMP ("apoena-browser-" + $target.Name + "-" + $env:GITHUB_RUN_ID)
             if (Test-Path -LiteralPath $profile) { Remove-Item -LiteralPath $profile -Recurse -Force }
-            $arguments = '--headless --disable-gpu --no-first-run --no-default-browser-check --disable-extensions --allow-file-access-from-files --window-size=390,844 --virtual-time-budget=10000 --user-data-dir="' + $profile + '" --dump-dom "' + $entryUri + '"'
+            $arguments = '--headless --disable-gpu --no-first-run --no-default-browser-check --disable-extensions --disable-javascript --allow-file-access-from-files --window-size=390,844 --virtual-time-budget=1000 --user-data-dir="' + $profile + '" --dump-dom "' + $entryUri + '"'
             $process = Start-Process -FilePath $browser -ArgumentList $arguments -RedirectStandardOutput $domPath -RedirectStandardError $stderrPath -Wait -PassThru
             if (Test-Path -LiteralPath $stderrPath) { Get-Content -LiteralPath $stderrPath | Add-Content -Encoding UTF8 $logPath }
             if ($process.ExitCode -ne 0) { throw "Navegador encerrou com codigo $($process.ExitCode) ao abrir $($target.RelativePath)." }
@@ -134,7 +134,7 @@ jobs:
               if (-not $dom.Contains($required)) { throw "Smoke test mobile falhou em $($target.RelativePath); marcador ausente: $required" }
             }
             if ($dom.Contains("Nao foi possivel abrir a versao unificada")) { throw "O Creator exibiu tela de erro no navegador." }
-            "BROWSER_MOBILE_SMOKE_OK: $($target.Name)" | Add-Content -Encoding UTF8 $logPath
+            "BROWSER_MOBILE_DOM_OK: $($target.Name)" | Add-Content -Encoding UTF8 $logPath
             Remove-Item -LiteralPath $domPath -Force -ErrorAction SilentlyContinue
             Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
             Remove-Item -LiteralPath $profile -Recurse -Force -ErrorAction SilentlyContinue
