@@ -27,6 +27,7 @@ if(-not $nav.Success) {throw "Menu principal com a aba Controles nao foi encontr
 if($s.Contains('data-page="pixelart"')) {throw "A fonte ja contem Pixel Art"}
 $s=$s.Replace('Game Creator v3.9.2 — Editor Visual Livre','Game Creator v4.0 — Editor Integrado')
 $s=$s.Replace('— Game Creator v3.9.2','— Game Creator v4.0')
+$s=$s.Replace('v3.9.2','v4.0')
 $navHtml=$nav.Value
 $navNew=$navHtml.Replace('</nav>','<button class="tab" data-page="pixelart">▧ Pixel Art • Personagens / Objetos / Mapas</button></nav>')
 $s=$s.Replace($navHtml,$navNew)
