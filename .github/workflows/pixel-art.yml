@@ -232,6 +232,10 @@ jobs:
           if (-not $index.Contains('id="page-pixelart"') -or -not $index.Contains('data-page="pixelart"')) {
             throw "A aba nativa Pixel Art nao foi adicionada pelo build."
           }
+          # Cada step do Actions tem um processo PowerShell separado; rele a fonte original.
+          $originalPath = "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
+          $original = Get-Content -Raw $originalPath
+          if (-not $original.Contains("</main>")) { throw "Fonte V4.0 incompleta durante a verificacao de navegacao." }
           # Confere todos os valores de navegacao que existiam na fonte V4.0.
           # Isso protege a bancada original sem presumir nomes de abas inexistentes.
           $originalPages = @([regex]::Matches($original, 'data-page="([^"]+)"') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
