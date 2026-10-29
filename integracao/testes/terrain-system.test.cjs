@@ -9,9 +9,9 @@ assert.equal(Terrain.keyForCell(1005), 'atlas:5');
 assert.equal(Terrain.keyForCell(-1), null);
 
 const cells = [
-  0, 0, 1,
-  0, 0, 1,
-  2, 1, 1
+  0, 1, 1,
+  1, 0, 1,
+  1, 1, 1
 ];
 const mask = Terrain.connectivityMask(cells, 3, 3, 1, 1, value => Terrain.definitionForCell(value, catalog));
 // A diagonal-only neighbor cannot connect when either cardinal side is missing.
