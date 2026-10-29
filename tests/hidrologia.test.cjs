@@ -1,6 +1,6 @@
 "use strict";
 const assert=require("node:assert/strict");
-const {Hidrologia,fromMap,SCHEMA}=require("../../map-editor/hidrologia-core.js");
+const {Hidrologia,fromMap,SCHEMA}=require("../map-editor/hidrologia-core.js");
 const h=new Hidrologia(16,16);
 assert.equal(h.size,256);
 assert.equal(h.get(0,0).elevation,0);
