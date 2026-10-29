@@ -1,0 +1,40 @@
+name: Limpeza pontual da fila antiga do GitHub Actions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/cleanup-queued-runs-once.yml"
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  limpar-fila:
+    name: Cancelar apenas execuções antigas ainda na fila
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Cancelar jobs queued anteriores a esta limpeza
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids="$(gh api "repos/$REPOSITORY/actions/runs?per_page=100" --paginate --jq '.workflow_runs[] | select(.status == "queued") | .id')"
+          count=0
+          if [ -z "$ids" ]; then
+            echo "Nenhuma execução queued encontrada."
+            exit 0
+          fi
+          while IFS= read -r id; do
+            [ -z "$id" ] && continue
+            [ "$id" = "$CURRENT_RUN_ID" ] && continue
+            echo "Cancelando execução antiga na fila: $id"
+            gh api --method POST "repos/$REPOSITORY/actions/runs/$id/cancel" >/dev/null
+            count=$((count + 1))
+          done <<< "$ids"
+          echo "Total de execuções queued canceladas: $count"
