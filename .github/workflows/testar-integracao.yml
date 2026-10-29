@@ -18,6 +18,7 @@ on:
       - 'integracao/catalogo.js'
       - 'integracao/testes/**'
       - 'map-editor/terrain-system.js'
+      - 'map-editor/world-object-system.js'
       - 'map-editor/modulo-integrado.js'
       - 'pixel-art/natureza.js'
       - 'pixel-art/modulo-integrado.js'
