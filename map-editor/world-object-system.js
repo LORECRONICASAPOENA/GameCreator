@@ -8,12 +8,16 @@
   const INTERACTIONS = new Set(['none', 'collect', 'chop', 'mine', 'harvest', 'talk', 'trade', 'ride', 'attack', 'enter']);
   const MOVEMENT = new Set(['static', 'ground', 'water', 'air', 'mounted']);
   const COLLISION = new Set(['none', 'walkable', 'blocked', 'conditional']);
+  const PROFESSIONS = new Set(['none', 'blacksmith', 'merchant', 'farmer', 'adventurer', 'guard', 'mage', 'healer', 'hunter', 'scholar', 'custom']);
+  const MARKET_ROLES = new Set(['none', 'buyer', 'seller', 'both']);
 
   function defaultBehavior() {
     return {
       schema: SCHEMA, category: 'decoration', interaction: 'none', movement: 'static',
       collision: 'none', rideable: false, ecological: false,
       resource: { itemId: '', amount: 1, respawnDays: 0 },
+      npc: { profession: 'none', routine: [] },
+      economy: { role: 'none', priceModifier: 1, buyItemIds: [], sellItemIds: [] },
       ecology: {
         enabled: false, waterMin: 0.25, nutrientMin: 0.2, lightMin: 0.2,
         tempMin: -10, tempMax: 50, growthDays: 0, lifespanDays: 0,
@@ -33,7 +37,15 @@
     const input = source && typeof source === 'object' ? source : {};
     const defaults = defaultBehavior();
     const resource = input.resource && typeof input.resource === 'object' ? input.resource : {};
+    const npc = input.npc && typeof input.npc === 'object' ? input.npc : {};
+    const economy = input.economy && typeof input.economy === 'object' ? input.economy : {};
     const ecology = input.ecology && typeof input.ecology === 'object' ? input.ecology : {};
+    const routine = Array.isArray(npc.routine) ? npc.routine.slice(0, 48).map(entry => ({
+      hour: bounded(entry && entry.hour, 8, 0, 23, true),
+      activity: String(entry && entry.activity || '').trim().slice(0, 80),
+      locationId: String(entry && entry.locationId || '').trim().slice(0, 100)
+    })) : [];
+    const itemIds = value => Array.isArray(value) ? [...new Set(value.map(v => String(v).trim()).filter(Boolean))].slice(0, 100) : [];
     return {
       schema: SCHEMA,
       category: CATEGORIES.has(input.category) ? input.category : defaults.category,
@@ -46,6 +58,16 @@
         itemId: String(resource.itemId || '').trim().slice(0, 100),
         amount: bounded(resource.amount, 1, 1, 99, true),
         respawnDays: bounded(resource.respawnDays, 0, 0, 3650, true)
+      },
+      npc: {
+        profession: PROFESSIONS.has(npc.profession) ? npc.profession : 'none',
+        routine
+      },
+      economy: {
+        role: MARKET_ROLES.has(economy.role) ? economy.role : 'none',
+        priceModifier: bounded(economy.priceModifier, 1, 0.25, 3, false),
+        buyItemIds: itemIds(economy.buyItemIds),
+        sellItemIds: itemIds(economy.sellItemIds)
       },
       ecology: {
         enabled: ecology.enabled === true,
@@ -75,6 +97,14 @@
     if (behavior.ecology.tempMin > behavior.ecology.tempMax) errors.push(prefix + 'temperatura mínima maior que a máxima.');
     if (['collect', 'chop', 'mine', 'harvest'].includes(behavior.interaction) && !behavior.resource.itemId) warnings.push(prefix + 'interação de coleta sem ID de item/recurso.');
     if (behavior.category === 'mount' && !behavior.rideable) warnings.push(prefix + 'objeto classificado como montaria, mas a opção de montar está desativada.');
+    if (behavior.category === 'npc' && behavior.npc.profession === 'none') warnings.push(prefix + 'NPC sem profissão definida.');
+    if (behavior.economy.role === 'buyer' || behavior.economy.role === 'both') {
+      if (!behavior.economy.buyItemIds.length) warnings.push(prefix + 'NPC/comerciante compra sem IDs de itens configurados.');
+    }
+    if (behavior.economy.role === 'seller' || behavior.economy.role === 'both') {
+      if (!behavior.economy.sellItemIds.length) warnings.push(prefix + 'NPC/comerciante vende sem IDs de itens configurados.');
+    }
+    if (behavior.npc.routine.some(entry => !entry.activity)) warnings.push(prefix + 'a rotina contém uma atividade sem nome.');
     if (behavior.ecological && !behavior.ecology.enabled) warnings.push(prefix + 'objeto ecológico sem parâmetros ambientais habilitados.');
     if (behavior.movement === 'air' && behavior.collision === 'blocked') warnings.push(prefix + 'entidade aérea marcada como bloqueio total; confirme a regra do runtime.');
     return { valid: errors.length === 0, errors, warnings, behavior };
@@ -110,6 +140,7 @@
 
   const api = Object.freeze({
     SCHEMA, CATEGORIES: Object.freeze(Array.from(CATEGORIES)),
+    PROFESSIONS: Object.freeze(Array.from(PROFESSIONS)), MARKET_ROLES: Object.freeze(Array.from(MARKET_ROLES)),
     INTERACTIONS: Object.freeze(Array.from(INTERACTIONS)),
     MOVEMENT: Object.freeze(Array.from(MOVEMENT)),
     COLLISION: Object.freeze(Array.from(COLLISION)),
