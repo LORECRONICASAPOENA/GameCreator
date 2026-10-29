@@ -33,6 +33,29 @@ catalog.tiles['atlas:0'] = Terrain.normalizeDefinition({
 assert.equal(Terrain.resolveVariant(5, catalog.tiles['atlas:0'].variants, 0), 4);
 assert.equal(Terrain.resolveVariant(7, catalog.tiles['atlas:0'].variants, 0), 0);
 
+const adaptiveGrass = Terrain.normalizeDefinition({
+  name: 'Grama adaptativa',
+  role: 'terrain',
+  connectGroup: 'grass',
+  collision: 'walkable',
+  height: 0,
+  environment: {
+    enabled: true, waterMin: 0.6, nutrientMin: 0.25, lightMin: 0.3,
+    tempMin: 5, tempMax: 40, healthyVariant: 0, dryVariant: 1, recovery: 'gradual'
+  }
+});
+assert.equal(adaptiveGrass.environment.waterMin, 0.6);
+assert.equal(adaptiveGrass.environment.dryVariant, 1);
+catalog.tiles['atlas:1'] = adaptiveGrass;
+assert.equal(Terrain.validateCatalog(catalog).valid, true);
+const invalidEnvironment = Terrain.validateCatalog({
+  schema: 'apoena.terrain.catalog.v1',
+  tiles: { 'atlas:1': { role: 'terrain', collision: 'walkable', height: 0,
+    environment: { enabled: true, waterMin: 0.5, nutrientMin: 0.2, lightMin: 0.2, tempMin: 30, tempMax: 10, healthyVariant: null, dryVariant: null } } }
+});
+assert.equal(invalidEnvironment.valid, false);
+assert.ok(invalidEnvironment.errors.some(e => e.includes('Faixa de temperatura')));
+
 const good = Terrain.prepareMap({
   schema: 'apoena.map2d.v1',
   width: 16,
