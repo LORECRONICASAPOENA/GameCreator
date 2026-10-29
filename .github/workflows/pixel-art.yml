@@ -254,8 +254,13 @@ jobs:
           $projectPath = Join-Path $env:GITHUB_WORKSPACE "integracao/godot"
           $testPath = Join-Path $projectPath "tests/test_catalogo.gd"
           if (-not (Test-Path -LiteralPath $testPath)) { throw "Teste GDScript ausente: $testPath" }
-          & $godotExe --headless --path $projectPath --script res://tests/test_catalogo.gd 2>&1 | Tee-Object -FilePath $logPath -Append
-          $godotCode = $LASTEXITCODE
+          $stdoutPath = Join-Path $env:RUNNER_TEMP ("apoena-godot-stdout-" + $env:GITHUB_RUN_ID + ".log")
+          $stderrPath = Join-Path $env:RUNNER_TEMP ("apoena-godot-stderr-" + $env:GITHUB_RUN_ID + ".log")
+          $arguments = '--headless --path "' + $projectPath + '" --script "res://tests/test_catalogo.gd"'
+          $process = Start-Process -FilePath $godotExe -ArgumentList $arguments -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath -Wait -PassThru
+          if (Test-Path -LiteralPath $stdoutPath) { Get-Content -LiteralPath $stdoutPath | Add-Content -Encoding UTF8 $logPath }
+          if (Test-Path -LiteralPath $stderrPath) { Get-Content -LiteralPath $stderrPath | Add-Content -Encoding UTF8 $logPath }
+          $godotCode = $process.ExitCode
           if ($godotCode -ne 0) { throw "Teste de runtime Godot falhou com codigo $godotCode. Consulte .ci-results/godot-runtime.log." }
           $godotLog = Get-Content -Raw $logPath
           if (-not $godotLog.Contains("GODOT CATALOG TEST OK")) { throw "Godot terminou sem confirmar a suite de catalogo." }
