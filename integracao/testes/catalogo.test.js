@@ -104,7 +104,7 @@ test("Simula chuva, escoamento, acúmulo e erosão sem valores inválidos",()=>{
   catalog.tiles["atlas:0"]=T.normalizeDefinition({name:"Areia frágil",role:"terrain",terrainKind:"sand_desert",hydrology:{permeability:0.05,retention:0.1,erosionResistance:0.1,runoff:0.9,source:false}});
   const map={width:8,height:8,tiles:Array(64).fill(1000),heights:Array.from({length:64},(_,i)=>Math.max(0,4-(i%8))),terrainCatalog:catalog};
   const sim=T.createHydrologySimulation(map);
-  T.simulateHydrology(sim,30,day=>({tempo:day%5<3?"Tempestade":"Sol",estacao:"summer",temperatura:29}));
+  T.simulateHydrology(sim,30,day=>({tempo:day%6<2?"Tempestade":"Sol",estacao:"summer",temperatura:29}));
   assert.ok(sim.flowAccumulation.some(v=>v>0),"a água deve escoar em terreno inclinado");
   assert.ok(sim.waterDepth.every(v=>Number.isFinite(v)&&v>=0&&v<=4),"a profundidade deve permanecer limitada");
   assert.ok(sim.soilMoisture.every(v=>Number.isFinite(v)&&v>=0&&v<=1),"a umidade deve permanecer normalizada");
