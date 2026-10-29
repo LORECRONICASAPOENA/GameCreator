@@ -8,7 +8,9 @@ on:
       - 'integracao/catalogo.js'
       - 'integracao/testes/**'
       - 'map-editor/terrain-system.js'
+      - 'map-editor/world-object-system.js'
       - 'map-editor/modulo-integrado.js'
+      - 'integracao/testes/world-object-system.test.cjs'
       - 'integracao/testes/terrain-system.test.cjs'
       - '.github/workflows/testar-integracao.yml'
   pull_request:
@@ -41,6 +43,10 @@ jobs:
         run: |
           node --check map-editor/terrain-system.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check map-editor/world-object-system.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check integracao/testes/world-object-system.test.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --check map-editor/modulo-integrado.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --check integracao/testes/terrain-system.test.cjs
@@ -60,6 +66,8 @@ jobs:
           node integracao/testes/catalogo.test.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node integracao/testes/terrain-system.test.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node integracao/testes/world-object-system.test.cjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node integracao/testes/natureza.test.cjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
