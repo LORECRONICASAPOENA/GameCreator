@@ -1,12 +1,8 @@
 name: Auto-validar Apoena Creator V4.1
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/auto-validar-v41.yml"
-  schedule:
-    - cron: "0 * * * *"
+  # A validacao automatica por push/PR ja e coberta por pixel-art.yml.
+  # Manter este fluxo apenas como fallback manual evita filas horarias duplicadas.
   workflow_dispatch:
 
 permissions:
