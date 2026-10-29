@@ -91,7 +91,7 @@ jobs:
           }
           if ($failed) { exit 1 }
 
-      - name: Verificar integridade do Creator
+      - name: Verificar integridade e compilar Creator nativo
         run: |
           $ErrorActionPreference = "Stop"
           $required = @(
@@ -100,17 +100,30 @@ jobs:
             "pixel-art/estudio.html",
             "map-editor/index.html",
             "integracao/index.html",
-            "legacy/iniciador-anterior.html"
+            "legacy/iniciador-anterior.html",
+            "integracao/build_unificado.ps1"
           )
           foreach ($path in $required) {
             if (-not (Test-Path $path)) { throw "Arquivo essencial ausente: $path" }
           }
-          $index = Get-Content -Raw index.html
-          if ($index -notmatch 'data-page="3d"') { throw "Navegacao 3D nao encontrada." }
-          if ($index -notmatch 'data-page="pixel"') { throw "Navegacao Pixel Art nao encontrada." }
-          $map = Get-Content -Raw map-editor/index.html
-          if ($map -notmatch 'asset-library.js') { throw "Editor de mapas nao carrega a biblioteca central." }
-          "Contratos de preservacao e integracao passaram." | Set-Content -Encoding UTF8 ".ci-results/contracts.log"
+          $originalPath = "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
+          $originalHashBefore = (Get-FileHash -LiteralPath $originalPath -Algorithm SHA256).Hash
+          $original = Get-Content -Raw $originalPath
+          if (-not $original.Contains("</main>") -or $original.Contains("<iframe")) {
+            throw "A fonte original V4.0 esta incompleta ou usa iframe inesperado."
+          }
+          & ".\integracao\build_unificado.ps1" 2>&1 | Tee-Object -FilePath ".ci-results/build-unificado.log"
+          if ($LASTEXITCODE -ne 0) { throw "O build nativo do Creator falhou." }
+          $originalHashAfter = (Get-FileHash -LiteralPath $originalPath -Algorithm SHA256).Hash
+          if ($originalHashBefore -ne $originalHashAfter) { throw "A fonte original V4.0 foi alterada durante o build." }
+          $index = Get-Content -Raw "index.html"
+          foreach ($requiredMarker in @('id="page-pixelart"', 'data-page="pixelart"', 'shared/asset-library.js', 'shared/creator-bridge.js', 'pixel-art/natureza.js', 'pixel-art/modulo-integrado.js', 'pixel-art/ponte-creator.js')) {
+            if (-not $index.Contains($requiredMarker)) { throw "Build nativo incompleto; marcador ausente: $requiredMarker" }
+          }
+          if ($index.Contains("<iframe")) { throw "A entrada principal nao pode substituir o Creator por iframe." }
+          $map = Get-Content -Raw "map-editor/index.html"
+          if (-not $map.Contains("asset-library.js")) { throw "Editor de mapas nao carrega a biblioteca central." }
+          "Build nativo OK. Fonte V4.0 preservada (SHA256 $originalHashAfter); Pixel Art integrado e sem iframe." | Set-Content -Encoding UTF8 ".ci-results/contracts.log"
 
       - name: Publicar logs da validacao
         if: always()
