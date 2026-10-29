@@ -4,6 +4,22 @@
 **Escopo:** Apoena Game Creator e Apoena Pixel Art HTML  
 **Objetivo:** manter uma lista única de trabalho, reduzir validações duplicadas e não encerrar tarefas sem confirmar que seu conteúdo foi preservado.
 
+## 0. Controle sequencial de tarefas
+
+**Protocolo obrigatório:** [Protocolo de trabalho sequencial](PROTOCOLO_TRABALHO_SEQUENCIAL.md) — aplicado também ao [repositório Pixel Art](https://github.com/apoenalore/Apoena-pixel-art-html/blob/main/docs/PROTOCOLO_TRABALHO_SEQUENCIAL.md). Limite de trabalho em andamento: **WIP = 1 para os dois repositórios combinados**.
+
+### Tarefa ativa
+
+- **T-001 — Registrar o protocolo sequencial nos dois repositórios**
+- **Estado:** EM VALIDAÇÃO. Os documentos foram publicados; a execução do Pixel Art disparada pelo commit está em andamento: [40965795436](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40965795436).
+- **Critério de encerramento:** confirmar o resultado dessa execução e registrar o fechamento desta tarefa. Se surgir falha de CI, registrar a evidência e decidir se é uma regressão da alteração documental ou uma falha preexistente, sem iniciar uma tarefa paralela.
+
+### Próxima tarefa no backlog — ainda NÃO iniciada
+
+- **T-002 — Estabilizar o CI/runner do Game Creator e consolidar as falhas de validação.**
+- Escopo inicial: limpar a fila antiga com segurança, confirmar a atribuição do runner, escolher uma validação canônica e tratar os erros conhecidos do PowerShell, testes de integração, catálogo e hidrologia.
+- **Regra:** T-002 só começa depois de T-001 ser marcada como CONCLUÍDA. Não iniciar novas funcionalidades enquanto T-002 estiver aberta ou bloqueada.
+
 ## 1. Estado geral
 
 - [x] Inventário inicial de pull requests abertos e workflows.
