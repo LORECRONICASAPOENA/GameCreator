@@ -64,4 +64,4 @@ A seção **Comportamento do objeto** permite configurar a imagem selecionada co
 
 As regras ambientais do tile permitem declarar limites de umidade, nutrientes, luz e temperatura, além dos índices de atlas para as variantes visualmente saudável e seca. Isso prepara, por exemplo, a grama para mudar de estado conforme o solo. A simulação da água/solo e a troca visual em tempo de jogo ainda precisam ser implementadas no runtime Godot.
 
-A validação do mapa também verifica os metadados dos assets e alerta sobre interações sem ID de recurso, montarias sem a opção de montar e perfis ecológicos incompletos. Esses avisos ajudam a encontrar configurações faltantes antes da exportação.
+A validação do mapa também verifica os metadados dos assets e alerta sobre interações sem ID de recurso, montarias sem a opção de montar e perfis ecológicos incompletos. Esses avisos ajudam a encontrar configurações faltantes antes da exportação. Para NPCs, também é possível registrar profissão, rotina diária em JSON, papel de comprador/vendedor, IDs de itens negociados e fator de preço. Isso define um perfil exportável; a execução das rotinas e das transações ainda pertence ao runtime.
