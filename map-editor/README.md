@@ -65,3 +65,20 @@ A seção **Comportamento do objeto** permite configurar a imagem selecionada co
 As regras ambientais do tile permitem declarar limites de umidade, nutrientes, luz e temperatura, além dos índices de atlas para as variantes visualmente saudável e seca. Isso prepara, por exemplo, a grama para mudar de estado conforme o solo. A simulação da água/solo e a troca visual em tempo de jogo ainda precisam ser implementadas no runtime Godot.
 
 A validação do mapa também verifica os metadados dos assets e alerta sobre interações sem ID de recurso, montarias sem a opção de montar e perfis ecológicos incompletos. Esses avisos ajudam a encontrar configurações faltantes antes da exportação. Para NPCs, também é possível registrar profissão, rotina diária em JSON, papel de comprador/vendedor, IDs de itens negociados e fator de preço. Isso define um perfil exportável; a execução das rotinas e das transações ainda pertence ao runtime.
+
+### Perfis físicos, biomas, estações e água (novo)
+
+Na aba **Pixel Art integrada ao Game Creator**, o formulário **Regras do tile selecionado** também cadastra:
+
+- tipo físico do material: grama, floresta, terra, areia de praia, areia desértica, rocha, água, brejo e outros;
+- tags dos biomas em que o tile pode aparecer;
+- permeabilidade, retenção de água, resistência à erosão, escoamento superficial e indicação de nascente/fonte permanente;
+- índice do tile alternativo para primavera, verão, outono e inverno/neve.
+
+O seletor **Prévia sazonal** troca para o índice visual cadastrado. Os índices são posições na folha importada; o editor não gera automaticamente arte de neve ou folhas de outono. É necessário importar as variantes desenhadas pelo autor.
+
+**Simular chuva por 30 dias** executa uma prévia discreta em células 2D: chuva, infiltração, evaporação, escoamento pela altura lógica, poças, acúmulo de fluxo e erosão em materiais vulneráveis. **Limpar água/erosão** remove somente a prévia, sem alterar o mapa nem suas alturas originais.
+
+A simulação não exige mapa 3D. A altura lógica continua sendo um dado de terreno; a água é uma camada calculada por cima. Os parâmetros hidrológicos e sazonais são salvos no campo terrainCatalog do JSON.
+
+**Limite de integração:** o protótipo HTML e o projeto Godot do jogo já possuem motores ambientais próprios, mas ainda não carregam automaticamente o JSON e o atlas exportados pelo Creator como mapa completo jogável. A importação de arte, terreno, colisão e estado ambiental entre os projetos continua sendo uma etapa de integração separada.
