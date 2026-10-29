@@ -9,7 +9,7 @@
 - [x] Inventário inicial de pull requests abertos e workflows.
 - [x] Confirmar uma execução completa bem-sucedida no runner Pixel Art.
 - [x] Identificar que trabalhos recentes do Game Creator permanecem sem runner atribuído.
-- [ ] Consolidar os workflows duplicados e revalidar os dois projetos.
+- [x] Reduzir gatilhos duplicados: agenda horária do Creator removida; validação de integração consolidada no workflow principal; workflow Linux do Pixel Art restrito a PRs de sessão.
 - [ ] Decidir o destino dos pull requests de protótipo de hidrologia após comparar os arquivos exclusivos.
 - [ ] Confirmar os testes no runner Game Creator depois de restabelecer a atribuição de jobs.
 
@@ -25,15 +25,15 @@
 
 ### Workflows encontrados na `main`
 
-- `.github/workflows/validar-pixel-art-windows.yml`: runner Windows `pixel-art`; execução de ecossistema, JavaScript e Godot.
-- `.github/workflows/validar-godot.yml`: runner Ubuntu; repete partes da mesma validação e teve execução com falha (`40949428714`), enquanto a validação Windows correspondente passou (`40949428700`).
+- `.github/workflows/validar-pixel-art-windows.yml`: workflow principal no runner Windows `pixel-art`; agora inclui verificações condicionais para os testes ambientais que entram com a PR #5.
+- `.github/workflows/validar-godot.yml`: workflow Linux restrito aos PRs de modos/sessões e execução manual; não dispara mais em cada push da `main`.
 - `feat/tempo-biomas-hidrologia` contém `.github/workflows/validar-ambiente-windows.yml`, que executou com sucesso em `40949815160`.
 
-**Ação de limpeza:** manter um workflow principal de validação Windows e incorporar nele os testes ambientais antes de remover o workflow Ubuntu duplicado. Preservar o workflow específico da branch ambiental somente enquanto essa branch precisar de validação independente.
+**Limpeza realizada:** o push da `main` é validado pelo runner Windows; o workflow Linux fica reservado aos PRs que alteram cenas/scripts de sessão. O workflow Windows foi estendido para executar os testes ambientais quando esses arquivos estiverem presentes na `main`. A branch ambiental mantém sua própria validação até ser integrada.
 
 ### Validação ambiental confirmada
 
-Execução [`40949815160`](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40949815160): sucesso em sintaxe JavaScript, testes de calendário/clima e hidrologia HTML, regressão do ecossistema, importação Godot, testes Godot de clima, ecossistema e hidrologia, inicialização headless e publicação dos logs.
+Execução [`40949815160`](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40949815160): sucesso em sintaxe JavaScript, testes de calendário/clima e hidrologia HTML, regressão do ecossistema, importação Godot, testes Godot de clima, ecossistema e hidrologia, inicialização headless e publicação dos logs. Após a limpeza dos gatilhos, a validação da `main` [`40961154439`](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40961154439) está em execução com o workflow Windows atualizado.
 
 ## 3. Apoena Game Creator
 
@@ -47,16 +47,16 @@ Execução [`40949815160`](https://github.com/apoenalore/Apoena-pixel-art-html/a
 
 ### Workflows encontrados na `main`
 
-- `.github/workflows/pixel-art.yml`: validação ampla do Creator, com testes de editor, biblioteca, build e runtime.
-- `.github/workflows/testar-integracao.yml`: testes de contrato para catálogo, terreno, objetos de mundo e natureza; compartilha alguns gatilhos/checagens com a validação ampla, mas possui testes específicos.
-- `.github/workflows/auto-validar-v41.yml`: executa a validação da branch V4.1 a cada hora. A validação por push já existe em `pixel-art.yml`, portanto a agenda horária é redundante e pode gerar fila desnecessária.
+- `.github/workflows/pixel-art.yml`: validação ampla do Creator, com testes de editor, biblioteca, build, runtime e agora os contratos de integração.
+- `.github/workflows/testar-integracao.yml`: permanece como opção manual; os gatilhos automáticos foram retirados para não executar a mesma suíte em paralelo.
+- `.github/workflows/auto-validar-v41.yml`: agora é manual; a agenda horária e o gatilho de push redundantes foram removidos.
 - `.github/workflows/publicar-creator-unificado.yml`: build/publicação do Creator em `main`; tem finalidade diferente e deve ser preservado.
 
-**Ação de limpeza:** consolidar os testes específicos de integração na validação principal, garantir gatilhos para PRs e branches de trabalho, retirar a agenda horária redundante e preservar o workflow de publicação.
+**Limpeza realizada:** os testes de integração foram incorporados à validação principal; o workflow dedicado ficou manual; a agenda horária redundante foi removida. O workflow de publicação permanece separado porque altera/constrói a entrega do Creator.
 
 ### Bloqueio de runner
 
-Os trabalhos recentes do Creator aparecem como `queued`, com `runner_id = 0` e sem `runner_name`. O runner conhecido em uma execução anterior bem-sucedida é `APOENA-GAMECREATOR-RUNNER` (ID 2; execução `40942973127`). Isso significa que, no momento das consultas, o GitHub ainda não atribuiu o runner aos novos trabalhos. O estado “Listening for Jobs” no CMD, isoladamente, não confirma que o runner esteja disponível para este repositório e para os labels solicitados.
+Os trabalhos recentes do Creator aparecem como `queued`, com `runner_id = 0` e sem `runner_name`. O runner conhecido em uma execução anterior bem-sucedida é `APOENA-GAMECREATOR-RUNNER` (ID 2; execução `40942973127`). Isso significa que, no momento das consultas, o GitHub ainda não atribuiu o runner aos novos trabalhos. A execução agendada [`40959244729`](https://github.com/apoenalore/GameCreator/actions/runs/40959244729) também já estava na fila antes da retirada da agenda horária e não é cancelada retroativamente pela alteração. O estado “Listening for Jobs” no CMD, isoladamente, não confirma que o runner esteja disponível para este repositório e para os labels solicitados.
 
 **Ação:** confirmar o registro/conexão do runner Game Creator no GitHub e só então executar uma validação de referência. Não criar novas execuções repetidas enquanto os jobs continuarem sem atribuição.
 
@@ -67,8 +67,8 @@ Execução [`40942973127`](https://github.com/apoenalore/GameCreator/actions/run
 ## 4. Ordem de fechamento
 
 1. Corrigir a atribuição de jobs ao runner Game Creator.
-2. Consolidar os workflows sem perder cobertura de testes.
-3. Revalidar a branch ambiental do Pixel Art e a branch ambiental do Creator.
+2. Confirmar o resultado final da validação Windows atualizada do Pixel Art.
+3. Revalidar a branch ambiental do Creator quando o runner voltar a aceitar jobs.
 4. Comparar os dois PRs de protótipo de hidrologia com as implementações atuais e preservar os arquivos únicos que ainda forem necessários.
 5. Revisar os resultados finais dos PRs de modos offline/LAN e sistemas de mundo.
 6. Atualizar este registro com links e resultados finais; marcar uma pendência como concluída somente depois de confirmar a execução correspondente.
