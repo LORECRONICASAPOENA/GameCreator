@@ -28,18 +28,21 @@ if not html.strip():
     assert 'full.length!==16324808' in loader, 'Integridade do loader não corresponde ao bundle atualizado'
     print('Fonte monolítica vazia; bundle-v4 validado. index.html foi preservado.')
     raise SystemExit(0)
+html=html.replace('Game Creator v3.9.2 — Editor Visual Livre','Game Creator v4.0 — Editor Integrado',1)
+html=html.replace('— Game Creator v3.9.2','— Game Creator v4.0',1)
+html=html.replace('v3.9.2','v4.0')
 menu_pattern = r'<button\b[^>]*data-page="controles"[^>]*>.*?</button>\s*</nav>'
 menu_matches = list(re.finditer(menu_pattern, html, re.S))
 assert len(menu_matches)==1, 'Nao foi possivel identificar de forma inequivoca o fim do menu original'
 menu_match = menu_matches[0]
 assert 'data-page="pixelart"' not in html, 'A fonte já contém Pixel Art'
 assert html.count('</main>')>=1 and html.count('</body>')==1
-html=html.replace('Game Creator v3.9.2 — Editor Visual Livre','Game Creator v4.0 — Editor Integrado',1)
-html=html.replace('— Game Creator v3.9.2','— Game Creator v4.0',1)
-html=html.replace('v3.9.2','v4.0')
 menu_original = menu_match.group(0)
 menu_new = menu_original.replace('</nav>','<button class="tab" data-page="pixelart">▧ Pixel Art • Personagens / Objetos / Mapas</button></nav>',1)
 html = html[:menu_match.start()] + menu_new + html[menu_match.end():]
+final_menu_pattern = r'<button\b[^>]*data-page="controles"[^>]*>.*?</button>\s*<button\b[^>]*data-page="pixelart"[^>]*>.*?</button>\s*</nav>'
+assert len(re.findall(final_menu_pattern, html, re.S)) == 1, 'Navegação de Controles/Pixel Art inválida após build'
+assert html.count('data-page="pixelart"') == 1, 'A aba Pixel Art deve aparecer exatamente uma vez no menu'
 html=html.replace('</main>','<section class="page" id="page-pixelart"><div id="gc40PixelRoot"><div class="panel"><h2>Pixel Art</h2><p>Carregando personagens, objetos e mapas...</p></div></div></section>\n</main>',1)
 imports='\n<script src="shared/asset-library.js"></script>\n<script src="shared/creator-bridge.js"></script>\n<script src="map-editor/terrain-system.js"></script>\n<script src="map-editor/world-object-system.js"></script>\n<script src="map-editor/modulo-integrado.js"></script>\n<script src="pixel-art/natureza.js"></script>\n<script src="pixel-art/modulo-integrado.js"></script>\n<script src="pixel-art/ponte-creator.js"></script>\n'
 html=html.replace('</body>',imports+'</body>',1)
