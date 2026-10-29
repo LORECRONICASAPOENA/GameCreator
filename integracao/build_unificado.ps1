@@ -22,12 +22,14 @@ if ([string]::IsNullOrWhiteSpace($s)) {
   Write-Host "Fonte monolítica vazia; bundle-v4 validado. O index.html não foi sobrescrito."
   return
 }
-$old='<button class="tab" data-page="controles">🎮 Controles PC / Android</button></nav>'
-if(-not $s.Contains($old)) {throw "Menu original mudou; nao sera substituido"}
+$nav=[regex]::Match($s,'(?is)<nav\b[^>]*>.*?data-page="controles".*?</nav>')
+if(-not $nav.Success) {throw "Menu principal com a aba Controles nao foi encontrado"}
 if($s.Contains('data-page="pixelart"')) {throw "A fonte ja contem Pixel Art"}
 $s=$s.Replace('Game Creator v3.9.2 — Editor Visual Livre','Game Creator v4.0 — Editor Integrado')
 $s=$s.Replace('— Game Creator v3.9.2','— Game Creator v4.0')
-$s=$s.Replace($old,$old.Replace('</nav>','<button class="tab" data-page="pixelart">▧ Pixel Art • Personagens / Objetos / Mapas</button></nav>'))
+$navHtml=$nav.Value
+$navNew=$navHtml.Replace('</nav>','<button class="tab" data-page="pixelart">▧ Pixel Art • Personagens / Objetos / Mapas</button></nav>')
+$s=$s.Replace($navHtml,$navNew)
 $pg='<section class="page" id="page-pixelart"><div id="gc40PixelRoot"><div class="panel"><h2>Pixel Art</h2><p>Carregando personagens, objetos e mapas...</p></div></div></section>'
 $s=[regex]::new('</main>').Replace($s,$pg+"</main>",1)
 $tags='<script src="map-editor/terrain-system.js"></script>' + [Environment]::NewLine + '<script src="map-editor/world-object-system.js"></script>' + [Environment]::NewLine + '<script src="map-editor/modulo-integrado.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/natureza.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/modulo-integrado.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/ponte-creator.js"></script>' + [Environment]::NewLine
