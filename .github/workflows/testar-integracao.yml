@@ -1,27 +1,7 @@
 name: Game Creator - integração de catálogo
 on:
-  push:
-    paths:
-      - 'pixel-art/natureza.js'
-      - 'pixel-art/modulo-integrado.js'
-      - 'integracao/testes/natureza.test.cjs'
-      - 'integracao/catalogo.js'
-      - 'integracao/testes/**'
-      - 'map-editor/terrain-system.js'
-      - 'map-editor/world-object-system.js'
-      - 'map-editor/modulo-integrado.js'
-      - 'integracao/testes/world-object-system.test.cjs'
-      - 'integracao/testes/terrain-system.test.cjs'
-      - '.github/workflows/testar-integracao.yml'
-  pull_request:
-    paths:
-      - 'integracao/catalogo.js'
-      - 'integracao/testes/**'
-      - 'map-editor/terrain-system.js'
-      - 'map-editor/world-object-system.js'
-      - 'map-editor/modulo-integrado.js'
-      - 'pixel-art/natureza.js'
-      - 'pixel-art/modulo-integrado.js'
+  # A validação automática foi consolidada em pixel-art.yml.
+  # Manter este workflow como opção manual de diagnóstico.
   workflow_dispatch:
 permissions:
   contents: read
