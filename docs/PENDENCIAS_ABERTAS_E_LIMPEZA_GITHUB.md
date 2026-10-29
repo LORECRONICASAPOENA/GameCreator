@@ -26,14 +26,14 @@
 ### Workflows encontrados na `main`
 
 - `.github/workflows/validar-pixel-art-windows.yml`: workflow principal no runner Windows `pixel-art`; agora inclui verificações condicionais para os testes ambientais que entram com a PR #5.
-- `.github/workflows/validar-godot.yml`: workflow Linux restrito aos PRs de modos/sessões e execução manual; não dispara mais em cada push da `main`.
+- `.github/workflows/validar-godot.yml`: workflow de sessões no runner Windows `pixel-art`, restrito aos PRs de modos/sessões e execução manual; não depende mais de runner Linux.
 - `feat/tempo-biomas-hidrologia` contém `.github/workflows/validar-ambiente-windows.yml`, que executou com sucesso em `40949815160`.
 
 **Limpeza realizada:** o push da `main` é validado pelo runner Windows; o workflow Linux fica reservado aos PRs que alteram cenas/scripts de sessão. O workflow Windows foi estendido para executar os testes ambientais quando esses arquivos estiverem presentes na `main`. A branch ambiental mantém sua própria validação até ser integrada.
 
 ### Validação ambiental confirmada
 
-Execução [`40949815160`](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40949815160): sucesso em sintaxe JavaScript, testes de calendário/clima e hidrologia HTML, regressão do ecossistema, importação Godot, testes Godot de clima, ecossistema e hidrologia, inicialização headless e publicação dos logs. Após a limpeza dos gatilhos, a validação da `main` [`40961154439`](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40961154439) está em execução com o workflow Windows atualizado.
+Execução [`40949815160`](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40949815160): sucesso em sintaxe JavaScript, testes de calendário/clima e hidrologia HTML, regressão do ecossistema, importação Godot, testes Godot de clima, ecossistema e hidrologia, inicialização headless e publicação dos logs. A validação da `main` [`40961154439`](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40961154439) passou com o workflow Windows atualizado. A nova validação de sessões no runner Windows está em execução em [`40961954483`](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40961954483).
 
 ## 3. Apoena Game Creator
 
@@ -56,9 +56,9 @@ Execução [`40949815160`](https://github.com/apoenalore/Apoena-pixel-art-html/a
 
 ### Bloqueio de runner
 
-Os trabalhos recentes do Creator aparecem como `queued`, com `runner_id = 0` e sem `runner_name`. O runner conhecido em uma execução anterior bem-sucedida é `APOENA-GAMECREATOR-RUNNER` (ID 2; execução `40942973127`). Isso significa que, no momento das consultas, o GitHub ainda não atribuiu o runner aos novos trabalhos. A execução agendada [`40959244729`](https://github.com/apoenalore/GameCreator/actions/runs/40959244729) também já estava na fila antes da retirada da agenda horária e não é cancelada retroativamente pela alteração. O estado “Listening for Jobs” no CMD, isoladamente, não confirma que o runner esteja disponível para este repositório e para os labels solicitados.
+Os trabalhos recentes do Creator aparecem como `queued`, com `runner_id = 0` e sem `runner_name`. O runner conhecido em uma execução anterior bem-sucedida é `APOENA-GAMECREATOR-RUNNER` (ID 2; execução `40942973127`). Na última consulta havia 13 execuções queued, incluindo a validação agendada [`40959244729`](https://github.com/apoenalore/GameCreator/actions/runs/40959244729) e várias execuções antigas do mesmo branch ambiental. A agenda horária já foi removida, mas isso não cancela os jobs criados antes da alteração. Uma tentativa de limpeza automática falhou antes do primeiro step por não receber runner; o workflow temporário foi removido. O estado “Listening for Jobs” no CMD, isoladamente, não confirma que o runner esteja disponível para este repositório e para os labels solicitados.
 
-**Ação:** confirmar o registro/conexão do runner Game Creator no GitHub e só então executar uma validação de referência. Não criar novas execuções repetidas enquanto os jobs continuarem sem atribuição.
+**Ação:** cancelar manualmente as execuções antigas ainda na fila em Actions antes de reativar o runner para que ele não processe commits obsoletos em sequência. Depois, confirmar o registro/conexão do runner Game Creator no GitHub e executar uma única validação de referência. Não criar novas execuções enquanto os jobs continuarem sem atribuição.
 
 ### Validação anterior
 
