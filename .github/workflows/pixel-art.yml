@@ -229,8 +229,17 @@ jobs:
             if (-not (Test-Path $path)) { throw "Arquivo essencial ausente: $path" }
           }
           $index = Get-Content -Raw index.html
-          if ($index -notmatch 'data-page="3d"') { throw "A navegacao 3D nao foi encontrada no Creator." }
-          if ($index -notmatch 'data-page="pixel"') { throw "A navegacao Pixel Art nao foi encontrada no Creator." }
+          if (-not $index.Contains('id="page-pixelart"') -or -not $index.Contains('data-page="pixelart"')) {
+            throw "A aba nativa Pixel Art nao foi adicionada pelo build."
+          }
+          # Confere todos os valores de navegacao que existiam na fonte V4.0.
+          # Isso protege a bancada original sem presumir nomes de abas inexistentes.
+          $originalPages = @([regex]::Matches($original, 'data-page="([^"]+)"') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+          if ($originalPages.Count -lt 1) { throw "Nenhuma aba original foi encontrada na fonte V4.0." }
+          foreach ($pageName in $originalPages) {
+            $marker = 'data-page="' + $pageName + '"'
+            if (-not $index.Contains($marker)) { throw "A navegacao original foi perdida: $pageName" }
+          }
           $map = Get-Content -Raw map-editor/index.html
           if ($map -notmatch 'asset-library.js') { throw "O editor de mapas nao carrega a biblioteca central." }
           "Contratos de preservacao e integracao passaram." | Tee-Object -FilePath .ci-results/contracts.log
