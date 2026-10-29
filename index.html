@@ -34,7 +34,7 @@
   const pieces=window.__APOENA_V4_PARTES||[];
   if(pieces.length!==24||pieces.some(p=>typeof p!=="string"||!p.length))throw Error("Arquivos do editor incompletos. Extraia o ZIP inteiro: precisa manter a pasta bundle-v4.");
   const full=pieces.join("");
-  if(full.length!==16324651||!full.startsWith("<!DOCTYPE html>")||!full.includes('id="page-pixelart"')||!full.includes('Game Creator v4.0'))throw Error("Versão 4.0 inválida ou incompleta. Não use partes de versões diferentes.");
+  if(full.length!==16324808||!full.startsWith("<!DOCTYPE html>")||!full.includes('id="page-pixelart"')||!full.includes('Game Creator v4.0'))throw Error("Versão 4.0 inválida ou incompleta. Não use partes de versões diferentes.");
   window.__APOENA_V4_PARTES=null;
   document.open();document.write(full);document.close();
  }catch(e){
