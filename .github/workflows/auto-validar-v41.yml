@@ -112,8 +112,15 @@ jobs:
           if (-not $original.Contains("</main>") -or $original.Contains("<iframe")) {
             throw "A fonte original V4.0 esta incompleta ou usa iframe inesperado."
           }
-          & ".\integracao\build_unificado.ps1" 2>&1 | Tee-Object -FilePath ".ci-results/build-unificado.log"
-          if ($LASTEXITCODE -ne 0) { throw "O build nativo do Creator falhou." }
+          # O build e um script PowerShell, nao um executavel nativo.
+          # LASTEXITCODE pode estar nulo ou conter o codigo de um comando anterior.
+          # Com ErrorActionPreference=Stop, erros do script propagam e falham a etapa.
+          try {
+            & ".\integracao\build_unificado.ps1" 2>&1 | Tee-Object -FilePath ".ci-results/build-unificado.log"
+          } catch {
+            $_ | Out-String | Add-Content -Encoding UTF8 ".ci-results/build-unificado.log"
+            throw "O build nativo do Creator falhou: $($_.Exception.Message)"
+          }
           $originalHashAfter = (Get-FileHash -LiteralPath $originalPath -Algorithm SHA256).Hash
           if ($originalHashBefore -ne $originalHashAfter) { throw "A fonte original V4.0 foi alterada durante o build." }
           $index = Get-Content -Raw "index.html"
@@ -131,4 +138,5 @@ jobs:
         with:
           name: apoena-v41-scheduled-diagnostics
           path: .ci-results/
+          include-hidden-files: true
           if-no-files-found: warn
