@@ -56,7 +56,24 @@ Execução [`40949815160`](https://github.com/apoenalore/Apoena-pixel-art-html/a
 
 ### Bloqueio de runner
 
-Os trabalhos recentes do Creator aparecem como `queued`, com `runner_id = 0` e sem `runner_name`. O runner conhecido em uma execução anterior bem-sucedida é `APOENA-GAMECREATOR-RUNNER` (ID 2; execução `40942973127`). Na última consulta havia 13 execuções queued, incluindo a validação agendada [`40959244729`](https://github.com/apoenalore/GameCreator/actions/runs/40959244729) e várias execuções antigas do mesmo branch ambiental. A agenda horária já foi removida, mas isso não cancela os jobs criados antes da alteração. Uma tentativa de limpeza automática falhou antes do primeiro step por não receber runner; o workflow temporário foi removido. O estado “Listening for Jobs” no CMD, isoladamente, não confirma que o runner esteja disponível para este repositório e para os labels solicitados.
+Os trabalhos recentes do Creator aparecem como `queued`, com `runner_id = 0` e sem `runner_name`. O runner conhecido em uma execução anterior bem-sucedida é `APOENA-GAMECREATOR-RUNNER` (ID 2; execução `40942973127`). Na última consulta havia 13 execuções queued. A agenda horária já foi removida, mas isso não cancela os jobs criados antes da alteração. A tentativa de limpeza automática [`40961681593`](https://github.com/apoenalore/GameCreator/actions/runs/40961681593) falhou antes do primeiro step por não receber runner; o workflow temporário foi removido para não deixar outro fluxo permanente.
+
+**Execuções antigas ainda na fila — cancelar manualmente em Actions:**
+- [40959244729 — validação agendada antiga](https://github.com/apoenalore/GameCreator/actions/runs/40959244729)
+- [40949144668 — validação da branch V4.1](https://github.com/apoenalore/GameCreator/actions/runs/40949144668)
+- [40947634011 — validação Pixel Art, PR ambiental](https://github.com/apoenalore/GameCreator/actions/runs/40947634011)
+- [40947633985 — integração, PR ambiental](https://github.com/apoenalore/GameCreator/actions/runs/40947633985)
+- [40947625325 — integração, push ambiental](https://github.com/apoenalore/GameCreator/actions/runs/40947625325)
+- [40947611808 — integração, PR ambiental anterior](https://github.com/apoenalore/GameCreator/actions/runs/40947611808)
+- [40947601170 — integração, push ambiental anterior](https://github.com/apoenalore/GameCreator/actions/runs/40947601170)
+- [40944962186 — integração, PR ambiental antigo](https://github.com/apoenalore/GameCreator/actions/runs/40944962186)
+- [40944675654 — integração, PR ambiental antigo](https://github.com/apoenalore/GameCreator/actions/runs/40944675654)
+- [40944666718 — integração, push ambiental antigo](https://github.com/apoenalore/GameCreator/actions/runs/40944666718)
+- [40943993233 — integração, PR ambiental antigo](https://github.com/apoenalore/GameCreator/actions/runs/40943993233)
+- [40943754023 — integração, push ambiental antigo](https://github.com/apoenalore/GameCreator/actions/runs/40943754023)
+- [40943621289 — integração, push ambiental antigo](https://github.com/apoenalore/GameCreator/actions/runs/40943621289)
+
+O estado “Listening for Jobs” no CMD, isoladamente, não confirma que o runner esteja disponível para este repositório e para os labels solicitados.
 
 **Ação:** cancelar manualmente as execuções antigas ainda na fila em Actions antes de reativar o runner para que ele não processe commits obsoletos em sequência. Depois, confirmar o registro/conexão do runner Game Creator no GitHub e executar uma única validação de referência. Não criar novas execuções enquanto os jobs continuarem sem atribuição.
 
