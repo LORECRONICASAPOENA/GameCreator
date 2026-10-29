@@ -111,4 +111,4 @@ Exportar dados e imagens com IDs estáveis, dimensões e propriedades preservada
 
 ## 10. Escopo desta primeira fatia
 
-A primeira implementação técnica no Game Creator cria um contrato reutilizável de terrenos, máscara de vizinhança, variantes de autotile, validação de mapas e metadados de tipo de mapa. Isso estabelece a base para o editor; não substitui o runtime ecológico, a economia, a IA de NPCs nem a integração final com Godot. Esses itens devem ser entregues em etapas separadas e verificadas.
+A primeira implementação técnica no Game Creator cria um contrato reutilizável de terrenos, máscara de vizinhança, variantes de autotile, regras ambientais por tile, comportamento declarativo de objetos, perfis de NPC/profissão/rotina/comércio, perfis de mapa e validação de mapas/assets. O mapa inicial do editor passa a ser a Cidade Capital de Agar no perfil História, mantendo o preset de três rotas para o MOBA. Isso estabelece a base de autoria e exportação; não substitui o runtime ecológico, a economia, a IA de NPCs nem a integração final com Godot. Esses itens devem ser entregues em etapas separadas e verificadas.
