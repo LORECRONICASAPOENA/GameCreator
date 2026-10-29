@@ -81,9 +81,12 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
+          $programFilesX86 = [Environment]::GetEnvironmentVariable("ProgramFiles(x86)")
           $candidates = @(
             (Join-Path $env:ProgramFiles "Microsoft/Edge/Application/msedge.exe"),
-            (Join-Path $env:ProgramFiles "Google/Chrome/Application/chrome.exe")
+            (Join-Path $programFilesX86 "Microsoft/Edge/Application/msedge.exe"),
+            (Join-Path $env:ProgramFiles "Google/Chrome/Application/chrome.exe"),
+            (Join-Path $programFilesX86 "Google/Chrome/Application/chrome.exe")
           )
           $browser = $candidates | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1
           if (-not $browser) { throw "Edge/Chrome nao encontrado: o smoke test do navegador nao pode ser considerado aprovado." }
@@ -116,10 +119,12 @@ jobs:
             if (-not (Test-Path -LiteralPath $entryPath)) { throw "Pagina ausente para smoke test: $($target.RelativePath)" }
             $entryUri = ([System.Uri]$entryPath).AbsoluteUri
             $domPath = Join-Path $env:RUNNER_TEMP ("apoena-" + $target.Name + "-" + $env:GITHUB_RUN_ID + ".html")
+            $stderrPath = Join-Path $env:RUNNER_TEMP ("apoena-" + $target.Name + "-" + $env:GITHUB_RUN_ID + ".stderr.log")
             $profile = Join-Path $env:RUNNER_TEMP ("apoena-browser-" + $target.Name + "-" + $env:GITHUB_RUN_ID)
             if (Test-Path -LiteralPath $profile) { Remove-Item -LiteralPath $profile -Recurse -Force }
             $arguments = '--headless --disable-gpu --no-first-run --no-default-browser-check --disable-extensions --allow-file-access-from-files --window-size=390,844 --virtual-time-budget=10000 --user-data-dir="' + $profile + '" --dump-dom "' + $entryUri + '"'
-            $process = Start-Process -FilePath $browser -ArgumentList $arguments -RedirectStandardOutput $domPath -RedirectStandardError $logPath -Wait -PassThru
+            $process = Start-Process -FilePath $browser -ArgumentList $arguments -RedirectStandardOutput $domPath -RedirectStandardError $stderrPath -Wait -PassThru
+            if (Test-Path -LiteralPath $stderrPath) { Get-Content -LiteralPath $stderrPath | Add-Content -Encoding UTF8 $logPath }
             if ($process.ExitCode -ne 0) { throw "Navegador encerrou com codigo $($process.ExitCode) ao abrir $($target.RelativePath)." }
             if (-not (Test-Path -LiteralPath $domPath) -or (Get-Item -LiteralPath $domPath).Length -lt 500) {
               throw "DOM vazio ou incompleto em $($target.RelativePath)."
@@ -131,6 +136,7 @@ jobs:
             if ($dom.Contains("Nao foi possivel abrir a versao unificada")) { throw "O Creator exibiu tela de erro no navegador." }
             "BROWSER_MOBILE_SMOKE_OK: $($target.Name)" | Add-Content -Encoding UTF8 $logPath
             Remove-Item -LiteralPath $domPath -Force -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
             Remove-Item -LiteralPath $profile -Recurse -Force -ErrorAction SilentlyContinue
           }
       - name: Verificar sintaxe do build Python quando disponivel
