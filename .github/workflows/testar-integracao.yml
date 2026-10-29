@@ -15,24 +15,38 @@ on:
       - 'pixel-art/natureza.js'
       - 'pixel-art/modulo-integrado.js'
   workflow_dispatch:
+permissions:
+  contents: read
+
 jobs:
+  defaults:
+    run:
+      shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
   testar-catalogo:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
     steps:
       - name: Baixar código
         uses: actions/checkout@v4
       - name: Preparar Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
       - name: Verificar sintaxe JS
         run: |
           node --check pixel-art/natureza.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --check pixel-art/modulo-integrado.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --check integracao/testes/natureza.test.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --check integracao/catalogo.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --check integracao/testes/catalogo.test.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Executar testes isolados do catálogo
         run: |
           node integracao/testes/catalogo.test.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node integracao/testes/natureza.test.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
