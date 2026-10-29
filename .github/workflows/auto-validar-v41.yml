@@ -1,4 +1,4 @@
-name: Auto-validar Apoena Creator V4.1
+name: Validar Apoena Creator V4.1 (manual)
 
 on:
   # A validacao automatica por push/PR ja e coberta por pixel-art.yml.
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: apoena-gamecreator-v41-scheduled-validation
+  group: apoena-gamecreator-v41-manual-validation
   cancel-in-progress: true
 
 jobs:
