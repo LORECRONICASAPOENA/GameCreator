@@ -383,8 +383,9 @@
         const retention = profile.retention;
         if (rainName === 'Neve' || rainName === 'snow') sim.snowpack[i] = Math.min(3, sim.snowpack[i] + 0.58 * dt);
         else sim.waterDepth[i] += rainfall * dt * (1 - permeability * 0.62);
+        const soilEvaporation = season === 'summer' || season === 'verão' ? 0.04 : season === 'winter' || season === 'inverno' ? 0.015 : 0.025;
         sim.soilMoisture[i] = Math.max(0, Math.min(1,
-          sim.soilMoisture[i] + rainfall * dt * permeability * 0.28 - (season === 'summer' || season === 'verão' ? 0.045 : 0.025) * dt
+          sim.soilMoisture[i] + rainfall * dt * (0.22 + permeability * 0.55) - soilEvaporation * dt
         ));
         const melt = (temperature > 1 || (season !== 'winter' && season !== 'inverno')) ? Math.min(sim.snowpack[i], 0.18 * dt) : 0;
         sim.snowpack[i] -= melt;
