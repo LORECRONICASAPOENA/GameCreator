@@ -48,15 +48,20 @@ test("Rejeita IDs duplicados e campeões desconhecidos",()=>{
 test("Bots completam as duas equipes até cinco membros cada",()=>{
   const lobby=M.createLobby({hostId:"j1"});
   M.joinLobby(lobby,{id:"j2",name:"Amigo"});
+  M.selectChampion(lobby,"j1","apoena");
+  M.selectChampion(lobby,"j2","serena");
   M.fillWithBots(lobby);
   assert.deepEqual(lobby.teams.map(t=>t.players.length),[5,5]);
   assert.equal(M.listPlayers(lobby).filter(p=>p.isBot).length,8);
   assert.ok(M.listPlayers(lobby).every(p=>p.championId));
 });
-test("Inicia a partida somente com as equipes completas",()=>{
+test("Não inicia sem seleção de campeão e inicia após seleção e preenchimento",()=>{
   const lobby=M.createLobby({hostId:"j1"});
+  assert.throws(()=>M.startLobby(lobby),/sem campeão selecionado/);
+  M.selectChampion(lobby,"j1","apoena");
   M.startLobby(lobby);
   assert.equal(lobby.status,"in_progress");
+  assert.ok(M.listPlayers(lobby).every(p=>p.championId));
   assert.throws(()=>M.joinLobby(lobby,{id:"j2",name:"Tarde demais"}),/não está aceitando/);
 });
 test("Configuração pode desativar bots sem iniciar equipe incompleta",()=>{
