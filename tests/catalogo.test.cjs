@@ -4,6 +4,13 @@ const path = require("node:path");
 const ApoenaCatalogo = require("../integracao/catalogo.js");
 const root = path.join(__dirname, "..");
 
+const godotCatalogPath = path.join(root, "integracao/godot/dados/apoena_catalogo.json");
+const godotCatalogText = fs.readFileSync(godotCatalogPath, "utf8");
+let godotCatalog;
+assert.doesNotThrow(() => { godotCatalog = JSON.parse(godotCatalogText); }, "fixture do Godot deve ser JSON válido");
+assert.equal(godotCatalog.schema, ApoenaCatalogo.SCHEMA, "fixture Godot deve usar o schema do catálogo exportado");
+assert.doesNotThrow(() => ApoenaCatalogo.validateCatalog(godotCatalog), "fixture Godot deve cumprir o contrato de itens e receitas");
+
 const project = {
   schema: "apoena.central.v1",
   name: "Projeto de integração",
