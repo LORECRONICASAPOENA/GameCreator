@@ -33,3 +33,35 @@ No iniciador `index.html` do GameCreator, toque em **Abrir Editor de Mapas 2.5D*
 ## Repositórios separados
 
 O GameCreator é uma ferramenta independente, localizado em `apoenalore/GameCreator`. O protótipo HTML jogável fica em `apoenalore/Apoena-pixel-art-html`, e o projeto Godot 3D permanece em `apoenalore/JOGO-APOENA-AGAR-`. Nenhum desses outros repositórios é modificado pelo editor.
+
+## Catálogo de terrenos e regras (implementação inicial)
+
+O editor integrado agora possui um formulário **Regras do tile selecionado**. Para o terreno básico ou tile selecionado do atlas, é possível registrar:
+
+- nome e função (terreno, água, encosta, decoração, construção, recurso ou entidade);
+- grupo de conexão usado pelo autotile;
+- colisão declarada (permitida, bloqueada, condicional ou nenhuma);
+- altura lógica e tags;
+- variantes de autotile em JSON, associando uma máscara de vizinhança ao índice do tile na folha.
+
+A máscara utiliza 8 bits: N=1, NE=2, E=4, SE=8, S=16, SW=32, W=64, NW=128. Diagonais são desconsideradas se os dois lados cardinais correspondentes não estiverem conectados. Isso é uma convenção do Apoena Creator; o atlas precisa ter suas variantes mapeadas corretamente pelo autor.
+
+O perfil do mapa agora pode ser marcado como **História**, **Exploração Livre** ou **MOBA**. Essa seleção é metadado de organização/exportação; não muda sozinha as regras do jogo.
+
+### Formato e compatibilidade
+
+O JSON mantém schema apoena.map2d.v1 para que projetos antigos continuem sendo reconhecidos, e acrescenta formatVersion 2, terrainRulesVersion, mapType e terrainCatalog. Projetos v1 sem catálogo recebem os padrões básicos quando abertos. O botão **Validar mapa** verifica dimensões, quantidade de tiles, alturas e catálogo antes da exportação/abertura.
+
+As propriedades de colisão, altura, conexão e tipo são dados exportados. Elas **não implementam sozinhas física, navegação ou gameplay no Godot**; o runtime do jogo precisa consumir essas propriedades.
+
+### Uma única implementação do editor
+
+A página map-editor/index.html agora carrega terrain-system.js e modulo-integrado.js, em vez de manter uma segunda cópia independente da interface. Isso reduz a chance de o editor standalone e o editor integrado divergirem. O build unificado carrega o sistema de terreno antes do módulo de mapas.
+
+### Objetos interativos e ecologia declarativa
+
+A seção **Comportamento do objeto** permite configurar a imagem selecionada como decoração, recurso, planta, animal, montaria, NPC, construção ou veículo. Os campos incluem interação (coletar, cortar, minerar, colher, conversar, comerciar, montar, atacar ou entrar), movimentação, colisão, item produzido, quantidade, reposição e, quando aplicável, requisitos ambientais, crescimento, vida útil, sombra e reprodução.
+
+As regras ambientais do tile permitem declarar limites de umidade, nutrientes, luz e temperatura, além dos índices de atlas para as variantes visualmente saudável e seca. Isso prepara, por exemplo, a grama para mudar de estado conforme o solo. A simulação da água/solo e a troca visual em tempo de jogo ainda precisam ser implementadas no runtime Godot.
+
+A validação do mapa também verifica os metadados dos assets e alerta sobre interações sem ID de recurso, montarias sem a opção de montar e perfis ecológicos incompletos. Esses avisos ajudam a encontrar configurações faltantes antes da exportação. Para NPCs, também é possível registrar profissão, rotina diária em JSON, papel de comprador/vendedor, IDs de itens negociados e fator de preço. Isso define um perfil exportável; a execução das rotinas e das transações ainda pertence ao runtime.
