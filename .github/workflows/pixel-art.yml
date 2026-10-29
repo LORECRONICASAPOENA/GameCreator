@@ -115,21 +115,32 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
-          $python = Get-Command python -ErrorAction SilentlyContinue
-          if (-not $python) {
-            "PYTHON_NOT_INSTALLED: build_unificado.py nao foi compilado neste runner." | Set-Content -Encoding UTF8 (Join-Path $diagDir "python-build.log")
-            Write-Warning "Python nao encontrado; o build principal usa PowerShell e foi validado separadamente."
+          $logPath = Join-Path $diagDir "python-build.log"
+          $python = Get-Command python.exe -ErrorAction SilentlyContinue
+          if (-not $python -or $python.Source -match '\\Microsoft\\WindowsApps\\python(?:3)?\.exe$') {
+            "PYTHON_NOT_INSTALLED: build_unificado.py nao foi compilado neste runner." | Set-Content -Encoding UTF8 $logPath
+            Write-Warning "Python nao instalado (ou somente alias da Microsoft Store); teste opcional ignorado. Build principal PowerShell continua validado."
             return
           }
-          & $python.Source --version 2>&1 | Tee-Object -FilePath (Join-Path $diagDir "python-build.log")
-          if ($LASTEXITCODE -ne 0) {
-            "PYTHON_NOT_EXECUTABLE: verificação de sintaxe Python nao executada." | Add-Content -Encoding UTF8 (Join-Path $diagDir "python-build.log")
-            Write-Warning "O comando python nao pode ser executado; o build principal continua pelo PowerShell."
+          $pythonPath = $python.Source
+          $oldPreference = $ErrorActionPreference
+          $ErrorActionPreference = "Continue"
+          $versionOutput = & $pythonPath --version 2>&1
+          $versionExitCode = $LASTEXITCODE
+          $ErrorActionPreference = $oldPreference
+          $versionOutput | Set-Content -Encoding UTF8 $logPath
+          if ($versionExitCode -ne 0) {
+            "PYTHON_NOT_EXECUTABLE: verificacao de sintaxe Python nao executada." | Add-Content -Encoding UTF8 $logPath
+            Write-Warning "Python nao executavel; teste opcional ignorado. Build principal PowerShell continua validado."
             return
           }
           $pythonCode = 'import ast, pathlib; ast.parse(pathlib.Path("integracao/build_unificado.py").read_text(encoding="utf-8")); print("Python build syntax OK")'
-          & $python.Source -c $pythonCode 2>&1 | Tee-Object -FilePath (Join-Path $diagDir "python-build.log") -Append
-          if ($LASTEXITCODE -ne 0) { throw "Sintaxe do build Python invalida." }
+          $ErrorActionPreference = "Continue"
+          $syntaxOutput = & $pythonPath -c $pythonCode 2>&1
+          $syntaxExitCode = $LASTEXITCODE
+          $ErrorActionPreference = $oldPreference
+          $syntaxOutput | Add-Content -Encoding UTF8 $logPath
+          if ($syntaxExitCode -ne 0) { throw "Sintaxe do build Python invalida. Consulte .ci-results/python-build.log." }
       - name: Instalar dependencias de teste
         run: |
           npm install --no-package-lock --ignore-scripts --no-audit --no-fund 2>&1 | Tee-Object -FilePath .ci-results/install.log
