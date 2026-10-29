@@ -57,5 +57,5 @@ A aba **Pixel Art → Natureza / Plantas** registra espécies, necessidades do s
 
 O plano consolidado de História, Exploração Livre, MOBA, ecossistema, NPCs, economia, desempenho mobile e integração com Godot está em [PLANO_GERAL_APOENA.md](PLANO_GERAL_APOENA.md).
 
-A implementação incremental está na branch feat/apoena-world-foundation. Ela adiciona catálogo de terreno, propriedades ambientais e autotile, metadados de interação para objetos, perfis de plantas/animais/montarias, profissão e rotina de NPCs, papel econômico, perfis de mapa e validação. O editor inicia com a Cidade Capital de Agar no perfil História e mantém o preset de MOBA. Esses dados são a fundação de autoria/exportação; a simulação ecológica, as transações, as rotinas autônomas e o comportamento no jogo ainda exigem implementação e testes no runtime.
+A primeira fatia foi integrada à main pela PR #2. Ela adiciona catálogo de terreno, propriedades ambientais e autotile, metadados de interação para objetos, perfis de plantas/animais/montarias, profissão e rotina de NPCs, papel econômico, perfis de mapa e validação. O editor inicia com a Cidade Capital de Agar no perfil História e mantém o preset de MOBA. Esses dados são a fundação de autoria/exportação; a simulação ecológica, as transações, as rotinas autônomas e o comportamento no jogo ainda exigem implementação e testes no runtime.
 
