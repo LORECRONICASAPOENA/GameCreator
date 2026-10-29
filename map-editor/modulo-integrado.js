@@ -119,7 +119,7 @@ function backgroundTile(gc,x,y){
    if(v===2){gc.fillStyle='#b3aea0';gc.fillRect(px+2,y*TILE+2,28,5);gc.fillStyle='#59615d';gc.fillRect(px+3,y*TILE+26,26,4)}
    if(v===3){gc.fillStyle='#62a6be';gc.fillRect(px+3,y*TILE+8,13,3);gc.fillRect(px+19,y*TILE+24,8,2)}
  }
- if(v>=1000&&sheetImg){const base=v-1000;const rule=TerrainSystem?TerrainSystem.getTileDefinition(terrainCatalog,'atlas:'+base):null;let source=base;if(smartTile&&rule&&rule.autotile&&rule.connectGroup&&TerrainSystem){const mask=TerrainSystem.connectivityMask(cells,width,height,x,y,definitionForCell);source=TerrainSystem.resolveVariant(mask,rule.variants,base)}drawSource(gc,source,px,y*TILE)}
+ if(v>=1000&&sheetImg&&!Number.isInteger(seasonalIndex)){const base=v-1000;const rule=TerrainSystem?TerrainSystem.getTileDefinition(terrainCatalog,'atlas:'+base):null;let source=base;if(smartTile&&rule&&rule.autotile&&rule.connectGroup&&TerrainSystem){const mask=TerrainSystem.connectivityMask(cells,width,height,x,y,definitionForCell);source=TerrainSystem.resolveVariant(mask,rule.variants,base)}drawSource(gc,source,px,y*TILE)}
  gc.restore()
 }
 function drawCliff(gc,x,y){
