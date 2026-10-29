@@ -58,41 +58,7 @@ jobs:
           $npmCode = $LASTEXITCODE
           $npmOutput | Out-File -FilePath $log -Append -Encoding utf8
           if ($npmCode -ne 0) { throw "npm --version falhou com codigo $npmCode." }
-      - name: Smoke test do loader no navegador headless quando disponivel
-        run: |
-          $ErrorActionPreference = "Stop"
-          $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
-          $candidates = @(
-            (Join-Path $env:ProgramFiles "Microsoft/Edge/Application/msedge.exe"),
-            (Join-Path ${env:ProgramFiles(x86)} "Microsoft/Edge/Application/msedge.exe"),
-            (Join-Path $env:ProgramFiles "Google/Chrome/Application/chrome.exe"),
-            (Join-Path ${env:ProgramFiles(x86)} "Google/Chrome/Application/chrome.exe")
-          )
-          $browser = $candidates | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1
-          if (-not $browser) {
-            "BROWSER_RUNTIME_NOT_INSTALLED: smoke test headless nao executado." | Set-Content -Encoding UTF8 (Join-Path $diagDir "browser-loader.log")
-            Write-Warning "Edge/Chrome nao encontrado; a verificacao de navegador fica registrada como nao testada."
-            return
-          }
-          $entryPath = Join-Path $env:GITHUB_WORKSPACE "index.html"
-          $entryUri = ([System.Uri]$entryPath).AbsoluteUri
-          $domPath = Join-Path $diagDir "browser-loader-dom.html"
-          $logPath = Join-Path $diagDir "browser-loader.log"
-          $profile = Join-Path $env:RUNNER_TEMP ("apoena-browser-" + $env:GITHUB_RUN_ID)
-          if (Test-Path -LiteralPath $profile) { Remove-Item -LiteralPath $profile -Recurse -Force }
-          $arguments = '--headless --disable-gpu --no-first-run --no-default-browser-check --disable-extensions --allow-file-access-from-files --virtual-time-budget=10000 --user-data-dir="' + $profile + '" --dump-dom "' + $entryUri + '"'
-          $process = Start-Process -FilePath $browser -ArgumentList $arguments -RedirectStandardOutput $domPath -RedirectStandardError $logPath -Wait -PassThru
-          "Browser: $browser | ExitCode: $($process.ExitCode) | Entry: $entryUri" | Add-Content -Encoding UTF8 -Path $logPath
-          if ($process.ExitCode -ne 0) { throw "Navegador headless encerrou com codigo $($process.ExitCode). Consulte .ci-results/browser-loader.log." }
-          if (-not (Test-Path -LiteralPath $domPath) -or (Get-Item -LiteralPath $domPath).Length -lt 1000) {
-            throw "Navegador headless nao produziu DOM suficiente. Consulte .ci-results/browser-loader.log."
-          }
-          $dom = Get-Content -Raw $domPath
-          foreach ($required in @('id="page-pixelart"', 'Game Creator v4.0', 'shared/asset-library.js', 'shared/creator-bridge.js', 'pixel-art/natureza.js')) {
-            if (-not $dom.Contains($required)) { throw "Smoke test do loader falhou; DOM sem: $required" }
-          }
-          if ($dom.Contains("Nao foi possivel abrir a versao unificada")) { throw "O loader exibiu tela de erro." }
-          "BROWSER_LOADER_SMOKE_OK" | Add-Content -Encoding UTF8 -Path $logPath
+
       - name: Preservar loader e compilar Creator nativo V4.0
         run: |
           $ErrorActionPreference = "Stop"
@@ -111,6 +77,62 @@ jobs:
           if ($built.Contains("<iframe")) { throw "A entrada nativa nao pode substituir o Creator por iframe." }
           $hash = Get-FileHash -LiteralPath (Join-Path $env:GITHUB_WORKSPACE "index.html") -Algorithm SHA256
           "Build nativo OK; bytes=$((Get-Item index.html).Length); SHA256=$($hash.Hash)" | Tee-Object -FilePath (Join-Path $diagDir "build.log") -Append
+      - name: Smoke test do Creator, Estudio, Mapas e Biblioteca em viewport mobile
+        run: |
+          $ErrorActionPreference = "Stop"
+          $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
+          $candidates = @(
+            (Join-Path $env:ProgramFiles "Microsoft/Edge/Application/msedge.exe"),
+            (Join-Path $env:ProgramFiles "Google/Chrome/Application/chrome.exe")
+          )
+          $browser = $candidates | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1
+          if (-not $browser) { throw "Edge/Chrome nao encontrado: o smoke test do navegador nao pode ser considerado aprovado." }
+          $logPath = Join-Path $diagDir "browser-loader.log"
+          "Browser: $browser | Viewport mobile: 390x844" | Set-Content -Encoding UTF8 $logPath
+          $targets = @(
+            @{
+              Name = "creator"
+              RelativePath = "index.html"
+              Required = @('id="page-pixelart"', 'Game Creator v4.0', 'shared/asset-library.js', 'shared/creator-bridge.js', 'pixel-art/natureza.js')
+            },
+            @{
+              Name = "studio"
+              RelativePath = "pixel-art/estudio.html"
+              Required = @('id="file"', 'id="librarySave"', 'id="detectSprites"', 'id="exportSheet"', 'corte-inteligente.js')
+            },
+            @{
+              Name = "map-editor"
+              RelativePath = "map-editor/index.html"
+              Required = @('id="stage"', 'id="saveMapLibrary"', 'id="checkTilesetFit"', 'shared/asset-library.js')
+            },
+            @{
+              Name = "library"
+              RelativePath = "biblioteca/index.html"
+              Required = @('id="exportBackup"', 'id="importBackup"', 'id="projects"', 'shared/library-backup.js')
+            }
+          )
+          foreach ($target in $targets) {
+            $entryPath = Join-Path $env:GITHUB_WORKSPACE $target.RelativePath
+            if (-not (Test-Path -LiteralPath $entryPath)) { throw "Pagina ausente para smoke test: $($target.RelativePath)" }
+            $entryUri = ([System.Uri]$entryPath).AbsoluteUri
+            $domPath = Join-Path $env:RUNNER_TEMP ("apoena-" + $target.Name + "-" + $env:GITHUB_RUN_ID + ".html")
+            $profile = Join-Path $env:RUNNER_TEMP ("apoena-browser-" + $target.Name + "-" + $env:GITHUB_RUN_ID)
+            if (Test-Path -LiteralPath $profile) { Remove-Item -LiteralPath $profile -Recurse -Force }
+            $arguments = '--headless --disable-gpu --no-first-run --no-default-browser-check --disable-extensions --allow-file-access-from-files --window-size=390,844 --virtual-time-budget=10000 --user-data-dir="' + $profile + '" --dump-dom "' + $entryUri + '"'
+            $process = Start-Process -FilePath $browser -ArgumentList $arguments -RedirectStandardOutput $domPath -RedirectStandardError $logPath -Wait -PassThru
+            if ($process.ExitCode -ne 0) { throw "Navegador encerrou com codigo $($process.ExitCode) ao abrir $($target.RelativePath)." }
+            if (-not (Test-Path -LiteralPath $domPath) -or (Get-Item -LiteralPath $domPath).Length -lt 500) {
+              throw "DOM vazio ou incompleto em $($target.RelativePath)."
+            }
+            $dom = Get-Content -Raw $domPath
+            foreach ($required in $target.Required) {
+              if (-not $dom.Contains($required)) { throw "Smoke test mobile falhou em $($target.RelativePath); marcador ausente: $required" }
+            }
+            if ($dom.Contains("Nao foi possivel abrir a versao unificada")) { throw "O Creator exibiu tela de erro no navegador." }
+            "BROWSER_MOBILE_SMOKE_OK: $($target.Name)" | Add-Content -Encoding UTF8 $logPath
+            Remove-Item -LiteralPath $domPath -Force -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $profile -Recurse -Force -ErrorAction SilentlyContinue
+          }
       - name: Verificar sintaxe do build Python quando disponivel
         run: |
           $ErrorActionPreference = "Stop"
@@ -195,26 +217,48 @@ jobs:
         run: |
           node tests/creator-bridge.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/creator-bridge.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Testar runtime Godot 4 quando instalado
+      - name: Testar runtime Godot 4 (instalacao portatil verificada)
         run: |
           $ErrorActionPreference = "Stop"
           $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
-          $godot = Get-Command godot -ErrorAction SilentlyContinue
-          if (-not $godot) { $godot = Get-Command godot4 -ErrorAction SilentlyContinue }
-          if (-not $godot) {
-            "GODOT_RUNTIME_NOT_INSTALLED: teste GDScript nao executado neste runner." | Set-Content -Encoding UTF8 (Join-Path $diagDir "godot-runtime.log")
-            Write-Warning "Godot 4 nao encontrado. O contrato esta coberto pelo teste Node; o runtime GDScript fica registrado como nao testado."
-            return
+          $logPath = Join-Path $diagDir "godot-runtime.log"
+          $godotExe = $null
+          foreach ($commandName in @("godot", "godot4")) {
+            $candidate = Get-Command $commandName -ErrorAction SilentlyContinue
+            if ($candidate) {
+              $candidateVersion = (& $candidate.Source --version 2>&1 | Out-String).Trim()
+              if ($candidateVersion -match '^4\.') { $godotExe = $candidate.Source; break }
+            }
           }
-          $version = & $godot.Source --version 2>&1
-          $versionCode = $LASTEXITCODE
-          $versionText = ($version | Out-String).Trim()
-          $versionText | Set-Content -Encoding UTF8 (Join-Path $diagDir "godot-runtime.log")
-          if ($versionCode -ne 0) { throw "Nao foi possivel consultar a versao do Godot." }
-          if ($versionText -notmatch '^4\.') { throw "Godot 4 necessario; encontrado: $versionText" }
-          & $godot.Source --headless --path (Join-Path $env:GITHUB_WORKSPACE "integracao/godot") --script res://tests/test_catalogo.gd 2>&1 | Tee-Object -FilePath (Join-Path $diagDir "godot-runtime.log") -Append
+          if (-not $godotExe) {
+            $version = "4.7.2-stable"
+            $archiveName = "Godot_v4.7.2-stable_win64.exe.zip"
+            $archivePath = Join-Path $env:RUNNER_TEMP $archiveName
+            $installDir = Join-Path $env:RUNNER_TEMP "apoena-godot-4.7.2"
+            $url = "https://github.com/godotengine/godot/releases/download/4.7.2-stable/$archiveName"
+            $expectedHash = "731980f9608d61333e5baf54a2ef17210acc7a538446c0cb9969f002aca1e953"
+            $ProgressPreference = "SilentlyContinue"
+            Invoke-WebRequest -Uri $url -OutFile $archivePath -UseBasicParsing
+            $actualHash = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actualHash -ne $expectedHash) { throw "SHA256 do pacote Godot nao confere. Esperado: $expectedHash; recebido: $actualHash" }
+            if (Test-Path -LiteralPath $installDir) { Remove-Item -LiteralPath $installDir -Recurse -Force }
+            Expand-Archive -LiteralPath $archivePath -DestinationPath $installDir -Force
+            $godotExe = Join-Path $installDir "Godot_v4.7.2-stable_win64.exe"
+            if (-not (Test-Path -LiteralPath $godotExe)) { throw "Executavel Godot nao encontrado apos extracao: $godotExe" }
+            "Godot baixado da origem oficial; versao=$version; SHA256=$actualHash" | Set-Content -Encoding UTF8 $logPath
+          }
+          $versionOutput = (& $godotExe --version 2>&1 | Out-String).Trim()
+          if ($versionOutput -notmatch '^4\.') { throw "Godot 4 necessario; encontrado: $versionOutput" }
+          "Runtime: $godotExe | Versao: $versionOutput" | Add-Content -Encoding UTF8 $logPath
+          $projectPath = Join-Path $env:GITHUB_WORKSPACE "integracao/godot"
+          $testPath = Join-Path $projectPath "tests/test_catalogo.gd"
+          if (-not (Test-Path -LiteralPath $testPath)) { throw "Teste GDScript ausente: $testPath" }
+          & $godotExe --headless --path $projectPath --script res://tests/test_catalogo.gd 2>&1 | Tee-Object -FilePath $logPath -Append
           $godotCode = $LASTEXITCODE
-          if ($godotCode -ne 0) { throw "Teste Godot falhou com codigo $godotCode." }
+          if ($godotCode -ne 0) { throw "Teste de runtime Godot falhou com codigo $godotCode. Consulte .ci-results/godot-runtime.log." }
+          $godotLog = Get-Content -Raw $logPath
+          if (-not $godotLog.Contains("GODOT CATALOG TEST OK")) { throw "Godot terminou sem confirmar a suite de catalogo." }
+          "GODOT_RUNTIME_TEST_OK" | Add-Content -Encoding UTF8 $logPath
       - name: Garantir preservacao do Creator original e dos modulos
         run: |
           $required = @(
