@@ -25,6 +25,17 @@ const mount = World.normalizeBehavior({
 });
 assert.equal(World.validateBehavior(mount).valid, true);
 
+const merchant = World.normalizeBehavior({
+  category: 'npc',
+  interaction: 'trade',
+  npc: { profession: 'merchant', routine: [{ hour: 8, activity: 'open_shop', locationId: 'loja-ferreiro' }] },
+  economy: { role: 'both', priceModifier: 1.2, buyItemIds: ['madeira'], sellItemIds: ['espada_ferro'] }
+});
+assert.equal(merchant.npc.profession, 'merchant');
+assert.equal(merchant.npc.routine[0].hour, 8);
+assert.equal(merchant.economy.buyItemIds[0], 'madeira');
+assert.equal(World.validateBehavior(merchant).valid, true);
+
 const missingResource = World.validateBehavior({
   category: 'resource',
   interaction: 'collect',
