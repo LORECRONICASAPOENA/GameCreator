@@ -369,14 +369,14 @@
     const season = String(weather.estacao || weather.season || 'summer').toLowerCase();
     const temperature = Number.isFinite(Number(weather.temperatura ?? weather.temperature)) ? Number(weather.temperatura ?? weather.temperature) : 25;
     const rainfall = Number.isFinite(Number(weather.rainfall)) ? Math.max(0, Math.min(2, Number(weather.rainfall))) :
-      rainName === 'Tempestade' || rainName === 'storm' ? 1.35 :
-      rainName === 'Chuva' || rainName === 'rain' ? 0.82 : 0;
+      rainName === 'Tempestade' || rainName === 'storm' ? 0.31 :
+      rainName === 'Chuva' || rainName === 'rain' ? 0.18 : 0;
     const count = sim.width * sim.height;
     while (remaining > 0.000001) {
-      const dt = Math.min(0.1, remaining);
+      const dt = Math.min(0.2, remaining);
       remaining -= dt;
-      const deltaWater = new Array(count).fill(0);
-      const outgoing = new Array(count).fill(0);
+      const deltaWater = new Float32Array(count);
+      const outgoing = new Float32Array(count);
       for (let i = 0; i < count; i++) {
         const profile = sim.profiles[i] || defaultHydrology();
         const permeability = profile.permeability;
