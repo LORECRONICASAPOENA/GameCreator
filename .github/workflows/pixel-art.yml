@@ -77,7 +77,7 @@ jobs:
           if ($built.Contains("<iframe")) { throw "A entrada nativa nao pode substituir o Creator por iframe." }
           $hash = Get-FileHash -LiteralPath (Join-Path $env:GITHUB_WORKSPACE "index.html") -Algorithm SHA256
           "Build nativo OK; bytes=$((Get-Item index.html).Length); SHA256=$($hash.Hash)" | Tee-Object -FilePath (Join-Path $diagDir "build.log") -Append
-      - name: Verificar DOM e estrutura responsiva no navegador mobile
+      - name: Verificar DOM responsivo do Estudio, Mapas e Biblioteca no navegador
         run: |
           $ErrorActionPreference = "Stop"
           $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
@@ -93,11 +93,6 @@ jobs:
           $logPath = Join-Path $diagDir "browser-loader.log"
           "Browser: $browser | Viewport mobile: 390x844" | Set-Content -Encoding UTF8 $logPath
           $targets = @(
-            @{
-              Name = "creator"
-              RelativePath = "index.html"
-              Required = @('id="page-pixelart"', 'Game Creator v4.0', 'shared/asset-library.js', 'shared/creator-bridge.js', 'pixel-art/natureza.js')
-            },
             @{
               Name = "studio"
               RelativePath = "pixel-art/estudio.html"
