@@ -110,6 +110,7 @@ test("Simula chuva, escoamento, acúmulo e erosão sem valores inválidos",()=>{
   assert.ok(sim.soilMoisture.every(v=>Number.isFinite(v)&&v>=0&&v<=1),"a umidade deve permanecer normalizada");
   assert.ok(sim.elevation.some((v,i)=>v<sim.originalElevation[i]),"o fluxo deve erodir ao menos uma célula vulnerável");
   assert.ok(T.hydrologyStats(sim).puddles>0,"o sistema deve identificar poças fora das fontes permanentes");
+  assert.ok(T.hydrologyStats(sim).wetCells>0,"chuva recorrente deve elevar a umidade do solo");
 });
 test("Mapas antigos recebem os perfis ambientais padrão",()=>{
   const prepared=T.prepareMap({schema:"apoena.map2d.v1",width:16,height:16,tiles:Array(256).fill(0)});
