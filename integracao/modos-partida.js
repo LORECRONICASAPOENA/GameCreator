@@ -177,6 +177,8 @@
     if(lobby.botsEnabled)fillWithBots(lobby);
     const incomplete=lobby.teams.find(team=>team.players.length!==lobby.playersPerTeam);
     if(incomplete)throw Error("Equipe incompleta: "+incomplete.name);
+    const unselected=listPlayers(lobby).find(player=>!player.championId);
+    if(unselected)throw Error("Jogador sem campeão selecionado: "+unselected.id);
     lobby.status="in_progress";
     return lobby;
   }
