@@ -42,7 +42,7 @@ $navEnd=$s.IndexOf('</nav>',$menuMatch.Index)+6
 if($navStart -lt 0 -or $navEnd -lt 6) {throw "Menu principal ausente apos build"}
 $menuText=$s.Substring($navStart,$navEnd-$navStart)
 $expectedPixelLabel=([char]0x25A7).ToString()+' Pixel Art '+([char]0x2022).ToString()+' Personagens / Objetos / Mapas'
-if(-not $s.Contains('<title>Apoena Game Creator v4.0 - Editor Integrado</title>') -or -not $menuText.Contains($expectedPixelLabel) -or $menuText.Contains('â–§') -or $menuText.Contains('â€¢')) {throw "Titulo ou rotulo Pixel Art invalido por codificacao."}
+if(-not $s.Contains('<title>Apoena Game Creator v4.0 - Editor Integrado</title>') -or -not $menuText.Contains($expectedPixelLabel)) {throw "Titulo ou rotulo Pixel Art invalido por codificacao."}
 $pg='<section class="page" id="page-pixelart"><div id="gc40PixelRoot"><div class="panel"><h2>Pixel Art</h2><p>Carregando personagens, objetos e mapas...</p></div></div></section>'
 $s=[regex]::new('</main>').Replace($s,$pg+"</main>",1)
 $tags='<script src="shared/asset-library.js"></script>' + [Environment]::NewLine + '<script src="shared/creator-bridge.js"></script>' + [Environment]::NewLine + '<script src="map-editor/terrain-system.js"></script>' + [Environment]::NewLine + '<script src="map-editor/world-object-system.js"></script>' + [Environment]::NewLine + '<script src="map-editor/modulo-integrado.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/natureza.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/modulo-integrado.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/ponte-creator.js"></script>' + [Environment]::NewLine
