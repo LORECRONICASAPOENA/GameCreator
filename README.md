@@ -52,3 +52,10 @@ Os efeitos de clima, combate, inventário e produção precisam de adaptadores/r
 A aba **Pixel Art → Natureza / Plantas** registra espécies, necessidades do solo, germinação, reprodução, vida, decomposição e 14 PNGs separados (semente, muda, planta adulta, fruto, tronco, pó). Permite importar PNG, verificar transparência, baixar PNG com nomes estáveis e exportar ficha JSON `apoena.natureza.asset.v1`. Não é um segundo gerador e não altera a biblioteca de itens nem a ferramenta 3D. Consulte `pixel-art/NATUREZA_CONTRATO.md`.
 
 **Importante:** o GameCreator não gera automaticamente as ilustrações; a pessoa produz as imagens e as cadastra. Para abrir como aba do editor principal é preciso recompilar a versão v4.0 com `integracao/build_unificado.py` ou `.ps1`; abrir `pixel-art/index.html` oferece a aba local imediatamente.
+
+## Plano geral e fundação de mapas
+
+O plano consolidado de História, Exploração Livre, MOBA, ecossistema, NPCs, economia, desempenho mobile e integração com Godot está em [PLANO_GERAL_APOENA.md](PLANO_GERAL_APOENA.md).
+
+A implementação incremental da base de terrenos está sendo preparada na branch feat/apoena-world-foundation. Ela adiciona catálogo de terreno, propriedades por tile, perfis de mapa, variantes de autotile e validação. Esses dados são a fundação do editor; simulação ecológica, economia e comportamento de NPCs ainda exigem implementação e testes no runtime do jogo.
+
