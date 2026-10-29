@@ -29,19 +29,29 @@ jobs:
           persist-credentials: true
       - name: Montar ou validar bundle v4.0
         run: .\integracao\build_unificado.ps1
-      - name: Conferir loader e módulos do bundle
+      - name: Conferir editor integrado ou loader em bundle
         run: |
-          $loader = Get-Content .\index.html -Raw
-          $part = Get-Content .\bundle-v4\parte_023.js -Raw
-          $parts = (Get-ChildItem .\bundle-v4\parte_*.js).Count
-          if ($parts -ne 24) { throw "O bundle v4.0 precisa conter 24 partes; encontrado: $parts." }
-          if (-not $loader.Contains('bundle-v4/parte_023.js')) { throw "O loader não referencia a última parte do bundle." }
-          if (-not $loader.Contains('full.length!==16324808')) { throw "O tamanho de integridade do bundle está desatualizado." }
-          foreach ($module in @('map-editor/terrain-system.js','map-editor/world-object-system.js','map-editor/modulo-integrado.js','pixel-art/natureza.js','pixel-art/modulo-integrado.js','pixel-art/ponte-creator.js')) {
-            if (-not $part.Contains($module)) { throw "Módulo não incluído no bundle: $module" }
-            if (-not (Test-Path (Join-Path (Get-Location) $module))) { throw "Arquivo de módulo ausente: $module" }
+          $html = Get-Content .\index.html -Raw
+          if ($html.Contains('bundle-v4/parte_023.js')) {
+            $part = Get-Content .\bundle-v4\parte_023.js -Raw
+            $parts = (Get-ChildItem .\bundle-v4\parte_*.js).Count
+            if ($parts -ne 24) { throw "O bundle v4.0 precisa conter 24 partes; encontrado: $parts." }
+            if (-not $html.Contains('full.length!==16324808')) { throw "O tamanho de integridade do bundle está desatualizado." }
+            foreach ($module in @('map-editor/terrain-system.js','map-editor/world-object-system.js','map-editor/modulo-integrado.js','pixel-art/natureza.js','pixel-art/modulo-integrado.js','pixel-art/ponte-creator.js')) {
+              if (-not $part.Contains($module)) { throw "Módulo não incluído no bundle: $module" }
+              if (-not (Test-Path (Join-Path (Get-Location) $module))) { throw "Arquivo de módulo ausente: $module" }
+            }
+            Write-Host "Loader, 24 partes e módulos validados."
+          } else {
+            if ([regex]::Matches($html, 'id="page-pixelart"').Count -ne 1) { throw "A aba Pixel Art deve aparecer exatamente uma vez." }
+            if ([regex]::Matches($html, 'data-page="pixelart"').Count -ne 1) { throw "O botão da aba Pixel Art deve aparecer exatamente uma vez." }
+            if ($html.Contains('<iframe')) { throw "O editor integrado não pode usar iframe." }
+            if (-not $html.Contains('<script src="map-editor/terrain-system.js"></script>')) { throw "Módulo de terrenos ausente no build." }
+            if (-not $html.Contains('<script src="map-editor/world-object-system.js"></script>')) { throw "Módulo de objetos ausente no build." }
+            if (-not $html.Contains('id="page-layouts"') -or -not $html.Contains('id="page-recipes"')) { throw "As abas originais do Creator precisam ser preservadas." }
+            if (-not $html.Contains('ApoenaBancada40')) { throw "A bancada original do Creator não foi preservada." }
+            Write-Host "Editor integrado e módulos de terreno/objetos validados."
           }
-          Write-Host "Loader, 24 partes e módulos de terreno/objetos validados."
       - name: Publicar somente se houver alteração
         run: |
           git diff --quiet -- index.html
