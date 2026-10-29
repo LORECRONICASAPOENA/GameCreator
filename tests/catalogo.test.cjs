@@ -58,7 +58,7 @@ const html = fs.readFileSync(path.join(root, "integracao/index.html"), "utf8");
 const inlineScripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(match => match[1]);
 assert.ok(inlineScripts.length > 0, "interface de integração tem script inline");
 for (const script of inlineScripts) assert.doesNotThrow(() => new Function(script), "script da interface de integração é sintaticamente válido");
-assert.ok(html.includes("catalogo.js") && html.includes("ApoenaCatalogo.portable"), "interface exporta o catálogo validado para jogos");
+assert.ok(html.includes("catalogo.js") && html.includes("A=window.ApoenaCatalogo") && html.includes("A.portable(source"), "interface exporta o catálogo validado para jogos");
 
 const gd = fs.readFileSync(path.join(root, "integracao/godot/ApoenaCatalogo.gd"), "utf8");
 assert.ok(gd.includes('const SCHEMA: String = "apoena.gamecreator.catalogo.v1"'), "Godot consome o mesmo schema exportado");
