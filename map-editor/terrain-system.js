@@ -11,10 +11,39 @@
   const COLLISIONS = new Set(['walkable', 'blocked', 'conditional', 'none']);
   const MAP_TYPES = new Set(['story', 'exploration', 'moba']);
 
+  function defaultEnvironment() {
+    return {
+      enabled: false, waterMin: 0.25, nutrientMin: 0.2, lightMin: 0.2,
+      tempMin: -10, tempMax: 50, healthyVariant: null, dryVariant: null,
+      recovery: 'gradual'
+    };
+  }
+
+  function normalizeEnvironment(source) {
+    const input = source && typeof source === 'object' ? source : {};
+    const number = (value, fallback, min, max) => {
+      const n = Number(value);
+      return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
+    };
+    const variant = value => value === null || value === undefined || value === '' ? null :
+      (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) < 1024 ? Number(value) : null);
+    return {
+      enabled: input.enabled === true,
+      waterMin: number(input.waterMin, 0.25, 0, 1),
+      nutrientMin: number(input.nutrientMin, 0.2, 0, 1),
+      lightMin: number(input.lightMin, 0.2, 0, 1),
+      tempMin: number(input.tempMin, -10, -50, 70),
+      tempMax: number(input.tempMax, 50, -50, 70),
+      healthyVariant: variant(input.healthyVariant),
+      dryVariant: variant(input.dryVariant),
+      recovery: input.recovery === 'immediate' ? 'immediate' : 'gradual'
+    };
+  }
+
   function defaultTile(name, role, connectGroup, collision, height, tags) {
     return {
       name, role, connectGroup, collision, height,
-      tags: tags || [], autotile: false, variants: {}
+      tags: tags || [], autotile: false, variants: {}, environment: defaultEnvironment()
     };
   }
 
@@ -56,7 +85,8 @@
       height: Number.isFinite(Number(input.height)) ? Math.max(0, Math.min(16, Math.round(Number(input.height)))) : 0,
       tags,
       autotile: input.autotile === true,
-      variants
+      variants,
+      environment: normalizeEnvironment(input.environment)
     };
   }
 
@@ -146,6 +176,17 @@
       if (!COLLISIONS.has(value.collision)) errors.push('Colisão inválida em ' + key + '.');
       if (!Number.isInteger(value.height) || value.height < 0 || value.height > 16) errors.push('Altura lógica inválida em ' + key + '.');
       if (value.autotile && !value.connectGroup) warnings.push(key + ' está com autotile ligado, mas sem grupo de conexão.');
+      if (value.environment !== undefined) {
+        const env = value.environment;
+        if (!env || typeof env !== 'object' || typeof env.enabled !== 'boolean') errors.push('Perfil ambiental inválido em ' + key + '.');
+        else {
+          for (const field of ['waterMin', 'nutrientMin', 'lightMin']) {
+            if (!Number.isFinite(Number(env[field])) || Number(env[field]) < 0 || Number(env[field]) > 1) errors.push('Limite ambiental ' + field + ' inválido em ' + key + '.');
+          }
+          if (!Number.isFinite(Number(env.tempMin)) || !Number.isFinite(Number(env.tempMax)) || Number(env.tempMin) > Number(env.tempMax)) errors.push('Faixa de temperatura inválida em ' + key + '.');
+          if (env.enabled && (env.healthyVariant === null || env.dryVariant === null)) warnings.push(key + ' reage ao ambiente, mas ainda não tem variante saudável e seca configuradas.');
+        }
+      }
       if (value.variants && typeof value.variants === 'object') {
         for (const [mask, tile] of Object.entries(value.variants)) {
           if (!/^(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/.test(mask) ||
@@ -199,7 +240,7 @@
 
   const api = Object.freeze({
     SCHEMA, MAP_SCHEMA, MAP_TYPES: Object.freeze(Array.from(MAP_TYPES)),
-    createDefaultCatalog, normalizeCatalog, normalizeDefinition, keyForCell,
+    createDefaultCatalog, normalizeCatalog, normalizeDefinition, normalizeEnvironment, keyForCell,
     getTileDefinition, definitionForCell, connectivityMask, resolveVariant,
     validateCatalog, validateMap, prepareMap
   });
