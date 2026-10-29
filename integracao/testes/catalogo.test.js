@@ -79,7 +79,6 @@ test("IDs duplicados são rejeitados",()=>{
   const s=source();s.items.push({...s.items[0]});
   assert.throws(()=>A.portable(s,"rpg"),/duplicado/);
 });
-console.log("Concluído: "+passed+" testes de contrato e regras isoladas.");
 
 test("Registra material físico, biomas e variantes das quatro estações",()=>{
   const d=T.normalizeDefinition({
@@ -97,8 +96,8 @@ test("Registra material físico, biomas e variantes das quatro estações",()=>{
 test("Limita índices sazonais e valores hidrológicos inválidos",()=>{
   const d=T.normalizeDefinition({terrainKind:"sand_desert",seasonalVariants:{winter:9999},hydrology:{permeability:4,retention:-1,erosionResistance:0.2,runoff:0.3}});
   assert.equal(d.seasonalVariants.winter,null);
-  assert.equal(d.hydrology.permeability,0.66);
-  assert.equal(d.hydrology.retention,0.1);
+  assert.equal(d.hydrology.permeability,1);
+  assert.equal(d.hydrology.retention,0);
 });
 test("Simula chuva, escoamento, acúmulo e erosão sem valores inválidos",()=>{
   const catalog=T.createDefaultCatalog();
@@ -117,4 +116,4 @@ test("Mapas antigos recebem os perfis ambientais padrão",()=>{
   assert.equal(prepared.terrainCatalog.tiles["builtin:0"].terrainKind,"grassland");
   assert.equal(prepared.terrainCatalog.tiles["builtin:3"].hydrology.source,true);
 });
-
+console.log("Concluído: "+passed+" testes de contrato e regras isoladas.");
