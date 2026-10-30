@@ -162,3 +162,13 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - Usar concorrência por branch e cancelar somente execuções obsoletas da mesma branch.
 - Manter uma validação principal por projeto, mais workflows de publicação que tenham finalidade própria.
 - Não fechar PR nem apagar arquivo de protótipo sem comparar os arquivos exclusivos e decidir o que será preservado.
+
+
+## GC-UPDATE-009 — distribuição enxuta do runtime (registro da auditoria)
+
+- **Estado:** EM VALIDAÇÃO; implementação na [PR #7](https://github.com/apoenalore/GameCreator/pull/7), ainda não integrada à `main`.
+- **Objetivo:** manter documentos internos no repositório privado e materializar somente o manifesto de runtime na pasta `APP`.
+- **Evidência atual:** o teste de contrato do manifesto passou no run [41082083233](https://github.com/apoenalore/GameCreator/actions/runs/41082083233), commit `3233e739474b993bb33a4f5c685753591c714ba3`. O run geral falhou nas etapas de artefatos; causa específica não confirmada.
+- **Bloqueios/pendências:** branch da PR divergente de `main`; revisão e sincronização pendentes; instalação/atualização real em Windows ainda não testada; preservação da biblioteca IndexedDB precisa de validação humana.
+- **Documentação:** [auditoria de distribuição enxuta](AUDITORIA_DISTRIBUICAO_RUNTIME_2026-10-30.md) e [atualizações pendentes](ATUALIZACOES_PENDENTES_LEIA_ANTES_DE_COMECAR.md).
+- **Regra:** não marcar concluída, não publicar o pacote e não iniciar outra tarefa até satisfazer os critérios da auditoria.
