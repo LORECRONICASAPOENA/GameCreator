@@ -218,7 +218,7 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - **Pixel Art main:** [run #41058053263](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/41058053263), SHA \`cff1930b59d8\`, success.
 - **Pixel Art PR #5 (clima/hidrologia):** [run #40995729054](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40995729054), SHA \`1507108e14dc51a33152af57ef5137571b0363d2\`, success.
 - **Pixel Art PR #4 (laboratório):** [run #40995732520](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40995732520), SHA \`413120bcc34aca9265a3d71e999bdac9760814fd\`, success.
-- Consulta de todas as páginas disponíveis após a validação: GameCreator **361 execuções históricas**, Pixel Art **92**; ambos com **0 queued e 0 in_progress**. A execução de empacotamento #41079295445 também concluiu com success.
+- **Fila atual (15:35 UTC):** GameCreator tem 3 jobs aguardando atribuição (#41081796048 main, #41082083233 atualizador, #41081917796 branch ambiental), sem job `in_progress` e sem executor atribuído nos detalhes dos jobs. O runner executou #41079295445 com sucesso às 15:17 UTC, portanto a disponibilidade voltou a oscilar. Pixel Art não apresenta fila pendente na consulta mais recente.
 
 ### Erros classificados e situação
 - **GC-CI-010 — build antes dos testes:** correção de ordem validada novamente pelo run #41075044875.
@@ -228,10 +228,10 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - **Pixel PA-GODOT-001 — erros de parser GDScript:** erros antigos de escopo e chamadas \`minf()\` inválidas corrigidos; run #40995729054 passou nos testes de clima, ecossistema e hidrologia Godot.
 
 ### Pull Requests — não confundir CI aprovado com integração
-- **GameCreator #7:** draft, mergeable/clean; continua como WIP 1 GC-UPDATE-009. Falta teste específico do atualizador e teste real seguro na instalação Windows do autor.
-- **GameCreator #6:** aberta, não draft, `mergeable=false/dirty`; head atual `907ae25d81ff3e0ba3ecffc5927a4b7970259f20`. Comparação atual com main: 46 commits à frente e 59 atrás. O código ambiental teve CI aprovado no SHA anterior `b90be364...`; o head atual contém commits posteriores de documentação/workflow e ainda não tem CI associado. Resolver a divergência e validar o head atual antes de integrar.
+- **GameCreator #7:** draft, head atual `3233e739474b993bb33a4f5c685753591c714ba3`, 13 commits à frente e 19 atrás; `mergeable=false/dirty` após sincronização do workflow canônico. O CI #41064201715 passou apenas no head anterior `546aafba...`; o commit `a27b1b...` foi marcado `[skip ci]`. Foi adicionado o teste estático `tests/atualizador-manifest.test.cjs`; o run atual #41082083233 está pendente de executor. Continua como WIP 1 GC-UPDATE-009.
+- **GameCreator #6:** aberta, não draft, `mergeable=false/dirty`; head atual `80b77e44723d33a469c81bda5687938edbdaae60`. Comparação atual com main: 47 commits à frente e 62 atrás. O workflow foi sincronizado com main; permanecem conflitos potenciais em `AGENTS.md` e `README.md`. O código ambiental teve CI aprovado no SHA anterior `b90be364...`; o head atual ainda não tem CI associado. O run #41081917796 aguarda runner.
 - **GameCreator #5:** draft, mergeable/clean; CI aprovado no head consultado. Manter o laboratório até comparar e preservar seus recursos exclusivos.
-- **GameCreator #4:** draft, `mergeable=false/dirty`; 11 commits à frente e 71 atrás de main; conflitos potenciais em `.github/workflows/testar-integracao.yml`, `README.md` e `pixel-art/ponte-creator.js`. Sem CI no head atual. Não integrar antes de sincronizar, validar e preservar os contratos de sessão.
+- **GameCreator #4:** draft, `mergeable=false/dirty`; 11 commits à frente e 74 atrás de main; conflitos potenciais em `.github/workflows/testar-integracao.yml`, `README.md` e `pixel-art/ponte-creator.js`. Sem CI no head atual. Não integrar antes de sincronizar, validar e preservar os contratos de sessão.
 - **Pixel Art #5 e #4:** mergeable/clean e testes aprovados nos SHAs indicados; continuam abertas até revisão e decisão de consolidação.
 - **Pixel Art #3:** draft, mergeable/clean; validação anterior #40961954483 passou, mas LAN em dois dispositivos e gameplay real continuam pendentes.
 - **Pixel Art #6:** documental, `mergeable=false/dirty`, 5 commits à frente e 7 atrás de main; há alterações sobrepostas em `AGENTS.md`, `docs/BASE_CONHECIMENTO_ERROS_RUNNER_CI.md` e `docs/PROTOCOLO_TRABALHO_SEQUENCIAL.md`. Resolver conflitos documentais antes de integrar; não declarar a documentação disponível na main.
@@ -245,6 +245,13 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - **Inspeção independente do ZIP:** nenhum diretório `docs`, `tests`, `testes`, `.github`, `historico` ou `legacy`; nenhum `.md`, `.txt` ou `package.json`. Launcher, fonte V4.0, loader, bundle, biblioteca, editor de mapas, integração e módulos Pixel Art necessários estão presentes. SHA-256 do ZIP interno: `7a061059a7d027c45e32ce11fd78c48fd5bdf9a0b0c05e069802cb6c1d3dfda7`.
 - O ZIP interno tem 36.047.579 bytes; o artefato anterior tinha 119.780.985 bytes. O artefato novo tem 71.896.589 bytes (pasta de runtime + ZIP + metadados), redução de 39,98% no download do artefato. Os documentos internos não foram apagados do GitHub.
 
+
+### Follow-up GC-PACK-002 — preservar dependência da fábrica original
+- A inspeção da página `integracao/index.html` mostrou que ela aponta para `legacy/abrir-editor-v3.9.html`, que carrega 23 scripts em `legacy/v3_9_parts/parte_000.js` a `parte_022.js`. A página integrada também depende de `integracao/catalogo.js` e é aberta por `pixel-art/modulo-integrado.js`.
+- O primeiro ZIP (#41079295445) excluiu toda a pasta `legacy`; embora estivesse limpo de documentos, deixava quebrado o acesso à fábrica original. O manifesto do atualizador também não incluía `integracao/index.html` nem `integracao/catalogo.js`.
+- Correções aplicadas: empacotador main commit `1561a0d08b26177596fafbf21102b739aa4a2b76`; manifesto do atualizador commit `184102a9317c687485da55bc34ef0f50d5352601`; teste estático commit `c155207db4a61ce2766ebcbd5dc1a59604c5afee`; workflow de teste condicional main commit `65db2b62cc9750f50a3cc595c80466b6344fbc94`.
+- O pacote agora preserva somente `legacy/abrir-editor-v3.9.html` e as 23 partes JS, excluindo `legacy/iniciador-anterior.html` e o restante do conteúdo antigo. O atualizador também inclui `integracao/index.html` e `integracao/catalogo.js`.
+- **Validação pendente:** main [#41081796048](https://github.com/apoenalore/GameCreator/actions/runs/41081796048), atualizador [#41082083233](https://github.com/apoenalore/GameCreator/actions/runs/41082083233) e branch ambiental [#41081917796](https://github.com/apoenalore/GameCreator/actions/runs/41081917796) aguardam atribuição de runner. Não considerar GC-PACK-002 concluído até o CI passar e o ZIP final ser inspecionado.
 ### Próximos passos, mantendo WIP = 1
 1. Resolver a divergência da PR #6 ambiental e obter CI no head atual; não fazer merge automático.
 2. Manter GC-UPDATE-009 como única tarefa de implementação ativa; não iniciar UX, sessão online ou novas funcionalidades até fechar os critérios do atualizador.
