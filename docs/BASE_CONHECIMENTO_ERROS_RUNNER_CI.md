@@ -445,17 +445,30 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - **Validação do atualizador:** o step 17 do run [#41082083233](https://github.com/apoenalore/GameCreator/actions/runs/41082083233) passou (parser PowerShell e teste estático do manifesto); o job ainda está no step 22 de publicação do artefato. O teste real de clone/fast-forward e preservação local continua pendente.
 
 
-### GC-UPDATE-TEST-001 — Falso negativo na assertion de ordem do guard sparse-checkout
+
+
+### GC-UPDATE-TEST-001 — CRLF não normalizado no teste de contrato
 
 - **Projeto/repositório:** Game Creator — apoenalore/GameCreator.
 - **Data/hora da ocorrência:** 30/10/2026 16:18:02 -03:00 (19:18:02Z).
-- **Data/hora do registro:** 30/10/2026 16:22 -03:00.
+- **Data/hora do registro/correção:** 30/10/2026 16:27 -03:00.
 - **Run/job:** [41113920551](https://github.com/apoenalore/GameCreator/actions/runs/41113920551) / 124263385696.
 - **Commit testado:** df105063a13536c0b3e56296c94e405cd7ce5a04.
 - **Workflow/step:** pixel-art.yml — step 17, “Validar manifesto do atualizador Windows quando presente”.
 - **Erro literal:** AssertionError: Arquivos locais fora do runtime precisam ser verificados antes de alterar o sparse-checkout.
-- **Causa raiz comprovada:** o teste Node usava indexOf("sparse-checkout set --no-cone"), que encontrava primeiro a ocorrência em comentário/documentação do script, anterior à chamada real. A assertion comparava posições erradas e falhava mesmo com a chamada de proteção no local correto.
-- **Correção aplicada:** a busca agora identifica a linha executável completa "& $git.Source -C $Destino sparse-checkout set --no-cone", comparando-a com a chamada efetiva do guard. Commit de correção: 8bbe3d7379b43da5c98c18bd1165e2d8d114a267 na branch de trabalho.
-- **Evidência:** logs do run 41113920551 mostram que o step 17 foi o único step de validação que falhou; etapas anteriores e preparação/upload do pacote concluíram. O teste PowerShell real ainda não foi alcançado nesse run.
-- **Resultado:** CORREÇÃO DE TESTE APLICADA / AGUARDANDO NOVA CI.
-- **Prevenção:** assertions de ordem devem procurar a linha executável completa, não uma substring que também possa aparecer em comentário ou documentação.
+- **Causa raiz comprovada:** o checkout Windows entregou o arquivo PowerShell com CRLF, mas o teste Node procurava sequências com LF usando indexOf. A busca retornou -1 e a assertion falhou. A hipótese anterior de que a primeira ocorrência era um comentário estava incompleta; a causa que explica o comportamento no runner é a diferença de quebras de linha.
+- **Correção aplicada:** a função read do teste normaliza CRLF para LF antes das buscas; a posição do sparse-checkout também aponta para a linha executável completa. Commits de correção do teste: 65c65521b0fb1595215bd70da03c4ef7b898032d e 8bbe3d7379b43da5c98c18bd1165e2d8d114a267.
+- **Evidência adicional:** o teste foi ampliado para executar o PowerShell real contra repositório Git temporário. A CI do commit 68c63b0b16b434a3482d9e44aa9824f8a27676dc ainda estava em andamento no momento deste registro; o resultado do teste end-to-end não foi presumido.
+- **Resultado:** CORREÇÃO DE TESTE APLICADA / NOVA CI PENDENTE.
+- **Prevenção:** normalizar CRLF/LF em testes Node que inspecionam scripts PowerShell e localizar linhas executáveis completas, não substrings ambíguas.
+
+
+### GC-UPDATE-RECOVERY-001 — Retomada de clone inicial interrompido antes do checkout
+
+- **Projeto/repositório:** Game Creator — apoenalore/GameCreator.
+- **Data/hora do achado:** 30/10/2026 16:26 -03:00.
+- **Fonte:** revisão CodeRabbit da PR #7 e reprodução de clone com --no-checkout.
+- **Condição:** se a primeira execução parar após o clone sem checkout e antes de read-tree, uma nova execução encontra .git e $novoClone=false. O status do Git apresenta arquivos rastreados ausentes; tratá-los como edição local bloquearia a recuperação.
+- **Correção aplicada:** marcador clone-pendente.txt em ConfigDir, gravado antes do clone e associado ao destino absoluto. Na retomada, o script só aceita estado rastreado composto por arquivos ausentes (status “ D”); alterações rastreadas reais bloqueiam. Após checkout concluído, o marcador é removido. Se o worktree já estiver limpo, o marcador antigo é removido e a execução segue como atualização normal.
+- **Teste previsto/aplicado:** o teste Node cria clone temporário com --no-checkout, confirma o estado “ D”, grava o marcador e executa o atualizador PowerShell real para materializar os arquivos e remover o marcador.
+- **Estado:** IMPLEMENTADO NA BRANCH / AGUARDANDO CI WINDOWS.
