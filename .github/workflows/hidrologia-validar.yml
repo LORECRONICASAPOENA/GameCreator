@@ -22,6 +22,9 @@ jobs:
   testar-hidrologia:
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 12
+    defaults:
+      run:
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,14 +35,12 @@ jobs:
         with:
           node-version: '20'
       - name: Verificar sintaxe
-        shell: powershell
         run: |
           node --check map-editor/hidrologia-core.js
           if ($LASTEXITCODE -ne 0) { throw "Erro de sintaxe no motor hidrológico." }
           node --check tests/hidrologia.test.cjs
           if ($LASTEXITCODE -ne 0) { throw "Erro de sintaxe no teste hidrológico." }
       - name: Testar chuva, bacias, erosão e persistência
-        shell: powershell
         run: |
           node tests/hidrologia.test.cjs
           if ($LASTEXITCODE -ne 0) { throw "Testes do motor hidrológico falharam." }
