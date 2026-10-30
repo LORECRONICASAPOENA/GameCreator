@@ -20,6 +20,8 @@ on:
       - "package.json"
       - "README.md"
       - "ORGANIZACAO_EDITOR.md"
+      - "AGENTS.md"
+      - "docs/**"
       - ".github/workflows/pixel-art.yml"
   schedule:
     - cron: "17 6 * * *"
