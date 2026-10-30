@@ -114,3 +114,9 @@ O teste executa primeira instalação, verifica arquivos presentes/ausentes, blo
 ## Retomada após interrupção da primeira instalação
 
 O atualizador cria clone-pendente.txt no diretório de configuração antes de iniciar o clone. Se a execução for interrompida após clone --no-checkout e antes de read-tree, a próxima execução pode usar o mesmo destino e retomar. O índice vazio (git ls-files) junto de uma árvore HEAD válida identifica o clone ainda não materializado. Se o índice já estiver populado, somente ausências de worktree sem outras alterações são retomáveis; modificações rastreadas reais bloqueiam. Se o checkout já estiver limpo, o marcador residual é removido. O marcador é apagado após a conclusão bem-sucedida.
+
+## Histórico de validação do atualizador
+
+- Run 41113920551: falha de assertion por CRLF não normalizado no teste Node; correção aplicada.
+- Run 41114836257: parser PowerShell encontrou bloco duplicado após catch; correção aplicada no commit d90541bd642f17aa681ea7e623b49dba12ca2b36.
+- Estado atual: aguardar a CI do head mais recente executar o parser e o teste PowerShell end-to-end.
