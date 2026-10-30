@@ -163,7 +163,7 @@
 - A correção preserva somente a página da fábrica e suas 23 partes JS; mantém \`integracao/index.html\` e \`integracao/catalogo.js\` no manifesto do atualizador; exclui o launcher legado e documentos.
 - O teste de contrato \`tests/atualizador-manifest.test.cjs\` foi adicionado e o workflow canônico recebeu execução condicional desse teste quando o atualizador existir no branch.
 - O atualizador recebeu a correção da comparação da versão Git completa (\`Groups[0]\`) e a cobertura estática do manifesto. O run #41064201715 é de um head anterior; o head atual ainda precisa de CI.
-- Runs pendentes: main #41081796048, atualizador #41082083233 e branch ambiental #41081917796. Não marcar GC-PACK-002 nem GC-UPDATE-009 como concluídos antes de CI e inspeção do pacote final.
+- Validação do pacote concluída na main #41081796048 e na branch ambiental #41081917796. O teste de manifesto do atualizador está em execução no run #41082083233; GC-UPDATE-009 permanece WIP 1 até esse teste e a validação de atualização segura em sandbox passarem.
 
 
 ## Atualização do follow-up GC-PACK-002 — 30/10/2026
