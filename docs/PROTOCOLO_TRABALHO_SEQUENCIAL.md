@@ -74,3 +74,16 @@ Quando uma funcionalidade exigir mudanças no Game Creator e no Pixel Art, os do
 Manter um único registro principal de pendências em `apoenalore/GameCreator/docs/PENDENCIAS_ABERTAS_E_LIMPEZA_GITHUB.md`. Nele, identificar a tarefa ativa, os itens do backlog, os bloqueios, os links de CI e a evidência de encerramento. O protocolo deste arquivo aplica-se também ao repositório `apoenalore/Apoena-pixel-art-html`.
 
 **Não começar a próxima tarefa por conveniência, por haver uma ideia nova ou porque a tarefa atual ficou bloqueada. Primeiro encerrar a tarefa ativa; se estiver bloqueada, resolver ou pedir a dependência necessária.**
+
+
+## 7. Governança de fila, revisão por IA e evidência de correção
+
+- **Capacidade:** WIP = 1 para GameCreator + Apoena Pixel Art HTML combinados. Manter no máximo 5 tarefas aprovadas na próxima fila. O restante é backlog de ideias, não trabalho iniciado.
+- **Bloqueio crítico:** enquanto existir bloqueio crítico de infraestrutura, segurança, integridade de dados ou validação, não iniciar funcionalidades novas. Resolver o bloqueio dentro da tarefa ativa.
+- **Papéis:** CodeRabbit faz a revisão técnica; a IA de desenvolvimento interpreta os achados e aplica correções pontuais; GitHub Actions valida automaticamente o commit corrigido. Não solicitar autofix/autopilot ao CodeRabbit sem autorização explícita. Se a revisão automática estiver pausada, solicitar uma única revisão manual na PR; não criar automações ou workflows extras para isso.
+- **Ciclo obrigatório:** revisão CodeRabbit → classificação dos achados → correção pela IA de desenvolvimento → testes focados → validação canônica do GitHub Actions no SHA correto → atualização do registro. Se CodeRabbit não responder, registrar como aguardando revisão; não fingir que houve revisão.
+- **Registro por correção:** ID do incidente/tarefa; mensagem literal do erro quando existir; causa comprovada (ou hipótese claramente marcada); solução realmente aplicada; data/hora BRT; repositório e branch; commit SHA; testes executados; run ID/link e resultado. Se o horário exato não estiver disponível, declarar que não foi preservado.
+- **Critério de conclusão:** código alterado não significa concluído. Só encerrar com revisão tratada, testes pertinentes aprovados, CI canônica aprovada no commit atual e validações humanas/dispositivo concluídas quando exigidas.
+- **Fila e duplicidade:** agrupar PRs do Creator e do Pixel Art que pertencem à mesma entrega integrada. Não contar uma issue guarda-chuva como várias tarefas e não criar issue/PR duplicada para uma frente já existente.
+- **Automação:** não criar novos workflows, agendas ou runners para compensar uma validação existente que falhou. Primeiro identificar por que o workflow canônico não iniciou ou não recebeu runner; só alterar a automação após comprovar a causa.
+- **Prioridade atual registrada em 30/10/2026:** GC-UPDATE-009 (atualizador incremental do Creator) é a tarefa ativa; a auditoria da fila e seus estados ficam no registro principal `GameCreator/docs/PENDENCIAS_ABERTAS_E_LIMPEZA_GITHUB.md`. A lista pode mudar somente após evidência nova ou decisão expressa do autor.
