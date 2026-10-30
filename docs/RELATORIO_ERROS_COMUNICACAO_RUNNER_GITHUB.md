@@ -215,3 +215,17 @@ Copiar e preencher este bloco a cada novo erro:
 - **Como evitar recorrência:**
 
 **Não preencher “correção efetivamente aplicada” com uma recomendação ainda não executada. Se não houve correção, escrever “Nenhuma correção aplicada; diagnóstico pendente”.**
+
+
+## GC-COMM-002 — Upload de artefatos: timeout + ENOTFOUND
+
+- **Ocorrencia:** 30/10/2026 10:55:01 -03:00 a 10:55:09 -03:00 (UTC 13:55:01Z a 13:55:09Z).
+- **Run/job:** [41066904787](https://github.com/apoenalore/GameCreator/actions/runs/41066904787) / 124100579029.
+- **Commit:** 55052f8912b70dc8eb132b983447df1c080e63fd na main.
+- **Etapas:** 21 — disponibilizar pacote; 22 — anexar logs de diagnostico.
+- **Mensagem literal:** Request timeout: /twirp/github.actions.results.api.v1.ArtifactService/CreateArtifact; depois Failed to CreateArtifact: Unable to make request: ENOTFOUND.
+- **O que passou:** todos os testes anteriores e a preparacao local do ZIP. O log registrou 128 arquivos para o artefato principal e 22 arquivos de diagnostico.
+- **Causa imediata:** falha de resolucao/conectividade com o servico remoto de artefatos do GitHub. A origem exata (DNS, proxy, rede ou rota) nao foi identificada.
+- **Solucao aplicada:** nenhuma correcao tecnica foi aplicada. A run [41075044875](https://github.com/apoenalore/GameCreator/actions/runs/41075044875), no mesmo commit, concluiu com sucesso depois; registrar como recuperacao/intermitencia, nao como correcao comprovada.
+- **Estado:** INTERMITENTE; nao confundir com defeito do codigo do Creator.
+- **Proxima verificacao:** com o computador online, fazer uma unica verificacao de conectividade do runner aos endpoints de artefatos antes de repetir a suite completa.
