@@ -146,3 +146,13 @@ A regra anterior de “somente documentacao” continua valendo para as demais m
 - A primeira instalacao deve baixar somente os dois arquivos de bootstrap e depois usar clone parcial + sparse-checkout.
 - Nenhuma limpeza de arquivos pessoais, runner, biblioteca IndexedDB ou historico local sera feita automaticamente.
 - A alteracao fica na branch de trabalho e nao pode ser considerada concluida antes de CI e teste Windows real.
+
+
+## Atualização de auditoria — GC-UPDATE-009 (30/10/2026)
+
+O objetivo aprovado é manter auditorias, requisitos, documentos internos e histórico no repositório privado, mas não baixá-los/materializá-los na pasta `APP` do Game Creator. A implementação de clone parcial + sparse-checkout e manifesto positivo está na [PR #7](https://github.com/apoenalore/GameCreator/pull/7), branch `feat/atualizador-local-incremental`; não está integrada à `main`.
+
+- Auditoria detalhada: [AUDITORIA_DISTRIBUICAO_RUNTIME_2026-10-30.md](AUDITORIA_DISTRIBUICAO_RUNTIME_2026-10-30.md).
+- O teste do manifesto passou no run [41082083233](https://github.com/apoenalore/GameCreator/actions/runs/41082083233), no commit `3233e739474b993bb33a4f5c685753591c714ba3`.
+- A execução geral falhou somente nas etapas de publicação de artefatos/logs; a causa específica não foi confirmada. Não confundir esse resultado com falha do teste do manifesto.
+- A PR permanece em validação: sincronização da branch, revisão CodeRabbit e testes reais no Windows ainda são necessários. Não declarar conclusão nem iniciar trabalho paralelo.
