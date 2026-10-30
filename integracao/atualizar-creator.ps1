@@ -1,11 +1,18 @@
 # Atualizador conservador do Apoena GameCreator para Windows PowerShell 5.1+.
 # Usa clone parcial + sparse-checkout: instala somente os arquivos de runtime.
 # Nao apaga arquivos pessoais, documentos locais ou o runner.
-param([string]$Destino = "")
+param(
+    [string]$Destino = "",
+    [string]$RepoUrl = "https://github.com/apoenalore/GameCreator.git",
+    [string]$ConfigDir = ""
+)
 
 $ErrorActionPreference = 'Stop'
-$repositorio = 'https://github.com/apoenalore/GameCreator.git'
-$pastaConfig = Join-Path $env:LOCALAPPDATA 'Apoena\GameCreator'
+if ([string]::IsNullOrWhiteSpace($ConfigDir)) {
+    $ConfigDir = Join-Path $env:LOCALAPPDATA 'Apoena\GameCreator'
+}
+$repositorio = $RepoUrl
+$pastaConfig = $ConfigDir
 $arquivoDestino = Join-Path $pastaConfig 'instalacao.txt'
 $arquivoLog = Join-Path $pastaConfig 'atualizacao.log'
 
@@ -199,7 +206,115 @@ try {
     }
 
     $origem = (& $git.Source -C $Destino remote get-url origin)
-    if ($LASTEXITCODE -ne 0 -or ($origem.Trim() -notmatch '^(https://github\.com/apoenalore/GameCreator(\.git)?/?|git@github\.com:apoenalore/GameCreator(\.git)?)$')) {
+    $origemOficial = $origem.Trim() -match '^(https://github\.com/apoenalore/GameCreator(\.git)?/?|git@github\.com:apoenalore/GameCreator(\.git)?)
+
+    $branch = (& $git.Source -C $Destino symbolic-ref --quiet --short HEAD 2>$null)
+    if ($LASTEXITCODE -ne 0 -or $branch.Trim() -cne 'main') {
+        throw 'Instalacao fora da branch main. Atualizacao bloqueada para nao substituir trabalho de desenvolvimento.'
+    }
+
+    if (-not $novoClone) {
+        $modificados = @(& $git.Source -C $Destino status --porcelain --untracked-files=no)
+        if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar alteracoes locais.' }
+        if (-not [string]::IsNullOrWhiteSpace(($modificados -join ''))) {
+            throw 'Existem arquivos rastreados modificados localmente. Salve o trabalho antes de atualizar; nao farei reset nem sobrescrita.'
+        }
+        VerificarConflitosLocais 'HEAD'
+    }
+
+    # Mantem apenas os arquivos necessarios para abrir e usar o Creator.
+    # Em uma instalacao antiga, documentos rastreados saem da pasta APP, mas nao sao apagados do historico Git.
+    & $git.Source -C $Destino config remote.origin.promisor true
+    if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel configurar o clone parcial.' }
+    & $git.Source -C $Destino config remote.origin.partialclonefilter blob:none
+    if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel configurar o filtro de blobs.' }
+    VerificarArquivosLocaisForaDoRuntime
+    & $git.Source -C $Destino sparse-checkout set --no-cone $runtimePatterns
+    if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel aplicar o manifesto de arquivos de runtime. Atualizacao interrompida.' }
+
+    # Confere antes de qualquer merge se todos os arquivos essenciais estao cobertos pelo sparse-checkout.
+    $incluidos = @($arquivosEssenciais | & $git.Source -C $Destino sparse-checkout check-rules --no-cone)
+    if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel validar as regras do sparse-checkout.' }
+    $incluidosSet = @{}
+    foreach ($caminho in $incluidos) { $incluidosSet[$caminho.Trim()] = $true }
+    $foraDoManifesto = @($arquivosEssenciais | Where-Object { -not $incluidosSet.ContainsKey($_) })
+    if ($foraDoManifesto.Count -gt 0) {
+        throw ('Sparse-checkout nao inclui todos os arquivos essenciais: ' + ($foraDoManifesto -join ', '))
+    }
+
+    # Clone com --no-checkout deixa o worktree vazio; materializa apenas os caminhos permitidos.
+    # A checagem de conflitos vem antes porque read-tree pode substituir arquivos locais no caminho.
+    VerificarConflitosLocais 'HEAD'
+    & $git.Source -C $Destino read-tree -mu HEAD
+    if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel materializar os arquivos de runtime com seguranca.' }
+
+    $anterior = (& $git.Source -C $Destino rev-parse HEAD).Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel identificar a versao instalada.' }
+    Registrar "Versao instalada antes: $anterior"
+    Registrar 'Checkout enxuto ativo: docs, testes, workflows, legado e documentos de desenvolvimento ficam fora da pasta APP.'
+
+    Registrar 'Buscando somente blobs necessarios ao runtime...'
+    & $git.Source -C $Destino fetch --no-tags --filter=blob:none origin '+refs/heads/main:refs/remotes/origin/main'
+    if ($LASTEXITCODE -ne 0) { throw 'Falha ao buscar alteracoes. Versao local mantida.' }
+
+    $arquivosRemotos = @(& $git.Source -C $Destino ls-tree -r --name-only refs/remotes/origin/main)
+    if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar o manifesto remoto.' }
+    $faltantes = @($arquivosEssenciais | Where-Object { $arquivosRemotos -notcontains $_ })
+    if ($faltantes.Count -gt 0) {
+        throw ('Versao remota sem arquivo(s) essencial(is): ' + ($faltantes -join ', ') + '. Nenhuma atualizacao foi aplicada.')
+    }
+
+    VerificarConflitosLocais 'refs/remotes/origin/main'
+
+    $remoto = (& $git.Source -C $Destino rev-parse refs/remotes/origin/main).Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel identificar a versao remota.' }
+
+    if ($remoto -eq $anterior) {
+        Registrar "SEM MUDANCAS: ja esta na versao $anterior. Referencia anterior preservada."
+    } else {
+        & $git.Source -C $Destino merge-base --is-ancestor HEAD refs/remotes/origin/main
+        if ($LASTEXITCODE -ne 0) {
+            throw 'A instalacao divergiu da main. Atualizacao bloqueada; nenhum reset, rebase ou descarte foi executado.'
+        }
+
+        # Preserva a revisao anterior somente quando existe uma atualizacao real.
+        & $git.Source -C $Destino update-ref refs/apoena/anterior $anterior
+        if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel preservar a referencia da versao anterior.' }
+
+        & $git.Source -C $Destino merge --no-overwrite-ignore --ff-only refs/remotes/origin/main
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Nao foi possivel aplicar atualizacao fast-forward. Verifique conflitos; arquivos ignorados nao serao sobrescritos.'
+        }
+        Registrar "ATUALIZADO: $anterior -> $remoto"
+    }
+
+    foreach ($item in $arquivosEssenciais) {
+        if (-not (Test-Path -LiteralPath (Join-Path $Destino $item))) {
+            throw "Arquivo essencial ausente apos atualizar: $item. A referencia anterior permanece em refs/apoena/anterior."
+        }
+    }
+
+    $atual = (& $git.Source -C $Destino rev-parse HEAD).Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'Falha ao ler commit instalado.' }
+    Set-Content -LiteralPath $arquivoDestino -Value $Destino -Encoding UTF8
+    Registrar "Concluido; commit instalado: $atual"
+    Registrar "Para abrir: $Destino\ABRIR_GAME_CREATOR.cmd"
+    Write-Host ''
+    Write-Host 'Somente arquivos de runtime foram mantidos na pasta APP.'
+    Write-Host 'Documentos internos continuam no repositorio privado e nao foram incluidos na instalacao.'
+    Write-Host 'A biblioteca do navegador/IndexedDB e independente do Git. Faca backup pela tela Biblioteca antes de trocar de navegador/perfil.'
+    exit 0
+} catch {
+    if (Test-Path -LiteralPath $pastaConfig) {
+        Registrar ("ERRO: " + $_.Exception.Message)
+    }
+    Write-Host ("ERRO: " + $_.Exception.Message)
+    Write-Host 'O atualizador nao executou reset, clean nem apagou a pasta RUNNER.'
+    Write-Host 'Em clones existentes, objetos antigos de documentos podem continuar no historico local; nao sera feita limpeza destrutiva automatica.'
+    exit 1
+}
+    $origemDeTestePermitida = ($env:APOENA_UPDATER_TEST_MODE -eq '1' -and $origem.Trim() -ceq $RepoUrl.Trim())
+    if ($LASTEXITCODE -ne 0 -or (-not $origemOficial -and -not $origemDeTestePermitida)) {
         throw 'O remote origin nao e o GameCreator oficial. Atualizacao bloqueada.'
     }
 
