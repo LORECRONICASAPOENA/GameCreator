@@ -206,7 +206,11 @@ try {
     }
 
     $origem = (& $git.Source -C $Destino remote get-url origin)
-    $origemOficial = $origem.Trim() -match '^(https://github\.com/apoenalore/GameCreator(\.git)?/?|git@github\.com:apoenalore/GameCreator(\.git)?)
+    $origemOficial = $origem.Trim() -match '^(https://github\.com/apoenalore/GameCreator(\.git)?/?|git@github\.com:apoenalore/GameCreator(\.git)?)$'
+    $origemDeTestePermitida = ($env:APOENA_UPDATER_TEST_MODE -eq '1' -and $origem.Trim() -ceq $RepoUrl.Trim())
+    if ($LASTEXITCODE -ne 0 -or (-not $origemOficial -and -not $origemDeTestePermitida)) {
+        throw 'O remote origin nao e o GameCreator oficial. Atualizacao bloqueada.'
+    }
 
     $branch = (& $git.Source -C $Destino symbolic-ref --quiet --short HEAD 2>$null)
     if ($LASTEXITCODE -ne 0 -or $branch.Trim() -cne 'main') {
