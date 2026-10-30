@@ -93,3 +93,8 @@ Também foi testado o merge em sparse-checkout com --no-overwrite-ignore: no Git
 - **Validação no computador do autor:** pendente; nenhuma pasta local foi modificada.
 
 Esse achado reforça que o atualizador não pode ser declarado concluído apenas com parser PowerShell e teste estático; a simulação Git e o teste Windows real são critérios obrigatórios.
+
+
+## Compatibilidade mínima corrigida
+
+A revisão de compatibilidade identificou que sparse-checkout check-rules foi incorporado após o Git 2.25. O requisito do atualizador foi corrigido para Git 2.41.0 ou superior, versão que inclui o comando usado para validar a cobertura do manifesto. A suíte estática agora verifica esse requisito. Fonte de referência: documentação e notas de versão do Git 2.41.
