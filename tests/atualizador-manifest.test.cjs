@@ -216,6 +216,8 @@ function runUpdater(install, configDir, repoUrl, allowFailure = false) {
     cwd: root,
     encoding: "utf8",
     windowsHide: true,
+    timeout: 120000,
+    maxBuffer: 5 * 1024 * 1024,
     env: { ...process.env, APOENA_UPDATER_TEST_MODE: "1" }
   });
   if (result.error) throw result.error;
