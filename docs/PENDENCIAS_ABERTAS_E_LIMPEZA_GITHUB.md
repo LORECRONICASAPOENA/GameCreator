@@ -162,3 +162,44 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - Usar concorrência por branch e cancelar somente execuções obsoletas da mesma branch.
 - Manter uma validação principal por projeto, mais workflows de publicação que tenham finalidade própria.
 - Não fechar PR nem apagar arquivo de protótipo sem comparar os arquivos exclusivos e decidir o que será preservado.
+
+
+## 6. Auditoria da fila e prioridade de execução — 30/10/2026
+
+**Este é o snapshot mais recente consultado nesta auditoria; ele prevalece sobre os estados antigos descritos nas seções históricas acima.** Horário exato da consulta não preservado. Nenhuma PR foi mesclada, fechada ou apagada durante esta auditoria.
+
+### Capacidade e regras
+- **WIP = 1** entre GameCreator e Apoena Pixel Art HTML: uma única tarefa de implementação ativa nos dois repositórios combinados.
+- A próxima fila terá no máximo **5 tarefas aprovadas**, agrupando PRs correspondentes entre Creator e runtime. Ideias novas ficam no backlog sem virar execução.
+- Enquanto houver bloqueio crítico de processo/validação, não iniciar funcionalidades novas.
+- Fluxo de revisão: **CodeRabbit revisa → IA de desenvolvimento analisa e corrige → GitHub Actions valida o mesmo commit**. CodeRabbit não deve aplicar autofix automaticamente nesta etapa; a IA de desenvolvimento é responsável pelas correções.
+- Toda correção deve registrar ID, causa comprovada (ou hipótese explicitamente marcada), solução realmente aplicada, data/hora BRT (sem inventar horário retroativo), repositório, branch, commit SHA, testes e link/resultado do Actions.
+- Uma PR aberta, um teste isolado ou um comentário de revisão não equivalem a funcionalidade integrada/concluída.
+
+### Tarefa ativa — WIP 1
+**GC-UPDATE-009 — Atualizador local incremental do GameCreator**
+- PR [GameCreator #7](https://github.com/apoenalore/GameCreator/pull/7), branch `feat/atualizador-local-incremental`, head `546aafba45140c7dfae016cd7756178b285cca7e`.
+- Estado: **EM VALIDAÇÃO / NÃO INTEGRADO**. PR draft e mergeable; ainda não testado no Windows do autor.
+- GitHub Actions: [run 41064201715](https://github.com/apoenalore/GameCreator/actions/runs/41064201715) — `completed/success`. A suíte canônica executou com sucesso, mas ainda não contém teste específico de comportamento do novo atualizador PowerShell/CMD.
+- CodeRabbit: revisão manual solicitada nesta PR com `@coderabbitai review`; o bot confirmou **“Review triggered”**. Resultado da revisão ainda não apareceu como review formal no momento do snapshot.
+- Critérios pendentes: revisão CodeRabbit; teste automatizado específico do script (sintaxe e cenários seguros); primeira instalação/atualização real no Windows; confirmação de backup/restauração da biblioteca IndexedDB antes de abandonar a instalação antiga.
+- Não instalar no computador do autor nem substituir a instalação antiga até concluir esses critérios e obter autorização para o teste local.
+
+### Tamanho atual do quadro
+- **8 PRs abertas:** 4 no GameCreator e 4 no Apoena Pixel Art HTML.
+- **2 issues abertas de planejamento:** GameCreator #3 e Pixel Art #1. São registros guarda-chuva de decisões/aceite, não duas tarefas extras a implementar separadamente.
+- As 8 PRs não são 8 frentes independentes: agrupam-se em quatro frentes de produto mais uma PR documental. Não criar issues ou PRs duplicadas para os mesmos assuntos.
+
+### Próxima fila aprovada — máximo de 5, sem execução paralela
+1. **Sistemas ambientais e integração Creator → runtime:** GameCreator [PR #6](https://github.com/apoenalore/GameCreator/pull/6) + Pixel Art [PR #5](https://github.com/apoenalore/Apoena-pixel-art-html/pull/5). A PR do Pixel Art tem [run 40995729054](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40995729054) success. A PR do GameCreator está com `mergeable=false`; comparação `main...feat/tempo-biomas-hidrologia` indica 44 commits à frente e 43 atrás, e não foi encontrado run de PR para o head atual `41b57659119aadbf5001daea69c4601d3e979adc`. O CodeRabbit publicou “Review skipped” nessa PR. **Bloqueada para integração** até resolver divergência, obter revisão e validar o head atual.
+2. **Consolidar o laboratório de hidrologia sem perder recursos exclusivos:** GameCreator [PR #5](https://github.com/apoenalore/GameCreator/pull/5) + Pixel Art [PR #4](https://github.com/apoenalore/Apoena-pixel-art-html/pull/4). Validações consultadas: [GC run 41044823914](https://github.com/apoenalore/GameCreator/actions/runs/41044823914) e [Pixel run 40995732520](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40995732520), ambas success nos commits consultados. Preservar funções únicas do laboratório e reconciliar com o sistema ambiental antes de fechar protótipos.
+3. **Validar modos offline, Exploração e salas LAN/MOBA:** GameCreator [PR #4](https://github.com/apoenalore/GameCreator/pull/4) + Pixel Art [PR #3](https://github.com/apoenalore/Apoena-pixel-art-html/pull/3). Pixel tem [run 40961954483](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40961954483) success. Não foi encontrado run de PR para o head atual do GameCreator `3370112741e112989fb5b7d0f47a01a16d28fbb7`; a PR está draft e `mergeable=false`. Validar os dois lados, LAN em dois dispositivos e limites reais antes de declarar pronto.
+4. **Concluir a revisão documental do diário técnico:** Pixel Art [PR #6](https://github.com/apoenalore/Apoena-pixel-art-html/pull/6). Alteração documental; sem alegação de teste funcional. Revisar links e modelos antes de integrar.
+5. **Reserva:** nenhuma quinta tarefa aprovada no momento. Ideias novas permanecem no backlog.
+
+### Observações de revisão e CI
+- GameCreator PR #7 e PR #5 têm execuções canônicas recentes com success; isso demonstra que o runner recebeu esses jobs nesses commits, mas não prova disponibilidade global em tempo real.
+- Não foi encontrada execução PR para os heads atuais de GameCreator PR #4 e #6. Não afirmar que o runner inteiro está indisponível: há execuções bem-sucedidas recentes em outras PRs.
+- Pixel Art PR #4 e #5 têm execuções bem-sucedidas nos heads consultados; PR #3 também tem validação anterior bem-sucedida. PR #6 é documental.
+- CodeRabbit não havia emitido review formal nas PRs consultadas. Na GameCreator PR #6, publicou uma mensagem de review ignorada; na PR #7, a solicitação manual foi aceita e aguarda o resultado.
+- Não criar workflow novo para contornar falta de review ou execução. Investigar gatilhos/filtros/branch e usar a validação canônica existente.
