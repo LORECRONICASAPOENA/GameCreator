@@ -402,7 +402,6 @@
         const i = y * sim.width + x;
         const profile = sim.profiles[i] || defaultHydrology();
         if (sim.waterDepth[i] <= 0.025) continue;
-        const profile = sim.profiles[i] || defaultHydrology();
         const surface = sim.elevation[i] + sim.waterDepth[i];
         let best = -1, lowest = surface;
         for (const [dx, dy] of [[0,-1],[1,0],[0,1],[-1,0]]) {
