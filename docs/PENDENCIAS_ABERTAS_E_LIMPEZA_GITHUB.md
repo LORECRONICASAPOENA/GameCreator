@@ -17,28 +17,31 @@
 - **Estado:** CONCLUÍDA. Os documentos estão publicados em ambos os repositórios. A validação do Pixel Art [40965795436](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40965795436) terminou com `completed/success` em `main`. Os ajustes posteriores foram exclusivamente documentais e não exigem nova suíte de código.
 - **Critério atendido:** protocolo publicado, validação exigida aprovada, resultado registrado. Mantido somente neste histórico; não é pendência aberta.
 
-### Tarefa ativa única
+### Tarefa concluída — T-002
 
 - **T-002 — Estabilizar CI/runner do Game Creator e consolidar as falhas de validação.**
-- **Estado:** BLOQUEADA — 17 jobs permanecem `queued`, sem nenhum `in_progress`. 15 são execuções antigas/obsoletas que precisam de cancelamento manual; 2 são validações atuais da PR #5 e devem ser preservadas para execução posterior. O estado online do runner ainda precisa ser confirmado.
-- **Levantamento atualizado em 30/10/2026:** consulta das 346 execuções do Game Creator (4 páginas da API): **17 queued, 0 in_progress e 329 completed**. No histórico concluído há 158 `failure`, 96 `success` e 75 `cancelled`; esses resultados incluem tentativas antigas e não representam 158 defeitos atuais. Todos os 17 jobs em fila exigem labels `self-hosted`, `Windows`, `X64` e retornam `runner_id = 0` e `runner_name` vazio. 15 são antigos/obsoletos; 2 são os testes atuais da PR #5 (validação do Creator e teste específico de hidrologia), que devem ser preservados.
-- **Limitação operacional:** a conexão GitHub disponível nesta sessão permite consultar execuções, jobs e logs, mas não expõe uma operação de cancelamento de workflow. Não declarar fila limpa nem fingir cancelamento. É necessária a ação manual de cancelamento dos 15 IDs obsoletos abaixo no GitHub Actions. Não cancelar as duas validações atuais da PR #5.
-- **Escopo:** cancelar a fila obsoleta/duplicada; confirmar runner e labels; executar uma única validação canônica da branch atual; diagnosticar e corrigir qualquer falha antes de repetir; concluir a revisão de CI e dos erros conhecidos do Creator. Nenhuma funcionalidade nova pode começar antes do encerramento de T-002.
+- **Estado:** <strong>CONCLUÍDA</strong> em 30/10/2026.
+- **Runner:** ID 2, `APOENA-GAMECREATOR-RUNNER`, labels `self-hosted`, `Windows`, `X64`; recebeu e concluiu os jobs reais.
+- **Fila:** o snapshot inicial tinha 17 jobs queued. Todos foram processados; os 15 antigos terminaram (12 success, 3 failure), e as duas validações antigas da PR #5 terminaram success. A consulta final retornou **0 queued e 0 in_progress**. Não foi necessário cancelar manualmente os 15 jobs.
+- **Automação:** `.github/workflows/pixel-art.yml` agora dispara em push de alterações relevantes em qualquer branch, Pull Requests para `main` e a cada hora na branch padrão. `workflow_dispatch` permanece somente como fallback.
+- **Consolidação:** os testes de integração e hidrologia foram reunidos no job canônico sequencial; os workflows manuais/separados redundantes foram removidos das branches PR #6 e PR #5.
+- **Validações finais:** [41044696841 — main](https://github.com/apoenalore/GameCreator/actions/runs/41044696841), [41044823914 — PR #5](https://github.com/apoenalore/GameCreator/actions/runs/41044823914) e [41045143930 — PR #6](https://github.com/apoenalore/GameCreator/actions/runs/41045143930) concluíram com success.
+- **Erros corrigidos e registrados:** ordem build/teste da validação agendada (GC-CI-010) e variável `profile` fora do escopo no escoamento (GC-CI-011). O motivo da indisponibilidade inicial do runner continua não diagnosticado, mas não há bloqueio ativo.
+- **Documentação:** [Relatório de comunicação Runner/GitHub](RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md) e [Base de conhecimento de erros](BASE_CONHECIMENTO_ERROS_RUNNER_CI.md) atualizados.
 
 ## 1. Estado geral
 
-- [x] Inventário de pull requests, workflows e execuções do Actions.
-- [x] Confirmar validações recentes bem-sucedidas no Pixel Art.
-- [x] Consultar todas as 346 execuções do Game Creator: 17 em fila, nenhuma em andamento; 329 concluídas.
-- [x] Escolher um workflow canônico de validação do Creator.
-- [x] Remover a agenda periódica redundante do workflow principal.
-- [x] Unificar concorrência por branch para eventos push e pull_request.
-- [x] Remover dois workflows manuais redundantes após conferir que os testes estão cobertos pela validação canônica.
-- [x] Preservar o workflow separado de build/publicação, que tem finalidade própria.
-- [ ] Cancelar manualmente os 15 jobs obsoletos ainda `queued`, preservando as duas validações atuais da PR #5.
-- [ ] Confirmar disponibilidade do runner Game Creator com labels compatíveis.
-- [ ] Executar uma única validação canônica e resolver eventuais falhas antes de repetir.
-- [ ] Decidir o destino dos protótipos de hidrologia depois de preservar seus arquivos exclusivos.
+- [x] Inventariar Pull Requests, workflows e execuções do Actions.
+- [x] Registrar o snapshot histórico de 346 execuções e 17 jobs inicialmente queued.
+- [x] Confirmar o runner ID 2 Online por atribuição real e execução de jobs.
+- [x] Processar a fila antiga: 15 execuções concluídas (12 success, 3 failure); duas validações antigas da PR #5 também concluídas.
+- [x] Configurar CI automático para push em branches, Pull Requests para main e agenda horária na main.
+- [x] Manter um único job sequencial com build antes dos testes.
+- [x] Integrar os testes de hidrologia e remover workflows redundantes.
+- [x] Corrigir e registrar os erros GC-CI-010 e GC-CI-011.
+- [x] Validar main, PR #5 e PR #6 com sucesso.
+- [x] Confirmar consulta final com 0 queued e 0 in_progress.
+- [ ] Decidir o destino dos protótipos de hidrologia depois de preservar seus arquivos exclusivos; esta decisão não bloqueia mais o CI.
 
 ## 2. Apoena Pixel Art HTML
 
@@ -151,7 +154,7 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 
 **Diagnóstico obrigatório:** ao falhar, registrar primeiro erro causal, job, logs e tipo de falha; planejar uma correção; validar local/focado; só depois fazer uma nova tentativa canônica. Repetir o mesmo commit sem alteração é reservado a falha transitória identificada (runner/conexão). Não iniciar fluxo duplicado para tentar contornar fila.
 
-**Estado confirmado (30/10/2026; hora da consulta não preservada):** Pixel Art: a validação principal [40965795436](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40965795436) segue registrada como aprovada no levantamento anterior. Game Creator: 346 execuções consultadas; 17 `queued`, 0 `in_progress`, 329 `completed` (158 failure, 96 success, 75 cancelled). Dos 17 em fila, 15 são obsoletos e precisam de cancelamento manual; 2 da PR #5 devem ser preservados para validação quando o runner estiver online.
+**Estado confirmado em 30/10/2026 após as validações:** Game Creator com 0 `queued` e 0 `in_progress`. O runner ID 2 concluiu as validações automáticas da main, PR #5 e PR #6 com success. O snapshot histórico de 346 execuções (158 failure, 96 success, 75 cancelled) permanece como histórico; não representa defeitos ativos.
 
 ## 5. Regra para evitar repetição
 
