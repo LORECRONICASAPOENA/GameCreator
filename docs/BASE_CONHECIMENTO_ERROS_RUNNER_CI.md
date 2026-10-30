@@ -431,3 +431,15 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - **Solucao efetivamente utilizada:** nenhuma correcao de codigo, DNS ou configuracao foi aplicada. A execucao posterior [41075044875](https://github.com/apoenalore/GameCreator/actions/runs/41075044875), no mesmo commit 55052f8912b70dc8eb132b983447df1c080e63fd, terminou com success, indicando que a falha nao foi permanente. Isso e recuperacao observada, nao causa raiz resolvida.
 - **Resultado:** INTERMITENTE / NAO REPRODUZIDO NA EXECUCAO SEGUINTE / CAUSA RAIZ DE REDE NAO IDENTIFICADA.
 - **Prevencao:** classificar falhas de upload separadamente de falhas de codigo; quando o computador estiver online, verificar uma vez a resolucao e o acesso aos endpoints de artefatos do GitHub no runner. Nao repetir a suite inteira apenas por falha de upload.
+
+
+### GC-PACK-002 — Dependência da fábrica original ausente no manifesto enxuto
+
+- **Classificação:** BUG DE EMPACOTAMENTO/MANIFESTO DE RUNTIME.
+- **Identificação:** 30/10/2026, após a inspeção independente do primeiro ZIP limpo; hora exata do achado não preservada.
+- **Causa:** \`pixel-art/modulo-integrado.js\` abre \`integracao/index.html\`; essa página usa \`integracao/catalogo.js\` e aponta para \`legacy/abrir-editor-v3.9.html\`. A página da fábrica carrega 23 partes JS em \`legacy/v3_9_parts/parte_000.js\` a \`parte_022.js\`. O primeiro empacotador e o manifesto do atualizador excluíam toda a pasta \`legacy\`; o manifesto do atualizador também omitia a página integrada e o catálogo.
+- **Impacto:** o Creator principal abria, mas o acesso à página integrada/fábrica original ficava incompleto na instalação enxuta.
+- **Correção aplicada:** o empacotador agora copia apenas a página original e suas 23 partes, validando ausência de arquivos legados extras; o atualizador inclui \`integracao/index.html\`, \`integracao/catalogo.js\`, a página da fábrica e as 23 partes. \`legacy/iniciador-anterior.html\` continua fora.
+- **Testes adicionados:** \`tests/atualizador-manifest.test.cjs\` valida o contrato do sparse-checkout, regex de runtime, os 23 scripts referenciados, a ligação da interface e o empacotador.
+- **Commits:** packager main \`1561a0d08b26177596fafbf21102b739aa4a2b76\`; manifesto \`184102a9317c687485da55bc34ef0f50d5352601\`; teste \`c155207db4a61ce2766ebcbd5dc1a59604c5afee\`; workflow canônico \`65db2b62cc9750f50a3cc595c80466b6344fbc94\`.
+- **Validação:** PENDENTE. Runs #41081796048, #41082083233 e #41081917796 estão aguardando executor. O primeiro pacote de 52 arquivos não deve ser usado como distribuição final até o novo pacote incluir a fábrica original.
