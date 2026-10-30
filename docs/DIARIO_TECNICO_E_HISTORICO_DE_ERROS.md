@@ -199,3 +199,13 @@ Se um teste falhar por um segundo defeito, abra ou vincule outro ID. Não mistur
 ## 8. Regra final
 
 **Se o trabalho não foi registrado, o conhecimento ainda não foi entregue ao projeto.** Toda tarefa termina com código/documentação validada quando aplicável e com um registro que permita a outra pessoa entender o que aconteceu, reproduzir o diagnóstico e continuar sem recomeçar do zero.
+
+
+## 9. Continuidade e checklist de PR
+
+- **Atualização:** 2026-10-30 08:17 BRT (11:17Z).
+- **PR:** [#6 — Biomas, variantes sazonais e simulação hidrológica 2D](https://github.com/apoenalore/GameCreator/pull/6).
+- **Último commit da documentação nesta etapa:** `31b3cec59f325e5cfe708aa49e4529bd61b37620`.
+- **Ação adicional:** criado `.github/pull_request_template.md` para exigir o registro do diário, causa/hipóteses, testes e estado real em cada PR.
+- **Referências existentes:** a base `docs/BASE_CONHECIMENTO_ERROS_RUNNER_CI.md`, o relatório `docs/RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md`, as pendências e o protocolo sequencial continuam como documentos complementares; o diário centraliza o progresso e aponta para eles.
+- **Estado:** PR aberta; não mesclada. A documentação está na branch, não se deve afirmar que já está disponível na `main`.
