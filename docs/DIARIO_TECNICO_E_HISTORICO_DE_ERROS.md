@@ -5,6 +5,15 @@
 **Fuso padrão dos registros:** America/Sao_Paulo (UTC−03:00). Sempre informar também o deslocamento UTC.  
 **Regra:** este diário é parte obrigatória do processo de desenvolvimento. Não é um documento opcional nem um relatório feito apenas quando há falhas.
 
+## Documentos técnicos relacionados
+
+- [AGENTS.md](../AGENTS.md) — instruções obrigatórias para agentes.
+- [Padrão de integração e prevenção de regressões](PADRAO_DE_INTEGRACAO_E_PREVENCAO_DE_REGRESSOES.md) — investigação, compatibilidade e validação.
+- [Base de conhecimento de erros Runner/CI](BASE_CONHECIMENTO_ERROS_RUNNER_CI.md) — diagnósticos históricos especializados.
+- [Relatório de erros de comunicação Runner/GitHub](RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md) — evidências de comunicação e fila.
+- [Pendências e limpeza do GitHub](PENDENCIAS_ABERTAS_E_LIMPEZA_GITHUB.md) — estado de tarefas e fila.
+- [Protocolo de trabalho sequencial](PROTOCOLO_TRABALHO_SEQUENCIAL.md) — WIP, execução e encerramento.
+
 ## 1. Como este diário deve ser usado
 
 Toda pessoa ou IA que executar uma tarefa significativa no Game Creator deve atualizar este arquivo antes de encerrar a tarefa ou entregar o trabalho a outra pessoa.
