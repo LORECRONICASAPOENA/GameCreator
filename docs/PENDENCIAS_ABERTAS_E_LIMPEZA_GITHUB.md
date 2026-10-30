@@ -229,7 +229,7 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 
 ### Pull Requests — não confundir CI aprovado com integração
 - **GameCreator #7:** draft, mergeable/clean; continua como WIP 1 GC-UPDATE-009. Falta teste específico do atualizador e teste real seguro na instalação Windows do autor.
-- **GameCreator #6:** aberta, não draft, \`mergeable=false/dirty\`; head atual após ajuste do empacotador: \`5f47b1fb2889a7116d02910da09ea9cb4d33003a\`. Comparação atual com main: 45 commits à frente e 46 atrás. O código ambiental teve CI aprovado no SHA anterior \`b90be364...\`; o head atual exige CI e resolução da divergência antes de integrar.
+- **GameCreator #6:** aberta, não draft, `mergeable=false/dirty`; head atual `907ae25d81ff3e0ba3ecffc5927a4b7970259f20`. Comparação atual com main: 46 commits à frente e 57 atrás. O código ambiental teve CI aprovado no SHA anterior `b90be364...`; o head atual contém commits posteriores de documentação/workflow e ainda não tem CI associado. Resolver a divergência e validar o head atual antes de integrar.
 - **GameCreator #5:** draft, mergeable/clean; CI aprovado no head consultado. Manter o laboratório até comparar e preservar seus recursos exclusivos.
 - **GameCreator #4:** draft, \`mergeable=false/dirty\`; 11 commits à frente e 57 atrás de main; sem CI no head atual. Não integrar antes de sincronizar, validar e preservar os contratos de sessão.
 - **Pixel Art #5 e #4:** mergeable/clean e testes aprovados nos SHAs indicados; continuam abertas até revisão e decisão de consolidação.
