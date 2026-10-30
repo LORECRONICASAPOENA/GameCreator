@@ -10,7 +10,7 @@ $arquivoDestino = Join-Path $pastaConfig 'instalacao.txt'
 $arquivoLog = Join-Path $pastaConfig 'atualizacao.log'
 
 # Lista positiva: tudo que nao estiver aqui fica fora da instalacao local.
-# Em especial: docs/, tests/, .github/, legacy/, historico/, README/AGENTS e documentos internos.
+# Em legacy, manter somente o editor original da fabrica e as partes JS referenciadas pela pagina de integracao.
 $runtimePatterns = @(
     '/ABRIR_GAME_CREATOR.cmd',
     '/ATUALIZAR_CREATOR.cmd',
@@ -19,9 +19,13 @@ $runtimePatterns = @(
     '/bundle-v4/*.js',
     '/integracao/build_unificado.ps1',
     '/integracao/atualizar-creator.ps1',
+    '/integracao/index.html',
+    '/integracao/catalogo.js',
     '/integracao/godot/ApoenaCatalogo.gd',
     '/integracao/godot/project.godot',
     '/integracao/godot/dados/apoena_catalogo.json',
+    '/legacy/abrir-editor-v3.9.html',
+    '/legacy/v3_9_parts/*.js',
     '/shared/*.js',
     '/biblioteca/*.html',
     '/map-editor/*.js',
@@ -38,6 +42,9 @@ $arquivosEssenciais = @(
     'index.html',
     'integracao/build_unificado.ps1',
     'integracao/atualizar-creator.ps1',
+    'integracao/index.html',
+    'integracao/catalogo.js',
+    'legacy/abrir-editor-v3.9.html',
     'shared/asset-library.js',
     'shared/creator-bridge.js',
     'map-editor/terrain-system.js',
@@ -52,9 +59,10 @@ $arquivosEssenciais = @(
     'pixel-art/estudio.html'
 )
 $arquivosEssenciais += @(0..23 | ForEach-Object { 'bundle-v4/parte_{0:D3}.js' -f $_ })
+$arquivosEssenciais += @(0..22 | ForEach-Object { 'legacy/v3_9_parts/parte_{0:D3}.js' -f $_ })
 
 # Impede que um arquivo ignorado do usuario seja substituido por um arquivo do Creator.
-$regexRuntime = '^(ABRIR_GAME_CREATOR\.cmd|ATUALIZAR_CREATOR\.cmd|APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA\.html|index\.html|bundle-v4/.*\.js|integracao/(build_unificado\.ps1|atualizar-creator\.ps1|godot/(ApoenaCatalogo\.gd|project\.godot|dados/apoena_catalogo\.json))|shared/.*\.js|biblioteca/.*\.(html|js|json)|map-editor/.*\.(js|html|json)|pixel-art/.*\.(js|html|json))$'
+$regexRuntime = '^(ABRIR_GAME_CREATOR\.cmd|ATUALIZAR_CREATOR\.cmd|APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA\.html|index\.html|bundle-v4/.*\.js|integracao/(index\.html|catalogo\.js|build_unificado\.ps1|atualizar-creator\.ps1|godot/(ApoenaCatalogo\.gd|project\.godot|dados/apoena_catalogo\.json))|legacy/(abrir-editor-v3\.9\.html|v3_9_parts/parte_\d{3}\.js)|shared/.*\.js|biblioteca/.*\.(html|js|json)|map-editor/.*\.(js|html|json)|pixel-art/.*\.(js|html|json))$'
 
 function Registrar([string]$Mensagem) {
     $linha = ('{0} horario local | {1}' -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz'), $Mensagem)
