@@ -326,3 +326,15 @@ A CI 41114836257 falhou no step 17 com Token '}' inesperado. A causa foi um segu
 O autor autorizou explicitamente a alteração do atualizador e do empacotamento do Game Creator para que a instalação/distribuição contenha somente os arquivos necessários ao runtime, mantendo auditorias, documentos internos, testes e workflows no repositório privado.
 
 A regra anterior de “somente documentação” continua valendo para todas as demais tarefas e funcionalidades do Creator. Esta autorização é restrita ao GC-UPDATE-009: atualizador enxuto, manifesto de runtime, proteção de dados locais e testes de validação. Não autoriza novas funcionalidades criativas nem alterações fora desse escopo.
+
+
+## Complemento de classificação — GC-UPDATE-TEST-001
+
+- **Branch:** feat/atualizador-local-incremental.
+- **Classificação:** falha de teste/asserção estática por incompatibilidade de quebras de linha CRLF/LF; não foi falha de atribuição do runner nem de comunicação.
+- **Causas descartadas com evidência:** o job foi atribuído ao runner Windows e chegou ao step 17; as etapas anteriores de build, navegador, sintaxe, biblioteca, catálogo e Godot concluíram antes da assertion. Não houve ENOTFOUND nem timeout de runner nesse run.
+
+
+## Regex de runtime derivada do manifesto
+
+A expressão usada para classificar arquivos locais agora é gerada diretamente de runtimePatterns, escapando cada caminho e traduzindo * para [^/]*. Assim, a proteção acompanha exatamente os padrões de sparse-checkout e não aceita extensões ou subpastas que o manifesto não instala. O teste cobre biblioteca/backup.json, map-editor/backup.json, subpastas em map-editor, pixel-art, shared e bundle-v4.
