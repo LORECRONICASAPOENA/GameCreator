@@ -74,3 +74,22 @@ A branch anterior da PR #7 estava divergente da main (16 commits à frente e 33 
 Os commits intermediários foram marcados com [skip ci] para evitar várias execuções enquanto os arquivos eram preparados. A CI canônica será executada uma única vez após a atualização final da branch da PR. O teste local automatizado não substitui a validação no computador do autor.
 
 **Estado:** sincronização preparada; validação CI do novo head e teste Windows real ainda pendentes.
+
+
+## Achado crítico adicional — clone sem checkout e proteção de arquivos locais
+
+A simulação de Git local reproduziu um defeito importante no fluxo inicial:
+
+- git clone --no-checkout deixa o worktree vazio;
+- git sparse-checkout set --no-cone configura o manifesto, mas não materializa os arquivos no clone sem checkout;
+- git read-tree -mu HEAD materializa os caminhos selecionados e mantém documentos fora do worktree;
+- antes de executar read-tree, é obrigatório verificar colisões de arquivos locais, porque o comando pode substituir conteúdo no caminho.
+
+Também foi testado o merge em sparse-checkout com --no-overwrite-ignore: no Git 2.47.3 usado na simulação, o merge ainda avançou sobre arquivos locais ignorados e não rastreados que conflitavam com novos arquivos remotos. Portanto, o atualizador não depende dessa flag como proteção principal. A função VerificarConflitosLocais compara a árvore remota com a lista combinada de arquivos não rastreados e ignorados e interrompe antes do merge.
+
+- **Correção aplicada:** validação de cobertura por sparse-checkout check-rules, chamada de read-tree -mu HEAD após checagem preventiva e detecção explícita de arquivos ignorados/não ignorados.
+- **Teste local de comandos:** PASSOU em Linux, Git 2.47.3, repositório temporário sem conexão ao GitHub.
+- **Validação Windows:** pendente da CI no novo head.
+- **Validação no computador do autor:** pendente; nenhuma pasta local foi modificada.
+
+Esse achado reforça que o atualizador não pode ser declarado concluído apenas com parser PowerShell e teste estático; a simulação Git e o teste Windows real são critérios obrigatórios.
