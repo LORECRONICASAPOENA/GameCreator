@@ -27,8 +27,9 @@
 - `tests/tileset-check.test.cjs`: bordas transparentes, repetição, grade e limites de imagens.
 - `tests/catalogo.test.cjs`: exportação portátil, vínculos de itens/receitas e contrato de integração Godot.
 - `tests/creator-bridge.test.cjs`: protocolo request/response, rejeição de origem externa e contratos de sincronização V4.0/V4.1.
-- `.github/workflows/pixel-art.yml`: build nativo pelo PowerShell do Windows, verificações JavaScript, testes Node, verificação DOM responsiva em Edge/Chrome e teste headless do Godot 4.7.2 com SHA-256 verificado.
-- A validação agendada executa a cada hora UTC enquanto o workflow estiver ativo na branch padrão.
+- `.github/workflows/pixel-art.yml` é o CI canônico: executa automaticamente em pushes de arquivos relevantes em qualquer branch, em atualizações de Pull Request para `main` e a cada hora UTC na branch padrão.
+- O pipeline usa um único job sequencial no Runner Windows: compila o Creator antes dos testes, valida JavaScript, DOM responsivo, biblioteca/backup, contratos de integração, hidrologia quando os arquivos existem e runtime headless do Godot 4.7.2 com SHA-256 verificado.
+- `workflow_dispatch` permanece apenas como alternativa de emergência; não é necessário apertar Validar no fluxo normal. A concorrência por branch cancela execuções antigas equivalentes para evitar fila acumulada.
 
 ## Limites que impedem declarar o projeto concluído
 
