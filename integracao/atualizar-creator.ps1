@@ -235,11 +235,28 @@ try {
     }
 
     if ($retomarClonePendente) {
+        $modificados = @(& $git.Source -C $Destino status --porcelain --untracked-files=no)
+        if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar o estado do clone pendente.' }
+
+        if ($modificados.Count -gt 0) {
+            $naoSaoAusencias = @($modificados | Where-Object {
+                $_.Length -lt 3 -or $_.Substring(0, 2) -ne ' D'
+            })
+            if ($naoSaoAusencias.Count -gt 0) {
+                throw 'Clone inicial marcado como pendente, mas ha alteracoes rastreadas alem de arquivos ausentes. Nao vou sobrescrever; faca backup e verifique manualmente.'
+            }
+            Registrar 'Retomando primeira instalacao interrompida antes da materializacao do checkout.'
+        } else {
+            # O checkout pode ter sido materializado antes da interrupcao; o marcador ficou para tras.
+            Remove-Item -LiteralPath $arquivoClonePendente -Force
+            $retomarClonePendente = $false
+            Registrar 'Marcador pendente encontrado com worktree limpo; retomando como instalacao normal.'
+        }
+
         & $git.Source -C $Destino rev-parse --verify HEAD *> $null
         if ($LASTEXITCODE -ne 0) {
             throw 'A primeira instalacao foi interrompida antes de criar o HEAD Git. Nao vou apagar a pasta; verifique o clone parcial e tente novamente.'
         }
-        Registrar 'Retomando primeira instalacao interrompida antes da materializacao do checkout.'
     } elseif (-not $novoClone) {
         $modificados = @(& $git.Source -C $Destino status --porcelain --untracked-files=no)
         if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar alteracoes locais.' }
