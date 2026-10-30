@@ -123,6 +123,18 @@ assert.match(updater, /\$versaoGit = \[version\]\$versaoMatch\.Groups\[0\]\.Valu
   "A comparação de versão deve usar a correspondência completa.");
 assert.match(updater, /sparse-checkout check-rules --no-cone/,
   "O atualizador deve conferir o manifesto antes de aplicar um merge.");
+assert.match(updater, /function VerificarConflitosLocais/,
+  "O atualizador precisa proteger arquivos locais antes de materializar o sparse-checkout.");
+assert.match(updater, /ls-files --others --exclude-standard/,
+  "A proteção precisa detectar arquivos locais não ignorados.");
+assert.match(updater, /ls-files --others --ignored --exclude-standard/,
+  "A proteção precisa detectar arquivos locais ignorados.");
+assert.match(updater, /read-tree -mu HEAD/,
+  "Clone iniciado com --no-checkout precisa materializar o runtime após validar conflitos.");
+const noOpBranch = updater.match(/if \(\$remoto -eq \$anterior\) \{([\s\S]*?)\} else \{/);
+assert.ok(noOpBranch, "O fluxo de atualização sem mudanças precisa existir.");
+assert.doesNotMatch(noOpBranch[1], /update-ref/,
+  "Execução sem mudanças não pode substituir a referência da versão anterior.");
 assert.match(updater, /merge --no-overwrite-ignore --ff-only/,
   "Atualização deve ser fast-forward e proteger arquivos ignorados.");
 assert.match(updater, /status --porcelain --untracked-files=no/,
@@ -244,6 +256,18 @@ function testSparseCheckoutAndUpdate() {
     ]);
     git(install, ["sparse-checkout", "set", "--no-cone", ...runtimePatterns]);
 
+    const checkRules = spawnSync("git", ["sparse-checkout", "check-rules", "--no-cone"], {
+      cwd: install, input: essentials.join("\n") + "\n", encoding: "utf8", windowsHide: true
+    });
+    assert.equal(checkRules.status, 0, "Git precisa validar as regras do sparse-checkout.");
+    const includedEssentials = new Set(checkRules.stdout.split(/\r?\n/).filter(Boolean));
+    for (const essential of essentials) {
+      assert.ok(includedEssentials.has(essential), "Sparse-checkout não cobre arquivo essencial: " + essential);
+    }
+
+    // --no-checkout exige uma materialização explícita depois da lista positiva.
+    git(install, ["read-tree", "-mu", "HEAD"]);
+
     const filter = git(install, ["config", "--get", "remote.origin.partialclonefilter"]).stdout.trim();
     assert.equal(filter, "blob:none", "Clone precisa manter filtro parcial de blobs.");
 
@@ -294,12 +318,15 @@ function testSparseCheckoutAndUpdate() {
         "Execução sem mudanças não pode substituir a referência da versão anterior.");
     }
 
-    const ignoredRelative = "pixel-art/override-local.js";
+    const ignoredRelative = "pixel-art/override-ignored.js";
+    const untrackedRelative = "pixel-art/override-untracked.js";
     const exclude = path.join(install, ".git", "info", "exclude");
     fs.appendFileSync(exclude, "\n" + ignoredRelative + "\n");
-    writeFile(install, ignoredRelative, "conteudo pessoal local");
-    writeFile(source, ignoredRelative, "conteudo remoto novo");
-    commitAll(source, "fixture introduces conflicting runtime path");
+    writeFile(install, ignoredRelative, "conteudo pessoal ignorado");
+    writeFile(install, untrackedRelative, "conteudo pessoal nao ignorado");
+    writeFile(source, ignoredRelative, "conteudo remoto ignorado");
+    writeFile(source, untrackedRelative, "conteudo remoto nao ignorado");
+    commitAll(source, "fixture introduces conflicting runtime paths");
     git(source, ["push", "origin", "main"]);
     git(install, [
       "fetch", "--no-tags", "--filter=blob:none", "origin",
@@ -308,19 +335,26 @@ function testSparseCheckoutAndUpdate() {
 
     const ignored = git(install, ["ls-files", "--others", "--ignored", "--exclude-standard"])
       .stdout.split(/\r?\n/).filter(Boolean);
+    const untracked = git(install, ["ls-files", "--others", "--exclude-standard"])
+      .stdout.split(/\r?\n/).filter(Boolean);
+    const localFiles = new Set([...ignored, ...untracked]);
     const remoteFiles = git(install, ["ls-tree", "-r", "--name-only", "refs/remotes/origin/main"])
       .stdout.split(/\r?\n/).filter(Boolean);
     const remoteRuntime = new Set(remoteFiles.filter((file) => runtimeRegex.test(file)));
-    const conflicts = ignored.filter((file) => remoteRuntime.has(file));
+    const conflicts = [...localFiles].filter((file) => remoteRuntime.has(file));
     assert.ok(conflicts.includes(ignoredRelative),
       "Verificação precisa identificar arquivo ignorado do usuário que conflita com runtime novo.");
+    assert.ok(conflicts.includes(untrackedRelative),
+      "Verificação precisa identificar arquivo não ignorado do usuário que conflita com runtime novo.");
 
     const merge = git(install, [
       "merge", "--no-overwrite-ignore", "--ff-only", "refs/remotes/origin/main"
     ], true);
-    assert.notEqual(merge.status, 0, "Merge precisa bloquear sobrescrita de arquivo ignorado.");
-    assert.equal(fs.readFileSync(path.join(install, ignoredRelative), "utf8"), "conteudo pessoal local",
+    assert.notEqual(merge.status, 0, "Merge precisa bloquear sobrescrita de arquivo local.");
+    assert.equal(fs.readFileSync(path.join(install, ignoredRelative), "utf8"), "conteudo pessoal ignorado",
       "Conteúdo pessoal ignorado precisa permanecer intacto.");
+    assert.equal(fs.readFileSync(path.join(install, untrackedRelative), "utf8"), "conteudo pessoal nao ignorado",
+      "Conteúdo pessoal não ignorado precisa permanecer intacto.");
     assert.equal(git(install, ["rev-parse", "HEAD"]).stdout.trim(), installedAfterUpdate,
       "Merge bloqueado não pode avançar a versão instalada.");
   } finally {
