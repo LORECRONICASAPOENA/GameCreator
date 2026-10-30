@@ -96,3 +96,18 @@ A exclusão do pacote não apaga os documentos do GitHub. Para uma distribuiçã
 4. Somente após essas evidências, decidir sobre integração da PR.
 
 **Estado final deste registro:** documentação atualizada; filtragem de ZIP presente na main; sparse-checkout preparado na PR #7; validação Windows pendente.
+
+
+## Atualizacao de evidencia — validacao do pacote sem documentos
+
+Depois do snapshot inicial, a execucao [41079295445](https://github.com/apoenalore/GameCreator/actions/runs/41079295445), disparada pelo commit f69a013dcc6f38267e204b50c1df90698dca54a3, terminou com SUCCESS.
+
+- Job: 124143797200.
+- Todos os steps do job terminaram com sucesso, incluindo a preparacao da entrega e o upload dos artefatos.
+- O log confirmou a mensagem de exclusao de documentacao interna, historico, testes e CI.
+- O ZIP foi montado com 52 arquivos de runtime.
+- O artefato principal enviado pelo Actions foi finalizado com 71.896.589 bytes.
+- O manifesto de runtime foi colocado fora do ZIP, junto dos arquivos de entrega.
+- A verificacao de caminhos proibidos e de arquivos Markdown/TXT no pacote nao encontrou conteudo proibido; caso encontrasse, o step teria falhado.
+
+**Conclusao atualizada:** a filtragem do ZIP de distribuicao esta VALIDADA PELO WORKFLOW no commit f69a013. Isso ainda nao valida o sparse-checkout do atualizador da PR #7 nem uma instalacao/atualizacao real no computador do autor. A PR #7 continua draft e nao integrada.
