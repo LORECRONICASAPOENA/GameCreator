@@ -263,3 +263,15 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 2. Atualizar o registro GC-CI-012 e GC-PACK-001 com o resultado final.
 3. Resolver a divergência/merge conflict da PR #6 ambiental e obter CI no head atual; não fazer merge automático.
 4. Manter GC-UPDATE-009 como única tarefa de implementação ativa; não iniciar UX, sessão online ou novas funcionalidades até fechar os critérios do atualizador.
+
+
+## GC-UPDATE-009 — Atualizador enxuto do Game Creator (30/10/2026)
+
+- **Estado:** WIP 1 / EM VALIDAÇÃO; não iniciar novas funcionalidades até fechar esta tarefa.
+- **Objetivo:** manter documentação, auditorias, histórico, testes e workflows no repositório privado, mas materializar somente os arquivos necessários ao runtime na pasta APP.
+- **Implementação:** clone parcial com --filter=blob:none, sparse-checkout por lista positiva, manifesto de arquivos essenciais, fetch explícito de origin/main, fast-forward e proteção de arquivos ignorados.
+- **Preservação:** não usar reset/clean; não apagar runner, biblioteca IndexedDB, arquivos pessoais ou histórico local.
+- **Revisão/sincronização:** a branch anterior da PR #7 estava divergente de main. Foi preservada em backup/gc-update-009-before-main-sync-20261030; a versão de trabalho está sendo reaplicada sobre a main atual antes de atualizar a PR.
+- **Validação automatizada planejada:** teste isolado com repositório Git local para confirmar sparse-checkout, exclusão de documentos, fast-forward, referência anterior e bloqueio de conflito com arquivo ignorado.
+- **Pendências de aceite:** CI canônica no novo SHA; CodeRabbit no diff atualizado; teste real de instalação/atualização no Windows; backup e restauração da biblioteca IndexedDB conferidos pelo autor.
+- **Regra:** não integrar a PR nem declarar concluído até todos os critérios acima terem evidência.
