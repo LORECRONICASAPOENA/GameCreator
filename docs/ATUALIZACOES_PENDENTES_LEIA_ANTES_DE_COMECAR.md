@@ -135,3 +135,14 @@
 - **Critérios de aceite:** (a) primeira configuração define a pasta fixa; (b) atualização seguinte atualiza essa mesma pasta sem criar uma segunda instalação; (c) arquivos novos e modificados chegam corretamente; (d) assets, biblioteca, dados, configurações e runner locais permanecem intactos; (e) falha/interrupção não deixa o Creator parcialmente sobrescrito sem aviso ou recuperação; (f) log identifica data, origem/commit, destino, arquivos copiados e resultado; (g) após sucesso, a pasta/ZIP temporários podem ser apagados e o espaço recuperado.
 - **Estado em 30/10/2026:** IMPLEMENTADO EM BRANCH / NAO VALIDADO. Arquivos ATUALIZAR_CREATOR.cmd e integracao/atualizar-creator.ps1 criados em feat/atualizador-local-incremental; documentacao em docs/ATUALIZADOR_CREATOR_WINDOWS.md. Nao foi executado no Windows do autor, nao esta integrado na main e nao houve alteracao do computador. Apendice da proposta ZIP continua como fallback futuro, nao implementado.
 - **Implementação futura:** primeiro inspecionar a estrutura real do repositório e a pasta local do usuário; elaborar inventário de arquivos de produto versus dados locais; prototipar em duas pastas temporárias de teste; validar cópia e recuperação; só então disponibilizar o CMD. Respeitar a regra geral deste documento: nesta etapa, apenas documentar, sem alterar código, UI, testes ou workflows.
+
+
+## Autorizacao especifica — GC-UPDATE-009 e pacote de runtime (30/10/2026, 12:09 BRT)
+
+A regra anterior de “somente documentacao” continua valendo para as demais melhorias criativas e funcionais. O autor autorizou especificamente a alteracao do atualizador GC-UPDATE-009 para que a instalacao local receba somente os arquivos necessarios ao runtime do Game Creator.
+
+- Documentacao, auditorias, bases de erros, requisitos, testes, workflows, legado e historico permanecem no repositorio privado.
+- A pasta APP deve conter apenas os arquivos listados no manifesto positivo de runtime.
+- A primeira instalacao deve baixar somente os dois arquivos de bootstrap e depois usar clone parcial + sparse-checkout.
+- Nenhuma limpeza de arquivos pessoais, runner, biblioteca IndexedDB ou historico local sera feita automaticamente.
+- A alteracao fica na branch de trabalho e nao pode ser considerada concluida antes de CI e teste Windows real.
