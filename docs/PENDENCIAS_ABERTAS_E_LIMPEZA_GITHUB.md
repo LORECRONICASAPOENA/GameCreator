@@ -275,3 +275,12 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - **Validação automatizada planejada:** teste isolado com repositório Git local para confirmar sparse-checkout, exclusão de documentos, fast-forward, referência anterior e bloqueio de conflito com arquivo ignorado.
 - **Pendências de aceite:** CI canônica no novo SHA; CodeRabbit no diff atualizado; teste real de instalação/atualização no Windows; backup e restauração da biblioteca IndexedDB conferidos pelo autor.
 - **Regra:** não integrar a PR nem declarar concluído até todos os critérios acima terem evidência.
+
+
+## Descoberta de segurança — checkout inicial e conflitos locais (30/10/2026)
+
+A simulação Git local identificou que sparse-checkout set --no-cone não materializa por si só um clone iniciado com --no-checkout. Foi adicionado git read-tree -mu HEAD após a verificação do manifesto.
+
+Também foi comprovado que, em sparse-checkout, git merge --no-overwrite-ignore sozinho não é proteção suficiente contra todo arquivo local conflitante. O atualizador agora detecta tanto arquivos ignorados quanto não ignorados antes da materialização e antes do merge; qualquer colisão com o runtime remoto bloqueia a operação.
+
+A simulação foi executada com Git 2.47.3 em Linux. O novo teste de contrato repete esses cenários na CI Windows. Nenhuma pasta do computador do autor foi alterada.
