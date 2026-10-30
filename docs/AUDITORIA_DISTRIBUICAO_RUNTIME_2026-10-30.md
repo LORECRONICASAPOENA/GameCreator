@@ -127,3 +127,7 @@ O teste executa primeira instalação, verifica arquivos presentes/ausentes, blo
 ## GC-UPDATE-RECOVERY-001 — Retomada segura da primeira instalação
 
 A revisão identificou que uma interrupção após clone --no-checkout e antes de read-tree deixaria um clone com .git, mas sem arquivos materializados. Nesse estado, git ls-files retorna índice vazio e git status pode mostrar D na primeira coluna. O atualizador agora grava clone-pendente.txt em ConfigDir antes de clonar. Na retomada, índice vazio + árvore HEAD válida identifica o clone não materializado; se o índice já estiver populado, somente ausências de worktree (status “ D”) são aceitas. Qualquer modificação rastreada real bloqueia. Se o worktree estiver limpo, o marcador residual é removido. O teste end-to-end cria o clone --no-checkout, confirma índice vazio/status D, e executa o PowerShell real. CI do head atual pendente.
+
+## GC-UPDATE-TEST-002 — Parser PowerShell
+
+O run 41114836257 falhou antes do teste Node porque o script continha um bloco duplicado depois do catch e uma chave de fechamento extra. O trecho duplicado foi removido no commit d90541bd642f17aa681ea7e623b49dba12ca2b36. O parser PowerShell 5.1 da próxima CI precisa confirmar a correção.
