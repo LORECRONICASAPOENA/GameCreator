@@ -58,3 +58,6 @@ O plano consolidado de História, Exploração Livre, MOBA, ecossistema, NPCs, e
 
 A primeira fatia foi integrada à main pela PR #2. Ela adiciona catálogo de terreno, propriedades ambientais e autotile, metadados de interação para objetos, perfis de plantas/animais/montarias, profissão e rotina de NPCs, papel econômico, perfis de mapa e validação. O editor inicia com a Cidade Capital de Agar no perfil História e mantém o preset de MOBA. Esses dados são a fundação de autoria/exportação; a simulação ecológica, as transações, as rotinas autônomas e o comportamento no jogo ainda exigem implementação e testes no runtime.
 
+## Padrão obrigatório para alterações de código
+
+Antes de qualquer implementação, agentes e colaboradores devem ler `AGENTS.md` e `docs/PADRAO_DE_INTEGRACAO_E_PREVENCAO_DE_REGRESSOES.md`. O documento define como investigar dependências, preservar contratos, evitar duplicidades e conflitos, testar integrações e registrar erros. Uma alteração só pode ser declarada concluída após o workflow relevante passar no commit exato.
