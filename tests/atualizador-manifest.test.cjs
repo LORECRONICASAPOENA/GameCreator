@@ -134,7 +134,7 @@ assert.match(updater, /function VerificarConflitosLocais/,
 assert.match(updater, /function VerificarArquivosLocaisForaDoRuntime/,
   "O atualizador precisa preservar arquivos ignorados fora da allowlist antes do sparse-checkout.");
 const ignoredOutsideGuardPosition = updater.indexOf("\n    VerificarArquivosLocaisForaDoRuntime\n");
-const sparseSetPosition = updater.indexOf("sparse-checkout set --no-cone");
+const sparseSetPosition = updater.indexOf("\n    & $git.Source -C $Destino sparse-checkout set --no-cone");
 assert.ok(ignoredOutsideGuardPosition >= 0 && ignoredOutsideGuardPosition < sparseSetPosition,
   "Arquivos locais fora do runtime precisam ser verificados antes de alterar o sparse-checkout.");
 assert.match(updater, /ls-files --others --exclude-standard/,
