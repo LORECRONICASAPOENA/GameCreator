@@ -235,22 +235,33 @@ try {
     }
 
     if ($retomarClonePendente) {
-        $modificados = @(& $git.Source -C $Destino status --porcelain --untracked-files=no)
-        if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar o estado do clone pendente.' }
+        $indexados = @(& $git.Source -C $Destino -c core.quotePath=false ls-files)
+        if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar o indice do clone pendente.' }
 
-        if ($modificados.Count -gt 0) {
-            $naoSaoAusencias = @($modificados | Where-Object {
-                $_.Length -lt 3 -or $_.Substring(0, 2) -ne ' D'
-            })
-            if ($naoSaoAusencias.Count -gt 0) {
-                throw 'Clone inicial marcado como pendente, mas ha alteracoes rastreadas alem de arquivos ausentes. Nao vou sobrescrever; faca backup e verifique manualmente.'
+        if ($indexados.Count -eq 0) {
+            $rastreadosNoCommit = @(& $git.Source -C $Destino -c core.quotePath=false ls-tree -r --name-only HEAD)
+            if ($LASTEXITCODE -ne 0 -or $rastreadosNoCommit.Count -eq 0) {
+                throw 'Clone inicial pendente sem indice e sem arvore HEAD valida. Nao vou apagar a pasta; verifique o clone parcial.'
             }
-            Registrar 'Retomando primeira instalacao interrompida antes da materializacao do checkout.'
+            Registrar 'Retomando clone inicial sem checkout: o indice esta vazio e o commit HEAD existe.'
         } else {
-            # O checkout pode ter sido materializado antes da interrupcao; o marcador ficou para tras.
-            Remove-Item -LiteralPath $arquivoClonePendente -Force
-            $retomarClonePendente = $false
-            Registrar 'Marcador pendente encontrado com worktree limpo; retomando como instalacao normal.'
+            $modificados = @(& $git.Source -C $Destino status --porcelain --untracked-files=no)
+            if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar o estado do clone pendente.' }
+
+            if ($modificados.Count -gt 0) {
+                $naoSaoAusencias = @($modificados | Where-Object {
+                    $_.Length -lt 3 -or $_.Substring(0, 2) -ne ' D'
+                })
+                if ($naoSaoAusencias.Count -gt 0) {
+                    throw 'Clone inicial marcado como pendente, mas ha alteracoes rastreadas alem de arquivos ausentes. Nao vou sobrescrever; faca backup e verifique manualmente.'
+                }
+                Registrar 'Retomando materializacao parcial: ha somente arquivos rastreados ausentes no worktree.'
+            } else {
+                # O checkout pode ter sido materializado antes da interrupcao; o marcador ficou para tras.
+                Remove-Item -LiteralPath $arquivoClonePendente -Force
+                $retomarClonePendente = $false
+                Registrar 'Marcador pendente encontrado com worktree limpo; retomando como instalacao normal.'
+            }
         }
 
         & $git.Source -C $Destino rev-parse --verify HEAD *> $null
