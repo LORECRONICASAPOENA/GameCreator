@@ -306,11 +306,12 @@ O teste tests/atualizador-manifest.test.cjs não fica apenas na simulação de c
 O teste executa primeira instalação, verifica arquivos presentes/ausentes, bloqueio de arquivos locais fora da allowlist, atualização fast-forward, preservação de refs/apoena/anterior, execução sem mudanças e bloqueio de conflitos ignorados/não ignorados, inclusive um caminho com acento. Nenhuma pasta permanente do autor é usada.
 
 
-## Incidente GC-UPDATE-TEST-001 — assertion do manifesto
 
-A CI do commit df105063a13536c0b3e56296c94e405cd7ce5a04 falhou no step 17 por uma assertion de ordem que encontrou a menção a sparse-checkout set --no-cone em um comentário, não a chamada executável. A implementação do guard não foi apontada como falha.
 
-- Run: 41113920551; job: 124263385696; ocorrência: 30/10/2026 16:18:02 BRT.
-- Correção: a assertion agora procura a linha completa do comando executável.
-- Commit da correção no branch de trabalho: 8bbe3d7379b43da5c98c18bd1165e2d8d114a267.
-- Estado: correção aplicada; nova CI ainda pendente. O teste PowerShell end-to-end ainda não foi executado nesse run.
+## GC-UPDATE-TEST-001 — CRLF no teste de contrato
+
+A falha do run 41113920551 foi causada por CRLF no arquivo PowerShell lido pelo teste Node, não por ausência do guard. O teste agora normaliza CRLF para LF antes de usar indexOf e procura a linha executável completa. Correções do teste: 65c65521b0fb1595215bd70da03c4ef7b898032d e 8bbe3d7379b43da5c98c18bd1165e2d8d114a267. A nova CI do head atual ainda está pendente.
+
+## GC-UPDATE-RECOVERY-001 — Retomada de clone interrompido
+
+Foi adicionado o marcador clone-pendente.txt no diretório de configuração. Ele permite retomar uma primeira instalação interrompida após clone --no-checkout, sem confundir os arquivos ausentes com alterações locais. O teste cria um clone temporário nesse estado e executa o atualizador PowerShell real. A validação CI ainda está pendente.
