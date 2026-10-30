@@ -1,6 +1,7 @@
 # Registro de pendências abertas e limpeza do GitHub
 
-**Data do levantamento:** 29/10/2026 21:37 BRT  
+**Data do levantamento inicial:** 29/10/2026 21:37 BRT  
+**Última atualização:** 30/10/2026 (hora exata da consulta não preservada)  
 **Escopo:** Apoena Game Creator e Apoena Pixel Art HTML  
 **Objetivo:** manter uma lista única de trabalho, reduzir validações duplicadas e não encerrar tarefas sem confirmar que seu conteúdo foi preservado.
 
@@ -17,22 +18,22 @@
 ### Tarefa ativa única
 
 - **T-002 — Estabilizar CI/runner do Game Creator e consolidar as falhas de validação.**
-- **Estado:** BLOQUEADA — cancelamento manual da fila antiga é necessário; nenhuma nova validação foi disparada.
-- **Levantamento completo:** consulta das 324 execuções do Game Creator (4 páginas da API): **13 queued, 0 in_progress**. As outras 311 execuções estavam concluídas/canceladas. Amostra de jobs confirma runner_id = 0, runner_name vazio e labels exigidos self-hosted, Windows, X64.
-- **Limitação operacional:** a conexão GitHub disponível nesta sessão permite consultar execuções, jobs e logs, mas não expõe uma operação de cancelamento de workflow. Não declarar fila limpa nem fingir cancelamento. É necessária a ação manual de cancelamento dos 13 IDs abaixo no GitHub Actions.
+- **Estado:** BLOQUEADA — 17 jobs permanecem `queued`, sem nenhum `in_progress`. 15 são execuções antigas/obsoletas que precisam de cancelamento manual; 2 são validações atuais da PR #5 e devem ser preservadas para execução posterior. O estado online do runner ainda precisa ser confirmado.
+- **Levantamento atualizado em 30/10/2026:** consulta das 346 execuções do Game Creator (4 páginas da API): **17 queued, 0 in_progress e 329 completed**. No histórico concluído há 158 `failure`, 96 `success` e 75 `cancelled`; esses resultados incluem tentativas antigas e não representam 158 defeitos atuais. Todos os 17 jobs em fila exigem labels `self-hosted`, `Windows`, `X64` e retornam `runner_id = 0` e `runner_name` vazio. 15 são antigos/obsoletos; 2 são os testes atuais da PR #5 (validação do Creator e teste específico de hidrologia), que devem ser preservados.
+- **Limitação operacional:** a conexão GitHub disponível nesta sessão permite consultar execuções, jobs e logs, mas não expõe uma operação de cancelamento de workflow. Não declarar fila limpa nem fingir cancelamento. É necessária a ação manual de cancelamento dos 15 IDs obsoletos abaixo no GitHub Actions. Não cancelar as duas validações atuais da PR #5.
 - **Escopo:** cancelar a fila obsoleta/duplicada; confirmar runner e labels; executar uma única validação canônica da branch atual; diagnosticar e corrigir qualquer falha antes de repetir; concluir a revisão de CI e dos erros conhecidos do Creator. Nenhuma funcionalidade nova pode começar antes do encerramento de T-002.
 
 ## 1. Estado geral
 
 - [x] Inventário de pull requests, workflows e execuções do Actions.
 - [x] Confirmar validações recentes bem-sucedidas no Pixel Art.
-- [x] Consultar todas as 324 execuções do Game Creator: 13 em fila, nenhuma em andamento.
+- [x] Consultar todas as 346 execuções do Game Creator: 17 em fila, nenhuma em andamento; 329 concluídas.
 - [x] Escolher um workflow canônico de validação do Creator.
 - [x] Remover a agenda periódica redundante do workflow principal.
 - [x] Unificar concorrência por branch para eventos push e pull_request.
 - [x] Remover dois workflows manuais redundantes após conferir que os testes estão cobertos pela validação canônica.
 - [x] Preservar o workflow separado de build/publicação, que tem finalidade própria.
-- [ ] Cancelar manualmente os 13 jobs antigos ainda queued.
+- [ ] Cancelar manualmente os 15 jobs obsoletos ainda `queued`, preservando as duas validações atuais da PR #5.
 - [ ] Confirmar disponibilidade do runner Game Creator com labels compatíveis.
 - [ ] Executar uma única validação canônica e resolver eventuais falhas antes de repetir.
 - [ ] Decidir o destino dos protótipos de hidrologia depois de preservar seus arquivos exclusivos.
@@ -84,7 +85,7 @@ Execução [`40949815160`](https://github.com/apoenalore/Apoena-pixel-art-html/a
 
 ### Bloqueio de runner e fila antiga
 
-Consulta completa em 29/10/2026 21:37 BRT: 324 execuções consultadas em quatro páginas; **13 queued, 0 in_progress**. Nas execuções representativas, os jobs solicitam labels self-hosted, Windows, X64, mas aparecem com runner_id = 0 e runner_name vazio. Isso confirma que nenhum runner foi atribuído; a causa pode ser runner offline, labels incompatíveis ou registro/permissão, e ainda precisa ser verificada.
+Consulta atualizada em 30/10/2026: 346 execuções em quatro páginas; **17 queued, 0 in_progress**. Os 17 jobs foram consultados individualmente: todos solicitam `self-hosted`, `Windows`, `X64`, têm `runner_id = 0`, `runner_name` vazio e zero steps executados. Isso confirma que nenhum recebeu runner. A causa específica ainda não está demonstrada; verificar status Online, grupo, autorização, labels e serviço Windows.
 
 **Execuções que precisam ser canceladas manualmente em Actions:**
 
@@ -101,16 +102,32 @@ Consulta completa em 29/10/2026 21:37 BRT: 324 execuções consultadas em quatro
 11. [40943993233 — integração da PR #6 em commit anterior](https://github.com/apoenalore/GameCreator/actions/runs/40943993233)
 12. [40943754023 — integração por push em commit anterior](https://github.com/apoenalore/GameCreator/actions/runs/40943754023)
 13. [40943621289 — integração por push em commit anterior](https://github.com/apoenalore/GameCreator/actions/runs/40943621289)
+14. [40994405717 — integração antiga por push da PR #6](https://github.com/apoenalore/GameCreator/actions/runs/40994405717)
+15. [40994401969 — integração antiga por push da PR #6](https://github.com/apoenalore/GameCreator/actions/runs/40994401969)
 
 **Por que ainda não foram canceladas:** a integração GitHub disponível nesta sessão não oferece a ação/API de cancelamento (somente leitura para execuções e jobs). Não posso executar o cancelamento por essa conexão. Não criei outro workflow para contornar isso, pois seria mais uma execução e contrariaria a regra de limpeza.
 
-**Ação necessária:** no GitHub, abrir cada execução acima e usar **Cancel workflow** enquanto o estado ainda for Queued. Depois, consultar novamente todas as páginas e confirmar zero queued e zero in_progress. Em seguida, verificar em Settings → Actions → Runners se APOENA-GAMECREATOR-RUNNER está online e possui os labels exigidos. O texto “Listening for Jobs” no CMD, sozinho, não comprova a atribuição ao repositório.
+**Preservar — não cancelar:**
+- [40996154391 — validação canônica do Creator na PR #5](https://github.com/apoenalore/GameCreator/actions/runs/40996154391)
+- [40996154399 — teste específico de hidrologia da PR #5](https://github.com/apoenalore/GameCreator/actions/runs/40996154399)
 
-Não disparar nenhuma nova validação antes dessas duas verificações. Depois da fila zerada e do runner confirmado, executar uma única validação canônica da PR #6; se falhar, diagnosticar o primeiro erro causal e corrigir antes de nova tentativa.
+**Ação necessária:** no GitHub, abrir as 15 execuções obsoletas acima e usar **Cancel workflow** enquanto estiverem `queued`. Não cancelar as duas execuções atuais da PR #5. Depois, abrir Settings → Actions → Runners e confirmar se `APOENA-GAMECREATOR-RUNNER` está Online, autorizado para o repositório e com as labels `self-hosted`, `Windows`, `X64`. “Listening for Jobs” no CMD, sozinho, não comprova que o runner esteja atribuído corretamente.
+
+Depois de confirmar o runner, deixar as duas validações atuais da PR #5 executarem. Só então executar uma única validação canônica necessária para a PR #6, sem repetir jobs equivalentes.
 
 ### Validação anterior
 
-Execução [`40942973127`](https://github.com/apoenalore/GameCreator/actions/runs/40942973127) passou nos testes isolados de integração de catálogo em um commit anterior. A execução agendada [`40942880450`](https://github.com/apoenalore/GameCreator/actions/runs/40942880450) falhou na suíte automatizada; esse erro ainda precisa ser revisto no log. Os testes executados em ambiente de análise não substituem a confirmação do CI no runner real.
+Execução [`40942973127`](https://github.com/apoenalore/GameCreator/actions/runs/40942973127) passou nos testes isolados de integração de catálogo em um commit anterior.
+
+**Diagnóstico das falhas históricas consultadas em 30/10/2026:**
+- [`40942880450`](https://github.com/apoenalore/GameCreator/actions/runs/40942880450) e [`40933499154`](https://github.com/apoenalore/GameCreator/actions/runs/40933499154) falharam no teste `tests/corte-inteligente.test.cjs:99`, assertion `entrada carrega biblioteca, ponte e editor de Natureza`. A antiga `auto-validar-v41.yml` executava os testes antes de compilar o Creator; a etapa de build vinha depois. Essa definição foi removida da `main`. A `pixel-art.yml` canônica atual compila o Creator antes da suíte de testes. A correção de ordem está presente na definição atual, mas ainda falta validação canônica executada com sucesso no runner.
+- [`40928443619`](https://github.com/apoenalore/GameCreator/actions/runs/40928443619) falhou com `ParserError` / `A cadeia de caracteres não tem o terminador: '`, durante a montagem do Creator. Uma execução posterior de publicação [`40928688594`](https://github.com/apoenalore/GameCreator/actions/runs/40928688594) concluiu com sucesso após correção no script PowerShell; classificar a falha anterior como histórica.
+- [`40994904732`](https://github.com/apoenalore/GameCreator/actions/runs/40994904732) e [`40994904143`](https://github.com/apoenalore/GameCreator/actions/runs/40994904143), tentativas temporárias com `windows-latest`, terminaram em cerca de três segundos, sem steps e sem logs. Não há evidência suficiente para atribuir a falha ao código; causa de inicialização do job não diagnosticada.
+- [`40961681593`](https://github.com/apoenalore/GameCreator/actions/runs/40961681593), tentativa pontual de limpeza usando `ubuntu-latest`, também terminou sem steps e sem logs; a fila não foi limpa e a causa permanece não diagnosticada.
+
+Na `main` atual existem apenas dois workflows: `pixel-art.yml` (validação canônica) e `publicar-creator-unificado.yml` (build/publicação). `auto-validar-v41.yml` e `testar-integracao.yml` foram removidos da `main`; execuções antigas e jobs já criados continuam visíveis no histórico/fila. Na branch atual da PR #6, `testar-integracao.yml` está limitado a `workflow_dispatch`; os dois jobs `409944...` foram criados antes dessa alteração. A PR #5 mantém um workflow específico para hidrologia, além da validação canônica.
+
+A ausência de logs nas execuções hospedadas não substitui a investigação do runner local. O status público do GitHub consultado durante esta análise indicava todos os sistemas operacionais; não foi confirmado incidente global ativo.
 
 ## 4. Ordem de fechamento
 
@@ -132,7 +149,7 @@ Execução [`40942973127`](https://github.com/apoenalore/GameCreator/actions/run
 
 **Diagnóstico obrigatório:** ao falhar, registrar primeiro erro causal, job, logs e tipo de falha; planejar uma correção; validar local/focado; só depois fazer uma nova tentativa canônica. Repetir o mesmo commit sem alteração é reservado a falha transitória identificada (runner/conexão). Não iniciar fluxo duplicado para tentar contornar fila.
 
-**Estado confirmado (29/10/2026 21:37 BRT):** Pixel Art: 68 execuções consultadas; 0 queued e 0 in_progress; validação principal [40965795436](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40965795436) aprovada. Game Creator: 324 execuções consultadas; 13 queued e 0 in_progress. A limpeza da fila continua bloqueada até o cancelamento manual dos 13 IDs acima.
+**Estado confirmado (30/10/2026; hora da consulta não preservada):** Pixel Art: a validação principal [40965795436](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40965795436) segue registrada como aprovada no levantamento anterior. Game Creator: 346 execuções consultadas; 17 `queued`, 0 `in_progress`, 329 `completed` (158 failure, 96 success, 75 cancelled). Dos 17 em fila, 15 são obsoletos e precisam de cancelamento manual; 2 da PR #5 devem ser preservados para validação quando o runner estiver online.
 
 ## 5. Regra para evitar repetição
 
