@@ -1,29 +1,63 @@
-name: Game Creator - integração de catálogo (manual)
+name: Game Creator - integração rápida (Windows hospedado)
 on:
+  push:
+    branches: ['feat/tempo-biomas-hidrologia']
+    paths:
+      - 'integracao/catalogo.js'
+      - 'integracao/testes/**'
+      - 'map-editor/terrain-system.js'
+      - 'map-editor/world-object-system.js'
+      - 'map-editor/modulo-integrado.js'
+      - 'pixel-art/natureza.js'
+      - 'pixel-art/modulo-integrado.js'
+      - '.github/workflows/testar-integracao.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'integracao/catalogo.js'
+      - 'integracao/testes/**'
+      - 'map-editor/terrain-system.js'
+      - 'map-editor/world-object-system.js'
+      - 'map-editor/modulo-integrado.js'
+      - 'pixel-art/natureza.js'
+      - 'pixel-art/modulo-integrado.js'
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: apoena-creator-quick-check-\${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   testar-catalogo:
-    runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 10
+    runs-on: windows-latest
+    timeout-minutes: 15
     defaults:
       run:
-        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        shell: pwsh
     steps:
-      - name: Baixar código
-        uses: actions/checkout@v4
-      - name: Preparar Node
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+          persist-credentials: false
+      - name: Preparar Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Executar suíte canônica de integração
+      - name: Verificar sintaxe dos módulos
+        run: |
+          node --check map-editor/terrain-system.js
+          node --check map-editor/world-object-system.js
+          node --check map-editor/modulo-integrado.js
+          node --check pixel-art/natureza.js
+          node --check pixel-art/modulo-integrado.js
+          node --check integracao/catalogo.js
+          node --check integracao/testes/catalogo.test.js
+          node --check integracao/testes/terrain-system.test.cjs
+          node --check integracao/testes/world-object-system.test.cjs
+          node --check integracao/testes/natureza.test.cjs
+      - name: Executar testes de integração
         run: |
           node integracao/testes/catalogo.test.js
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node integracao/testes/terrain-system.test.cjs
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node integracao/testes/world-object-system.test.cjs
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node integracao/testes/natureza.test.cjs
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
