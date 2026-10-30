@@ -38,9 +38,7 @@ assert.match(updater, /\[regex\]::Escape\(\$_\.TrimStart\('\//,
   "A conversão do manifesto para regex precisa escapar os caminhos antes de aplicar curingas.");
 function globToRegex(pattern) {
   return pattern
-    .replace(/[.+^$()|[\]\\]/g, "\\const runtimeRegexMatch = updater.match(/^\$regexRuntime = '([^']+)'$/m);
-assert.ok(runtimeRegexMatch, "regexRuntime precisa existir como contrato de arquivos locais.");
-const runtimeRegex = new RegExp(runtimeRegexMatch[1], "i");")
+    .replace(/[.+^$()|[\]\\]/g, "\\$&")
     .replace(/\*/g, "[^/]*")
     .replace(/\?/g, "[^/]");
 }
