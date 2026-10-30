@@ -2,16 +2,44 @@ name: Validar Hidrologia Apoena
 on:
   push:
     branches: ['feature/hidrologia-erosao-niveis-20261029']
+    paths:
+      - 'map-editor/hidrologia-core.js'
+      - 'tests/hidrologia.test.cjs'
+      - '.github/workflows/hidrologia-validar.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'map-editor/hidrologia-core.js'
+      - 'tests/hidrologia.test.cjs'
+      - '.github/workflows/hidrologia-validar.yml'
   workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: apoena-creator-hidrologia-\${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   testar-hidrologia:
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Conferir Node.js
-        run: node --version
-        shell: cmd
-      - name: Testar motor de chuva e erosao
-        run: node tests/hidrologia.test.cjs
-        shell: cmd
+        with:
+          clean: true
+          persist-credentials: false
+      - name: Preparar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verificar sintaxe
+        shell: powershell
+        run: |
+          node --check map-editor/hidrologia-core.js
+          if ($LASTEXITCODE -ne 0) { throw "Erro de sintaxe no motor hidrológico." }
+          node --check tests/hidrologia.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw "Erro de sintaxe no teste hidrológico." }
+      - name: Testar chuva, bacias, erosão e persistência
+        shell: powershell
+        run: |
+          node tests/hidrologia.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw "Testes do motor hidrológico falharam." }
