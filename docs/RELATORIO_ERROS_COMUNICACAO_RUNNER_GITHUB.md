@@ -40,117 +40,61 @@ Leia também:
 
 ---
 
-## 3. Incidente atual — GC-COMM-001: GitHub não atribui jobs ao Runner Windows
+## 3. Incidente GC-COMM-001 — GitHub sem atribuição de runner
 
-**Classificação:** BLOQUEIO DE ATRIBUIÇÃO CONFIRMADO; causa local específica ainda NÃO DIAGNOSTICADA.  
-**Data/hora do relato do usuário:** 30/10/2026 10:42:01 UTC (07:42:01 BRT).  
-**Data da rechecagem no GitHub:** 30/10/2026; a integração retornou os dados sem preservar o minuto/segundo da consulta.  
+**Classificação:** bloqueio de atribuição CONFIRMADO no snapshot inicial; runner RECUPERADO OPERACIONALMENTE; causa raiz da interrupção original ainda NÃO DIAGNOSTICADA.  
+**Data/hora do relato:** 30/10/2026 10:42:01 UTC (07:42:01 BRT).  
 **Repositório:** `apoenalore/GameCreator`.
 
-### 3.1 Evidência observada
+### 3.1 Evidência do bloqueio inicial
 
-Consulta das quatro páginas de execuções:
-- 346 execuções no histórico consultado;
-- 17 `queued`;
-- 0 `in_progress`;
+No snapshot inicial de 30/10/2026:
+- 346 execuções consultadas;
+- 17 jobs em `queued`;
+- 0 em `in_progress`;
 - 329 `completed` (158 `failure`, 96 `success`, 75 `cancelled`).
 
-Os 158 resultados `failure` são históricos e não significam 158 defeitos atuais.
+Os 17 jobs em fila solicitavam labels `self-hosted`, `Windows`, `X64`, mas apresentavam `runner_id = 0`, `runner_name` vazio e nenhum step executado. Portanto, naquele instante o GitHub não havia atribuído os jobs ao runner; o checkout e os testes ainda não tinham começado.
 
-Os 17 jobs em fila foram consultados individualmente. Todos apresentaram:
-- labels solicitadas: `self-hosted`, `Windows`, `X64`;
-- `runner_id = 0`;
-- `runner_name = ""`;
-- nenhum step executado (`steps = []`);
-- status `queued`.
+### 3.2 Evidência de recuperação do runner
 
-Isso demonstra que o GitHub ainda não atribuiu esses jobs a um runner compatível. O bloqueio ocorre antes do checkout do código e antes de qualquer script PowerShell, Node.js ou teste.
+A fila começou a ser processada pelo runner real. As seguintes execuções confirmam a atribuição:
 
-### 3.2 Execuções em fila
+| Execução | Job | Runner atribuído | Início (UTC / BRT) | Fim (UTC / BRT) | Resultado |
+|---|---:|---|---|---|---|
+| [40996154399](https://github.com/apoenalore/GameCreator/actions/runs/40996154399) | 123869646067 | ID 2 — `APOENA-GAMECREATOR-RUNNER` | 10:44:56 / 07:44:56 | 10:45:20 / 07:45:20 | success |
+| [40996154391](https://github.com/apoenalore/GameCreator/actions/runs/40996154391) | 123869650074 | ID 2 — `APOENA-GAMECREATOR-RUNNER` | 10:53:08 / 07:53:08 | 10:55:51 / 07:55:51 | success |
+| [41044696841](https://github.com/apoenalore/GameCreator/actions/runs/41044696841) | 124025821184 | ID 2 — `APOENA-GAMECREATOR-RUNNER` | 10:58:56 / 07:58:56 | 11:01:18 / 08:01:18 | success |
 
-**Preservar — são as duas validações mais recentes da PR de hidrologia e não devem ser canceladas:**
+Nas três execuções, as labels do runner eram `self-hosted`, `Windows`, `X64`. A execução 41044696841 validou o workflow canônico atualizado na branch `main`, com todos os steps concluídos com sucesso.
 
-1. [40996154391 — validação principal do Creator](https://github.com/apoenalore/GameCreator/actions/runs/40996154391)
-2. [40996154399 — validação específica de hidrologia](https://github.com/apoenalore/GameCreator/actions/runs/40996154399)
+### 3.3 Destino da fila antiga
 
-**Fila antiga — 15 execuções que devem ser canceladas manualmente após conferir que continuam obsoletas:**
+As 15 execuções antigas inicialmente identificadas terminaram de ser processadas até 30/10/2026 10:57:42 UTC. Resultado: 12 success e 3 failure. As três falhas não foram falhas de comunicação do runner:
+- [40959244729](https://github.com/apoenalore/GameCreator/actions/runs/40959244729): ordem incorreta entre build e testes — GC-CI-010.
+- [40994401969](https://github.com/apoenalore/GameCreator/actions/runs/40994401969): `ReferenceError: profile is not defined` — GC-CI-011.
+- [40994405717](https://github.com/apoenalore/GameCreator/actions/runs/40994405717): o mesmo `ReferenceError: profile is not defined` — GC-CI-011.
 
-1. [40994405717 — integração antiga por push](https://github.com/apoenalore/GameCreator/actions/runs/40994405717)
-2. [40994401969 — integração antiga por push](https://github.com/apoenalore/GameCreator/actions/runs/40994401969)
-3. [40959244729 — validação agendada antiga](https://github.com/apoenalore/GameCreator/actions/runs/40959244729)
-4. [40949144668 — validação antiga da branch Pixel Art](https://github.com/apoenalore/GameCreator/actions/runs/40949144668)
-5. [40947634011 — validação antiga da branch ambiental](https://github.com/apoenalore/GameCreator/actions/runs/40947634011)
-6. [40947633985 — integração antiga por pull request](https://github.com/apoenalore/GameCreator/actions/runs/40947633985)
-7. [40947625325 — integração antiga por push](https://github.com/apoenalore/GameCreator/actions/runs/40947625325)
-8. [40947611808 — integração antiga por pull request](https://github.com/apoenalore/GameCreator/actions/runs/40947611808)
-9. [40947601170 — integração antiga por push](https://github.com/apoenalore/GameCreator/actions/runs/40947601170)
-10. [40944962186 — integração antiga por pull request](https://github.com/apoenalore/GameCreator/actions/runs/40944962186)
-11. [40944675654 — integração antiga por pull request](https://github.com/apoenalore/GameCreator/actions/runs/40944675654)
-12. [40944666718 — integração antiga por push](https://github.com/apoenalore/GameCreator/actions/runs/40944666718)
-13. [40943993233 — integração antiga por pull request](https://github.com/apoenalore/GameCreator/actions/runs/40943993233)
-14. [40943754023 — integração antiga por push](https://github.com/apoenalore/GameCreator/actions/runs/40943754023)
-15. [40943621289 — integração antiga por push](https://github.com/apoenalore/GameCreator/actions/runs/40943621289)
+Não foi necessário cancelar manualmente esses 15 jobs: o runner os recebeu e concluiu. As duas validações atuais foram substituídas por execuções do fluxo canônico após a consolidação.
 
-**Observação:** a lista é um retrato da consulta de 30/10/2026. Antes de cancelar, reconsultar o status de cada run. Não cancelar uma execução que já tenha sido concluída ou que tenha se tornado a validação atual.
+### 3.4 Causa raiz e solução
 
-### 3.3 Causa raiz: o que sabemos e o que ainda não sabemos
+**Causa raiz da indisponibilidade inicial:** NÃO DIAGNOSTICADA. A evidência comprova que os jobs não tinham runner atribuído; não comprova se a origem foi serviço parado, estado Offline, grupo, permissão, labels ou configuração local.
 
-**Comprovado:** o agendador do GitHub não encontrou/atribuiu um runner que atendesse às labels exigidas no momento da consulta. Os jobs não chegaram a executar steps.
+**Solução de runner efetivamente aplicada:** nenhuma alteração de instalação, registro, grupo ou labels foi feita por esta investigação. A recuperação foi observada quando o runner voltou a receber jobs. Não registrar como causa resolvida sem identificar o que provocou a indisponibilidade original.
 
-**Ainda não comprovado:** por que o runner não foi considerado disponível. Hipóteses a verificar, nesta ordem:
+**Estado atual comprovado:** runner ID 2 recebeu e concluiu três jobs reais, incluindo a validação canônica da `main`. Não há necessidade de reinstalar ou duplicar o runner enquanto continuar Online e recebendo jobs.
 
-1. runner está Offline ou serviço do Windows está parado;
-2. runner está registrado em outro repositório ou grupo;
-3. repositório não tem autorização para usar o grupo de runners;
-4. labels efetivas não correspondem exatamente a `self-hosted`, `Windows`, `X64`;
-5. serviço ativo aponta para outra instalação/pasta ou usa uma configuração antiga;
-6. duas instalações foram registradas e a instância observada no CMD não é a que o GitHub conhece.
+### 3.5 Procedimento se o bloqueio voltar
 
-A hipótese de “há mais de um runner ativo” não foi comprovada. Não remover, reinstalar ou registrar runners adicionais antes de inventariar as instalações existentes.
+1. Consultar a execução e conferir `status`, `runner_id`, `runner_name`, labels e steps.
+2. Se `queued`, `runner_id=0` e steps vazios, parar a investigação do código: o job ainda não executou.
+3. Abrir `https://github.com/apoenalore/GameCreator/settings/actions/runners` e conferir Online/Offline, grupo e labels.
+4. No Windows, verificar o serviço existente e os logs `_diag/Runner_*.log` e `_diag/Worker_*.log`.
+5. Não iniciar cópias da mesma instalação, apagar `_work` ou registrar outro runner sem evidência.
+6. Registrar o horário exato em UTC e BRT, run/job IDs e o primeiro log causal.
 
-### 3.4 Correção: o que foi feito e o que falta
-
-**Ações internas efetivamente concluídas nesta investigação:**
-- consultadas as quatro páginas de histórico do Actions;
-- consultados os 17 jobs em fila;
-- separados 15 jobs antigos e 2 validações atuais que devem ser preservadas;
-- atualizado o registro central de pendências com a contagem e os links;
-- criado este relatório para reutilização por futuras IAs;
-- não foi disparada uma nova validação para aumentar a fila.
-
-**Limite da integração:** a conexão GitHub usada nesta sessão permite consultar runs, jobs, arquivos e logs, mas não disponibiliza operação de cancelamento de runs nem leitura autorizada da lista de runners em Settings. Portanto, nenhum job foi cancelado e o status Online do runner não foi confirmado por esta sessão.
-
-**Correção definitiva ainda pendente:** verificar Settings → Actions → Runners no repositório GameCreator e corrigir a condição exata (serviço, registro, grupo, permissão ou labels). Depois, preservar as duas validações atuais e executar apenas a validação canônica necessária.
-
-### 3.5 Procedimento para concluir o diagnóstico no PC
-
-1. Abrir `https://github.com/apoenalore/GameCreator/settings/actions/runners`.
-2. Localizar o runner esperado do Game Creator.
-3. Registrar nome, estado (Online/Offline), grupo e labels exibidas.
-4. Se estiver Offline, verificar o serviço Windows correspondente antes de iniciar outra instância.
-5. Se estiver Online, conferir se o grupo autoriza o repositório e se as labels incluem exatamente `self-hosted`, `Windows`, `X64`.
-6. No Windows, conferir o serviço e os processos ativos. Usar PowerShell:
-
-```powershell
-Get-Service |
-  Where-Object {
-    $_.Name -like 'actions.runner*' -or
-    $_.DisplayName -like '*GitHub Actions Runner*'
-  } |
-  Format-Table Name, Status, StartType, DisplayName -AutoSize
-
-Get-Process -Name Runner.Listener, Runner.Worker -ErrorAction SilentlyContinue |
-  Format-Table Id, ProcessName, Path -AutoSize
-```
-
-7. Conferir os logs `_diag/Runner_*.log` e `_diag/Worker_*.log` da instalação efetivamente registrada.
-8. Não iniciar duas cópias da mesma instalação. Não apagar `_work` nem remover o runner sem evidência.
-9. Depois de corrigir, aguardar a atribuição de uma das duas validações preservadas. Confirmar no GitHub que `runner_id` deixou de ser zero e que os steps começaram.
-10. Só depois da fila antiga cancelada e do runner confirmado, executar uma única validação canônica.
-
-**Pasta do runner informada anteriormente no projeto:** `C:\ApoenaHub\GAME CREATOR\RUNNER`. É uma referência fornecida pelo usuário, não uma confirmação de que o serviço ativo esteja instalado ou iniciado nessa pasta neste momento.
-
-**Critério de resolução:** o runner aparece Online com grupo/autorização/labels corretos; o job atual recebe runner_id e runner_name reais; os steps começam; uma validação canônica termina com resultado registrado. Até lá, manter o incidente como BLOQUEADO, não RESOLVIDO.
+**Pasta do runner informada no projeto:** `C:\ApoenaHub\GAME CREATOR\RUNNER`. É uma referência do usuário, não uma confirmação permanente do diretório ativo.
 
 ---
 
@@ -179,6 +123,39 @@ Get-Process -Name Runner.Listener, Runner.Worker -ErrorAction SilentlyContinue |
 O workflow canônico atual do Creator usa grupo de concorrência por branch e `cancel-in-progress: true` para evitar execuções equivalentes concorrentes na mesma branch. Isso reduz duplicidade futura, mas **não limpa automaticamente toda a fila histórica nem corrige runner offline/sem autorização**.
 
 ---
+
+### GC-CI-009 — Validação de integração exigia clique manual
+
+- **Data/hora do relato:** 30/10/2026 10:55:05 UTC (07:55:05 BRT).
+- **Evidência:** na branch `feat/tempo-biomas-hidrologia`, `.github/workflows/testar-integracao.yml` continha somente `on: workflow_dispatch`; isso significa execução exclusivamente manual. O `pixel-art.yml` da `main` também limitava o evento `push` a uma única branch de desenvolvimento. O workflow antigo `auto-validar-v41.yml` não estava presente na `main`; a agenda horária que existia na branch não era a agenda ativa da branch padrão.
+- **Causa raiz comprovada:** cobertura incompleta de eventos automáticos e workflow de integração separado com gatilho exclusivamente manual.
+- **Correção efetivamente aplicada:** em 30/10/2026 10:58:51 UTC (07:58:51 BRT), commit [e861c534](https://github.com/apoenalore/GameCreator/commit/e861c5348cd9849800571a4d31c6bfeff0ede8ed) atualizou `.github/workflows/pixel-art.yml` para disparar em pushes relevantes de todas as branches, Pull Requests para `main` e agenda horária `0 * * * *` na branch padrão. O `workflow_dispatch` foi mantido apenas como alternativa de emergência.
+- **Consolidação:** em 10:59:40 UTC (07:59:40 BRT), commit [acc6c293](https://github.com/apoenalore/GameCreator/commit/acc6c2938a365a992fffaa13c6e11854527cd24c) removeu o workflow manual duplicado da PR #6. Em 10:59:50 UTC (07:59:50 BRT), commit [00b3619](https://github.com/apoenalore/GameCreator/commit/00b3619f296fd821beed219f46fcc5d572bad6ea) removeu o workflow separado de hidrologia da PR #5. Os testes foram reunidos em um único job sequencial do fluxo canônico.
+- **Validação:** [run 41044696841](https://github.com/apoenalore/GameCreator/actions/runs/41044696841) executou automaticamente após o commit, sem clique manual; runner ID 2; início 10:58:56 UTC (07:58:56 BRT), fim 11:01:18 UTC (08:01:18 BRT); todos os steps success.
+- **Estado:** CORRIGIDO E VALIDADO NA MAIN. As validações das branches PR #5 e PR #6 continuam sendo acompanhadas separadamente para comprovar os testes específicos de cada alteração.
+- **Prevenção:** não criar workflow duplicado com `workflow_dispatch` para testes já cobertos pelo fluxo canônico. Manter push/PR automáticos, concorrência por branch e uma única suíte sequencial.
+
+### GC-CI-010 — Validação agendada executava testes antes de compilar o Creator
+
+- **Data/hora da falha:** 30/10/2026 10:48:40.053 UTC (07:48:40.053 BRT).
+- **Execução/job:** [40959244729](https://github.com/apoenalore/GameCreator/actions/runs/40959244729), job 123747361508, workflow antigo `auto-validar-v41.yml`.
+- **Erro literal:** `AssertionError [ERR_ASSERTION]: entrada nativa carrega biblioteca, ponte e editor de Natureza` em `tests/corte-inteligente.test.cjs:100`.
+- **Causa raiz comprovada:** o workflow antigo executava `Executar testes automatizados` antes de `Verificar integridade e compilar Creator nativo`. O teste exigia a entrada nativa já compilada; como falhou primeiro, a etapa de build foi marcada como skipped.
+- **Correção efetivamente aplicada:** a agenda antiga foi substituída pelo agendamento horário do workflow canônico `pixel-art.yml`, que executa `Preservar loader e compilar Creator nativo V4.0` antes da suíte de testes. A nova configuração foi publicada no commit [e861c534](https://github.com/apoenalore/GameCreator/commit/e861c5348cd9849800571a4d31c6bfeff0ede8ed).
+- **Evidência de validação:** no [run 41044696841](https://github.com/apoenalore/GameCreator/actions/runs/41044696841), o build terminou success às 10:59:11 UTC (07:59:11 BRT), antes dos testes; todos os testes e steps seguintes terminaram success.
+- **Estado:** RESOLVIDO para a ordem de build/teste do fluxo canônico.
+- **Prevenção:** qualquer workflow agendado deve reutilizar a mesma ordem do CI canônico; nunca manter uma segunda suíte reduzida com ordem diferente.
+
+### GC-CI-011 — ReferenceError: profile is not defined no cálculo de escoamento
+
+- **Data/hora das falhas:** 30/10/2026 10:57:20.037 UTC (07:57:20.037 BRT) e 10:57:37.247 UTC (07:57:37.247 BRT).
+- **Execuções/jobs:** [40994401969 / job 123864045768](https://github.com/apoenalore/GameCreator/actions/runs/40994401969) e [40994405717 / job 123864058010](https://github.com/apoenalore/GameCreator/actions/runs/40994405717).
+- **Erro literal:** `ReferenceError: profile is not defined`; stack em `map-editor/terrain-system.js:415:132`, função `stepHydrology`, chamada por `simulateHydrology` a partir de `integracao/testes/catalogo.test.js`.
+- **Causa raiz comprovada:** `profile` era declarado dentro do primeiro loop por célula, mas o loop posterior de escoamento (`for y/for x`) usava `profile.runoff` fora daquele escopo. O teste de runoff/hidrologia acionava a referência sem variável definida.
+- **Correção efetivamente aplicada:** em 30/10/2026 11:00:44 UTC (08:00:44 BRT), commit [de5f5e9](https://github.com/apoenalore/GameCreator/commit/de5f5e9db7808c1eb0c3b5c18aec3686a10ea77b), branch `feat/tempo-biomas-hidrologia`, adicionou `const profile = sim.profiles[i] || defaultHydrology();` dentro do loop de escoamento, após a verificação de água da célula e antes de acessar `profile.runoff`.
+- **Validação:** a nova validação automática da PR #6 [run 41045053407](https://github.com/apoenalore/GameCreator/actions/runs/41045053407) foi criada em 30/10/2026 11:01:40 UTC (08:01:40 BRT) para o commit que contém a correção; resultado ainda aguardando conclusão no momento deste registro.
+- **Estado:** CORRIGIDO-AGUARDANDO-VALIDAÇÃO. Não marcar como RESOLVIDO até o teste de integração da PR #6 passar.
+- **Prevenção:** manter o teste que simula escoamento com diferentes coeficientes `runoff`; toda variável usada dentro de loops deve ser declarada no escopo correto da célula.
 
 ## 5. Regras obrigatórias para futuras IAs
 
