@@ -133,7 +133,7 @@
 - **Eficiência de armazenamento:** preferir git pull numa instalação Git já preparada; no modo ZIP, manter apenas uma extração temporária e removê-la após validação. Backup, se necessário, deve ser incremental e limitado aos arquivos de programa que serão substituídos, sem duplicar a pasta inteira; medir espaço livre antes de começar e abortar com segurança se insuficiente.
 - **Compatibilidade:** Windows 10/11, caminhos com espaços e acentos, execução sem privilégios administrativos, CMD simples chamando PowerShell/robocopy nativos. Não instalar nem atualizar Node.js como efeito colateral da atualização do Creator.
 - **Critérios de aceite:** (a) primeira configuração define a pasta fixa; (b) atualização seguinte atualiza essa mesma pasta sem criar uma segunda instalação; (c) arquivos novos e modificados chegam corretamente; (d) assets, biblioteca, dados, configurações e runner locais permanecem intactos; (e) falha/interrupção não deixa o Creator parcialmente sobrescrito sem aviso ou recuperação; (f) log identifica data, origem/commit, destino, arquivos copiados e resultado; (g) após sucesso, a pasta/ZIP temporários podem ser apagados e o espaço recuperado.
-- **Estado:** PENDENTE / apenas especificação. Nenhum atualizador CMD/PowerShell foi criado ou executado; nenhum arquivo local do usuário foi alterado.
+- **Estado:** WIP 1 / implementado na branch draft PR7, ainda não integrado. O CMD e o script PowerShell foram criados; o parser e o teste estático do manifesto passaram no step 17 do run #41082083233. Ainda faltam simulação real em sandbox (clone/fast-forward, repetição, offline, alterações locais, origem/branch incorretas e preservação do Runner) e teste controlado na instalação do autor. Nenhuma instalação local do usuário foi alterada.
 - **Implementação futura:** primeiro inspecionar a estrutura real do repositório e a pasta local do usuário; elaborar inventário de arquivos de produto versus dados locais; prototipar em duas pastas temporárias de teste; validar cópia e recuperação; só então disponibilizar o CMD. Respeitar a regra geral deste documento: nesta etapa, apenas documentar, sem alterar código, UI, testes ou workflows.
 
 
@@ -145,7 +145,7 @@
 - A PR #5 de laboratório passou no run [#41044823914](https://github.com/apoenalore/GameCreator/actions/runs/41044823914). A PR #4 de modos/sessões continua draft e sem CI no head atual.
 - O erro transitório de upload \`ENOTFOUND\` está registrado em GC-CI-012; o run posterior #41075044875 comprovou que os uploads foram recuperados.
 - O empacotador está sendo ajustado para distribuir somente arquivos de execução, sem documentos internos, testes e workflows. A validação do pacote está pendente no run [#41079295445](https://github.com/apoenalore/GameCreator/actions/runs/41079295445).
-- GC-UPDATE-009 continua como única tarefa ativa (WIP 1). A suíte canônica passou no run [#41064201715](https://github.com/apoenalore/GameCreator/actions/runs/41064201715), mas ainda faltam os testes específicos e a atualização real segura no Windows do autor.
+- GC-UPDATE-009 continua como única tarefa ativa (WIP 1). A suíte canônica #41064201715 passou somente no head anterior; no head atual, parser PowerShell e teste estático do manifesto passaram no step 17 do run [#41082083233](https://github.com/apoenalore/GameCreator/actions/runs/41082083233). Ainda faltam a simulação real de atualização segura e a validação controlada no Windows do autor.
 
 
 ## Resultado da auditoria de entrega — 30/10/2026
@@ -154,7 +154,7 @@
 - O manifesto foi separado do ZIP e o launcher, fonte V4.0, bundle e módulos necessários foram preservados.
 - A auditoria do ZIP confirmou SHA-256 \`7a061059a7d027c45e32ce11fd78c48fd5bdf9a0b0c05e069802cb6c1d3dfda7\`.
 - A auditoria de embalagem não altera as pendências criativas GC-TILE-001/002, nem autoriza implementar UI ou novas funcionalidades.
-- GC-UPDATE-009 continua como WIP 1; a validação canônica [#41064201715](https://github.com/apoenalore/GameCreator/actions/runs/41064201715) passou, mas o teste específico do atualizador e a atualização real segura no Windows do autor permanecem pendentes.
+- GC-UPDATE-009 continua como WIP 1; a validação canônica #41064201715 refere-se ao head anterior. No head atual, o teste estático do manifesto passou no step 17 de #41082083233; a simulação de atualização segura e a atualização real controlada no Windows do autor permanecem pendentes.
 
 
 ## Follow-up de preservação do runtime — GC-PACK-002 (30/10/2026)
@@ -162,8 +162,8 @@
 - A auditoria do primeiro ZIP limpo revelou que a exclusão total de \`legacy/\` quebrava a ligação da página integrada com a fábrica original v3.9.
 - A correção preserva somente a página da fábrica e suas 23 partes JS; mantém \`integracao/index.html\` e \`integracao/catalogo.js\` no manifesto do atualizador; exclui o launcher legado e documentos.
 - O teste de contrato \`tests/atualizador-manifest.test.cjs\` foi adicionado e o workflow canônico recebeu execução condicional desse teste quando o atualizador existir no branch.
-- O atualizador recebeu a correção da comparação da versão Git completa (\`Groups[0]\`) e a cobertura estática do manifesto. O run #41064201715 é de um head anterior; o head atual ainda precisa de CI.
-- Validação do pacote concluída na main #41081796048 e na branch ambiental #41081917796. O teste de manifesto do atualizador está em execução no run #41082083233; GC-UPDATE-009 permanece WIP 1 até esse teste e a validação de atualização segura em sandbox passarem.
+- O atualizador recebeu a correção da comparação da versão Git completa (`Groups[0]`) e a cobertura estática do manifesto. O run #41064201715 é de um head anterior; o head atual teve parser PowerShell e teste estático do manifesto aprovados no step 17 de #41082083233, mas o job completo ainda finalizava o upload.
+- Validação do pacote concluída na main #41081796048 e na branch ambiental #41081917796. O step 17 do atualizador passou no run #41082083233; GC-UPDATE-009 permanece WIP 1 até a simulação real de atualização segura em sandbox passar.
 
 
 ## Atualização do follow-up GC-PACK-002 — 30/10/2026
@@ -171,4 +171,4 @@
 - O pacote da main passou no run [#41081796048](https://github.com/apoenalore/GameCreator/actions/runs/41081796048), SHA \`65db2b62cc9750f50a3cc595c80466b6344fbc94\`.
 - O ZIP final contém 76 arquivos de runtime; a fábrica original está preservada somente com a página e as 23 partes JS necessárias. Não contém documentação, testes, CI ou arquivos Markdown/texto.
 - SHA-256 do ZIP interno: \`62407aaad9bd183d78bd3a29a65752f8325981a4191aa77b084be49b818eb55d\`.
-- O teste do manifesto do atualizador no PR7 ainda aguarda execução no run #41082083233. A branch ambiental PR6 está sendo validada no run #41081917796.
+- O teste do manifesto do atualizador no PR7 passou no step 17 do run #41082083233; a simulação real de clone/fast-forward e preservação local continua pendente. A branch ambiental PR6 passou no run #41081917796.
