@@ -284,3 +284,6 @@ A simulação Git local identificou que sparse-checkout set --no-cone não mater
 Também foi comprovado que, em sparse-checkout, git merge --no-overwrite-ignore sozinho não é proteção suficiente contra todo arquivo local conflitante. O atualizador agora detecta tanto arquivos ignorados quanto não ignorados antes da materialização e antes do merge; qualquer colisão com o runtime remoto bloqueia a operação.
 
 A simulação foi executada com Git 2.47.3 em Linux. O novo teste de contrato repete esses cenários na CI Windows. Nenhuma pasta do computador do autor foi alterada.
+
+
+- **Proteção adicional:** antes de reduzir o worktree, o atualizador interrompe se encontrar arquivos ignorados fora da allowlist de runtime. O operador deverá fazer backup ou movê-los manualmente; o atualizador não apaga nem move dados pessoais.
