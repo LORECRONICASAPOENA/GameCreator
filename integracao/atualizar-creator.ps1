@@ -15,6 +15,7 @@ $repositorio = $RepoUrl
 $pastaConfig = $ConfigDir
 $arquivoDestino = Join-Path $pastaConfig 'instalacao.txt'
 $arquivoLog = Join-Path $pastaConfig 'atualizacao.log'
+$arquivoClonePendente = Join-Path $pastaConfig 'clone-pendente.txt'
 
 # Lista positiva: tudo que nao estiver aqui fica fora da instalacao local.
 # Em legacy, manter somente o editor original da fabrica e as partes JS referenciadas pela pagina de integracao.
@@ -144,7 +145,9 @@ try {
     }
 
     if ([string]::IsNullOrWhiteSpace($Destino)) {
-        if (Test-Path -LiteralPath $arquivoDestino) {
+        if (Test-Path -LiteralPath $arquivoClonePendente) {
+            $Destino = (Get-Content -LiteralPath $arquivoClonePendente -Raw).Trim()
+        } elseif (Test-Path -LiteralPath $arquivoDestino) {
             $Destino = (Get-Content -LiteralPath $arquivoDestino -Raw).Trim()
         } else {
             $sugerido = Join-Path ($env:SystemDrive + '\') 'ApoenaHub\GAME CREATOR\APP'
@@ -163,6 +166,19 @@ try {
         throw 'O destino precisa ser um caminho absoluto, por exemplo C:\ApoenaHub\GAME CREATOR\APP. Caminhos relativos podem ficar dentro da pasta ZIP temporaria.'
     }
     $Destino = [IO.Path]::GetFullPath($Destino)
+
+    $retomarClonePendente = $false
+    if (Test-Path -LiteralPath $arquivoClonePendente) {
+        $destinoMarcado = (Get-Content -LiteralPath $arquivoClonePendente -Raw).Trim()
+        if ([string]::IsNullOrWhiteSpace($destinoMarcado) -or -not [IO.Path]::IsPathRooted($destinoMarcado)) {
+            throw 'Marcador de clone pendente invalido. Nao vou alterar nenhum arquivo.'
+        }
+        $destinoMarcado = [IO.Path]::GetFullPath($destinoMarcado)
+        if ($destinoMarcado.TrimEnd('\') -ine $Destino.TrimEnd('\')) {
+            throw "Existe uma primeira instalacao pendente em $destinoMarcado. Retome esse mesmo destino antes de escolher outra pasta."
+        }
+        $retomarClonePendente = $true
+    }
 
     $raiz = [IO.Path]::GetPathRoot($Destino)
     if ($Destino.TrimEnd('\') -eq $raiz.TrimEnd('\')) {
@@ -191,9 +207,11 @@ try {
     Registrar "Inicio; instalacao: $Destino"
     if ($novoClone) {
         Registrar 'Primeira instalacao: clone parcial sem checkout inicial; documentos e blobs fora do runtime nao serao baixados.'
+        Set-Content -LiteralPath $arquivoClonePendente -Value $Destino -Encoding UTF8
+        $retomarClonePendente = $true
         & $git.Source clone --filter=blob:none --depth 1 --single-branch --branch main --no-checkout $repositorio $Destino
         if ($LASTEXITCODE -ne 0) {
-            throw 'Clone parcial falhou. Confirme a conexao e o login GitHub. Nenhuma instalacao existente foi sobrescrita.'
+            throw 'Clone parcial falhou. O marcador foi preservado para diagnostico/retomada; confira conexao e autenticacao GitHub.'
         }
     }
 
@@ -217,14 +235,20 @@ try {
         throw 'Instalacao fora da branch main. Atualizacao bloqueada para nao substituir trabalho de desenvolvimento.'
     }
 
-    if (-not $novoClone) {
+    if ($retomarClonePendente) {
+        & $git.Source -C $Destino rev-parse --verify HEAD *> $null
+        if ($LASTEXITCODE -ne 0) {
+            throw 'A primeira instalacao foi interrompida antes de criar o HEAD Git. Nao vou apagar a pasta; verifique o clone parcial e tente novamente.'
+        }
+        Registrar 'Retomando primeira instalacao interrompida antes da materializacao do checkout.'
+    } elseif (-not $novoClone) {
         $modificados = @(& $git.Source -C $Destino status --porcelain --untracked-files=no)
         if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar alteracoes locais.' }
         if (-not [string]::IsNullOrWhiteSpace(($modificados -join ''))) {
             throw 'Existem arquivos rastreados modificados localmente. Salve o trabalho antes de atualizar; nao farei reset nem sobrescrita.'
         }
-        VerificarConflitosLocais 'HEAD'
     }
+    VerificarConflitosLocais 'HEAD'
 
     # Mantem apenas os arquivos necessarios para abrir e usar o Creator.
     # Em uma instalacao antiga, documentos rastreados saem da pasta APP, mas nao sao apagados do historico Git.
@@ -301,6 +325,9 @@ try {
     $atual = (& $git.Source -C $Destino rev-parse HEAD).Trim()
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao ler commit instalado.' }
     Set-Content -LiteralPath $arquivoDestino -Value $Destino -Encoding UTF8
+    if (Test-Path -LiteralPath $arquivoClonePendente) {
+        Remove-Item -LiteralPath $arquivoClonePendente -Force
+    }
     Registrar "Concluido; commit instalado: $atual"
     Registrar "Para abrir: $Destino\ABRIR_GAME_CREATOR.cmd"
     Write-Host ''
