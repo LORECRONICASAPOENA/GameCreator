@@ -272,6 +272,27 @@ jobs:
             if ($testCode -ne 0) { $failed = $true }
           }
           if ($failed) { exit 1 }
+      - name: Validar manifesto do atualizador Windows quando presente
+        run: |
+          $ErrorActionPreference = "Stop"
+          $updater = "integracao/atualizar-creator.ps1"
+          $test = "tests/atualizador-manifest.test.cjs"
+          if ((Test-Path -LiteralPath $updater) -and (Test-Path -LiteralPath $test)) {
+            $tokens = $null
+            $parseErrors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path -LiteralPath $updater).Path, [ref]$tokens, [ref]$parseErrors) | Out-Null
+            if ($parseErrors.Count -gt 0) {
+              $parseErrors | ForEach-Object { Write-Error $_.Message }
+              throw "Sintaxe do atualizador PowerShell inválida."
+            }
+            node --check $test
+            if ($LASTEXITCODE -ne 0) { throw "Sintaxe do teste de manifesto falhou." }
+            node $test
+            if ($LASTEXITCODE -ne 0) { throw "Contrato do manifesto do atualizador falhou." }
+          } else {
+            Write-Output "SKIP: atualizador Windows ainda não está presente neste branch."
+          }
+
       - name: Testar hidrologia e erosao quando presente
         run: |
           $ErrorActionPreference = "Stop"
