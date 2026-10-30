@@ -79,7 +79,7 @@ function Registrar([string]$Mensagem) {
     Add-Content -LiteralPath $arquivoLog -Value $linha -Encoding UTF8
 }
 
-function VerificarArquivosIgnorados([string]$Referencia) {
+function VerificarConflitosLocais([string]$Referencia) {
     $rastreados = @(& $git.Source -C $Destino ls-tree -r --name-only $Referencia)
     if ($LASTEXITCODE -ne 0) { throw "Nao foi possivel inspecionar os arquivos de $Referencia." }
 
@@ -87,15 +87,20 @@ function VerificarArquivosIgnorados([string]$Referencia) {
     $runtimeSet = @{}
     foreach ($caminho in $runtime) { $runtimeSet[$caminho] = $true }
 
+    # Untracked nao ignorados e ignorados podem ser sobrescritos por read-tree/merge.
+    $naoRastreados = @(& $git.Source -C $Destino ls-files --others --exclude-standard)
+    if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar arquivos locais nao rastreados.' }
+
     $ignorados = @(& $git.Source -C $Destino ls-files --others --ignored --exclude-standard)
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar arquivos locais ignorados.' }
 
+    $arquivosLocais = @($naoRastreados + $ignorados | Sort-Object -Unique)
     $conflitos = @()
-    foreach ($caminho in $ignorados) {
+    foreach ($caminho in $arquivosLocais) {
         if ($runtimeSet.ContainsKey($caminho)) { $conflitos += $caminho }
     }
     if ($conflitos.Count -gt 0) {
-        throw ('Atualizacao bloqueada: arquivo(s) ignorado(s) do usuario conflitam com arquivos do Creator: ' + ($conflitos -join ', '))
+        throw ('Atualizacao bloqueada: arquivo(s) local(is) conflitam com arquivos do Creator: ' + ($conflitos -join ', '))
     }
 }
 
@@ -192,7 +197,7 @@ try {
         if (-not [string]::IsNullOrWhiteSpace(($modificados -join ''))) {
             throw 'Existem arquivos rastreados modificados localmente. Salve o trabalho antes de atualizar; nao farei reset nem sobrescrita.'
         }
-        VerificarArquivosIgnorados 'HEAD'
+        VerificarConflitosLocais 'HEAD'
     }
 
     # Mantem apenas os arquivos necessarios para abrir e usar o Creator.
@@ -214,6 +219,12 @@ try {
         throw ('Sparse-checkout nao inclui todos os arquivos essenciais: ' + ($foraDoManifesto -join ', '))
     }
 
+    # Clone com --no-checkout deixa o worktree vazio; materializa apenas os caminhos permitidos.
+    # A checagem de conflitos vem antes porque read-tree pode substituir arquivos locais no caminho.
+    VerificarConflitosLocais 'HEAD'
+    & $git.Source -C $Destino read-tree -mu HEAD
+    if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel materializar os arquivos de runtime com seguranca.' }
+
     $anterior = (& $git.Source -C $Destino rev-parse HEAD).Trim()
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel identificar a versao instalada.' }
     Registrar "Versao instalada antes: $anterior"
@@ -230,7 +241,7 @@ try {
         throw ('Versao remota sem arquivo(s) essencial(is): ' + ($faltantes -join ', ') + '. Nenhuma atualizacao foi aplicada.')
     }
 
-    VerificarArquivosIgnorados 'refs/remotes/origin/main'
+    VerificarConflitosLocais 'refs/remotes/origin/main'
 
     $remoto = (& $git.Source -C $Destino rev-parse refs/remotes/origin/main).Trim()
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel identificar a versao remota.' }
