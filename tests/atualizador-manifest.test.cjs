@@ -141,6 +141,10 @@ assert.match(updater, /ls-files --others --exclude-standard/,
   "A proteção precisa detectar arquivos locais não ignorados.");
 assert.match(updater, /ls-files --others --ignored --exclude-standard/,
   "A proteção precisa detectar arquivos locais ignorados.");
+assert.match(updater, /core\.quotePath=false/,
+  "A leitura de caminhos Git precisa preservar nomes Unicode sem escape octal.");
+assert.ok(runtimeRegex.test("pixel-art/árvore.js"),
+  "A allowlist precisa reconhecer arquivos com acentos em caminhos de runtime.");
 assert.match(updater, /read-tree -mu HEAD/,
   "Clone iniciado com --no-checkout precisa materializar o runtime após validar conflitos.");
 const initialGuardPosition = updater.indexOf("VerificarConflitosLocais 'HEAD'");
@@ -378,11 +382,14 @@ function testSparseCheckoutAndUpdate() {
     // Colisão dentro do runtime: o updater real deve bloquear antes do merge.
     const ignoredRelative = "pixel-art/override-ignored.js";
     const untrackedRelative = "pixel-art/override-untracked.js";
+    const unicodeRelative = "pixel-art/árvore.js";
     fs.appendFileSync(excludeFile, "\n" + ignoredRelative + "\n");
     writeFile(install, ignoredRelative, "conteudo pessoal ignorado");
     writeFile(install, untrackedRelative, "conteudo pessoal nao ignorado");
+    writeFile(install, unicodeRelative, "conteudo pessoal unicode");
     writeFile(source, ignoredRelative, "conteudo remoto ignorado");
     writeFile(source, untrackedRelative, "conteudo remoto nao ignorado");
+    writeFile(source, unicodeRelative, "conteudo remoto unicode");
     commitAll(source, "fixture introduces conflicting runtime paths");
     git(source, ["push", "origin", "main"]);
     const beforeConflict = git(install, ["rev-parse", "HEAD"]).stdout.trim();
@@ -399,6 +406,8 @@ function testSparseCheckoutAndUpdate() {
       "Arquivo ignorado pessoal precisa permanecer intacto.");
     assert.equal(fs.readFileSync(path.join(install, untrackedRelative), "utf8"), "conteudo pessoal nao ignorado",
       "Arquivo não ignorado pessoal precisa permanecer intacto.");
+    assert.equal(fs.readFileSync(path.join(install, unicodeRelative), "utf8"), "conteudo pessoal unicode",
+      "Arquivo com nome Unicode precisa ser reconhecido como colisão e permanecer intacto.");
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }
@@ -411,4 +420,4 @@ console.log("PASSOU: manifesto positivo e arquivos essenciais do Creator, Godot,
 console.log("PASSOU: o atualizador PowerShell real fez a primeira instalação enxuta e excluiu documentos/testes/CI.");
 console.log("PASSOU: arquivos locais fora da allowlist bloquearam a atualização sem serem alterados.");
 console.log("PASSOU: atualização fast-forward, referência anterior e execução sem mudanças.");
-console.log("PASSOU: colisões locais ignoradas e não ignoradas bloquearam o merge antes de alterar dados.");
+console.log("PASSOU: colisões locais ignoradas, não ignoradas e com acentos bloquearam o merge sem alterar dados.");
