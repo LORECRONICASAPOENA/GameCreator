@@ -391,3 +391,21 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - Prevenção para não repetir:
 
 **Regra:** nunca preencher “solução efetivamente utilizada” com uma recomendação que ainda não foi aplicada. Quando a hora original não estiver disponível, registrar “hora não preservada” e manter a data/hora do cadastro separada.
+
+## GC-COMM-002 — Falha intermitente ao criar/enviar artefatos do GitHub Actions
+
+- **Projeto/repositório:** Game Creator — apoenalore/GameCreator.
+- **Data/hora da ocorrência:** 30/10/2026 10:55:01 -03:00 e 10:55:09 -03:00 (13:55:01Z e 13:55:09Z).
+- **Data/hora do registro:** 30/10/2026 12:17:00 -03:00.
+- **Run/job:** [41066904787](https://github.com/apoenalore/GameCreator/actions/runs/41066904787) / 124100579029.
+- **Branch/commit:** main / 55052f8912b70dc8eb132b983447df1c080e63fd.
+- **Workflow/steps:** .github/workflows/pixel-art.yml; step 21, “Disponibilizar pacote de codigo para download”, e step 22, “Anexar logs de diagnostico”.
+- **Status:** testes e preparacao local do pacote passaram; as duas etapas de upload de artefatos falharam.
+- **Erro literal:** Request timeout: /twirp/github.actions.results.api.v1.ArtifactService/CreateArtifact seguido de Failed to CreateArtifact: Unable to make request: ENOTFOUND.
+- **Evidencia adicional:** o pacote local foi preparado em ChatGPT trabalho; o log informou 128 arquivos para o artefato principal e 22 arquivos de diagnostico. O erro ocorreu ao criar o artefato no servico remoto, nao durante os testes do Creator.
+- **Causa imediata comprovada:** falha de resolucao/conectividade ao acessar o servico de artefatos do GitHub, acompanhada de timeout.
+- **Hipotese ainda nao confirmada:** instabilidade temporaria de DNS, rede, proxy ou rota do runner. O log nao identifica qual componente de rede originou a falha.
+- **Causas descartadas nesta execucao:** nao houve falha nos testes de JavaScript, biblioteca, exportacao, integracao ou Godot; os steps anteriores ao upload terminaram com sucesso.
+- **Solucao efetivamente utilizada:** nenhuma correcao de codigo, DNS ou configuracao foi aplicada. A execucao posterior [41075044875](https://github.com/apoenalore/GameCreator/actions/runs/41075044875), no mesmo commit 55052f8912b70dc8eb132b983447df1c080e63fd, terminou com success, indicando que a falha nao foi permanente. Isso e recuperacao observada, nao causa raiz resolvida.
+- **Resultado:** INTERMITENTE / NAO REPRODUZIDO NA EXECUCAO SEGUINTE / CAUSA RAIZ DE REDE NAO IDENTIFICADA.
+- **Prevencao:** classificar falhas de upload separadamente de falhas de codigo; quando o computador estiver online, verificar uma vez a resolucao e o acesso aos endpoints de artefatos do GitHub no runner. Nao repetir a suite inteira apenas por falha de upload.
