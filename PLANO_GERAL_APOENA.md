@@ -124,3 +124,24 @@ A arquitetura ambiental passa a separar três responsabilidades:
 **Decisão de arquitetura:** não migrar para 3D apenas para representar relevo e água. A altura lógica da célula controla o escoamento; a profundidade da água é uma camada separada. O custo da simulação é limitado por células e passos discretos, priorizando desempenho em celulares.
 
 **Estado:** metadados de bioma/hidrologia e variantes sazonais, prévia ambiental no Creator e motores iniciais no HTML/Godot foram adicionados na branch feat/tempo-biomas-hidrologia. A importação automática do JSON/atlas do Creator como mapa jogável continua pendente e precisa de um teste ponta a ponta antes de ser declarada concluída.
+
+
+## 11. Lista de execução e preservação — 29/10/2026
+
+### Concluído nesta rodada (código e regressões adicionados)
+- O catálogo do Creator normaliza tags de bioma com acentos e espaços, preservando termos como `desertico` e `mata_atlantica`.
+- O parâmetro `runoff` passa a controlar o volume de água transferido entre células; a água permanente recebe coeficiente alto para continuar escoando.
+- Testes de regressão comparam escoamento baixo e alto, evitando que o campo hidrológico fique apenas armazenado no JSON.
+- A documentação do editor corrige quebras de linha que eram exibidas literalmente.
+- A suíte de integração automática deixa de duplicar a validação já executada pelo workflow principal `pixel-art.yml`; a execução isolada permanece disponível por acionamento manual.
+
+### Em validação
+- Branch `feat/tempo-biomas-hidrologia`: código e testes atualizados; validação completa do GameCreator depende do runner Windows do repositório. A última execução observada ficou em `queued`, sem executor atribuído.
+- Branch `feature/estudio-unificado-pixelart-v41`: permanece a linha oficial de desenvolvimento V4.1; esta rodada não altera a `main` nem substitui a branch oficial.
+- Runner Pixel Art: execução de CI concluída com sucesso na validação anterior; a nova suíte ambiental será confirmada após o próximo evento de CI.
+
+### Pendências preservadas — não marcar como concluídas
+- Consolidar o laboratório hidrológico de bacias/solo da PR #5 com a prévia ambiental do `terrain-system.js` da PR #6, preservando recursos exclusivos de ambos.
+- Implementar importação ponta a ponta do JSON e atlas exportados pelo Creator para o runtime HTML/Godot; metadados válidos não equivalem a mapa jogável importado.
+- Substituir topografia provisória por alturas reais do mapa, validar variantes sazonais em objetos/construções e calibrar chuva longa, seca, neve e desempenho mobile.
+- Validar no Godot de destino, Android físico e gameplay real antes de declarar História, Exploração ou MOBA concluídos.
