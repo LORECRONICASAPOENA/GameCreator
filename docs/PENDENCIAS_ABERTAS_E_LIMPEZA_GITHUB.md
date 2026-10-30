@@ -218,7 +218,7 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - **Pixel Art main:** [run #41058053263](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/41058053263), SHA \`cff1930b59d8\`, success.
 - **Pixel Art PR #5 (clima/hidrologia):** [run #40995729054](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40995729054), SHA \`1507108e14dc51a33152af57ef5137571b0363d2\`, success.
 - **Pixel Art PR #4 (laboratório):** [run #40995732520](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40995732520), SHA \`413120bcc34aca9265a3d71e999bdac9760814fd\`, success.
-- Consulta de todas as páginas disponíveis: GameCreator 360 execuções históricas e Pixel Art 92; não havia jobs \`queued\` ou \`in_progress\` no snapshot anterior ao novo commit de empacotamento. O novo run [#41079295445](https://github.com/apoenalore/GameCreator/actions/runs/41079295445) foi iniciado para validar o ajuste do pacote e estava em andamento na última consulta.
+- Consulta de todas as páginas disponíveis após a validação: GameCreator **361 execuções históricas**, Pixel Art **92**; ambos com **0 queued e 0 in_progress**. A execução de empacotamento #41079295445 também concluiu com success.
 
 ### Erros classificados e situação
 - **GC-CI-010 — build antes dos testes:** correção de ordem validada novamente pelo run #41075044875.
@@ -237,12 +237,18 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - **Pixel Art #6:** documental, \`mergeable=false/dirty\`, 2 commits à frente e 3 atrás de main. Resolver conflito documental antes de integrar; não declarar a documentação disponível na main.
 - Permanecem 8 PRs abertas e 2 issues guarda-chuva; não são 10 tarefas independentes.
 
-### Pacote do Creator — correção em validação
-- Foi identificado que o empacotador copiava \`docs/\`, \`AGENTS.md\`, planos, testes e arquivos de CI para o ZIP de trabalho.
-- Corrigidos os workflows \`.github/workflows/pixel-art.yml\` em main (commit \`f69a013dcc6f38267e204b50c1df90698dca54a3\`) e na branch ambiental (commit \`5f47b1fb2889a7116d02910da09ea9cb4d33003a\`).
-- A cópia agora exclui diretórios internos/documentais, testes, CI, arquivos \`.md/.txt\`, package de testes, scripts de publicação e versões antigas. O manifesto e o resumo de entrega ficam fora do ZIP; os documentos continuam preservados no GitHub.
-- **Estado:** AGUARDANDO validação do run #41079295445 no SHA exato da main. Não declarar o pacote limpo até conferir o step de empacotamento e o manifesto publicado.
+### Pacote do Creator — correção validada
+- Foi identificado que o empacotador copiava documentação interna, planos, testes e arquivos de CI para o ZIP de trabalho.
+- Corrigidos os workflows `.github/workflows/pixel-art.yml` em main (commit `f69a013dcc6f38267e204b50c1df90698dca54a3`) e na branch ambiental (commit `5f47b1fb2889a7116d02910da09ea9cb4d33003a`).
+- A cópia agora exclui diretórios internos/documentais, testes, CI, arquivos `.md/.txt`, package de testes, scripts de publicação e versões antigas. O manifesto e o resumo de entrega ficam fora do ZIP; os documentos continuam preservados no GitHub.
+- **Estado:** VALIDADO no run [#41079295445](https://github.com/apoenalore/GameCreator/actions/runs/41079295445), SHA `f69a013dcc6f38267e204b50c1df90698dca54a3`. O step de empacotamento passou, gerou 52 arquivos de runtime e publicou o artefato ID `12988218628`.
+- **Inspeção independente do ZIP:** nenhum diretório `docs`, `tests`, `testes`, `.github`, `historico` ou `legacy`; nenhum `.md`, `.txt` ou `package.json`. Launcher, fonte V4.0, loader, bundle, biblioteca, editor de mapas, integração e módulos Pixel Art necessários estão presentes. SHA-256 do ZIP interno: `7a061059a7d027c45e32ce11fd78c48fd5bdf9a0b0c05e069802cb6c1d3dfda7`.
+- O ZIP interno tem 36.047.579 bytes; o artefato anterior tinha 119.780.985 bytes. O artefato novo tem 71.896.589 bytes (pasta de runtime + ZIP + metadados), redução de 39,98% no download do artefato. Os documentos internos não foram apagados do GitHub.
 
+### Próximos passos, mantendo WIP = 1
+1. Resolver a divergência da PR #6 ambiental e obter CI no head atual; não fazer merge automático.
+2. Manter GC-UPDATE-009 como única tarefa de implementação ativa; não iniciar UX, sessão online ou novas funcionalidades até fechar os critérios do atualizador.
+3. Preservar os protótipos de hidrologia até consolidar as funções exclusivas e validar o fluxo Creator → runtime.
 ### Próximos passos, mantendo WIP = 1
 1. Confirmar o resultado do run #41079295445 e verificar que o ZIP não contém documentação, testes ou CI, mas contém launcher, fonte V4.0, bundle e módulos de runtime.
 2. Atualizar o registro GC-CI-012 e GC-PACK-001 com o resultado final.
