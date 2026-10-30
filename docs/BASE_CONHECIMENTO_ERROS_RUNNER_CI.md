@@ -487,3 +487,15 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - **Evidência:** inspeção estrutural do arquivo confirmou blocos balanceados e uma única validação de origin; a próxima CI precisa confirmar a análise pelo parser real do Windows PowerShell 5.1.
 - **Resultado:** CORREÇÃO APLICADA / NOVA CI PENDENTE.
 - **Prevenção:** após substituições por trecho, verificar arquivo completo, contagem de blocos e executar o parser PowerShell no runner antes de considerar o teste end-to-end alcançado.
+
+
+## Complemento de classificação — GC-UPDATE-TEST-001
+
+- **Branch:** feat/atualizador-local-incremental.
+- **Classificação:** falha de teste/asserção estática por incompatibilidade de quebras de linha CRLF/LF; não foi falha de atribuição do runner nem de comunicação.
+- **Causas descartadas com evidência:** o job foi atribuído ao runner Windows e chegou ao step 17; as etapas anteriores de build, navegador, sintaxe, biblioteca, catálogo e Godot concluíram antes da assertion. Não houve ENOTFOUND nem timeout de runner nesse run.
+
+
+## GC-UPDATE-REGEX-001 — Correspondência exata entre manifesto e proteção local
+
+A revisão identificou que a regex manual aceitava arquivos que os padrões de sparse-checkout não instalavam, como biblioteca/backup.json e map-editor/backup.json, além de subpastas não incluídas. A regex agora é gerada diretamente de runtimePatterns e restringe * a caracteres que não atravessam /. O teste inclui esses caminhos como arquivos locais e exige bloqueio sem remoção. CI do head mais recente pendente.
