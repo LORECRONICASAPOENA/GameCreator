@@ -32,9 +32,22 @@ const essentials = quotedValues(updater.slice(essentialsStart, essentialsEnd));
 essentials.push(...Array.from({ length: 24 }, (_, i) => "bundle-v4/parte_" + String(i).padStart(3, "0") + ".js"));
 essentials.push(...Array.from({ length: 23 }, (_, i) => "legacy/v3_9_parts/parte_" + String(i).padStart(3, "0") + ".js"));
 
-const runtimeRegexMatch = updater.match(/^\$regexRuntime = '([^']+)'$/m);
+assert.match(updater, /\$runtimeRegexParts = @\(/,
+  "A regex de runtime deve ser gerada a partir do manifesto positivo.");
+assert.match(updater, /\[regex\]::Escape\(\$_\.TrimStart\('\//,
+  "A conversão do manifesto para regex precisa escapar os caminhos antes de aplicar curingas.");
+function globToRegex(pattern) {
+  return pattern
+    .replace(/[.+^$()|[\]\\]/g, "\\const runtimeRegexMatch = updater.match(/^\$regexRuntime = '([^']+)'$/m);
 assert.ok(runtimeRegexMatch, "regexRuntime precisa existir como contrato de arquivos locais.");
-const runtimeRegex = new RegExp(runtimeRegexMatch[1], "i");
+const runtimeRegex = new RegExp(runtimeRegexMatch[1], "i");")
+    .replace(/\*/g, "[^/]*")
+    .replace(/\?/g, "[^/]");
+}
+const runtimeRegex = new RegExp(
+  "^(?:" + runtimePatterns.map((pattern) => globToRegex(pattern.replace(/^\//, ""))).join("|") + ")$",
+  "i"
+);
 
 const requiredRuntime = [
   "integracao/index.html",
@@ -149,6 +162,17 @@ assert.match(updater, /core\.quotePath=false/,
   "A leitura de caminhos Git precisa preservar nomes Unicode sem escape octal.");
 assert.ok(runtimeRegex.test("pixel-art/árvore.js"),
   "A allowlist precisa reconhecer arquivos com acentos em caminhos de runtime.");
+for (const outsidePath of [
+  "biblioteca/backup.json",
+  "map-editor/backup.json",
+  "map-editor/sub/terrain.js",
+  "pixel-art/sub/natureza.js",
+  "shared/sub/helper.js",
+  "bundle-v4/sub/parte.js"
+]) {
+  assert.equal(runtimeRegex.test(outsidePath), false,
+    "Caminho fora dos padrões exatos do sparse-checkout não pode ser classificado como runtime: " + outsidePath);
+}
 assert.match(updater, /read-tree -mu HEAD/,
   "Clone iniciado com --no-checkout precisa materializar o runtime após validar conflitos.");
 const initialGuardPosition = updater.indexOf("VerificarConflitosLocais 'HEAD'");
@@ -376,10 +400,14 @@ function testSparseCheckoutAndUpdate() {
     // Arquivos locais fora da allowlist bloqueiam o updater sem serem apagados.
     const personalDoc = "docs/personal-notes.md";
     const extraLocal = "cache/local-data.json";
+    const extraLibraryJson = "biblioteca/backup.json";
+    const extraMapJson = "map-editor/backup.json";
     const excludeFile = path.join(install, ".git", "info", "exclude");
     fs.appendFileSync(excludeFile, "\n" + personalDoc + "\n");
     writeFile(install, personalDoc, "anotacao pessoal");
     writeFile(install, extraLocal, "dado local nao ignorado");
+    writeFile(install, extraLibraryJson, "backup local de biblioteca");
+    writeFile(install, extraMapJson, "backup local de mapa");
     const outsideRun = runUpdater(install, configDir, repoUrl, true);
     assert.notEqual(outsideRun.status, 0, "Arquivos locais fora do runtime precisam bloquear o atualizador.");
     assert.equal(git(install, ["rev-parse", "HEAD"]).stdout.trim(), initialHead,
@@ -388,8 +416,14 @@ function testSparseCheckoutAndUpdate() {
       "Documento pessoal ignorado precisa permanecer intacto.");
     assert.equal(fs.readFileSync(path.join(install, extraLocal), "utf8"), "dado local nao ignorado",
       "Dado local não ignorado precisa permanecer intacto.");
+    assert.equal(fs.readFileSync(path.join(install, extraLibraryJson), "utf8"), "backup local de biblioteca",
+      "JSON local fora do manifesto da biblioteca precisa permanecer intacto e bloquear a atualização.");
+    assert.equal(fs.readFileSync(path.join(install, extraMapJson), "utf8"), "backup local de mapa",
+      "JSON local fora do manifesto do editor de mapas precisa permanecer intacto e bloquear a atualização.");
     fs.rmSync(path.join(install, personalDoc), { force: true });
     fs.rmSync(path.join(install, extraLocal), { force: true });
+    fs.rmSync(path.join(install, extraLibraryJson), { force: true });
+    fs.rmSync(path.join(install, extraMapJson), { force: true });
     fs.writeFileSync(excludeFile, fs.readFileSync(excludeFile, "utf8").replace(personalDoc + "\n", ""));
 
     // Atualização real: o updater deve avançar por fast-forward e guardar o SHA anterior.
