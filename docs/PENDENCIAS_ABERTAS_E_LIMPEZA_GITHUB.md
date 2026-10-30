@@ -263,3 +263,59 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 2. Atualizar o registro GC-CI-012 e GC-PACK-001 com o resultado final.
 3. Resolver a divergência/merge conflict da PR #6 ambiental e obter CI no head atual; não fazer merge automático.
 4. Manter GC-UPDATE-009 como única tarefa de implementação ativa; não iniciar UX, sessão online ou novas funcionalidades até fechar os critérios do atualizador.
+
+
+## GC-UPDATE-009 — Atualizador enxuto do Game Creator (30/10/2026)
+
+- **Estado:** WIP 1 / EM VALIDAÇÃO; não iniciar novas funcionalidades até fechar esta tarefa.
+- **Objetivo:** manter documentação, auditorias, histórico, testes e workflows no repositório privado, mas materializar somente os arquivos necessários ao runtime na pasta APP.
+- **Implementação:** clone parcial com --filter=blob:none, sparse-checkout por lista positiva, manifesto de arquivos essenciais, fetch explícito de origin/main, fast-forward e proteção de arquivos ignorados.
+- **Preservação:** não usar reset/clean; não apagar runner, biblioteca IndexedDB, arquivos pessoais ou histórico local.
+- **Revisão/sincronização:** a branch anterior da PR #7 estava divergente de main. Foi preservada em backup/gc-update-009-before-main-sync-20261030; a versão de trabalho está sendo reaplicada sobre a main atual antes de atualizar a PR.
+- **Validação automatizada planejada:** teste isolado com repositório Git local para confirmar sparse-checkout, exclusão de documentos, fast-forward, referência anterior e bloqueio de conflito com arquivo ignorado.
+- **Pendências de aceite:** CI canônica no novo SHA; CodeRabbit no diff atualizado; teste real de instalação/atualização no Windows; backup e restauração da biblioteca IndexedDB conferidos pelo autor.
+- **Regra:** não integrar a PR nem declarar concluído até todos os critérios acima terem evidência.
+
+
+## Descoberta de segurança — checkout inicial e conflitos locais (30/10/2026)
+
+A simulação Git local identificou que sparse-checkout set --no-cone não materializa por si só um clone iniciado com --no-checkout. Foi adicionado git read-tree -mu HEAD após a verificação do manifesto.
+
+Também foi comprovado que, em sparse-checkout, git merge --no-overwrite-ignore sozinho não é proteção suficiente contra todo arquivo local conflitante. O atualizador agora detecta tanto arquivos ignorados quanto não ignorados antes da materialização e antes do merge; qualquer colisão com o runtime remoto bloqueia a operação.
+
+A simulação foi executada com Git 2.47.3 em Linux. O novo teste de contrato repete esses cenários na CI Windows. Nenhuma pasta do computador do autor foi alterada.
+
+
+- **Proteção adicional:** antes de reduzir o worktree, o atualizador interrompe se encontrar arquivos ignorados fora da allowlist de runtime. O operador deverá fazer backup ou movê-los manualmente; o atualizador não apaga nem move dados pessoais.
+
+
+## Bloqueio de arquivos locais fora do runtime
+
+Antes de aplicar o sparse-checkout, o atualizador verifica arquivos locais ignorados e não ignorados. Se encontrar qualquer arquivo fora da allowlist de runtime, interrompe e solicita backup ou movimentação manual. Não tenta apagar, mover ou incorporar esses arquivos. Dados locais dentro de caminhos de runtime também bloqueiam a atualização se colidirem com um arquivo que venha do repositório.
+
+
+## Caminhos Unicode
+
+A leitura de árvores e arquivos locais usa core.quotePath=false para que nomes com acentos, como árvore.js, sejam comparados como caminhos reais e não como sequências octais escapadas. O teste PowerShell cria uma colisão com nome Unicode e exige que o atualizador bloqueie sem sobrescrever o arquivo local.
+
+
+## Execução do atualizador PowerShell real na CI
+
+O teste tests/atualizador-manifest.test.cjs não fica apenas na simulação de comandos Git. Ele executa integracao/atualizar-creator.ps1 com Windows PowerShell 5.1, usando um repositório bare local temporário e diretório de configuração isolado. O modo de teste permite a URL local somente quando APOENA_UPDATER_TEST_MODE=1 e a URL do remote corresponde exatamente ao parâmetro RepoUrl; a instalação normal continua limitada ao GameCreator oficial.
+
+O teste executa primeira instalação, verifica arquivos presentes/ausentes, bloqueio de arquivos locais fora da allowlist, atualização fast-forward, preservação de refs/apoena/anterior, execução sem mudanças e bloqueio de conflitos ignorados/não ignorados, inclusive um caminho com acento. Nenhuma pasta permanente do autor é usada.
+
+
+
+
+## GC-UPDATE-TEST-001 — CRLF no teste de contrato
+
+A falha do run 41113920551 foi causada por CRLF no arquivo PowerShell lido pelo teste Node, não por ausência do guard. O teste agora normaliza CRLF para LF antes de usar indexOf e procura a linha executável completa. Correções do teste: 65c65521b0fb1595215bd70da03c4ef7b898032d e 8bbe3d7379b43da5c98c18bd1165e2d8d114a267. A nova CI do head atual ainda está pendente.
+
+## GC-UPDATE-RECOVERY-001 — Retomada de clone interrompido
+
+O clone --no-checkout deixa o índice vazio; o status pode apresentar remoções na primeira coluna (D ). O atualizador agora usa o marcador clone-pendente.txt e verifica git ls-files + árvore HEAD para reconhecer esse estado. Se o índice já estiver populado, somente ausências de worktree sem outras alterações são retomáveis. Modificações rastreadas bloqueiam. O teste cria esse estado e executa o PowerShell real. CI pendente.
+
+## GC-UPDATE-TEST-002 — Parser PowerShell
+
+A CI 41114836257 falhou no step 17 com Token '}' inesperado. A causa foi um segundo bloco de código duplicado após o catch, deixado por uma substituição anterior do trecho de validação do remote. O bloco duplicado foi removido no commit d90541bd642f17aa681ea7e623b49dba12ca2b36. Nova CI pendente; o teste end-to-end PowerShell ainda não foi considerado aprovado.
