@@ -125,6 +125,8 @@ assert.match(updater, /\[version\]'2\.41\.0'/,
   "O atualizador usa check-rules e precisa exigir Git 2.41 ou superior.");
 assert.match(updater, /APOENA_UPDATER_TEST_MODE -eq '1'/,
   "O repositório local de teste só pode ser aceito no modo de teste explícito.");
+assert.match(updater, /Substring\(0, 2\) -ne ' D'/,
+  "A retomada deve distinguir arquivos ausentes de modificações locais.");
 assert.match(updater, /origem\.Trim\(\) -ceq \$RepoUrl\.Trim\(\)/,
   "A exceção de teste precisa validar que o remote corresponde exatamente à URL temporária.");
 assert.match(updater, /sparse-checkout check-rules --no-cone/,
@@ -344,6 +346,11 @@ function testSparseCheckoutAndUpdate() {
       "clone", "--filter=blob:none", "--depth", "1", "--single-branch",
       "--branch", "main", "--no-checkout", repoUrl, resumeInstall
     ]);
+    const incompleteStatus = git(resumeInstall, ["status", "--porcelain", "--untracked-files=no"])
+      .stdout.split(/\r?\n/).filter(Boolean);
+    assert.ok(incompleteStatus.length > 0, "Clone --no-checkout deve revelar arquivos ainda não materializados.");
+    assert.ok(incompleteStatus.every((line) => line.slice(0, 2) === " D"),
+      "Clone --no-checkout deve aparecer como arquivos rastreados ausentes, não como alterações locais.");
     fs.writeFileSync(path.join(resumeConfig, "clone-pendente.txt"), resumeInstall, "utf8");
     const resumeRun = runUpdater(resumeInstall, resumeConfig, repoUrl);
     assert.equal(resumeRun.status, 0, "O atualizador deve retomar um clone interrompido antes do checkout.");
