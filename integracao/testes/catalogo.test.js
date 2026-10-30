@@ -93,6 +93,10 @@ test("Registra material físico, biomas e variantes das quatro estações",()=>{
   assert.equal(d.hydrology.permeability,0.9);
   assert.equal(T.validateCatalog({schema:T.SCHEMA,version:1,tiles:{"atlas:0":d}}).valid,true);
 });
+test("Normaliza tags de bioma com acentos e espaços",()=>{
+  const d=T.normalizeDefinition({terrainKind:"sand_desert",biomeTags:["Desértico","Mata Atlântica"]},"atlas:0");
+  assert.deepEqual(d.biomeTags,["desertico","mata_atlantica"]);
+});
 test("Limita índices sazonais e valores hidrológicos inválidos",()=>{
   const d=T.normalizeDefinition({terrainKind:"sand_desert",seasonalVariants:{winter:9999},hydrology:{permeability:4,retention:-1,erosionResistance:0.2,runoff:0.3}});
   assert.equal(d.seasonalVariants.winter,null);
@@ -118,3 +122,20 @@ test("Mapas antigos recebem os perfis ambientais padrão",()=>{
   assert.equal(prepared.terrainCatalog.tiles["builtin:3"].hydrology.source,true);
 });
 console.log("Concluído: "+passed+" testes de contrato e regras isoladas.");
+
+
+test("O coeficiente runoff altera o escoamento superficial",()=>{
+  function fluxo(runoff){
+    const catalog=T.createDefaultCatalog();
+    catalog.tiles["atlas:0"]=T.normalizeDefinition({
+      name:"Areia de teste",role:"terrain",terrainKind:"sand_desert",
+      hydrology:{permeability:0.05,retention:0.1,erosionResistance:0.1,runoff,source:false}
+    });
+    const map={width:8,height:8,tiles:Array(64).fill(1000),
+      heights:Array.from({length:64},(_,i)=>Math.max(0,4-(i%8))),terrainCatalog:catalog};
+    const sim=T.createHydrologySimulation(map);
+    T.simulateHydrology(sim,10,()=>({tempo:"Tempestade",estacao:"summer",temperatura:29}));
+    return Array.from(sim.flowAccumulation).reduce((sum,value)=>sum+value,0);
+  }
+  assert.ok(fluxo(0.9)>fluxo(0.1),"runoff maior deve produzir mais escoamento");
+});
