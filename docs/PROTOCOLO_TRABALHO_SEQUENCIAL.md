@@ -47,6 +47,15 @@ Se depender de teste humano ou de dispositivo, o estado será **AGUARDANDO VALID
 
 **Pendências antigas:** não carregar como erro atual uma falha de commit anterior que tenha sido comprovadamente corrigida. Conservar no histórico o link da falha e da validação que a substituiu; PR aberta não é igual a funcionalidade integrada.
 
+## 3B. Organização da lista de workflows
+
+- Manter **um único workflow canônico de validação por repositório**. Um segundo workflow só permanece quando produz uma entrega distinta (por exemplo, build/publicação) ou cobre testes exclusivos que não estejam na validação canônica.
+- Antes de remover um workflow manual, comparar seus testes com a suíte canônica e confirmar que toda a cobertura útil foi preservada.
+- Não manter agenda periódica sem requisito explícito de monitoramento; validações devem ocorrer por alteração relevante, PR ou acionamento manual deliberado.
+- Normalizar o grupo de concorrência pela branch (`github.head_ref || github.ref_name`) para que eventos `push` e `pull_request` da mesma branch não mantenham duas execuções concorrentes. Usar `cancel-in-progress: true` quando seguro.
+- Diferenciar estados: `queued` aguarda um runner e aumenta a fila, mas não consome execução ativa; `in_progress` ocupa runner; `completed` (sucesso, falha ou cancelamento) é histórico e não ocupa runner.
+- Só declarar a fila limpa depois de consultar todas as páginas de execuções e confirmar zero itens `queued` e zero `in_progress`.
+- Cancelar uma execução exige permissão de escrita de Actions. Se a integração disponível não oferecer a operação de cancelamento, registrar o bloqueio e solicitar cancelamento humano pelo GitHub Actions; não criar outro workflow para tentar contornar a limitação.
 ## 4. Trabalho que abrange os dois repositórios
 
 Quando uma funcionalidade exigir mudanças no Game Creator e no Pixel Art, os dois lados formam **uma única tarefa integrada**, com critérios de aceitação para cada repositório. Não iniciar outra funcionalidade entre a implementação e a validação dos dois lados.
