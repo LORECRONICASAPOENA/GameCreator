@@ -35,6 +35,6 @@ No editor integrado, clique em **Selecionar pincel de bacia**, escolha nível/ra
 
 ## Estado da validação automatizada — 30/10/2026
 
-O workflow foi ajustado para validar pull requests, verificar sintaxe com PowerShell em modo `ExecutionPolicy Bypass` e executar `tests/hidrologia.test.cjs`. **A validação ainda não passou:** a execução [#40995084387](https://github.com/apoenalore/GameCreator/actions/runs/40995084387) está em `queued`, sem runner atribuído. O runner Pixel Art não atende automaticamente este repositório, pois seu registro é restrito ao repositório Pixel Art.
+O workflow foi ajustado para validar pull requests, verificar sintaxe com PowerShell em modo `ExecutionPolicy Bypass` e executar `tests/hidrologia.test.cjs`. **A validação ainda não passou:** a execução mais recente [#40995373584](https://github.com/apoenalore/GameCreator/actions/runs/40995373584) está em `queued`, sem runner atribuído. O runner Pixel Art não atende automaticamente este repositório, pois seu registro é restrito ao repositório Pixel Art.
 
 Não marcar este motor como concluído até o runner GameCreator executar a suíte e os testes de integração do Creator confirmarem a importação/exportação.
