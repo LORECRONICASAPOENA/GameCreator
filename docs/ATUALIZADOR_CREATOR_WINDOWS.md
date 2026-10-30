@@ -82,3 +82,8 @@ A simulação de clone parcial revelou dois comportamentos que passaram a ser tr
 2. Em sparse-checkout, não é seguro confiar apenas em git merge --no-overwrite-ignore. Em uma simulação local com Git 2.47.3, o merge ainda avançou sobre caminhos ignorados/não rastreados. Por isso, o atualizador calcula previamente a interseção entre arquivos locais (ignorados e não ignorados) e arquivos de runtime da árvore remota; havendo conflito, aborta antes do read-tree/merge.
 
 O teste automatizado reproduz o clone, a materialização, o fast-forward e a identificação dos conflitos em repositório Git temporário. A simulação foi feita em Linux com Git 2.47.3; o comportamento no runner Windows será verificado pela CI e a instalação real ainda exige teste no computador do autor.
+
+
+## Requisito mínimo de Git
+
+O atualizador exige Git for Windows 2.41.0 ou superior. Embora clone parcial e sparse-checkout básico existam desde versões anteriores, este fluxo usa o subcomando sparse-checkout check-rules para validar o manifesto antes de materializar arquivos. Esse subcomando foi incorporado posteriormente; por isso, a versão mínima do instalador foi elevada para 2.41.0. O runner atual usa uma versão mais recente.
