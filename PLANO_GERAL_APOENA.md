@@ -138,10 +138,17 @@ A arquitetura ambiental passa a separar três responsabilidades:
 ### Em validação
 - Branch `feat/tempo-biomas-hidrologia`: código e testes atualizados; validação completa do GameCreator depende do runner Windows do repositório. A última execução observada ficou em `queued`, sem executor atribuído.
 - Branch `feature/estudio-unificado-pixelart-v41`: permanece a linha oficial de desenvolvimento V4.1; esta rodada não altera a `main` nem substitui a branch oficial.
-- Runner Pixel Art: execução de CI concluída com sucesso na validação anterior; a nova suíte ambiental será confirmada após o próximo evento de CI.
+- Runner GameCreator: as execuções [#40995084509](https://github.com/apoenalore/GameCreator/actions/runs/40995084509) e [#40995084387](https://github.com/apoenalore/GameCreator/actions/runs/40995084387) continuam em `queued`, sem `runner_name`/executor atribuído. A validação agendada [#40959244729](https://github.com/apoenalore/GameCreator/actions/runs/40959244729) também permanece na fila. A tentativa de fallback hospedado falhou antes da primeira etapa; foi removida para manter o runner próprio como requisito do build completo.
+- Runner Pixel Art: duas validações concluídas com sucesso no runner real `Runner-Pixel-Art` (ID 21; labels `self-hosted`, `Windows`, `X64`, `pixel-art`): [calendário/hidrologia HTML + Godot #40994277391](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40994277391) e [laboratório de bacias/erosão #40994748901](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40994748901).
 
 ### Pendências preservadas — não marcar como concluídas
 - Consolidar o laboratório hidrológico de bacias/solo da PR #5 com a prévia ambiental do `terrain-system.js` da PR #6, preservando recursos exclusivos de ambos.
 - Implementar importação ponta a ponta do JSON e atlas exportados pelo Creator para o runtime HTML/Godot; metadados válidos não equivalem a mapa jogável importado.
 - Substituir topografia provisória por alturas reais do mapa, validar variantes sazonais em objetos/construções e calibrar chuva longa, seca, neve e desempenho mobile.
 - Validar no Godot de destino, Android físico e gameplay real antes de declarar História, Exploração ou MOBA concluídos.
+
+
+### Ação externa necessária para liberar o GameCreator
+- No computador Windows, executar o diagnóstico somente-leitura do repositório `runner`: `powershell -NoProfile -File .\\scripts\\diagnosticar_runner_windows.ps1`.
+- Confirmar que existe uma instalação de runner registrada especificamente para o repositório GameCreator (ou um runner de organização autorizado para ele), com labels compatíveis com `self-hosted`, `Windows` e `X64`; o runner `Runner-Pixel-Art` está registrado no repositório Pixel Art e não atende automaticamente o GameCreator.
+- Não reiniciar um runner que esteja com `Runner.Worker.exe` executando job. Depois de ativar/registrar o serviço correto, reexecutar a validação completa e só então marcar a parte do Creator como concluída.
