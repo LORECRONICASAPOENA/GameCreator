@@ -335,30 +335,38 @@ jobs:
           try {
             if (Test-Path -LiteralPath $project) { Remove-Item -LiteralPath $project -Recurse -Force }
             New-Item -ItemType Directory -Force -Path $project | Out-Null
-            $skipNames = @(".git", "node_modules", ".ci-results", "_delivery", ".godot", "__pycache__")
-            $items = Get-ChildItem -LiteralPath $source -Force | Where-Object { $_.Name -notin $skipNames }
-            foreach ($item in $items) {
-              Copy-Item -LiteralPath $item.FullName -Destination $project -Recurse -Force
+            $skipDirectoryNames = @(".git", "node_modules", ".ci-results", "_delivery", ".godot", "__pycache__", ".github", "docs", "historico", "legacy", "tests", "testes")
+            $skipFileNames = @("package.json", "package-lock.json", "npm-shrinkwrap.json", ".gitignore", ".gitattributes", "PUBLICAR_NO_GITHUB.cmd", "PUBLICAR_NO_GITHUB.ps1", "APOENA_GAME_CREATOR_v3_9_2_PROJETOS_SEGUROS_COMPLETO.html", "ORGANIZACAO_EDITOR.html")
+            $skipExtensions = @(".md", ".txt")
+            function Copy-RuntimeTree {
+              param([string]$SourceDirectory, [string]$DestinationDirectory)
+              New-Item -ItemType Directory -Force -Path $DestinationDirectory | Out-Null
+              foreach ($entry in Get-ChildItem -LiteralPath $SourceDirectory -Force) {
+                if ($entry.Attributes -band [System.IO.FileAttributes]::ReparsePoint) { continue }
+                if ($entry.PSIsContainer) {
+                  if ($entry.Name -in $skipDirectoryNames) { continue }
+                  Copy-RuntimeTree -SourceDirectory $entry.FullName -DestinationDirectory (Join-Path $DestinationDirectory $entry.Name)
+                  continue
+                }
+                if ($entry.Name -in $skipFileNames -or $entry.Extension.ToLowerInvariant() -in $skipExtensions) { continue }
+                Copy-Item -LiteralPath $entry.FullName -Destination $DestinationDirectory -Force
+              }
             }
-            $info = @(
-              "APOENA GAME CREATOR V4.1 - PACOTE DE TRABALHO",
-              "Commit: $env:GITHUB_SHA",
-              "Run: https://github.com/apoenalore/GameCreator/actions/runs/$env:GITHUB_RUN_ID",
-              "Pull request: https://github.com/apoenalore/GameCreator/pull/1",
-              "Criado em: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')",
-              "",
-              "Esta pasta contem a copia do checkout deste commit.",
-              "O pacote nao significa que os testes passaram. Confira o resultado do run acima.",
-              "A V4.0 original foi mantida no repositorio; nao houve mesclagem automatica na main."
-            )
-            $info | Set-Content -Encoding UTF8 (Join-Path $project "ENTREGA-INFO.txt")
-            $manifestPath = Join-Path $project "MANIFESTO-ARQUIVOS.txt"
+            Copy-RuntimeTree -SourceDirectory $source -DestinationDirectory $project
+            $forbiddenPaths = @(".github", "docs", "historico", "legacy", "tests", "testes", "package.json", "AGENTS.md", "README.md", "PLANO_GERAL_APOENA.md", "ORGANIZACAO_EDITOR.html")
+            foreach ($relativePath in $forbiddenPaths) {
+              if (Test-Path -LiteralPath (Join-Path $project $relativePath)) { throw "Conteúdo interno indevido no pacote: $relativePath" }
+            }
+            $forbiddenDocs = @(Get-ChildItem -LiteralPath $project -File -Recurse -Force | Where-Object { $_.Extension.ToLowerInvariant() -in @(".md", ".txt") })
+            if ($forbiddenDocs.Count -gt 0) { throw "O pacote ainda contém documentos internos: $($forbiddenDocs[0].FullName)" }
+            Write-Output "Documentação interna, histórico, testes e CI excluídos do pacote."
             $files = @(Get-ChildItem -LiteralPath $project -File -Recurse -Force | Sort-Object FullName)
+            $manifestPath = Join-Path $stage "MANIFESTO-ARQUIVOS.txt"
             $lines = foreach ($file in $files) {
               $relative = $file.FullName.Substring($project.Length).TrimStart([char[]]@([char]92,[char]47))
               "{0}{1}{2} bytes" -f $relative, [char]9, $file.Length
             }
-            @("Commit: $env:GITHUB_SHA", "Arquivos: $($files.Count)", "", $lines) | Set-Content -Encoding UTF8 $manifestPath
+            @("Commit: $env:GITHUB_SHA", "Arquivos de runtime: $($files.Count)", "Documentação interna incluída: não", "", $lines) | Set-Content -Encoding UTF8 $manifestPath
             $zipPath = Join-Path $stage "Apoena-GameCreator-V4.1.zip"
             if (Test-Path -LiteralPath $zipPath) { Remove-Item -LiteralPath $zipPath -Force }
             Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -369,7 +377,8 @@ jobs:
               "Run: https://github.com/apoenalore/GameCreator/actions/runs/$env:GITHUB_RUN_ID",
               "Pasta: GameCreator-V4.1",
               "Arquivo ZIP: Apoena-GameCreator-V4.1.zip",
-              "Manifesto: GameCreator-V4.1\MANIFESTO-ARQUIVOS.txt",
+              "Manifesto: MANIFESTO-ARQUIVOS.txt",
+              "O ZIP contém somente arquivos necessários para executar o Creator; documentos internos, testes e CI ficam fora.",
               "Criado em: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')"
             )
             $latest | Set-Content -Encoding UTF8 (Join-Path $stage "LEIA-ME-ENTREGA.txt")
@@ -378,8 +387,9 @@ jobs:
             Copy-Item -LiteralPath $project -Destination $existingProject -Recurse -Force
             Copy-Item -LiteralPath $zipPath -Destination (Join-Path $deliveryRoot "Apoena-GameCreator-V4.1.zip") -Force
             Copy-Item -LiteralPath (Join-Path $stage "LEIA-ME-ENTREGA.txt") -Destination (Join-Path $deliveryRoot "LEIA-ME-ENTREGA.txt") -Force
+            Copy-Item -LiteralPath $manifestPath -Destination (Join-Path $deliveryRoot "MANIFESTO-ARQUIVOS.txt") -Force
             Write-Output "Entrega preparada em: $deliveryRoot"
-            Write-Output "Arquivos no projeto (antes do manifesto): $($files.Count)"
+            Write-Output "Arquivos de runtime no ZIP: $($files.Count)"
             Write-Output "ZIP: $(Join-Path $deliveryRoot 'Apoena-GameCreator-V4.1.zip')"
           } catch {
             $errorText = "Falha ao preparar entrega: $($_.Exception.Message)"
