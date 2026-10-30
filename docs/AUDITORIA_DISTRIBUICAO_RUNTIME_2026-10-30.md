@@ -1,0 +1,60 @@
+# Auditoria — distribuição enxuta do Game Creator
+
+- **Data da auditoria:** 30/10/2026, 15:08 BRT (-03:00)
+- **Repositório:** `apoenalore/GameCreator`
+- **Branch auditada:** `feat/atualizador-local-incremental`
+- **PR:** [#7 — GC-UPDATE-009](https://github.com/apoenalore/GameCreator/pull/7)
+- **Commit auditado:** `3233e739474b993bb33a4f5c685753591c714ba3`
+- **Estado:** implementação em branch; não integrada à `main`; teste Windows real pendente.
+
+## Objetivo aprovado
+
+Manter a documentação, auditorias, requisitos, histórico e dados de desenvolvimento no repositório privado, sem baixar esses documentos como parte da instalação local do Creator. A pasta de instalação (`APP`) deve receber somente os arquivos necessários para executar o produto.
+
+A auditoria fica registrada aqui e referenciada no documento de atualizações pendentes. **A documentação não deve ser apagada do repositório interno para tornar o pacote enxuto.**
+
+## Implementação observada
+
+O atualizador `integracao/atualizar-creator.ps1` na branch da PR:
+
+- usa clone Git parcial com `--filter=blob:none` e `--no-checkout` na primeira instalação;
+- aplica sparse-checkout a partir de uma lista positiva de padrões de runtime;
+- inclui os launchers, páginas, módulos e arquivos de integração necessários ao produto, incluindo a fábrica original v3.9 que a página integrada referencia;
+- exclui da pasta `APP` `docs/`, `tests/`, `.github/`, `historico/`, documentação interna e arquivos de desenvolvimento;
+- verifica arquivos essenciais antes e depois da atualização;
+- registra versão anterior/atual e resultado em log local;
+- não usa `git clean`, `reset --hard` nem apaga a pasta do runner;
+- exige autenticação Git para o repositório privado.
+
+O bootstrap documentado requer somente:
+
+1. `ATUALIZAR_CREATOR.cmd`
+2. `integracao/atualizar-creator.ps1`
+
+O usuário não precisa baixar nem extrair o ZIP completo do repositório para iniciar o processo.
+
+## Validação e evidência
+
+- Run [41082083233](https://github.com/apoenalore/GameCreator/actions/runs/41082083233), commit `3233e739474b993bb33a4f5c685753591c714ba3`.
+- Os steps de build, testes do Creator e **“Validar manifesto do atualizador Windows quando presente” (step 17)** concluíram com sucesso.
+- O run completo terminou com falha nas etapas 22 e 23, relacionadas à disponibilização do pacote e logs de diagnóstico. Os logs específicos não foram recuperados nesta auditoria; portanto, a causa exata dessa falha de artefato permanece **não confirmada**.
+- Esta evidência valida os testes automatizados executados no runner para o manifesto; **não comprova instalação ou atualização no computador do autor**.
+
+## Limites que permanecem
+
+- A PR #7 está aberta em draft e não foi integrada à `main`.
+- No snapshot consultado, a branch estava 13 commits à frente e 22 atrás de `main`, com estado de merge não limpo. É necessário sincronizar e revisar a divergência antes de considerar a integração.
+- Não há teste humano confirmado de primeira instalação, atualização fast-forward, repetição sem mudanças, modo offline, conflito de arquivos locais, preservação do runner ou backup/restauração da biblioteca IndexedDB.
+- Em instalações antigas, o sparse-checkout remove da pasta de trabalho os arquivos rastreados fora do manifesto, mas blobs já armazenados em `.git` podem permanecer. Não executar limpeza destrutiva automática.
+- O repositório é privado. Para uma versão pública, publicar um artefato de runtime produzido pelo manifesto; não expor o repositório interno nem copiar os documentos internos para o pacote.
+
+## Critérios para encerrar GC-UPDATE-009
+
+1. Sincronizar e revisar a PR #7 sem perder mudanças.
+2. CodeRabbit revisar o diff; classificar e corrigir achados acionáveis.
+3. Obter CI canônica bem-sucedida no commit atualizado. Não repetir a suíte enquanto houver execução equivalente ativa.
+4. Executar no Windows real os cenários de instalação/atualização listados em `docs/ATUALIZADOR_CREATOR_WINDOWS.md`.
+5. Conferir o manifesto do pacote e provar que documentos internos não entram na pasta `APP` nem no artefato público.
+6. Atualizar os registros com commit, data/hora BRT, testes e links de execução.
+
+**Conclusão:** o desenho de distribuição enxuta está implementado na branch da PR #7 e o contrato automatizado do manifesto passou no run citado. A tarefa continua em validação; não marcar como concluída nem publicar o atualizador antes dos critérios acima.
