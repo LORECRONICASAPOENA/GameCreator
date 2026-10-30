@@ -103,3 +103,8 @@ A revisão de compatibilidade identificou que sparse-checkout check-rules foi in
 ## Proteção adicional de dados ignorados fora da allowlist
 
 Antes de executar sparse-checkout set, o atualizador agora identifica todos os arquivos ignorados não rastreados. Se algum estiver fora da allowlist de runtime, interrompe a atualização e solicita backup/movimentação manual. A regra é conservadora: não tenta limpar, mover nem apagar dados pessoais automaticamente. O teste de contrato cria um arquivo ignorado em docs/ e confirma que a condição é detectável antes de alterar o checkout.
+
+
+## Bloqueio de arquivos locais fora do runtime
+
+Antes de aplicar o sparse-checkout, o atualizador verifica arquivos locais ignorados e não ignorados. Se encontrar qualquer arquivo fora da allowlist de runtime, interrompe e solicita backup ou movimentação manual. Não tenta apagar, mover ou incorporar esses arquivos. Dados locais dentro de caminhos de runtime também bloqueiam a atualização se colidirem com um arquivo que venha do repositório.
