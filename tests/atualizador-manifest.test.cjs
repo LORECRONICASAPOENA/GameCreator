@@ -347,16 +347,17 @@ function testSparseCheckoutAndUpdate() {
     assert.ok(conflicts.includes(untrackedRelative),
       "Verificação precisa identificar arquivo não ignorado do usuário que conflita com runtime novo.");
 
-    const merge = git(install, [
-      "merge", "--no-overwrite-ignore", "--ff-only", "refs/remotes/origin/main"
-    ], true);
-    assert.notEqual(merge.status, 0, "Merge precisa bloquear sobrescrita de arquivo local.");
+    // O guard do atualizador deve abortar ANTES do merge. Em sparse-checkout,
+    // não confiar apenas em --no-overwrite-ignore: a proteção comprovada é a
+    // interseção entre arquivos locais (ignored + untracked) e o runtime remoto.
+    assert.match(updater, /VerificarConflitosLocais 'refs\/remotes\/origin\/main'/,
+      "O atualizador precisa executar a checagem local contra a árvore remota antes do merge.");
     assert.equal(fs.readFileSync(path.join(install, ignoredRelative), "utf8"), "conteudo pessoal ignorado",
-      "Conteúdo pessoal ignorado precisa permanecer intacto.");
+      "Conteúdo pessoal ignorado precisa permanecer intacto após o bloqueio.");
     assert.equal(fs.readFileSync(path.join(install, untrackedRelative), "utf8"), "conteudo pessoal nao ignorado",
-      "Conteúdo pessoal não ignorado precisa permanecer intacto.");
+      "Conteúdo pessoal não ignorado precisa permanecer intacto após o bloqueio.");
     assert.equal(git(install, ["rev-parse", "HEAD"]).stdout.trim(), installedAfterUpdate,
-      "Merge bloqueado não pode avançar a versão instalada.");
+      "A checagem de conflito precisa bloquear a atualização sem avançar a versão instalada.");
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }
