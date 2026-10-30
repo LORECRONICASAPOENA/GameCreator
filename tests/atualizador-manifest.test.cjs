@@ -123,6 +123,10 @@ assert.match(updater, /\$versaoGit = \[version\]\$versaoMatch\.Groups\[0\]\.Valu
   "A comparação de versão deve usar a correspondência completa.");
 assert.match(updater, /\[version\]'2\.41\.0'/,
   "O atualizador usa check-rules e precisa exigir Git 2.41 ou superior.");
+assert.match(updater, /APOENA_UPDATER_TEST_MODE -eq '1'/,
+  "O repositório local de teste só pode ser aceito no modo de teste explícito.");
+assert.match(updater, /origem\.Trim\(\) -ceq \$RepoUrl\.Trim\(\)/,
+  "A exceção de teste precisa validar que o remote corresponde exatamente à URL temporária.");
 assert.match(updater, /sparse-checkout check-rules --no-cone/,
   "O atualizador deve conferir o manifesto antes de aplicar um merge.");
 assert.match(updater, /function VerificarConflitosLocais/,
@@ -403,7 +407,8 @@ function testSparseCheckoutAndUpdate() {
 
 testSparseCheckoutAndUpdate();
 
-console.log("PASSOU: manifesto inclui todos os módulos essenciais, Godot, biblioteca e fábrica original.");
-console.log("PASSOU: sparse-checkout real mantém somente runtime e exclui docs, testes, CI e legado antigo.");
-console.log("PASSOU: clone parcial, fetch explícito, fast-forward e referência anterior foram simulados em repositório local.");
-console.log("PASSOU: arquivo ignorado conflitante bloqueia merge sem sobrescrever dados pessoais.");
+console.log("PASSOU: manifesto positivo e arquivos essenciais do Creator, Godot, biblioteca e Pixel Art.");
+console.log("PASSOU: o atualizador PowerShell real fez a primeira instalação enxuta e excluiu documentos/testes/CI.");
+console.log("PASSOU: arquivos locais fora da allowlist bloquearam a atualização sem serem alterados.");
+console.log("PASSOU: atualização fast-forward, referência anterior e execução sem mudanças.");
+console.log("PASSOU: colisões locais ignoradas e não ignoradas bloquearam o merge antes de alterar dados.");
