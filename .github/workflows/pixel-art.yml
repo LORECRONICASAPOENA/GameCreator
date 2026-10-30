@@ -413,6 +413,25 @@ jobs:
               foreach ($entry in Get-ChildItem -LiteralPath $SourceDirectory -Force) {
                 if ($entry.Attributes -band [System.IO.FileAttributes]::ReparsePoint) { continue }
                 if ($entry.PSIsContainer) {
+                  if ($entry.Name -eq "legacy") {
+                    $legacyTarget = Join-Path $DestinationDirectory "legacy"
+                    New-Item -ItemType Directory -Force -Path $legacyTarget | Out-Null
+                    $legacyHtml = Join-Path $entry.FullName "abrir-editor-v3.9.html"
+                    $legacyPartsSource = Join-Path $entry.FullName "v3_9_parts"
+                    if (-not (Test-Path -LiteralPath $legacyHtml)) { throw "Fábrica original ausente: legacy/abrir-editor-v3.9.html" }
+                    if (-not (Test-Path -LiteralPath $legacyPartsSource)) { throw "Partes da fábrica original ausentes: legacy/v3_9_parts" }
+                    Copy-Item -LiteralPath $legacyHtml -Destination $legacyTarget -Force
+                    $expectedLegacyParts = @(0..22 | ForEach-Object { "parte_{0:D3}.js" -f $_ })
+                    $legacyParts = @(Get-ChildItem -LiteralPath $legacyPartsSource -File -Filter "parte_*.js")
+                    $actualLegacyParts = @($legacyParts | ForEach-Object { $_.Name })
+                    $missingLegacyParts = @($expectedLegacyParts | Where-Object { $_ -notin $actualLegacyParts })
+                    $extraLegacyParts = @($actualLegacyParts | Where-Object { $_ -notin $expectedLegacyParts })
+                    if ($missingLegacyParts.Count -gt 0 -or $extraLegacyParts.Count -gt 0) { throw "Manifesto da fábrica original incompleto ou com arquivos extras." }
+                    $legacyPartsTarget = Join-Path $legacyTarget "v3_9_parts"
+                    New-Item -ItemType Directory -Force -Path $legacyPartsTarget | Out-Null
+                    foreach ($part in $legacyParts) { Copy-Item -LiteralPath $part.FullName -Destination $legacyPartsTarget -Force }
+                    continue
+                  }
                   if ($entry.Name -in $skipDirectoryNames) { continue }
                   Copy-RuntimeTree -SourceDirectory $entry.FullName -DestinationDirectory (Join-Path $DestinationDirectory $entry.Name)
                   continue
@@ -422,13 +441,23 @@ jobs:
               }
             }
             Copy-RuntimeTree -SourceDirectory $source -DestinationDirectory $project
-            $forbiddenPaths = @(".github", "docs", "historico", "legacy", "tests", "testes", "package.json", "AGENTS.md", "README.md", "PLANO_GERAL_APOENA.md", "ORGANIZACAO_EDITOR.html")
+            $forbiddenPaths = @(".github", "docs", "historico", "tests", "testes", "package.json", "AGENTS.md", "README.md", "PLANO_GERAL_APOENA.md", "ORGANIZACAO_EDITOR.html", "legacy/iniciador-anterior.html")
             foreach ($relativePath in $forbiddenPaths) {
               if (Test-Path -LiteralPath (Join-Path $project $relativePath)) { throw "Conteúdo interno indevido no pacote: $relativePath" }
             }
             $forbiddenDocs = @(Get-ChildItem -LiteralPath $project -File -Recurse -Force | Where-Object { $_.Extension.ToLowerInvariant() -in @(".md", ".txt") })
             if ($forbiddenDocs.Count -gt 0) { throw "O pacote ainda contém documentos internos: $($forbiddenDocs[0].FullName)" }
-            Write-Output "Documentação interna, histórico, testes e CI excluídos do pacote."
+            $requiredRuntimeFiles = @("integracao/index.html", "integracao/catalogo.js", "legacy/abrir-editor-v3.9.html")
+            foreach ($relativePath in $requiredRuntimeFiles) {
+              if (-not (Test-Path -LiteralPath (Join-Path $project $relativePath))) { throw "Arquivo de runtime obrigatório ausente: $relativePath" }
+            }
+            $legacyRoot = Join-Path $project "legacy"
+            $expectedLegacyFiles = @("abrir-editor-v3.9.html") + @(0..22 | ForEach-Object { "v3_9_parts\parte_{0:D3}.js" -f $_ })
+            $actualLegacyFiles = @(Get-ChildItem -LiteralPath $legacyRoot -File -Recurse -Force | ForEach-Object { $_.FullName.Substring($legacyRoot.Length).TrimStart([char[]]@([char]92,[char]47)) })
+            $missingLegacyFiles = @($expectedLegacyFiles | Where-Object { $_ -notin $actualLegacyFiles })
+            $extraLegacyFiles = @($actualLegacyFiles | Where-Object { $_ -notin $expectedLegacyFiles })
+            if ($missingLegacyFiles.Count -gt 0 -or $extraLegacyFiles.Count -gt 0) { throw "O pacote da fábrica original não corresponde ao manifesto mínimo." }
+            Write-Output "Documentação interna, histórico, testes e CI excluídos; somente a fábrica original necessária foi preservada."
             $files = @(Get-ChildItem -LiteralPath $project -File -Recurse -Force | Sort-Object FullName)
             $manifestPath = Join-Path $stage "MANIFESTO-ARQUIVOS.txt"
             $lines = foreach ($file in $files) {
