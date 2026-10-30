@@ -131,3 +131,8 @@ A revisão identificou que uma interrupção após clone --no-checkout e antes d
 ## GC-UPDATE-TEST-002 — Parser PowerShell
 
 O run 41114836257 falhou antes do teste Node porque o script continha um bloco duplicado depois do catch e uma chave de fechamento extra. O trecho duplicado foi removido no commit d90541bd642f17aa681ea7e623b49dba12ca2b36. O parser PowerShell 5.1 da próxima CI precisa confirmar a correção.
+
+
+## Autorização de escopo registrada
+
+Em 30/10/2026, o autor autorizou especificamente o GC-UPDATE-009 para alterar o atualizador/empacotamento e manter somente runtime na instalação pública. A regra de congelamento de funcionalidades e de trabalho somente documental permanece ativa para os demais itens. Esta exceção não abre autorização geral para novas funcionalidades.
