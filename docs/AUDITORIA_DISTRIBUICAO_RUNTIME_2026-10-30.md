@@ -126,8 +126,4 @@ O teste executa primeira instalação, verifica arquivos presentes/ausentes, blo
 
 ## GC-UPDATE-RECOVERY-001 — Retomada segura da primeira instalação
 
-A revisão identificou que uma interrupção após clone --no-checkout e antes de read-tree deixaria um clone com .git, mas sem arquivos materializados. Na execução seguinte, o status mostraria arquivos rastreados ausentes e o antigo guard trataria isso como alteração local.
-
-O atualizador agora grava clone-pendente.txt em ConfigDir antes de clonar. Se o marcador existir, examina o status: somente ausências de worktree (status “ D”) permitem retomada; qualquer modificação rastreada bloqueia. Se o worktree já estiver limpo, o marcador residual é removido e a execução segue normalmente. O marcador é apagado após a conclusão bem-sucedida.
-
-O teste end-to-end cria um clone --no-checkout, confirma o estado de arquivos ausentes, grava o marcador e executa o PowerShell real para materializar os arquivos essenciais. CI do head atual pendente.
+A revisão identificou que uma interrupção após clone --no-checkout e antes de read-tree deixaria um clone com .git, mas sem arquivos materializados. Nesse estado, git ls-files retorna índice vazio e git status pode mostrar D na primeira coluna. O atualizador agora grava clone-pendente.txt em ConfigDir antes de clonar. Na retomada, índice vazio + árvore HEAD válida identifica o clone não materializado; se o índice já estiver populado, somente ausências de worktree (status “ D”) são aceitas. Qualquer modificação rastreada real bloqueia. Se o worktree estiver limpo, o marcador residual é removido. O teste end-to-end cria o clone --no-checkout, confirma índice vazio/status D, e executa o PowerShell real. CI do head atual pendente.
