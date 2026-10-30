@@ -126,7 +126,7 @@ A arquitetura ambiental passa a separar três responsabilidades:
 **Estado:** metadados de bioma/hidrologia e variantes sazonais, prévia ambiental no Creator e motores iniciais no HTML/Godot foram adicionados na branch feat/tempo-biomas-hidrologia. A importação automática do JSON/atlas do Creator como mapa jogável continua pendente e precisa de um teste ponta a ponta antes de ser declarada concluída.
 
 
-## 11. Lista de execução e preservação — 29/10/2026
+## 11. Lista de execução e preservação — 30/10/2026
 
 ### Concluído nesta rodada (código e regressões adicionados)
 - O catálogo do Creator normaliza tags de bioma com acentos e espaços, preservando termos como `desertico` e `mata_atlantica`.
