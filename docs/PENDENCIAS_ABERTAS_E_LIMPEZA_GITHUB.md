@@ -1,6 +1,6 @@
 # Registro de pendências abertas e limpeza do GitHub
 
-**Data do levantamento:** 29/10/2026  
+**Data do levantamento:** 29/10/2026 21:37 BRT  
 **Escopo:** Apoena Game Creator e Apoena Pixel Art HTML  
 **Objetivo:** manter uma lista única de trabalho, reduzir validações duplicadas e não encerrar tarefas sem confirmar que seu conteúdo foi preservado.
 
@@ -17,18 +17,25 @@
 ### Tarefa ativa única
 
 - **T-002 — Estabilizar CI/runner do Game Creator e consolidar as falhas de validação.**
-- **Estado:** BLOQUEADA PELA FILA / ATRIBUIÇÃO DO RUNNER; diagnóstico realizado, nenhuma validação adicional disparada.
-- **Evidência:** consulta de 29/10/2026: 13 execuções `queued` entre as 30 mais recentes do Creator; nenhuma em execução nessa amostra. Priorizar o cancelamento seguro dos jobs obsoletos listados abaixo, verificar runner e labels, então rodar uma única validação canônica.
-- **Escopo:** limpar a fila antiga com segurança, confirmar a atribuição do runner, escolher uma validação canônica e tratar os erros conhecidos do PowerShell, testes de integração, catálogo e hidrologia. Nenhuma funcionalidade nova pode começar antes do encerramento de T-002.
+- **Estado:** BLOQUEADA — cancelamento manual da fila antiga é necessário; nenhuma nova validação foi disparada.
+- **Levantamento completo:** consulta das 324 execuções do Game Creator (4 páginas da API): **13 queued, 0 in_progress**. As outras 311 execuções estavam concluídas/canceladas. Amostra de jobs confirma runner_id = 0, runner_name vazio e labels exigidos self-hosted, Windows, X64.
+- **Limitação operacional:** a conexão GitHub disponível nesta sessão permite consultar execuções, jobs e logs, mas não expõe uma operação de cancelamento de workflow. Não declarar fila limpa nem fingir cancelamento. É necessária a ação manual de cancelamento dos 13 IDs abaixo no GitHub Actions.
+- **Escopo:** cancelar a fila obsoleta/duplicada; confirmar runner e labels; executar uma única validação canônica da branch atual; diagnosticar e corrigir qualquer falha antes de repetir; concluir a revisão de CI e dos erros conhecidos do Creator. Nenhuma funcionalidade nova pode começar antes do encerramento de T-002.
 
 ## 1. Estado geral
 
-- [x] Inventário inicial de pull requests abertos e workflows.
-- [x] Confirmar uma execução completa bem-sucedida no runner Pixel Art.
-- [x] Identificar que trabalhos recentes do Game Creator permanecem sem runner atribuído.
-- [x] Reduzir gatilhos duplicados: agenda horária do Creator removida; validação de integração consolidada no workflow principal; workflow Linux do Pixel Art restrito a PRs de sessão.
-- [ ] Decidir o destino dos pull requests de protótipo de hidrologia após comparar os arquivos exclusivos.
-- [ ] Confirmar os testes no runner Game Creator depois de restabelecer a atribuição de jobs.
+- [x] Inventário de pull requests, workflows e execuções do Actions.
+- [x] Confirmar validações recentes bem-sucedidas no Pixel Art.
+- [x] Consultar todas as 324 execuções do Game Creator: 13 em fila, nenhuma em andamento.
+- [x] Escolher um workflow canônico de validação do Creator.
+- [x] Remover a agenda periódica redundante do workflow principal.
+- [x] Unificar concorrência por branch para eventos push e pull_request.
+- [x] Remover dois workflows manuais redundantes após conferir que os testes estão cobertos pela validação canônica.
+- [x] Preservar o workflow separado de build/publicação, que tem finalidade própria.
+- [ ] Cancelar manualmente os 13 jobs antigos ainda queued.
+- [ ] Confirmar disponibilidade do runner Game Creator com labels compatíveis.
+- [ ] Executar uma única validação canônica e resolver eventuais falhas antes de repetir.
+- [ ] Decidir o destino dos protótipos de hidrologia depois de preservar seus arquivos exclusivos.
 
 ## 2. Apoena Pixel Art HTML
 
@@ -62,37 +69,44 @@ Execução [`40949815160`](https://github.com/apoenalore/Apoena-pixel-art-html/a
 | [#5 Protótipo de hidrologia 2D](https://github.com/apoenalore/GameCreator/pull/5) | Motor experimental, página de teste e seis níveis | Aberto; mergeable; 7 arquivos. | Preservar ou portar as funções exclusivas do laboratório: seis níveis de bacia, pintura de terreno, serialização/reimportação e testes de secagem/proteção contra erosão. Comparar `map-editor/hidrologia-core.js`, `map-editor/hidrologia_teste.html` e `tests/hidrologia.test.cjs` com o sistema de terreno da PR #6 antes de encerrar o protótipo. |
 | [#4 Contratos de modos offline, salas MOBA 5v5 e sistemas de mundo](https://github.com/apoenalore/GameCreator/pull/4) | Contratos de sessão e sistemas de mundo | Aberto; draft; 7 arquivos. 10 testes de modos/salas e 7 testes de sistemas de mundo passaram em execução isolada de análise; CI real ainda não confirmado. | Manter aberto; validar no runner quando a fila for limpa e o runner voltar a receber jobs. |
 
-### Workflows encontrados na `main`
+### Workflows ativos na main
 
-- `.github/workflows/pixel-art.yml`: validação ampla do Creator, com testes de editor, biblioteca, build, runtime e agora os contratos de integração.
-- `.github/workflows/testar-integracao.yml`: permanece como opção manual; os gatilhos automáticos foram retirados para não executar a mesma suíte em paralelo.
-- `.github/workflows/auto-validar-v41.yml`: agora é manual; a agenda horária e o gatilho de push redundantes foram removidos.
-- `.github/workflows/publicar-creator-unificado.yml`: build/publicação do Creator em `main`; tem finalidade diferente e deve ser preservado.
+<badge>2 workflows</badge>
 
-**Limpeza realizada:** os testes de integração foram incorporados à validação principal; o workflow dedicado ficou manual; a agenda horária redundante foi removida. O workflow de publicação permanece separado porque altera/constrói a entrega do Creator.
+- .github/workflows/pixel-art.yml: **validação canônica única**. Mantém os testes de editor, biblioteca, build, runtime Godot e contratos de integração. Gatilhos: push na branch V4.1, pull requests para main com alterações relevantes e acionamento manual. A agenda diária foi removida. A concorrência agora usa github.head_ref || github.ref_name e cancel-in-progress: true, unificando push e PR da mesma branch.
+- .github/workflows/publicar-creator-unificado.yml: **build/publicação**. Preservado porque produz/atualiza a entrega integrada e tem finalidade diferente da suíte de validação.
 
-### Bloqueio de runner
+### Workflows redundantes removidos
 
-Os trabalhos recentes do Creator aparecem como `queued`, com `runner_id = 0` e sem `runner_name`. O runner conhecido em uma execução anterior bem-sucedida é `APOENA-GAMECREATOR-RUNNER` (ID 2; execução `40942973127`). Na última consulta havia 13 execuções queued. A agenda horária já foi removida, mas isso não cancela os jobs criados antes da alteração. A tentativa de limpeza automática [`40961681593`](https://github.com/apoenalore/GameCreator/actions/runs/40961681593) falhou antes do primeiro step por não receber runner; o workflow temporário foi removido para não deixar outro fluxo permanente.
+- .github/workflows/auto-validar-v41.yml: removido; seus testes de sintaxe, Corte Inteligente, tileset, biblioteca, backup e build já são cobertos pela validação canônica.
+- .github/workflows/testar-integracao.yml: removido; os testes de catálogo, terreno, objetos de mundo e Natureza, além dos contratos opcionais de modos/sistemas de mundo, já são executados pelo step de integração do pixel-art.yml.
+- A remoção dos arquivos impede novos acionamentos por esses workflows, mas **não apaga nem cancela execuções antigas** que já estavam na fila. O histórico concluído permanece no Actions e não consome runner.
 
-**Execuções antigas ainda na fila — cancelar manualmente em Actions:**
-- [40959244729 — validação agendada antiga](https://github.com/apoenalore/GameCreator/actions/runs/40959244729)
-- [40949144668 — validação da branch V4.1](https://github.com/apoenalore/GameCreator/actions/runs/40949144668)
-- [40947634011 — validação Pixel Art, PR ambiental](https://github.com/apoenalore/GameCreator/actions/runs/40947634011)
-- [40947633985 — integração, PR ambiental](https://github.com/apoenalore/GameCreator/actions/runs/40947633985)
-- [40947625325 — integração, push ambiental](https://github.com/apoenalore/GameCreator/actions/runs/40947625325)
-- [40947611808 — integração, PR ambiental anterior](https://github.com/apoenalore/GameCreator/actions/runs/40947611808)
-- [40947601170 — integração, push ambiental anterior](https://github.com/apoenalore/GameCreator/actions/runs/40947601170)
-- [40944962186 — integração, PR ambiental antigo](https://github.com/apoenalore/GameCreator/actions/runs/40944962186)
-- [40944675654 — integração, PR ambiental antigo](https://github.com/apoenalore/GameCreator/actions/runs/40944675654)
-- [40944666718 — integração, push ambiental antigo](https://github.com/apoenalore/GameCreator/actions/runs/40944666718)
-- [40943993233 — integração, PR ambiental antigo](https://github.com/apoenalore/GameCreator/actions/runs/40943993233)
-- [40943754023 — integração, push ambiental antigo](https://github.com/apoenalore/GameCreator/actions/runs/40943754023)
-- [40943621289 — integração, push ambiental antigo](https://github.com/apoenalore/GameCreator/actions/runs/40943621289)
+### Bloqueio de runner e fila antiga
 
-O estado “Listening for Jobs” no CMD, isoladamente, não confirma que o runner esteja disponível para este repositório e para os labels solicitados.
+Consulta completa em 29/10/2026 21:37 BRT: 324 execuções consultadas em quatro páginas; **13 queued, 0 in_progress**. Nas execuções representativas, os jobs solicitam labels self-hosted, Windows, X64, mas aparecem com runner_id = 0 e runner_name vazio. Isso confirma que nenhum runner foi atribuído; a causa pode ser runner offline, labels incompatíveis ou registro/permissão, e ainda precisa ser verificada.
 
-**Ação:** cancelar manualmente as execuções antigas ainda na fila em Actions antes de reativar o runner para que ele não processe commits obsoletos em sequência. Depois, confirmar o registro/conexão do runner Game Creator no GitHub e executar uma única validação de referência. Não criar novas execuções enquanto os jobs continuarem sem atribuição.
+**Execuções que precisam ser canceladas manualmente em Actions:**
+
+1. [40959244729 — validação agendada antiga, workflow já removido](https://github.com/apoenalore/GameCreator/actions/runs/40959244729)
+2. [40949144668 — push antigo da branch V4.1](https://github.com/apoenalore/GameCreator/actions/runs/40949144668)
+3. [40947634011 — validação da PR #6 no commit 80e4c0](https://github.com/apoenalore/GameCreator/actions/runs/40947634011)
+4. [40947633985 — integração duplicada da PR #6](https://github.com/apoenalore/GameCreator/actions/runs/40947633985)
+5. [40947625325 — integração duplicada por push da PR #6](https://github.com/apoenalore/GameCreator/actions/runs/40947625325)
+6. [40947611808 — integração da PR #6 em commit anterior](https://github.com/apoenalore/GameCreator/actions/runs/40947611808)
+7. [40947601170 — integração por push em commit anterior](https://github.com/apoenalore/GameCreator/actions/runs/40947601170)
+8. [40944962186 — integração da PR #6 em commit anterior](https://github.com/apoenalore/GameCreator/actions/runs/40944962186)
+9. [40944675654 — integração da PR #6 em commit anterior](https://github.com/apoenalore/GameCreator/actions/runs/40944675654)
+10. [40944666718 — integração por push em commit anterior](https://github.com/apoenalore/GameCreator/actions/runs/40944666718)
+11. [40943993233 — integração da PR #6 em commit anterior](https://github.com/apoenalore/GameCreator/actions/runs/40943993233)
+12. [40943754023 — integração por push em commit anterior](https://github.com/apoenalore/GameCreator/actions/runs/40943754023)
+13. [40943621289 — integração por push em commit anterior](https://github.com/apoenalore/GameCreator/actions/runs/40943621289)
+
+**Por que ainda não foram canceladas:** a integração GitHub disponível nesta sessão não oferece a ação/API de cancelamento (somente leitura para execuções e jobs). Não posso executar o cancelamento por essa conexão. Não criei outro workflow para contornar isso, pois seria mais uma execução e contrariaria a regra de limpeza.
+
+**Ação necessária:** no GitHub, abrir cada execução acima e usar **Cancel workflow** enquanto o estado ainda for Queued. Depois, consultar novamente todas as páginas e confirmar zero queued e zero in_progress. Em seguida, verificar em Settings → Actions → Runners se APOENA-GAMECREATOR-RUNNER está online e possui os labels exigidos. O texto “Listening for Jobs” no CMD, sozinho, não comprova a atribuição ao repositório.
+
+Não disparar nenhuma nova validação antes dessas duas verificações. Depois da fila zerada e do runner confirmado, executar uma única validação canônica da PR #6; se falhar, diagnosticar o primeiro erro causal e corrigir antes de nova tentativa.
 
 ### Validação anterior
 
@@ -118,7 +132,7 @@ Execução [`40942973127`](https://github.com/apoenalore/GameCreator/actions/run
 
 **Diagnóstico obrigatório:** ao falhar, registrar primeiro erro causal, job, logs e tipo de falha; planejar uma correção; validar local/focado; só depois fazer uma nova tentativa canônica. Repetir o mesmo commit sem alteração é reservado a falha transitória identificada (runner/conexão). Não iniciar fluxo duplicado para tentar contornar fila.
 
-**Estado confirmado (29/10/2026):** Pixel Art: a validação principal [40965795436](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40965795436) foi aprovada; nenhuma fila/execução ativa entre as 12 mais recentes consultadas. Game Creator: 13 trabalhos antigos `queued` entre os 30 mais recentes; essa limpeza permanece na T-002.
+**Estado confirmado (29/10/2026 21:37 BRT):** Pixel Art: 68 execuções consultadas; 0 queued e 0 in_progress; validação principal [40965795436](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40965795436) aprovada. Game Creator: 324 execuções consultadas; 13 queued e 0 in_progress. A limpeza da fila continua bloqueada até o cancelamento manual dos 13 IDs acima.
 
 ## 5. Regra para evitar repetição
 
