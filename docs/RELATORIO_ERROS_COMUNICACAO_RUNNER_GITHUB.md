@@ -229,3 +229,16 @@ Copiar e preencher este bloco a cada novo erro:
 - **Solucao aplicada:** nenhuma correcao tecnica foi aplicada. A run [41075044875](https://github.com/apoenalore/GameCreator/actions/runs/41075044875), no mesmo commit, concluiu com sucesso depois; registrar como recuperacao/intermitencia, nao como correcao comprovada.
 - **Estado:** INTERMITENTE; nao confundir com defeito do codigo do Creator.
 - **Proxima verificacao:** com o computador online, fazer uma unica verificacao de conectividade do runner aos endpoints de artefatos antes de repetir a suite completa.
+
+
+## 4. Incidente GC-COMM-002 — Falha transitória ao criar artefatos
+
+- **Data/hora:** 30/10/2026 13:55:01 UTC (10:55:01 BRT).
+- **Run/job:** [#41066904787](https://github.com/apoenalore/GameCreator/actions/runs/41066904787) / \`124100579029\`.
+- **Mensagem literal:** \`Failed to CreateArtifact: Unable to make request: ENOTFOUND\`, após timeout em \`ArtifactService/CreateArtifact\`.
+- **Onde ocorreu:** steps \`actions/upload-artifact@v4\` para \`_delivery/\` e \`.ci-results/\`. A etapa de preparação do pacote e todos os testes anteriores concluíram com success.
+- **Causa confirmada:** falha de resolução DNS/conectividade na requisição ao serviço de artefatos do GitHub. O log não preserva o hostname final; não inferir domínio específico.
+- **Solução aplicada:** nenhuma alteração no código do jogo. Foi feita uma execução posterior após a retomada da comunicação.
+- **Evidência de recuperação:** [run #41075044875](https://github.com/apoenalore/GameCreator/actions/runs/41075044875) terminou com success e publicou pacote ID \`12986794324\` e diagnósticos ID \`12987043973\`.
+- **Estado:** RECUPERADO OPERACIONALMENTE; causa de rede pontual confirmada, sem evidência de falha persistente do runner.
+- **Prevenção:** ao ocorrer novamente, conferir primeiro os steps de teste e preparação; repetir somente a publicação se os testes e o pacote já estiverem comprovados, evitando repetir o build inteiro sem necessidade.
