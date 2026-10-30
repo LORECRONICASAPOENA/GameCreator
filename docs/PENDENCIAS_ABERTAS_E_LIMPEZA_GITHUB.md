@@ -229,12 +229,12 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 
 ### Pull Requests — não confundir CI aprovado com integração
 - **GameCreator #7:** draft, mergeable/clean; continua como WIP 1 GC-UPDATE-009. Falta teste específico do atualizador e teste real seguro na instalação Windows do autor.
-- **GameCreator #6:** aberta, não draft, `mergeable=false/dirty`; head atual `907ae25d81ff3e0ba3ecffc5927a4b7970259f20`. Comparação atual com main: 46 commits à frente e 57 atrás. O código ambiental teve CI aprovado no SHA anterior `b90be364...`; o head atual contém commits posteriores de documentação/workflow e ainda não tem CI associado. Resolver a divergência e validar o head atual antes de integrar.
+- **GameCreator #6:** aberta, não draft, `mergeable=false/dirty`; head atual `907ae25d81ff3e0ba3ecffc5927a4b7970259f20`. Comparação atual com main: 46 commits à frente e 59 atrás. O código ambiental teve CI aprovado no SHA anterior `b90be364...`; o head atual contém commits posteriores de documentação/workflow e ainda não tem CI associado. Resolver a divergência e validar o head atual antes de integrar.
 - **GameCreator #5:** draft, mergeable/clean; CI aprovado no head consultado. Manter o laboratório até comparar e preservar seus recursos exclusivos.
-- **GameCreator #4:** draft, \`mergeable=false/dirty\`; 11 commits à frente e 57 atrás de main; sem CI no head atual. Não integrar antes de sincronizar, validar e preservar os contratos de sessão.
+- **GameCreator #4:** draft, `mergeable=false/dirty`; 11 commits à frente e 71 atrás de main; conflitos potenciais em `.github/workflows/testar-integracao.yml`, `README.md` e `pixel-art/ponte-creator.js`. Sem CI no head atual. Não integrar antes de sincronizar, validar e preservar os contratos de sessão.
 - **Pixel Art #5 e #4:** mergeable/clean e testes aprovados nos SHAs indicados; continuam abertas até revisão e decisão de consolidação.
 - **Pixel Art #3:** draft, mergeable/clean; validação anterior #40961954483 passou, mas LAN em dois dispositivos e gameplay real continuam pendentes.
-- **Pixel Art #6:** documental, \`mergeable=false/dirty\`, 2 commits à frente e 3 atrás de main. Resolver conflito documental antes de integrar; não declarar a documentação disponível na main.
+- **Pixel Art #6:** documental, `mergeable=false/dirty`, 5 commits à frente e 7 atrás de main; há alterações sobrepostas em `AGENTS.md`, `docs/BASE_CONHECIMENTO_ERROS_RUNNER_CI.md` e `docs/PROTOCOLO_TRABALHO_SEQUENCIAL.md`. Resolver conflitos documentais antes de integrar; não declarar a documentação disponível na main.
 - Permanecem 8 PRs abertas e 2 issues guarda-chuva; não são 10 tarefas independentes.
 
 ### Pacote do Creator — correção validada
