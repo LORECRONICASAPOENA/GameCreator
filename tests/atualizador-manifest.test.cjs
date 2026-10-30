@@ -131,6 +131,14 @@ assert.match(updater, /ls-files --others --ignored --exclude-standard/,
   "A proteção precisa detectar arquivos locais ignorados.");
 assert.match(updater, /read-tree -mu HEAD/,
   "Clone iniciado com --no-checkout precisa materializar o runtime após validar conflitos.");
+const initialGuardPosition = updater.indexOf("VerificarConflitosLocais 'HEAD'");
+const materializePosition = updater.indexOf("read-tree -mu HEAD");
+const remoteGuardPosition = updater.indexOf("VerificarConflitosLocais 'refs/remotes/origin/main'");
+const mergePosition = updater.indexOf("merge --no-overwrite-ignore --ff-only");
+assert.ok(initialGuardPosition >= 0 && initialGuardPosition < materializePosition,
+  "Conflitos locais precisam ser verificados antes de materializar o checkout inicial.");
+assert.ok(remoteGuardPosition >= 0 && remoteGuardPosition < mergePosition,
+  "Conflitos locais precisam ser verificados contra a árvore remota antes do merge.");
 const noOpBranch = updater.match(/if \(\$remoto -eq \$anterior\) \{([\s\S]*?)\} else \{/);
 assert.ok(noOpBranch, "O fluxo de atualização sem mudanças precisa existir.");
 assert.doesNotMatch(noOpBranch[1], /update-ref/,
