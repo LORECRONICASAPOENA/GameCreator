@@ -120,3 +120,8 @@ O atualizador cria clone-pendente.txt no diretório de configuração antes de i
 - Run 41113920551: falha de assertion por CRLF não normalizado no teste Node; correção aplicada.
 - Run 41114836257: parser PowerShell encontrou bloco duplicado após catch; correção aplicada no commit d90541bd642f17aa681ea7e623b49dba12ca2b36.
 - Estado atual: aguardar a CI do head mais recente executar o parser e o teste PowerShell end-to-end.
+
+
+## Regex de runtime derivada do manifesto
+
+A expressão usada para classificar arquivos locais agora é gerada diretamente de runtimePatterns, escapando cada caminho e traduzindo * para [^/]*. Assim, a proteção acompanha exatamente os padrões de sparse-checkout e não aceita extensões ou subpastas que o manifesto não instala. O teste cobre biblioteca/backup.json, map-editor/backup.json, subpastas em map-editor, pixel-art, shared e bundle-v4.
