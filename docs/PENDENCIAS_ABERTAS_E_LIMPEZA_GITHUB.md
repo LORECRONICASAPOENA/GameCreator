@@ -218,7 +218,7 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - **Pixel Art main:** [run #41058053263](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/41058053263), SHA \`cff1930b59d8\`, success.
 - **Pixel Art PR #5 (clima/hidrologia):** [run #40995729054](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40995729054), SHA \`1507108e14dc51a33152af57ef5137571b0363d2\`, success.
 - **Pixel Art PR #4 (laboratório):** [run #40995732520](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40995732520), SHA \`413120bcc34aca9265a3d71e999bdac9760814fd\`, success.
-- **Fila atual (15:41 UTC):** main [#41081796048](https://github.com/apoenalore/GameCreator/actions/runs/41081796048) e branch ambiental [#41081917796](https://github.com/apoenalore/GameCreator/actions/runs/41081917796) terminaram success; o atualizador [#41082083233](https://github.com/apoenalore/GameCreator/actions/runs/41082083233) está em execução no runner, na etapa de DOM responsivo. Não há outros jobs em progresso conhecidos.
+- **Fila atual:** main [#41081796048](https://github.com/apoenalore/GameCreator/actions/runs/41081796048) e branch ambiental [#41081917796](https://github.com/apoenalore/GameCreator/actions/runs/41081917796) terminaram success; o atualizador [#41082083233](https://github.com/apoenalore/GameCreator/actions/runs/41082083233) passou no step 17 (parser e teste de manifesto) e está parado no step 22, publicação do artefato. Não há outros jobs em progresso conhecidos.
 
 ### Erros classificados e situação
 - **GC-CI-010 — build antes dos testes:** correção de ordem validada novamente pelo run #41075044875.
