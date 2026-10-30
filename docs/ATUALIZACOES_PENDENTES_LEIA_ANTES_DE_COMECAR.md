@@ -135,3 +135,14 @@
 - **Critérios de aceite:** (a) primeira configuração define a pasta fixa; (b) atualização seguinte atualiza essa mesma pasta sem criar uma segunda instalação; (c) arquivos novos e modificados chegam corretamente; (d) assets, biblioteca, dados, configurações e runner locais permanecem intactos; (e) falha/interrupção não deixa o Creator parcialmente sobrescrito sem aviso ou recuperação; (f) log identifica data, origem/commit, destino, arquivos copiados e resultado; (g) após sucesso, a pasta/ZIP temporários podem ser apagados e o espaço recuperado.
 - **Estado:** PENDENTE / apenas especificação. Nenhum atualizador CMD/PowerShell foi criado ou executado; nenhum arquivo local do usuário foi alterado.
 - **Implementação futura:** primeiro inspecionar a estrutura real do repositório e a pasta local do usuário; elaborar inventário de arquivos de produto versus dados locais; prototipar em duas pastas temporárias de teste; validar cópia e recuperação; só então disponibilizar o CMD. Respeitar a regra geral deste documento: nesta etapa, apenas documentar, sem alterar código, UI, testes ou workflows.
+
+
+## Atualização de estado — auditoria de runners e validação (30/10/2026)
+
+- A validação principal do GameCreator voltou a executar no runner Windows: [#41075044875](https://github.com/apoenalore/GameCreator/actions/runs/41075044875) terminou com success, incluindo build, testes de interface, biblioteca/backup, contratos, hidrologia, Godot headless e publicação de artefatos.
+- A correção da variável \`profile\` permanece **VALIDADA** no SHA \`b90be364189bd4f2145848494f285c9a6be2fed8\`, run [#41045143930](https://github.com/apoenalore/GameCreator/actions/runs/41045143930). Não reabrir esse defeito sem nova reprodução.
+- A PR ambiental #6 está aberta, mas seu head atual \`5f47b1fb2889a7116d02910da09ea9cb4d33003a\` ainda não foi validado por CI e a branch está divergente de main. A implementação do código já passou no SHA anterior; commits documentais/workflow posteriores exigem nova validação e resolução de conflito.
+- A PR #5 de laboratório passou no run [#41044823914](https://github.com/apoenalore/GameCreator/actions/runs/41044823914). A PR #4 de modos/sessões continua draft e sem CI no head atual.
+- O erro transitório de upload \`ENOTFOUND\` está registrado em GC-CI-012; o run posterior #41075044875 comprovou que os uploads foram recuperados.
+- O empacotador está sendo ajustado para distribuir somente arquivos de execução, sem documentos internos, testes e workflows. A validação do pacote está pendente no run [#41079295445](https://github.com/apoenalore/GameCreator/actions/runs/41079295445).
+- GC-UPDATE-009 continua como única tarefa ativa (WIP 1). A suíte canônica passou no run [#41064201715](https://github.com/apoenalore/GameCreator/actions/runs/41064201715), mas ainda faltam os testes específicos e a atualização real segura no Windows do autor.
