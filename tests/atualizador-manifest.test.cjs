@@ -121,6 +121,8 @@ assert.equal(runtimePatterns.some((value) => value.includes("/docs/") || value.i
 
 assert.match(updater, /\$versaoGit = \[version\]\$versaoMatch\.Groups\[0\]\.Value/,
   "A comparação de versão deve usar a correspondência completa.");
+assert.match(updater, /\[version\]'2\.41\.0'/,
+  "O atualizador usa check-rules e precisa exigir Git 2.41 ou superior.");
 assert.match(updater, /sparse-checkout check-rules --no-cone/,
   "O atualizador deve conferir o manifesto antes de aplicar um merge.");
 assert.match(updater, /function VerificarConflitosLocais/,
