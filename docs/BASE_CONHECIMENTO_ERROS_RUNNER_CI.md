@@ -35,26 +35,18 @@ Antes de alterar código, workflow ou runner:
 
 ## 3. Catálogo de erros conhecidos
 
-### GC-RUN-001 — Jobs permanecem em QUEUED e nenhum runner é atribuído
+### GC-RUN-001 — Jobs permaneceram em QUEUED sem runner atribuído
 
-**Classificação:** bloqueio de atribuição CONFIRMADO; causa local específica ainda NÃO DIAGNOSTICADA.
+**Classificação:** bloqueio de atribuição CONFIRMADO no snapshot inicial; RECUPERADO OPERACIONALMENTE; causa raiz original NÃO DIAGNOSTICADA.
 
-**Estado revalidado em 30/10/2026:** 346 execuções consultadas; 17 queued, 0 in_progress e 329 completed. Todos os 17 jobs em fila foram inspecionados: solicitam labels self-hosted, Windows, X64, retornam runner_id = 0, runner_name vazio e nenhum step executado. A lista de IDs e o diagnóstico completo estão em [RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md](RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md).
+- Snapshot inicial: 30/10/2026, 17 queued, 0 in_progress; todos os 17 jobs tinham runner_id = 0, runner_name vazio e steps vazios.
+- Recuperação: runner ID 2, `APOENA-GAMECREATOR-RUNNER`, recebeu jobs com labels self-hosted, Windows, X64 e concluiu com success os runs [40996154399](https://github.com/apoenalore/GameCreator/actions/runs/40996154399), [40996154391](https://github.com/apoenalore/GameCreator/actions/runs/40996154391), [41044696841](https://github.com/apoenalore/GameCreator/actions/runs/41044696841), [41044823914](https://github.com/apoenalore/GameCreator/actions/runs/41044823914) e [41045143930](https://github.com/apoenalore/GameCreator/actions/runs/41045143930).
+- Snapshot posterior às validações: 0 queued, 0 in_progress.
+- Causa raiz da indisponibilidade inicial: NÃO DIAGNOSTICADA. Não foi comprovado se o runner ficou Offline, perdeu serviço, grupo, autorização ou labels.
+- Solução efetivamente utilizada: nenhuma alteração de instalação/configuração do runner foi comprovada. O runner voltou a aceitar jobs e processou a fila; as falhas que surgiram foram diagnosticadas separadamente como GC-CI-010 e GC-CI-011.
+- **Relatório completo:** [RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md](RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md).
 
-**O que isso significa:** o job não foi atribuído a um runner compatível. O checkout e os comandos do job ainda não começaram; não classificar como bug do aplicativo.
-
-**Causa raiz:** ainda NÃO DIAGNOSTICADA. Runner Offline/serviço parado, registro em repositório ou grupo errado, autorização do repositório, labels incompatíveis e instalação/serviço duplicado são hipóteses a verificar, não fatos.
-
-**Próximo diagnóstico obrigatório:**
-1. Abrir Settings → Actions → Runners do repositório GameCreator.
-2. Registrar nome, estado Online/Offline, grupo e labels.
-3. Conferir autorização do repositório no grupo.
-4. No PC, verificar o serviço Windows e a instalação efetivamente ativa; consultar os logs `_diag/Runner_*.log` e `_diag/Worker_*.log`.
-5. Não iniciar uma segunda cópia do runner nem remover instalações antes do inventário.
-
-**Solução efetivamente utilizada para o incidente atual:** nenhuma solução de runner aplicada/comprovada. Foram atualizados o registro de pendências e o relatório dedicado; os jobs antigos ainda exigem cancelamento manual, e duas validações atuais devem ser preservadas.
-
-**Não fazer:** disparar novos workflows para testar a mesma coisa, criar runners duplicados, apagar `_work` sem diagnóstico ou trocar para runner hospedado apenas para esconder o bloqueio.
+**Regra:** se queued + runner_id=0 + steps vazios, diagnosticar atribuição do runner antes de analisar código. Não declarar causa resolvida apenas porque o runner voltou.
 
 ### GC-RUN-002 — “pwsh: command not found”
 
@@ -181,11 +173,11 @@ O log apresentado mostrava dez testes de contrato do catálogo aprovados antes d
 
 ### GC-CI-009 — Validação de integração dependia de clique manual
 
-**Classificação:** CAUSA CONFIRMADA; fluxo automático corrigido.
-- O workflow de integração da branch PR #6 continha somente `on: workflow_dispatch`.
-- O push do workflow principal estava limitado a uma única branch e o workflow horário antigo não estava presente na main.
-- Correção: commit [e861c534](https://github.com/apoenalore/GameCreator/commit/e861c5348cd9849800571a4d31c6bfeff0ede8ed) ampliou push/PR e restaurou agenda horária no workflow canônico. Os workflows manuais redundantes foram removidos das branches PR #6 e PR #5.
-- Validação da main: [41044696841](https://github.com/apoenalore/GameCreator/actions/runs/41044696841) success.
+**Classificação:** CAUSA CONFIRMADA; CORRIGIDO E VALIDADO.
+- O workflow de integração da branch PR #6 continha somente `on: workflow_dispatch`; o push canônico estava restrito a uma branch e a agenda horária antiga não estava na main.
+- Correção: commit [e861c534](https://github.com/apoenalore/GameCreator/commit/e861c5348cd9849800571a4d31c6bfeff0ede8ed) ampliou push/PR e restaurou agenda horária. Commits [acc6c293](https://github.com/apoenalore/GameCreator/commit/acc6c2938a365a992fffaa13c6e11854527cd24c) e [00b3619](https://github.com/apoenalore/GameCreator/commit/00b3619f296fd821beed219f46fcc5d572bad6ea) removeram workflows redundantes das PRs #6 e #5.
+- Validações automáticas sem clique: [41044696841](https://github.com/apoenalore/GameCreator/actions/runs/41044696841) main success; [41044823914](https://github.com/apoenalore/GameCreator/actions/runs/41044823914) PR #5 success; [41045143930](https://github.com/apoenalore/GameCreator/actions/runs/41045143930) PR #6 success.
+- Consulta posterior: 0 queued, 0 in_progress. `workflow_dispatch` permanece somente como fallback de emergência.
 
 ### GC-CI-010 — Testes executados antes do build nativo
 
@@ -196,11 +188,11 @@ O log apresentado mostrava dez testes de contrato do catálogo aprovados antes d
 
 ### GC-CI-011 — ReferenceError: profile is not defined
 
-**Classificação:** CAUSA CONFIRMADA; correção aplicada, validação da branch pendente.
+**Classificação:** CAUSA CONFIRMADA; RESOLVIDO E VALIDADO.
 - Runs [40994401969](https://github.com/apoenalore/GameCreator/actions/runs/40994401969) e [40994405717](https://github.com/apoenalore/GameCreator/actions/runs/40994405717), 30/10/2026 07:57:20 e 07:57:37 BRT.
 - `stepHydrology` usava `profile.runoff` no loop de escoamento sem declarar `profile` naquele escopo.
 - Correção: commit [de5f5e9](https://github.com/apoenalore/GameCreator/commit/de5f5e9db7808c1eb0c3b5c18aec3686a10ea77b), 30/10/2026 08:00:44 BRT, declara `const profile = sim.profiles[i] || defaultHydrology();` dentro do loop de escoamento.
-- Run automático da PR #6 [41045053407](https://github.com/apoenalore/GameCreator/actions/runs/41045053407) aguardando resultado no momento deste registro.
+- Validação: run [41045143930](https://github.com/apoenalore/GameCreator/actions/runs/41045143930), step `Testar contratos do catálogo e simulação hidrológica` success às 08:04:58 BRT; job completo success às 08:05:57 BRT.
 
 ## 4. Configuração de CI conhecida — usar como referência, não como verdade permanente
 
@@ -352,7 +344,10 @@ Para cada erro novo, adicionar:
 - **Data/hora do relato:** 30/10/2026 10:55:05 UTC (07:55:05 BRT).
 - **Causa:** `testar-integracao.yml` na branch de desenvolvimento tinha somente `workflow_dispatch`; portanto, era manual. O push do workflow canônico estava restrito a `feature/estudio-unificado-pixelart-v41`; o workflow horário antigo não existia na main.
 - **Correção:** commit `e861c534` às 07:58:51 BRT ampliou os gatilhos do pipeline canônico para push em qualquer branch, Pull Requests para main e schedule horário na main. Commits `acc6c293` às 07:59:40 BRT e `00b3619` às 07:59:50 BRT removeram workflows redundantes das PRs #6 e #5.
-- **Resultado:** run `41044696841` executado automaticamente, sem clique, e concluído success às 08:01:18 BRT. Ver relatório dedicado para detalhes.
+- **Validação main:** run `41044696841` — success às 08:01:18 BRT.
+- **Validação PR #5:** run `41044823914` — success às 08:03:40 BRT, incluindo teste hidrológico no job canônico.
+- **Validação PR #6:** run `41045143930` — success às 08:05:57 BRT, incluindo integração, simulação hidrológica, Godot e artefatos.
+- **Estado:** RESOLVIDO. Consulta posterior: 0 queued e 0 in_progress.
 
 ### GC-CI-010 — Ordem de build/teste incorreta na validação agendada
 
@@ -371,8 +366,8 @@ Para cada erro novo, adicionar:
 - **Mensagem:** `ReferenceError: profile is not defined`, `map-editor/terrain-system.js:415:132`.
 - **Causa:** `profile` era declarado em outro loop; o loop x/y que usa `profile.runoff` não tinha variável no escopo.
 - **Correção:** commit `de5f5e9` às 08:00:44 BRT adicionou `const profile = sim.profiles[i] || defaultHydrology();` no loop de escoamento.
-- **Validação:** run `41045053407` da PR #6 está aguardando conclusão; não marcar resolvido até passar.
-- **Estado:** CORRIGIDO-AGUARDANDO-VALIDAÇÃO.
+- **Validação:** run `41045143930`; o teste de contratos do catálogo e simulação hidrológica passou às 08:04:58 BRT e o job completo terminou success às 08:05:57 BRT.
+- **Estado:** RESOLVIDO E VALIDADO.
 
 ## 8. Modelo obrigatório para todos os novos registros
 
