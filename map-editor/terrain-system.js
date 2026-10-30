@@ -22,7 +22,7 @@
       sand_desert: { permeability: 0.66, retention: 0.10, erosionResistance: 0.20, runoff: 0.18, source: false },
       rock: { permeability: 0.08, retention: 0.12, erosionResistance: 0.92, runoff: 0.82, source: false },
       stone: { permeability: 0.06, retention: 0.08, erosionResistance: 0.96, runoff: 0.88, source: false },
-      water: { permeability: 0.02, retention: 0.98, erosionResistance: 0.98, runoff: 0.02, source: true },
+      water: { permeability: 0.02, retention: 0.98, erosionResistance: 0.98, runoff: 0.95, source: true },
       wetland: { permeability: 0.24, retention: 0.88, erosionResistance: 0.34, runoff: 0.16, source: false },
       snow: { permeability: 0.20, retention: 0.52, erosionResistance: 0.42, runoff: 0.36, source: false },
       wood: { permeability: 0.12, retention: 0.18, erosionResistance: 0.88, runoff: 0.68, source: false },
@@ -121,7 +121,7 @@
       ? [...new Set(input.tags.map(v => String(v).trim().toLowerCase()).filter(Boolean))].slice(0, 32)
       : [];
     const biomeTags = Array.isArray(input.biomeTags)
-      ? [...new Set(input.biomeTags.map(v => String(v).trim().toLowerCase().replace(/[^a-z0-9_-]/g, '')).filter(Boolean))].slice(0, 32)
+      ? [...new Set(input.biomeTags.map(v => String(v).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_').replace(/[^a-z0-9_-]/g, '')).filter(Boolean))].slice(0, 32)
       : tags.slice();
     const terrainKind = TERRAIN_KINDS.has(input.terrainKind) ? input.terrainKind :
       role === 'water' ? 'water' : tags.includes('mineral') || tags.includes('rock') ? 'rock' :
@@ -412,7 +412,7 @@
         }
         if (best < 0) continue;
         const difference = surface - lowest;
-        const transfer = Math.min(sim.waterDepth[i] * 0.22, difference * 0.12, 0.16 * dt + 0.002);
+        const transfer = Math.min(sim.waterDepth[i] * 0.22, difference * 0.12, 0.16 * dt + 0.002) * Math.max(0, Math.min(1, Number(profile.runoff) || 0));
         if (transfer <= 0) continue;
         deltaWater[i] -= transfer;
         deltaWater[best] += transfer;
