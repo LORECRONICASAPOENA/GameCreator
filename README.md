@@ -28,7 +28,7 @@
 - `tests/catalogo.test.cjs`: exportação portátil, vínculos de itens/receitas e contrato de integração Godot.
 - `tests/creator-bridge.test.cjs`: protocolo request/response, rejeição de origem externa e contratos de sincronização V4.0/V4.1.
 - `.github/workflows/pixel-art.yml`: build nativo pelo PowerShell do Windows, verificações JavaScript, testes Node, verificação DOM responsiva em Edge/Chrome e teste headless do Godot 4.7.2 com SHA-256 verificado.
-- A validação automática é acionada por push e pull request nos caminhos monitorados; a execução manual fica disponível por workflow_dispatch. Este workflow não configura agendamento horário.
+- A validação agendada de V4.1 usa `.github/workflows/auto-validar-v41.yml` e roda a cada hora UTC quando ativa na branch padrão; a validação de alterações usa `.github/workflows/pixel-art.yml`.
 
 ## Limites que impedem declarar o projeto concluído
 
