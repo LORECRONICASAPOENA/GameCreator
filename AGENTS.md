@@ -4,6 +4,7 @@ Antes de investigar ou alterar CI, GitHub Actions, PowerShell, runner, testes ou
 
 1. Leia docs/BASE_CONHECIMENTO_ERROS_RUNNER_CI.md.
 2. Leia docs/PENDENCIAS_ABERTAS_E_LIMPEZA_GITHUB.md.
+2a. Leia docs/ATUALIZACOES_PENDENTES_LEIA_ANTES_DE_COMECAR.md antes de modificar o editor, mapa, tilesets ou registrar novas decisões; atualize estados com evidência e não confunda ideia discutida com implementação.
 3. Respeite o protocolo sequencial: WIP = 1 para Game Creator e Apoena Pixel Art HTML combinados.
 4. Diferencie job queued (aguardando runner) de job failed (código/etapa executada e falhou).
 5. Não repita workflows, não crie workflows redundantes e não altere labels/shells sem identificar a causa.
