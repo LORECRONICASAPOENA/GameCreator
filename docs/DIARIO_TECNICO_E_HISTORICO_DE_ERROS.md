@@ -177,11 +177,15 @@ Se um teste falhar por um segundo defeito, abra ou vincule outro ID. Não mistur
 
 - **Solicitação recebida:** 2026-10-30 08:11:06 UTC−03:00 (11:11:06Z).
 - **Objetivo:** tornar obrigatório o registro de progresso, erros, investigação, justificativa técnica, solução, datas e evidências para IA e desenvolvedores.
-- **Estado:** DOCUMENTAÇÃO PREPARADA NESTA BRANCH; aguarda validação do commit documental e integração da PR.
+- **Estado:** DOCUMENTAÇÃO PUBLICADA NA BRANCH; AGUARDANDO VALIDAÇÃO DO CI E MERGE DA PR.
 - **Branch:** `feat/tempo-biomas-hidrologia`; PR #6, base `main`.
-- **Ação:** criar este diário; tornar sua atualização obrigatória em `AGENTS.md`; vincular o diário e a regra no README e no padrão de integração.
-- **Critério de conclusão:** os arquivos devem estar presentes na branch, a validação aplicável deve terminar com sucesso no SHA documental e a PR deve ser revisada/mesclada antes de considerar o padrão disponível na `main`.
-- **Próximo passo:** acompanhar o workflow do commit documental, corrigir eventuais falhas e manter o diário atualizado em toda tarefa futura.
+- **Commit documental:** `0acceaf993f6c100d01f023b610849e032fbae5a`.
+- **Arquivos criados/atualizados:** `docs/DIARIO_TECNICO_E_HISTORICO_DE_ERROS.md`, `AGENTS.md`, `docs/PADRAO_DE_INTEGRACAO_E_PREVENCAO_DE_REGRESSOES.md` e `README.md`.
+- **Ação:** criado o diário com modelos obrigatórios de progresso e incidente; adicionada obrigação explícita aos agentes; README e padrão de integração apontam para o diário.
+- **Verificação documental:** os quatro arquivos foram relidos na branch e os IDs `GC-COMM-001` e `GC-BUG-001`, os modelos e as instruções obrigatórias foram confirmados.
+- **CI:** até a última consulta, não havia workflow associado ao SHA documental `0acceaf...` e o status combinado não apresentava checks. Portanto, a documentação não deve ser marcada como validada pelo CI ainda. A validação de código anterior no Run `41045143930` foi bem-sucedida no SHA `b90be364...`, mas é um commit diferente.
+- **Critério de conclusão:** validar o SHA documental por workflow apropriado e mesclar a PR #6; até lá, o padrão existe na branch da PR, não na `main`.
+- **Próximo passo:** solicitar/disparar a validação do commit documental se ela não iniciar automaticamente; revisar o resultado e, após merge, confirmar que os arquivos estão presentes na `main`.
 
 ## 8. Regra final
 
