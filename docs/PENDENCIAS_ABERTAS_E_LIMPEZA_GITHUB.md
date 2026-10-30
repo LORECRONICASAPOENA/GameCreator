@@ -203,3 +203,48 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - Pixel Art PR #4 e #5 têm execuções bem-sucedidas nos heads consultados; PR #3 também tem validação anterior bem-sucedida. PR #6 é documental.
 - CodeRabbit não havia emitido review formal nas PRs consultadas. Na GameCreator PR #6, publicou uma mensagem de review ignorada; na PR #7, a solicitação manual foi aceita e aguarda o resultado.
 - Não criar workflow novo para contornar falta de review ou execução. Investigar gatilhos/filtros/branch e usar a validação canônica existente.
+
+
+## 7. Reauditoria após retorno dos runners — 30/10/2026
+
+**Referência temporal:** a nova validação principal foi iniciada em 30/10/2026 15:17:16 UTC (12:17:16 BRT). Esta seção substitui os estados de fila antigos da seção 6, preservando-os como histórico.
+
+### Estado de execução e fila
+- **GameCreator main:** [run #41075044875](https://github.com/apoenalore/GameCreator/actions/runs/41075044875), SHA \`55052f8912b70dc8eb132b983447df1c080e63fd\`, terminou \`completed/success\`. Build, contratos, integração, hidrologia quando presente, runtime Godot 4.7.2, preservação do Creator, preparação da entrega e os dois uploads de artefato passaram.
+- **Artefatos confirmados:** pacote de origem ID \`12986794324\` (119.780.985 bytes) e diagnósticos ID \`12987043973\` (11.903.423 bytes). Os dois foram publicados no run #41075044875.
+- **GameCreator PR #5:** [run #41044823914](https://github.com/apoenalore/GameCreator/actions/runs/41044823914), SHA \`00b3619f296fd821beed219f46fcc5d572bad6ea\`, success.
+- **GameCreator PR #6:** [run #41045143930](https://github.com/apoenalore/GameCreator/actions/runs/41045143930), SHA \`b90be364189bd4f2145848494f285c9a6be2fed8\`, success. A correção de escopo de \`profile\` foi validada nesse SHA. O head atual da PR mudou depois por commits documentais/workflow e ainda precisa de CI no SHA atual.
+- **GameCreator PR #7:** [run #41064201715](https://github.com/apoenalore/GameCreator/actions/runs/41064201715), SHA \`546aafba45140c7dfae016cd7756178b285cca7e\`, success. A suíte canônica ainda não substitui os testes específicos de instalação/atualização do GC-UPDATE-009.
+- **Pixel Art main:** [run #41058053263](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/41058053263), SHA \`cff1930b59d8\`, success.
+- **Pixel Art PR #5 (clima/hidrologia):** [run #40995729054](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40995729054), SHA \`1507108e14dc51a33152af57ef5137571b0363d2\`, success.
+- **Pixel Art PR #4 (laboratório):** [run #40995732520](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40995732520), SHA \`413120bcc34aca9265a3d71e999bdac9760814fd\`, success.
+- Consulta de todas as páginas disponíveis: GameCreator 360 execuções históricas e Pixel Art 92; não havia jobs \`queued\` ou \`in_progress\` no snapshot anterior ao novo commit de empacotamento. O novo run [#41079295445](https://github.com/apoenalore/GameCreator/actions/runs/41079295445) foi iniciado para validar o ajuste do pacote e estava em andamento na última consulta.
+
+### Erros classificados e situação
+- **GC-CI-010 — build antes dos testes:** correção de ordem validada novamente pelo run #41075044875.
+- **GC-CI-011 — \`ReferenceError: profile is not defined\`:** correção de código validada no run #41045143930; não reabrir como erro atual.
+- **GC-CI-012 — upload de artefato \`ENOTFOUND\`:** falha transitória de DNS/serviço de artefatos no run #41066904787; os testes e a preparação do pacote tinham passado. O run posterior #41075044875 publicou os dois artefatos com sucesso.
+- **Pixel PA-CI-001 — \`PSSecurityException\`:** política de execução PowerShell corrigida com \`ExecutionPolicy Bypass\`; run #40995732520 passou.
+- **Pixel PA-GODOT-001 — erros de parser GDScript:** erros antigos de escopo e chamadas \`minf()\` inválidas corrigidos; run #40995729054 passou nos testes de clima, ecossistema e hidrologia Godot.
+
+### Pull Requests — não confundir CI aprovado com integração
+- **GameCreator #7:** draft, mergeable/clean; continua como WIP 1 GC-UPDATE-009. Falta teste específico do atualizador e teste real seguro na instalação Windows do autor.
+- **GameCreator #6:** aberta, não draft, \`mergeable=false/dirty\`; head atual após ajuste do empacotador: \`5f47b1fb2889a7116d02910da09ea9cb4d33003a\`. Comparação atual com main: 45 commits à frente e 46 atrás. O código ambiental teve CI aprovado no SHA anterior \`b90be364...\`; o head atual exige CI e resolução da divergência antes de integrar.
+- **GameCreator #5:** draft, mergeable/clean; CI aprovado no head consultado. Manter o laboratório até comparar e preservar seus recursos exclusivos.
+- **GameCreator #4:** draft, \`mergeable=false/dirty\`; 11 commits à frente e 57 atrás de main; sem CI no head atual. Não integrar antes de sincronizar, validar e preservar os contratos de sessão.
+- **Pixel Art #5 e #4:** mergeable/clean e testes aprovados nos SHAs indicados; continuam abertas até revisão e decisão de consolidação.
+- **Pixel Art #3:** draft, mergeable/clean; validação anterior #40961954483 passou, mas LAN em dois dispositivos e gameplay real continuam pendentes.
+- **Pixel Art #6:** documental, \`mergeable=false/dirty\`, 2 commits à frente e 3 atrás de main. Resolver conflito documental antes de integrar; não declarar a documentação disponível na main.
+- Permanecem 8 PRs abertas e 2 issues guarda-chuva; não são 10 tarefas independentes.
+
+### Pacote do Creator — correção em validação
+- Foi identificado que o empacotador copiava \`docs/\`, \`AGENTS.md\`, planos, testes e arquivos de CI para o ZIP de trabalho.
+- Corrigidos os workflows \`.github/workflows/pixel-art.yml\` em main (commit \`f69a013dcc6f38267e204b50c1df90698dca54a3\`) e na branch ambiental (commit \`5f47b1fb2889a7116d02910da09ea9cb4d33003a\`).
+- A cópia agora exclui diretórios internos/documentais, testes, CI, arquivos \`.md/.txt\`, package de testes, scripts de publicação e versões antigas. O manifesto e o resumo de entrega ficam fora do ZIP; os documentos continuam preservados no GitHub.
+- **Estado:** AGUARDANDO validação do run #41079295445 no SHA exato da main. Não declarar o pacote limpo até conferir o step de empacotamento e o manifesto publicado.
+
+### Próximos passos, mantendo WIP = 1
+1. Confirmar o resultado do run #41079295445 e verificar que o ZIP não contém documentação, testes ou CI, mas contém launcher, fonte V4.0, bundle e módulos de runtime.
+2. Atualizar o registro GC-CI-012 e GC-PACK-001 com o resultado final.
+3. Resolver a divergência/merge conflict da PR #6 ambiental e obter CI no head atual; não fazer merge automático.
+4. Manter GC-UPDATE-009 como única tarefa de implementação ativa; não iniciar UX, sessão online ou novas funcionalidades até fechar os critérios do atualizador.
