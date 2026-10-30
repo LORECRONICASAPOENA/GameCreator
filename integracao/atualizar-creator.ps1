@@ -92,7 +92,7 @@ try {
     $versaoTexto = (& $git.Source --version 2>&1 | Out-String).Trim()
     $versaoMatch = [regex]::Match($versaoTexto, '(\d+)\.(\d+)\.(\d+)')
     if (-not $versaoMatch.Success) { throw "Nao foi possivel identificar a versao do Git: $versaoTexto" }
-    $versaoGit = [version]$versaoMatch.Groups[1].Value
+    $versaoGit = [version]$versaoMatch.Groups[0].Value
     if ($versaoGit -lt [version]'2.25.0') {
         throw "Git 2.25 ou superior e necessario para o checkout enxuto. Versao encontrada: $versaoTexto"
     }
