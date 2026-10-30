@@ -87,7 +87,7 @@ function Registrar([string]$Mensagem) {
 }
 
 function VerificarConflitosLocais([string]$Referencia) {
-    $rastreados = @(& $git.Source -C $Destino ls-tree -r --name-only $Referencia)
+    $rastreados = @(& $git.Source -C $Destino -c core.quotePath=false ls-tree -r --name-only $Referencia)
     if ($LASTEXITCODE -ne 0) { throw "Nao foi possivel inspecionar os arquivos de $Referencia." }
 
     $runtime = @($rastreados | Where-Object { $_ -match $regexRuntime })
@@ -95,10 +95,10 @@ function VerificarConflitosLocais([string]$Referencia) {
     foreach ($caminho in $runtime) { $runtimeSet[$caminho] = $true }
 
     # Untracked nao ignorados e ignorados podem ser sobrescritos por read-tree/merge.
-    $naoRastreados = @(& $git.Source -C $Destino ls-files --others --exclude-standard)
+    $naoRastreados = @(& $git.Source -C $Destino -c core.quotePath=false ls-files --others --exclude-standard)
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar arquivos locais nao rastreados.' }
 
-    $ignorados = @(& $git.Source -C $Destino ls-files --others --ignored --exclude-standard)
+    $ignorados = @(& $git.Source -C $Destino -c core.quotePath=false ls-files --others --ignored --exclude-standard)
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar arquivos locais ignorados.' }
 
     $arquivosLocais = @($naoRastreados + $ignorados | Sort-Object -Unique)
@@ -114,10 +114,10 @@ function VerificarConflitosLocais([string]$Referencia) {
 function VerificarArquivosLocaisForaDoRuntime {
     # Arquivos locais fora da allowlist nao pertencem ao pacote e podem ser removidos/ocultados ao reduzir o worktree.
     # Interrompe em vez de apagar, mover ou incorporar dados pessoais automaticamente.
-    $naoRastreados = @(& $git.Source -C $Destino ls-files --others --exclude-standard)
+    $naoRastreados = @(& $git.Source -C $Destino -c core.quotePath=false ls-files --others --exclude-standard)
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar arquivos locais nao rastreados fora do runtime.' }
 
-    $ignorados = @(& $git.Source -C $Destino ls-files --others --ignored --exclude-standard)
+    $ignorados = @(& $git.Source -C $Destino -c core.quotePath=false ls-files --others --ignored --exclude-standard)
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar arquivos locais ignorados fora do runtime.' }
 
     $arquivosLocais = @($naoRastreados + $ignorados | Sort-Object -Unique)
@@ -261,7 +261,7 @@ try {
     & $git.Source -C $Destino fetch --no-tags --filter=blob:none origin '+refs/heads/main:refs/remotes/origin/main'
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao buscar alteracoes. Versao local mantida.' }
 
-    $arquivosRemotos = @(& $git.Source -C $Destino ls-tree -r --name-only refs/remotes/origin/main)
+    $arquivosRemotos = @(& $git.Source -C $Destino -c core.quotePath=false ls-tree -r --name-only refs/remotes/origin/main)
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar o manifesto remoto.' }
     $faltantes = @($arquivosEssenciais | Where-Object { $arquivosRemotos -notcontains $_ })
     if ($faltantes.Count -gt 0) {
@@ -371,7 +371,7 @@ try {
     & $git.Source -C $Destino fetch --no-tags --filter=blob:none origin '+refs/heads/main:refs/remotes/origin/main'
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao buscar alteracoes. Versao local mantida.' }
 
-    $arquivosRemotos = @(& $git.Source -C $Destino ls-tree -r --name-only refs/remotes/origin/main)
+    $arquivosRemotos = @(& $git.Source -C $Destino -c core.quotePath=false ls-tree -r --name-only refs/remotes/origin/main)
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar o manifesto remoto.' }
     $faltantes = @($arquivosEssenciais | Where-Object { $arquivosRemotos -notcontains $_ })
     if ($faltantes.Count -gt 0) {
