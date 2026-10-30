@@ -21,14 +21,14 @@ on:
       - "README.md"
       - "ORGANIZACAO_EDITOR.md"
       - ".github/workflows/pixel-art.yml"
-  schedule:
-    - cron: "17 6 * * *"
   workflow_dispatch:
 permissions:
   contents: read
 
 concurrency:
-  group: apoena-v41-${{ github.event.pull_request.head.ref || github.ref }}
+  # Push e pull_request da mesma branch compartilham um único grupo.
+  # Uma execução mais recente substitui a anterior, evitando fila duplicada.
+  group: apoena-creator-validation-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
