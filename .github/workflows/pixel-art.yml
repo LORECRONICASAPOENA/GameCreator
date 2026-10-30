@@ -1,7 +1,22 @@
-name: Validar Apoena Creator Pixel Art
 on:
   push:
-    branches: [feature/estudio-unificado-pixelart-v41]
+    paths:
+      - "index.html"
+      - "bundle-v4/**"
+      - "ABRIR_GAME_CREATOR.cmd"
+      - "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
+      - "pixel-art/**"
+      - "shared/**"
+      - "biblioteca/**"
+      - "map-editor/**"
+      - "integracao/**"
+      - "legacy/**"
+      - "**/*.gd"
+      - "tests/**"
+      - "package.json"
+      - "README.md"
+      - "ORGANIZACAO_EDITOR.md"
+      - ".github/workflows/**"
   pull_request:
     branches: [main]
     paths:
@@ -20,7 +35,9 @@ on:
       - "package.json"
       - "README.md"
       - "ORGANIZACAO_EDITOR.md"
-      - ".github/workflows/pixel-art.yml"
+      - ".github/workflows/**"
+  schedule:
+    - cron: "0 * * * *"
   workflow_dispatch:
 permissions:
   contents: read
@@ -255,6 +272,27 @@ jobs:
             if ($testCode -ne 0) { $failed = $true }
           }
           if ($failed) { exit 1 }
+      - name: Testar hidrologia e erosao quando presente
+        run: |
+          $ErrorActionPreference = "Stop"
+          $corePath = "map-editor/hidrologia-core.js"
+          $testPath = "tests/hidrologia.test.cjs"
+          $hasCore = Test-Path -LiteralPath $corePath
+          $hasTest = Test-Path -LiteralPath $testPath
+          if ($hasCore -ne $hasTest) {
+            throw "Implementacao hidrologica incompleta: motor e teste precisam existir juntos."
+          }
+          if (-not $hasCore) {
+            Write-Output "SKIP: hidrologia ainda nao existe nesta branch."
+            return
+          }
+          node --check $corePath
+          if ($LASTEXITCODE -ne 0) { throw "Sintaxe do motor hidrologico falhou." }
+          node --check $testPath
+          if ($LASTEXITCODE -ne 0) { throw "Sintaxe do teste hidrologico falhou." }
+          node $testPath
+          if ($LASTEXITCODE -ne 0) { throw "Testes de chuva, bacias, erosao e persistencia falharam." }
+
       - name: Testar runtime Godot 4 (instalacao portatil verificada)
         run: |
           $ErrorActionPreference = "Stop"
