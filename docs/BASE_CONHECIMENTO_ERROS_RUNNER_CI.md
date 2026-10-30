@@ -369,6 +369,27 @@ Para cada erro novo, adicionar:
 - **Validação:** run `41045143930`; o teste de contratos do catálogo e simulação hidrológica passou às 08:04:58 BRT e o job completo terminou success às 08:05:57 BRT.
 - **Estado:** RESOLVIDO E VALIDADO.
 
+### GC-CI-012 — Falha transitória de DNS ao publicar artefatos
+
+- **Classificação:** ERRO DE COMUNICAÇÃO EXTERNA; não foi falha de build, teste ou runtime.
+- **Ocorrência:** 30/10/2026 13:55:01 UTC (10:55:01 BRT), run [#41066904787](https://github.com/apoenalore/GameCreator/actions/runs/41066904787), job \`124100579029\`.
+- **Mensagem literal:** \`Failed to CreateArtifact: Unable to make request: ENOTFOUND\`; houve timeout ao chamar \`ArtifactService/CreateArtifact\`.
+- **Evidência anterior à falha:** compilação, JavaScript, interface, biblioteca, backup, catálogo, integração, hidrologia, Godot e preparação do pacote concluíram com success. A falha ocorreu nos steps de upload de \`_delivery/\` e \`.ci-results/\`.
+- **Causa confirmada:** a requisição ao serviço de artefatos não conseguiu resolver o destino de rede (ENOTFOUND) após timeout. O log não preserva o hostname final, portanto não atribuir a falha a um domínio específico.
+- **Solução aplicada:** nenhuma mudança de código para esse incidente; a execução posterior [#41075044875](https://github.com/apoenalore/GameCreator/actions/runs/41075044875) concluiu os dois uploads.
+- **Resultado:** RECUPERADO E VALIDADO OPERACIONALMENTE por execução posterior. Não repetir toda a suíte quando o único step falho for upload transitório e os testes já tiverem passado.
+- **Prevenção:** separar falha de artifact service de falha de aplicação; guardar run/job/step e confirmar se o pacote foi gerado antes de repetir.
+
+### GC-PACK-001 — Pacote de trabalho incluía documentação interna
+
+- **Classificação:** BUG DE EMPACOTAMENTO confirmado por inspeção.
+- **Identificação:** 30/10/2026, durante auditoria após o run #41075044875; hora exata do achado não preservada.
+- **Arquivo:** \`.github/workflows/pixel-art.yml\`, etapa \`Preparar entrega na pasta ChatGPT trabalho do runner\`.
+- **Causa:** o filtro antigo excluía apenas \`.git\`, \`node_modules\`, \`.ci-results\`, \`_delivery\`, \`.godot\` e \`__pycache__\`; a cópia recursiva incluía \`docs/\`, arquivos Markdown/texto, testes e workflows internos.
+- **Correção aplicada:** commit main \`f69a013dcc6f38267e204b50c1df90698dca54a3\`; o mesmo filtro foi levado à branch ambiental no commit \`5f47b1fb2889a7116d02910da09ea9cb4d33003a\`. A cópia recursiva exclui documentação, histórico, testes, CI, package de testes, scripts de publicação e versões antigas. Manifesto e resumo ficam fora do ZIP.
+- **Validação:** pendente no run [#41079295445](https://github.com/apoenalore/GameCreator/actions/runs/41079295445). Só marcar VALIDADO após sucesso no step de empacotamento e conferência do manifesto/artefato.
+- **Prevenção:** manter a lista de exclusões e falhar o step se diretórios/documentos internos aparecerem no pacote.
+
 ## 8. Modelo obrigatório para todos os novos registros
 
 Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso, preferencialmente BRT (-03:00), e preservar o horário UTC original quando vier do GitHub.
