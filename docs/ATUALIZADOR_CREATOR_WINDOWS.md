@@ -72,3 +72,13 @@ O teste \`tests/atualizador-manifest.test.cjs\` agora cria um repositório Git l
 - bloqueio de merge quando um arquivo ignorado do usuário conflita com um novo arquivo de runtime.
 
 Esse teste é executado pela CI canônica do Game Creator. Ele reduz o risco do Git/sparse-checkout, mas não substitui o teste de primeira instalação e atualização no Windows do autor, nem a conferência de IndexedDB.
+
+
+## Descobertas adicionais da simulação Git local
+
+A simulação de clone parcial revelou dois comportamentos que passaram a ser tratados explicitamente:
+
+1. Um clone feito com --no-checkout permanece sem arquivos materializados depois de sparse-checkout set --no-cone. O atualizador agora verifica as regras e executa git read-tree -mu HEAD para materializar somente os caminhos permitidos.
+2. Em sparse-checkout, não é seguro confiar apenas em git merge --no-overwrite-ignore. Em uma simulação local com Git 2.47.3, o merge ainda avançou sobre caminhos ignorados/não rastreados. Por isso, o atualizador calcula previamente a interseção entre arquivos locais (ignorados e não ignorados) e arquivos de runtime da árvore remota; havendo conflito, aborta antes do read-tree/merge.
+
+O teste automatizado reproduz o clone, a materialização, o fast-forward e a identificação dos conflitos em repositório Git temporário. A simulação foi feita em Linux com Git 2.47.3; o comportamento no runner Windows será verificado pela CI e a instalação real ainda exige teste no computador do autor.
