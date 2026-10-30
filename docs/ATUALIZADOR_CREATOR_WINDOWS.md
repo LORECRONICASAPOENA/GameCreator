@@ -109,3 +109,8 @@ A leitura de árvores e arquivos locais usa core.quotePath=false para que nomes 
 O teste tests/atualizador-manifest.test.cjs não fica apenas na simulação de comandos Git. Ele executa integracao/atualizar-creator.ps1 com Windows PowerShell 5.1, usando um repositório bare local temporário e diretório de configuração isolado. O modo de teste permite a URL local somente quando APOENA_UPDATER_TEST_MODE=1 e a URL do remote corresponde exatamente ao parâmetro RepoUrl; a instalação normal continua limitada ao GameCreator oficial.
 
 O teste executa primeira instalação, verifica arquivos presentes/ausentes, bloqueio de arquivos locais fora da allowlist, atualização fast-forward, preservação de refs/apoena/anterior, execução sem mudanças e bloqueio de conflitos ignorados/não ignorados, inclusive um caminho com acento. Nenhuma pasta permanente do autor é usada.
+
+
+## Retomada após interrupção da primeira instalação
+
+O atualizador cria o marcador clone-pendente.txt no diretório de configuração antes de iniciar o clone. Se a execução for interrompida após clone --no-checkout e antes de read-tree, a próxima execução pode usar o mesmo destino e retomar. A retomada só aceita arquivos rastreados ausentes (status “ D”); alterações rastreadas reais bloqueiam a operação. Se o checkout já estiver limpo, o marcador residual é removido. O marcador é apagado após a conclusão bem-sucedida.
