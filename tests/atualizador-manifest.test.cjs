@@ -6,7 +6,7 @@ const { spawnSync } = require("node:child_process");
 const { pathToFileURL } = require("node:url");
 
 const root = path.resolve(__dirname, "..");
-const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
+const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8").replace(/\r\n/g, "\n");
 const updater = read("integracao/atualizar-creator.ps1");
 const integrationPage = read("integracao/index.html");
 const integrationCatalog = read("integracao/catalogo.js");
@@ -303,6 +303,8 @@ function testSparseCheckoutAndUpdate() {
     // Executa o atualizador PowerShell real contra o repositório temporário.
     const firstRun = runUpdater(install, configDir, repoUrl);
     assert.equal(firstRun.status, 0, "Primeira instalação PowerShell precisa terminar com sucesso.");
+    assert.equal(fs.existsSync(path.join(configDir, "clone-pendente.txt")), false,
+      "A primeira instalação concluída deve remover o marcador de retomada.");
     assert.ok(firstRun.stdout.includes("Concluido") || firstRun.stdout.includes("Concluído"),
       "O atualizador precisa registrar conclusão da primeira instalação.");
 
@@ -333,6 +335,26 @@ function testSparseCheckoutAndUpdate() {
     const savedPath = fs.readFileSync(path.join(configDir, "instalacao.txt"), "utf8").replace(/^\uFEFF/, "").trim();
     assert.equal(path.resolve(savedPath), path.resolve(install),
       "O atualizador precisa salvar o destino permanente escolhido.");
+
+    // Simula interrupcao apos clone --no-checkout e antes de read-tree.
+    const resumeInstall = path.join(temp, "APP-RESUME");
+    const resumeConfig = path.join(temp, "config-resume");
+    fs.mkdirSync(resumeConfig, { recursive: true });
+    git(temp, [
+      "clone", "--filter=blob:none", "--depth", "1", "--single-branch",
+      "--branch", "main", "--no-checkout", repoUrl, resumeInstall
+    ]);
+    fs.writeFileSync(path.join(resumeConfig, "clone-pendente.txt"), resumeInstall, "utf8");
+    const resumeRun = runUpdater(resumeInstall, resumeConfig, repoUrl);
+    assert.equal(resumeRun.status, 0, "O atualizador deve retomar um clone interrompido antes do checkout.");
+    assert.equal(fs.existsSync(path.join(resumeConfig, "clone-pendente.txt")), false,
+      "Retomada concluída deve remover o marcador.");
+    for (const essential of essentials) {
+      assert.ok(fs.existsSync(path.join(resumeInstall, essential)),
+        "Retomada precisa materializar arquivo essencial: " + essential);
+    }
+    assert.equal(fs.existsSync(path.join(resumeInstall, "docs/segredo-interno.md")), false,
+      "Retomada não pode materializar documentação interna.");
 
     const initialHead = git(install, ["rev-parse", "HEAD"]).stdout.trim();
     const noPreviousRef = git(install, ["show-ref", "--verify", "--quiet", "refs/apoena/anterior"], true);
