@@ -136,3 +136,8 @@ O run 41114836257 falhou antes do teste Node porque o script continha um bloco d
 ## Autorização de escopo registrada
 
 Em 30/10/2026, o autor autorizou especificamente o GC-UPDATE-009 para alterar o atualizador/empacotamento e manter somente runtime na instalação pública. A regra de congelamento de funcionalidades e de trabalho somente documental permanece ativa para os demais itens. Esta exceção não abre autorização geral para novas funcionalidades.
+
+
+## GC-UPDATE-REGEX-001 — Correspondência exata entre manifesto e proteção local
+
+A revisão identificou que a regex manual aceitava arquivos que os padrões de sparse-checkout não instalavam, como biblioteca/backup.json e map-editor/backup.json, além de subpastas não incluídas. A regex agora é gerada diretamente de runtimePatterns e restringe * a caracteres que não atravessam /. O teste inclui esses caminhos como arquivos locais e exige bloqueio sem remoção. CI do head mais recente pendente.
