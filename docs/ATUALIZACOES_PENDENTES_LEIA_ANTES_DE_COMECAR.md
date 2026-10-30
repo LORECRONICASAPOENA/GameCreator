@@ -223,4 +223,4 @@ A falha do run 41113920551 foi causada por CRLF no arquivo PowerShell lido pelo 
 
 ## GC-UPDATE-RECOVERY-001 — Retomada de clone interrompido
 
-Foi adicionado o marcador clone-pendente.txt no diretório de configuração. Ele permite retomar uma primeira instalação interrompida após clone --no-checkout, sem confundir os arquivos ausentes com alterações locais. O teste cria um clone temporário nesse estado e executa o atualizador PowerShell real. A validação CI ainda está pendente.
+O clone --no-checkout deixa o índice vazio; o status pode apresentar remoções na primeira coluna (D ). O atualizador agora usa o marcador clone-pendente.txt e verifica git ls-files + árvore HEAD para reconhecer esse estado. Se o índice já estiver populado, somente ausências de worktree sem outras alterações são retomáveis. Modificações rastreadas bloqueiam. O teste cria esse estado e executa o PowerShell real. CI pendente.
