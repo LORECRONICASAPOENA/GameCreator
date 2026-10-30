@@ -98,6 +98,18 @@ Não foi necessário cancelar manualmente esses 15 jobs: o runner os recebeu e c
 
 ---
 
+### 3.6 Estado após a recuperação e a automação
+
+Consulta posterior às validações de 30/10/2026: **0 jobs queued e 0 in_progress**.
+
+- [41044696841 — main / CI automático](https://github.com/apoenalore/GameCreator/actions/runs/41044696841): success; 10:58:56–11:01:18 UTC (07:58:56–08:01:18 BRT).
+- [41044823914 — PR #5 / hidrologia integrada](https://github.com/apoenalore/GameCreator/actions/runs/41044823914): success; job 124026252566; 11:01:20–11:03:40 UTC (08:01:20–08:03:40 BRT). O teste hidrológico condicional passou no mesmo job.
+- [41045143930 — PR #6 / correção de runoff](https://github.com/apoenalore/GameCreator/actions/runs/41045143930): success; job 124027289979; 11:03:43–11:05:57 UTC (08:03:43–08:05:57 BRT). A suíte de contratos do catálogo e simulação hidrológica passou, assim como Godot e as etapas de entrega.
+
+**Conclusão:** o runner está operacional e o pipeline automático foi validado na main e nas duas branches de desenvolvimento. A causa da indisponibilidade inicial do runner continua sem diagnóstico histórico, mas não há bloqueio ativo neste snapshot.
+
+---
+
 ## 4. Correções internas já aplicadas em incidentes anteriores
 
 ### GC-RUN-002 — `pwsh: command not found`
@@ -131,8 +143,10 @@ O workflow canônico atual do Creator usa grupo de concorrência por branch e `c
 - **Causa raiz comprovada:** cobertura incompleta de eventos automáticos e workflow de integração separado com gatilho exclusivamente manual.
 - **Correção efetivamente aplicada:** em 30/10/2026 10:58:51 UTC (07:58:51 BRT), commit [e861c534](https://github.com/apoenalore/GameCreator/commit/e861c5348cd9849800571a4d31c6bfeff0ede8ed) atualizou `.github/workflows/pixel-art.yml` para disparar em pushes relevantes de todas as branches, Pull Requests para `main` e agenda horária `0 * * * *` na branch padrão. O `workflow_dispatch` foi mantido apenas como alternativa de emergência.
 - **Consolidação:** em 10:59:40 UTC (07:59:40 BRT), commit [acc6c293](https://github.com/apoenalore/GameCreator/commit/acc6c2938a365a992fffaa13c6e11854527cd24c) removeu o workflow manual duplicado da PR #6. Em 10:59:50 UTC (07:59:50 BRT), commit [00b3619](https://github.com/apoenalore/GameCreator/commit/00b3619f296fd821beed219f46fcc5d572bad6ea) removeu o workflow separado de hidrologia da PR #5. Os testes foram reunidos em um único job sequencial do fluxo canônico.
-- **Validação:** [run 41044696841](https://github.com/apoenalore/GameCreator/actions/runs/41044696841) executou automaticamente após o commit, sem clique manual; runner ID 2; início 10:58:56 UTC (07:58:56 BRT), fim 11:01:18 UTC (08:01:18 BRT); todos os steps success.
-- **Estado:** CORRIGIDO E VALIDADO NA MAIN. As validações das branches PR #5 e PR #6 continuam sendo acompanhadas separadamente para comprovar os testes específicos de cada alteração.
+- **Validação automática sem clique:** [run 41044696841](https://github.com/apoenalore/GameCreator/actions/runs/41044696841) na main — success, 10:58:56–11:01:18 UTC (07:58:56–08:01:18 BRT).
+- **Validação da PR #5:** [run 41044823914](https://github.com/apoenalore/GameCreator/actions/runs/41044823914) — success, 11:01:20–11:03:40 UTC (08:01:20–08:03:40 BRT), incluindo o teste de hidrologia no fluxo único.
+- **Validação da PR #6:** [run 41045143930](https://github.com/apoenalore/GameCreator/actions/runs/41045143930) — success, 11:03:43–11:05:57 UTC (08:03:43–08:05:57 BRT), incluindo contratos de integração, simulação hidrológica, runtime Godot e entrega de artefatos.
+- **Estado:** CORRIGIDO E VALIDADO. Consulta final: 0 queued e 0 in_progress.
 - **Prevenção:** não criar workflow duplicado com `workflow_dispatch` para testes já cobertos pelo fluxo canônico. Manter push/PR automáticos, concorrência por branch e uma única suíte sequencial.
 
 ### GC-CI-010 — Validação agendada executava testes antes de compilar o Creator
@@ -153,8 +167,9 @@ O workflow canônico atual do Creator usa grupo de concorrência por branch e `c
 - **Erro literal:** `ReferenceError: profile is not defined`; stack em `map-editor/terrain-system.js:415:132`, função `stepHydrology`, chamada por `simulateHydrology` a partir de `integracao/testes/catalogo.test.js`.
 - **Causa raiz comprovada:** `profile` era declarado dentro do primeiro loop por célula, mas o loop posterior de escoamento (`for y/for x`) usava `profile.runoff` fora daquele escopo. O teste de runoff/hidrologia acionava a referência sem variável definida.
 - **Correção efetivamente aplicada:** em 30/10/2026 11:00:44 UTC (08:00:44 BRT), commit [de5f5e9](https://github.com/apoenalore/GameCreator/commit/de5f5e9db7808c1eb0c3b5c18aec3686a10ea77b), branch `feat/tempo-biomas-hidrologia`, adicionou `const profile = sim.profiles[i] || defaultHydrology();` dentro do loop de escoamento, após a verificação de água da célula e antes de acessar `profile.runoff`.
-- **Validação:** a nova validação automática da PR #6 [run 41045053407](https://github.com/apoenalore/GameCreator/actions/runs/41045053407) foi criada em 30/10/2026 11:01:40 UTC (08:01:40 BRT) para o commit que contém a correção; resultado ainda aguardando conclusão no momento deste registro.
-- **Estado:** CORRIGIDO-AGUARDANDO-VALIDAÇÃO. Não marcar como RESOLVIDO até o teste de integração da PR #6 passar.
+- **Validação específica:** no [run 41045143930](https://github.com/apoenalore/GameCreator/actions/runs/41045143930), o step `Testar contratos do catálogo e simulação hidrológica` terminou success às 11:04:58 UTC (08:04:58 BRT).
+- **Validação canônica completa:** o mesmo run terminou success às 11:05:57 UTC (08:05:57 BRT), incluindo Godot, preservação dos módulos e artefatos.
+- **Estado:** RESOLVIDO E VALIDADO no commit que contém a correção.
 - **Prevenção:** manter o teste que simula escoamento com diferentes coeficientes `runoff`; toda variável usada dentro de loops deve ser declarada no escopo correto da célula.
 
 ## 5. Regras obrigatórias para futuras IAs
