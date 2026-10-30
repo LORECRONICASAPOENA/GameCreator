@@ -115,8 +115,8 @@ try {
     $versaoMatch = [regex]::Match($versaoTexto, '(\d+)\.(\d+)\.(\d+)')
     if (-not $versaoMatch.Success) { throw "Nao foi possivel identificar a versao do Git: $versaoTexto" }
     $versaoGit = [version]$versaoMatch.Groups[0].Value
-    if ($versaoGit -lt [version]'2.25.0') {
-        throw "Git 2.25 ou superior e necessario para o checkout enxuto. Versao encontrada: $versaoTexto"
+    if ($versaoGit -lt [version]'2.41.0') {
+        throw "Git 2.41 ou superior e necessario para o checkout enxuto. Versao encontrada: $versaoTexto"
     }
 
     if ([string]::IsNullOrWhiteSpace($Destino)) {
