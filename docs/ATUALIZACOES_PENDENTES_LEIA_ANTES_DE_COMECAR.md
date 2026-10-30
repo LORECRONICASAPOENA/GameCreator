@@ -164,3 +164,11 @@
 - O teste de contrato \`tests/atualizador-manifest.test.cjs\` foi adicionado e o workflow canônico recebeu execução condicional desse teste quando o atualizador existir no branch.
 - O atualizador recebeu a correção da comparação da versão Git completa (\`Groups[0]\`) e a cobertura estática do manifesto. O run #41064201715 é de um head anterior; o head atual ainda precisa de CI.
 - Runs pendentes: main #41081796048, atualizador #41082083233 e branch ambiental #41081917796. Não marcar GC-PACK-002 nem GC-UPDATE-009 como concluídos antes de CI e inspeção do pacote final.
+
+
+## Atualização do follow-up GC-PACK-002 — 30/10/2026
+
+- O pacote da main passou no run [#41081796048](https://github.com/apoenalore/GameCreator/actions/runs/41081796048), SHA \`65db2b62cc9750f50a3cc595c80466b6344fbc94\`.
+- O ZIP final contém 76 arquivos de runtime; a fábrica original está preservada somente com a página e as 23 partes JS necessárias. Não contém documentação, testes, CI ou arquivos Markdown/texto.
+- SHA-256 do ZIP interno: \`62407aaad9bd183d78bd3a29a65752f8325981a4191aa77b084be49b818eb55d\`.
+- O teste do manifesto do atualizador no PR7 ainda aguarda execução no run #41082083233. A branch ambiental PR6 está sendo validada no run #41081917796.
