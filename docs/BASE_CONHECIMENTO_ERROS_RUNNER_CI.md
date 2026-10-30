@@ -179,17 +179,45 @@ O log apresentado mostrava dez testes de contrato do catálogo aprovados antes d
 
 **Solução:** abrir o log do job, voltar à primeira mensagem Error, ParserError, AssertionError, comando não encontrado ou teste reprovado. O código 1 isolado não informa se a origem foi PowerShell, Node, Git, Godot ou uma assertion.
 
+### GC-CI-009 — Validação de integração dependia de clique manual
+
+**Classificação:** CAUSA CONFIRMADA; fluxo automático corrigido.
+- O workflow de integração da branch PR #6 continha somente `on: workflow_dispatch`.
+- O push do workflow principal estava limitado a uma única branch e o workflow horário antigo não estava presente na main.
+- Correção: commit [e861c534](https://github.com/apoenalore/GameCreator/commit/e861c5348cd9849800571a4d31c6bfeff0ede8ed) ampliou push/PR e restaurou agenda horária no workflow canônico. Os workflows manuais redundantes foram removidos das branches PR #6 e PR #5.
+- Validação da main: [41044696841](https://github.com/apoenalore/GameCreator/actions/runs/41044696841) success.
+
+### GC-CI-010 — Testes executados antes do build nativo
+
+**Classificação:** CAUSA CONFIRMADA; RESOLVIDO.
+- Run [40959244729](https://github.com/apoenalore/GameCreator/actions/runs/40959244729), 30/10/2026 07:48:40 BRT: assertion `entrada nativa carrega biblioteca, ponte e editor de Natureza`.
+- O workflow antigo rodava a suíte antes de compilar o Creator; a etapa de build era ignorada após a falha.
+- Correção: fluxo horário antigo substituído pelo pipeline canônico que compila antes dos testes. Run [41044696841](https://github.com/apoenalore/GameCreator/actions/runs/41044696841) comprovou a ordem e passou.
+
+### GC-CI-011 — ReferenceError: profile is not defined
+
+**Classificação:** CAUSA CONFIRMADA; correção aplicada, validação da branch pendente.
+- Runs [40994401969](https://github.com/apoenalore/GameCreator/actions/runs/40994401969) e [40994405717](https://github.com/apoenalore/GameCreator/actions/runs/40994405717), 30/10/2026 07:57:20 e 07:57:37 BRT.
+- `stepHydrology` usava `profile.runoff` no loop de escoamento sem declarar `profile` naquele escopo.
+- Correção: commit [de5f5e9](https://github.com/apoenalore/GameCreator/commit/de5f5e9db7808c1eb0c3b5c18aec3686a10ea77b), 30/10/2026 08:00:44 BRT, declara `const profile = sim.profiles[i] || defaultHydrology();` dentro do loop de escoamento.
+- Run automático da PR #6 [41045053407](https://github.com/apoenalore/GameCreator/actions/runs/41045053407) aguardando resultado no momento deste registro.
+
 ## 4. Configuração de CI conhecida — usar como referência, não como verdade permanente
 
-O workflow canônico atualmente consultado em .github/workflows/pixel-art.yml:
-- Usa runs-on: [self-hosted, Windows, X64].
-- Usa shell PowerShell.
-- Prepara Node.js 20.
-- Executa build e verificações do Creator.
-- Possui smoke test de navegador com --disable-javascript. Esse teste verifica DOM/marcadores estáticos; não comprova inicialização JavaScript nem interação real.
-- É acionado por push na branch feature/estudio-unificado-pixelart-v41, pull requests para main com filtros de caminho e workflow_dispatch.
-- Não deve ser duplicado por um segundo workflow com os mesmos testes.
-- O workflow publicar-creator-unificado.yml tem finalidade distinta de build/publicação e não deve ser removido sem comparar seus artefatos.
+O workflow canônico atual é `.github/workflows/pixel-art.yml` na `main`:
+- Usa `runs-on: [self-hosted, Windows, X64]`.
+- Usa Windows PowerShell explicitamente e prepara Node.js 20.
+- Executa em push de alterações relevantes em qualquer branch.
+- Executa em eventos de Pull Request para `main`, com filtro de caminhos.
+- Executa também a cada hora na branch padrão (`cron: "0 * * * *"`).
+- `workflow_dispatch` é somente fallback de emergência; não é necessário para o fluxo normal.
+- Usa concorrência por branch com `cancel-in-progress: true`, evitando acumular validações antigas equivalentes.
+- Executa build nativo antes dos testes, depois DOM responsivo, sintaxe, testes Node, biblioteca/backup, integração de catálogo/terreno/objetos/natureza, hidrologia quando os arquivos existem, runtime headless do Godot, preservação de arquivos e artefatos.
+- Todas as verificações ficam em um único job sequencial para reduzir concorrência e consumo do runner.
+- Não recriar workflows manuais separados para testes já cobertos pelo pipeline canônico.
+- `publicar-creator-unificado.yml` mantém finalidade distinta de build/publicação; não remover sem comparar seus artefatos.
+
+**Importante sobre schedules:** o evento `schedule` é executado na branch padrão. Um cron definido apenas numa branch de Pull Request não substitui a agenda ativa da `main`.
 
 ## 5. Procedimento padrão para corrigir qualquer falha
 
@@ -233,14 +261,14 @@ Para cada erro novo, adicionar:
 ### GC-RUN-001 — Job sem runner atribuído (queued)
 
 - **Data/hora do relato:** 30/10/2026 10:42:01 UTC (07:42:01 BRT).
-- **Data/hora da rechecagem:** 30/10/2026; minuto/segundo da consulta não preservados pela integração.
-- **Execuções de referência:** [40996154391](https://github.com/apoenalore/GameCreator/actions/runs/40996154391) e [40996154399](https://github.com/apoenalore/GameCreator/actions/runs/40996154399).
-- **Erro/sintoma:** 17 jobs em queued; todos solicitam self-hosted, Windows, X64 e apresentam runner_id = 0, runner_name vazio e steps vazios.
-- **Motivo comprovado:** o GitHub não atribuiu os jobs a um runner compatível; a execução não chegou ao checkout nem aos testes.
-- **Causa raiz:** NÃO DIAGNOSTICADA. Estado Online, serviço Windows, grupo, autorização, labels e instalação ativa ainda precisam ser verificados no PC/Settings.
-- **Solução efetivamente utilizada:** nenhuma correção de runner comprovada. Relatório operacional criado em [RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md](RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md); registro central atualizado. 15 execuções antigas foram identificadas para cancelamento manual; duas validações atuais foram preservadas.
-- **Resultado:** BLOQUEADO / PENDENTE. Não declarar resolvido.
-- **Prevenção:** verificar atribuição, runner_id, runner_name e labels antes de qualquer nova validação. Seguir o relatório dedicado e não repetir workflows equivalentes.
+- **Sintoma inicial:** snapshot com 17 jobs queued; todos solicitavam self-hosted, Windows, X64 e apresentavam runner_id = 0, runner_name vazio e steps vazios.
+- **Motivo comprovado:** o GitHub não atribuiu jobs a um runner compatível naquele snapshot; nenhum step tinha começado.
+- **Recuperação observada:** o runner ID 2, `APOENA-GAMECREATOR-RUNNER`, voltou a receber jobs. Runs [40996154399](https://github.com/apoenalore/GameCreator/actions/runs/40996154399) (07:44:56–07:45:20 BRT), [40996154391](https://github.com/apoenalore/GameCreator/actions/runs/40996154391) (07:53:08–07:55:51 BRT) e [41044696841](https://github.com/apoenalore/GameCreator/actions/runs/41044696841) (07:58:56–08:01:18 BRT) foram concluídos com success e labels self-hosted, Windows, X64.
+- **Causa raiz da indisponibilidade inicial:** NÃO DIAGNOSTICADA. A recuperação foi observada, mas não foi registrada alteração de serviço, grupo, autorização, labels ou instalação que prove a causa.
+- **Solução efetivamente utilizada:** nenhuma alteração de configuração do runner comprovada. A fila antiga foi processada pelo runner; 15 execuções antigas terminaram (12 success, 3 failure). As falhas foram de código/ordem de build, não de comunicação.
+- **Resultado:** RECUPERADO OPERACIONALMENTE; causa raiz original permanece desconhecida. Não confundir recuperação com causa resolvida.
+- **Relatório completo:** [RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md](RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md).
+- **Prevenção:** antes de repetir, verificar status, runner_id, runner_name, labels e steps. Se queued + runner_id=0 + steps vazios, investigar atribuição do runner, não o código.
 
 ### GC-RUN-002 — pwsh: command not found
 
@@ -318,6 +346,33 @@ Para cada erro novo, adicionar:
 - **Solução efetivamente utilizada:** depende do erro causal; não existe solução única.
 - **Resultado:** NÃO DIAGNOSTICADO até recuperar o primeiro erro do log.
 - **Prevenção:** registrar e investigar a primeira mensagem causal, não corrigir apenas o código final.
+
+### GC-CI-009 — Gatilhos automáticos incompletos
+
+- **Data/hora do relato:** 30/10/2026 10:55:05 UTC (07:55:05 BRT).
+- **Causa:** `testar-integracao.yml` na branch de desenvolvimento tinha somente `workflow_dispatch`; portanto, era manual. O push do workflow canônico estava restrito a `feature/estudio-unificado-pixelart-v41`; o workflow horário antigo não existia na main.
+- **Correção:** commit `e861c534` às 07:58:51 BRT ampliou os gatilhos do pipeline canônico para push em qualquer branch, Pull Requests para main e schedule horário na main. Commits `acc6c293` às 07:59:40 BRT e `00b3619` às 07:59:50 BRT removeram workflows redundantes das PRs #6 e #5.
+- **Resultado:** run `41044696841` executado automaticamente, sem clique, e concluído success às 08:01:18 BRT. Ver relatório dedicado para detalhes.
+
+### GC-CI-010 — Ordem de build/teste incorreta na validação agendada
+
+- **Data/hora:** 30/10/2026 07:48:40.053 BRT.
+- **Run/job:** `40959244729` / `123747361508`.
+- **Mensagem:** `AssertionError: entrada nativa carrega biblioteca, ponte e editor de Natureza` em `tests/corte-inteligente.test.cjs:100`.
+- **Causa:** a suíte executava antes do build nativo; a etapa de build foi skipped após a assertion.
+- **Correção:** pipeline canônico com build antes da suíte e schedule horário restaurado na main; commit `e861c534`.
+- **Validação:** run `41044696841` — build success antes dos testes; todos os steps success às 08:01:18 BRT.
+- **Estado:** RESOLVIDO.
+
+### GC-CI-011 — Variável profile fora do escopo no escoamento
+
+- **Data/hora:** 30/10/2026 07:57:20.037 BRT e 07:57:37.247 BRT.
+- **Runs/jobs:** `40994401969` / `123864045768`; `40994405717` / `123864058010`.
+- **Mensagem:** `ReferenceError: profile is not defined`, `map-editor/terrain-system.js:415:132`.
+- **Causa:** `profile` era declarado em outro loop; o loop x/y que usa `profile.runoff` não tinha variável no escopo.
+- **Correção:** commit `de5f5e9` às 08:00:44 BRT adicionou `const profile = sim.profiles[i] || defaultHydrology();` no loop de escoamento.
+- **Validação:** run `41045053407` da PR #6 está aguardando conclusão; não marcar resolvido até passar.
+- **Estado:** CORRIGIDO-AGUARDANDO-VALIDAÇÃO.
 
 ## 8. Modelo obrigatório para todos os novos registros
 
