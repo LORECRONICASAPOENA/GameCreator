@@ -87,3 +87,8 @@ O teste automatizado reproduz o clone, a materialização, o fast-forward e a id
 ## Requisito mínimo de Git
 
 O atualizador exige Git for Windows 2.41.0 ou superior. Embora clone parcial e sparse-checkout básico existam desde versões anteriores, este fluxo usa o subcomando sparse-checkout check-rules para validar o manifesto antes de materializar arquivos. Esse subcomando foi incorporado posteriormente; por isso, a versão mínima do instalador foi elevada para 2.41.0. O runner atual usa uma versão mais recente.
+
+
+## Proteção de arquivos ignorados fora do runtime
+
+Antes de alterar o sparse-checkout, o atualizador verifica arquivos locais ignorados em toda a instalação. Se encontrar arquivos ignorados fora da lista positiva de runtime, interrompe a operação e pede backup ou movimentação manual. Essa interrupção preventiva evita que o Git remova dados locais ao reduzir o worktree. Arquivos não rastreados e ignorados que coincidam com caminhos de runtime também bloqueiam a atualização antes da materialização/merge.
