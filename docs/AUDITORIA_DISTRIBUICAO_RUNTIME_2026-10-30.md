@@ -120,3 +120,8 @@ A leitura de árvores e arquivos locais usa core.quotePath=false para que nomes 
 O teste tests/atualizador-manifest.test.cjs não fica apenas na simulação de comandos Git. Ele executa integracao/atualizar-creator.ps1 com Windows PowerShell 5.1, usando um repositório bare local temporário e diretório de configuração isolado. O modo de teste permite a URL local somente quando APOENA_UPDATER_TEST_MODE=1 e a URL do remote corresponde exatamente ao parâmetro RepoUrl; a instalação normal continua limitada ao GameCreator oficial.
 
 O teste executa primeira instalação, verifica arquivos presentes/ausentes, bloqueio de arquivos locais fora da allowlist, atualização fast-forward, preservação de refs/apoena/anterior, execução sem mudanças e bloqueio de conflitos ignorados/não ignorados, inclusive um caminho com acento. Nenhuma pasta permanente do autor é usada.
+
+
+## Incidente de validação — GC-UPDATE-TEST-001
+
+O run 41113920551 falhou no step 17 devido a uma assertion do teste que localizava a primeira ocorrência textual de sparse-checkout set --no-cone, que era um comentário, e não a chamada executável. O guard PowerShell não foi demonstrado como defeituoso por essa falha. A assertion foi corrigida para procurar a linha real do comando no commit 8bbe3d7379b43da5c98c18bd1165e2d8d114a267. Nova CI pendente; não considerar o teste PowerShell end-to-end aprovado até essa execução.
