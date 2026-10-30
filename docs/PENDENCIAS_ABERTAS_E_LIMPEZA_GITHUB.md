@@ -319,3 +319,10 @@ O clone --no-checkout deixa o índice vazio; o status pode apresentar remoções
 ## GC-UPDATE-TEST-002 — Parser PowerShell
 
 A CI 41114836257 falhou no step 17 com Token '}' inesperado. A causa foi um segundo bloco de código duplicado após o catch, deixado por uma substituição anterior do trecho de validação do remote. O bloco duplicado foi removido no commit d90541bd642f17aa681ea7e623b49dba12ca2b36. Nova CI pendente; o teste end-to-end PowerShell ainda não foi considerado aprovado.
+
+
+## Autorização específica de escopo — GC-UPDATE-009 (30/10/2026)
+
+O autor autorizou explicitamente a alteração do atualizador e do empacotamento do Game Creator para que a instalação/distribuição contenha somente os arquivos necessários ao runtime, mantendo auditorias, documentos internos, testes e workflows no repositório privado.
+
+A regra anterior de “somente documentação” continua valendo para todas as demais tarefas e funcionalidades do Creator. Esta autorização é restrita ao GC-UPDATE-009: atualizador enxuto, manifesto de runtime, proteção de dados locais e testes de validação. Não autoriza novas funcionalidades criativas nem alterações fora desse escopo.
