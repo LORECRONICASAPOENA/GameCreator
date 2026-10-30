@@ -209,3 +209,13 @@ Se um teste falhar por um segundo defeito, abra ou vincule outro ID. Não mistur
 - **Ação adicional:** criado `.github/pull_request_template.md` para exigir o registro do diário, causa/hipóteses, testes e estado real em cada PR.
 - **Referências existentes:** a base `docs/BASE_CONHECIMENTO_ERROS_RUNNER_CI.md`, o relatório `docs/RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md`, as pendências e o protocolo sequencial continuam como documentos complementares; o diário centraliza o progresso e aponta para eles.
 - **Estado:** PR aberta; não mesclada. A documentação está na branch, não se deve afirmar que já está disponível na `main`.
+
+
+## 10. Progresso — empacotamento sem documentos internos (30/10/2026)
+
+- **Repositório principal:** GameCreator, branch \`main\`.
+- **Correção:** o workflow de entrega passou a excluir documentação interna, histórico, testes, CI, arquivos Markdown/texto, package de testes, scripts de publicação e versão antiga.
+- **Commit:** \`f69a013dcc6f38267e204b50c1df90698dca54a3\`.
+- **Validação:** run [#41079295445](https://github.com/apoenalore/GameCreator/actions/runs/41079295445), success. O ZIP interno foi inspecionado e contém 52 arquivos necessários ao runtime, sem documentação, testes ou workflows.
+- **Integridade:** SHA-256 do ZIP interno \`7a061059a7d027c45e32ce11fd78c48fd5bdf9a0b0c05e069802cb6c1d3dfda7\`.
+- **Limite:** a correção do empacotador foi validada na main. A branch ambiental desta PR tem commit equivalente, mas seu head atual ainda precisa de CI e sincronização com main antes de integração.
