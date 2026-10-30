@@ -10,3 +10,7 @@ Antes de investigar ou alterar CI, GitHub Actions, PowerShell, runner, testes ou
 6. Nunca enfraqueça testes, remova assertions ou oculte exceções para obter CI verde.
 7. Separe causas comprovadas de hipóteses. Atualize a base de conhecimento somente depois de validar a correção.
 8. Preserve a liberdade criativa: automações do editor devem ser assistivas, reversíveis e nunca impor escolhas ao criador.
+
+## Registro obrigatório de incidentes
+
+Ao acrescentar ou atualizar um erro em docs/BASE_CONHECIMENTO_ERROS_RUNNER_CI.md, registre data/hora da ocorrência e do cadastro com fuso BRT, mensagem literal, motivo comprovado, solução efetivamente utilizada, evidência da solução, resultado e prevenção. Não invente horários retroativos. Se a hora não estiver preservada, declare isso. Nunca registre uma recomendação como solução aplicada.
