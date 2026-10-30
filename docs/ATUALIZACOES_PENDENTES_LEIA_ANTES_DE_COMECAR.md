@@ -172,3 +172,15 @@
 - O ZIP final contém 76 arquivos de runtime; a fábrica original está preservada somente com a página e as 23 partes JS necessárias. Não contém documentação, testes, CI ou arquivos Markdown/texto.
 - SHA-256 do ZIP interno: \`62407aaad9bd183d78bd3a29a65752f8325981a4191aa77b084be49b818eb55d\`.
 - O teste do manifesto do atualizador no PR7 passou no step 17 do run #41082083233; a simulação real de clone/fast-forward e preservação local continua pendente. A branch ambiental PR6 passou no run #41081917796.
+
+
+## Atualização GC-UPDATE-009 — sincronização e reforço de segurança (30/10/2026)
+
+- A branch original da PR #7 foi preservada em backup/gc-update-009-before-main-sync-20261030 antes de preparar uma base atualizada.
+- A comparação com a main identificou 16 commits exclusivos da PR e 33 commits posteriores na main; a integração direta foi suspensa para evitar regressão.
+- A nova versão de trabalho parte do SHA 0bd916157d9bfab6c6c9b121c26050f94918cf80, preservando as correções recentes da main.
+- O manifesto agora exige também os arquivos Godot de runtime, os módulos de backup/tileset da biblioteca e os módulos complementares do Pixel Art.
+- A regex de proteção foi alinhada ao padrão amplo de legacy/v3_9_parts/*.js, para proteger também arquivos JS futuros cobertos pelo sparse-checkout.
+- O atualizador valida com git sparse-checkout check-rules que todos os arquivos essenciais estão incluídos antes de buscar/aplicar atualização.
+- O teste automatizado foi ampliado para simular clone parcial, sparse-checkout real, fast-forward, referência anterior e conflito com arquivo local ignorado em repositório Git temporário.
+- **Estado:** alterações preparadas na branch de trabalho; commits documentais e de código marcados com [skip ci] para evitar execuções intermediárias. CI ainda não executada para o novo head; teste Windows real permanece pendente.
