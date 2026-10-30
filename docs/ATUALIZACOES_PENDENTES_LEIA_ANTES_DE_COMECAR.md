@@ -184,3 +184,12 @@
 - O atualizador valida com git sparse-checkout check-rules que todos os arquivos essenciais estão incluídos antes de buscar/aplicar atualização.
 - O teste automatizado foi ampliado para simular clone parcial, sparse-checkout real, fast-forward, referência anterior e conflito com arquivo local ignorado em repositório Git temporário.
 - **Estado:** alterações preparadas na branch de trabalho; commits documentais e de código marcados com [skip ci] para evitar execuções intermediárias. CI ainda não executada para o novo head; teste Windows real permanece pendente.
+
+
+## Descoberta de segurança — checkout inicial e conflitos locais (30/10/2026)
+
+A simulação Git local identificou que sparse-checkout set --no-cone não materializa por si só um clone iniciado com --no-checkout. Foi adicionado git read-tree -mu HEAD após a verificação do manifesto.
+
+Também foi comprovado que, em sparse-checkout, git merge --no-overwrite-ignore sozinho não é proteção suficiente contra todo arquivo local conflitante. O atualizador agora detecta tanto arquivos ignorados quanto não ignorados antes da materialização e antes do merge; qualquer colisão com o runtime remoto bloqueia a operação.
+
+A simulação foi executada com Git 2.47.3 em Linux. O novo teste de contrato repete esses cenários na CI Windows. Nenhuma pasta do computador do autor foi alterada.
