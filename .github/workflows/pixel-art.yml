@@ -214,6 +214,10 @@ jobs:
         run: |
           node tests/catalogo.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/catalogo.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Testar contratos do catálogo e simulação hidrológica
+        run: |
+          node integracao/testes/catalogo.test.js 2>&1 | Tee-Object -FilePath .ci-results/catalogo-hidrologia.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Testar protocolo de sincronizacao entre V4.0 e V4.1
         run: |
           node tests/creator-bridge.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/creator-bridge.log
