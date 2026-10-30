@@ -5,10 +5,10 @@ Estado: implementacao em branch de trabalho; NAO VALIDADO em Windows do autor.
 ## Instalacao inicial (uma vez)
 
 1. Na instalacao antiga, abra Biblioteca e exporte o backup antes de migrar. Ela utiliza IndexedDB do navegador; esses dados nao ficam automaticamente no GitHub e podem depender da origem/caminho do arquivo.
-2. Baixe e extraia o ZIP do repositorio privado apenas na primeira vez. Execute ATUALIZAR_CREATOR.cmd na pasta extraida.
+2. Baixe somente ATUALIZAR_CREATOR.cmd e integracao/atualizar-creator.ps1 para uma pasta temporaria, mantendo a estrutura. Execute o CMD; nao baixe nem extraia o ZIP completo.
 3. Escolha a pasta definitiva quando solicitado. Sugestao: C:\ApoenaHub\GAME CREATOR\APP. Nao escolha C:\ApoenaHub\GAME CREATOR\RUNNER nem a pasta que contem o runner.
 4. E necessario ter Git for Windows e fazer login com a conta que possui acesso ao repositorio privado. Nao inserir credenciais nos scripts.
-5. Depois de instalar, abra o editor com ABRIR_GAME_CREATOR.cmd na pasta definitiva. Verifique sua biblioteca/backup antes de apagar a instalacao antiga. Apague a pasta temporaria ZIP manualmente depois de verificar.
+5. Depois de instalar, abra o editor com ABRIR_GAME_CREATOR.cmd na pasta definitiva. Verifique sua biblioteca/backup antes de apagar a instalacao antiga. Depois da verificacao, a pasta temporaria de bootstrap pode ser descartada.
 
 O atualizador nao sobrescreve uma instalacao ZIP antiga: se o destino ja existir mas nao for um clone Git, ele interrompe. A migracao de dados pessoais exige conferencia separada.
 
@@ -37,9 +37,9 @@ Testar no Windows: primeira instalacao; atualizacao de versao na mesma pasta; re
 
 ## Distribuicao enxuta: somente arquivos de runtime
 
-A instalacao permanente usa clone parcial do Git (--filter=blob:none) e sparse-checkout com uma lista positiva de arquivos de runtime. O manifesto mantem o launcher, a pagina integrada, os modulos JS/HTML/JSON necessarios, a biblioteca e os arquivos de integracao Godot utilizados pelo Creator.
+A instalacao permanente usa clone parcial do Git (--filter=blob:none) e sparse-checkout com uma lista positiva de arquivos de runtime. O manifesto mantem o launcher, a pagina integrada, catalogo, modulos JS/HTML/JSON necessarios, biblioteca, arquivos de integracao Godot e a fabrica original v3.9 (pagina e 23 partes JS) referenciada pela pagina de integracao.
 
-**Ficam fora da pasta APP:** docs/, tests/, .github/, legacy/, historico/, AGENTS.md, README, auditorias, relatorios, bases de erros, planos, documentos de requisitos e arquivos exclusivos de desenvolvimento.
+**Ficam fora da pasta APP:** docs/, tests/, .github/, historico/, AGENTS.md, README, auditorias, relatorios, bases de erros, planos, documentos de requisitos e arquivos exclusivos de desenvolvimento. De legacy/, entram somente `abrir-editor-v3.9.html` e `v3_9_parts/parte_000.js` a `parte_022.js`, pois a pagina integrada oferece acesso a essa fabrica original; `iniciador-anterior.html` e os demais arquivos antigos continuam fora.
 
 ### Primeira instalacao sem baixar a documentacao
 
