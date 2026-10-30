@@ -69,3 +69,50 @@
 3. **Prioridade 3:** expandir autotiling para folhas externas e perfis reutilizáveis com testes completos.
 4. Antes de executar suite pesada, testar a lógica de vizinhos isoladamente; depois usar o workflow canônico, e registrar evidência real de sucesso.
 5. Após sucesso validado, mover tarefa para seção concluída neste mesmo arquivo, com data, commit, teste e comportamento confirmado. Nunca excluir o histórico de decisão.
+
+## Requisitos complementares — decisões discutidas em 30/10/2026
+
+**Estado de todos os itens nesta seção:** PLANEJADO / NÃO IMPLEMENTAR ATÉ PEDIDO EXPLÍCITO. Esta seção preserva decisões e relatos do autor; não comprova que o comportamento esteja pronto ou validado. **Restrição atual do autor:** apenas documentar, não modificar interface, funcionalidades, testes ou workflows nesta etapa.
+
+### GC-UX-004 — Simplificar fluxo e navegação do GameCreator
+- **Relato:** o autor considera a interface atual confusa até para quem desenvolve a ferramenta; menus e campos de funções diferentes estão misturados e sobrecarregam a visualização.
+- **Diretriz de organização:** o fluxo natural do usuário é (1) criar/importar e configurar recursos reutilizáveis, personagens, itens, animais, plantas e objetos; (2) definir comportamentos e animações; (3) **abrir o editor de mapas ao final**, para montar o cenário a partir da biblioteca pronta. Não apresentar o mapa como painel permanente em todas as etapas.
+- **Navegação prevista:** menus contextuais, poucos níveis, grupos claros e painéis recolhíveis; tela principal dedicada à tarefa atual; editor de mapas acessível por aba/barra própria no final do fluxo. A preferência por posição “no final” é decisão expressa do autor; apresentação exata ainda deve passar por revisão visual.
+- **Dentro do editor de mapas:** biblioteca organizada e consultável por categorias distintas: **Tiles/terrenos**, **Assets/árvores e cenários**, **Personagens e NPCs**, **Itens e veículos** (ex.: carro, balão, carroça), **Animais**; categorias devem reaproveitar os recursos já cadastrados, evitando importações redundantes.
+- **Requisitos de usabilidade:** busca, miniaturas legíveis, filtros por categoria, comportamento transparente de seleção, painéis adequados a celular/PC, área de mapa prioritária, distinção entre editar um recurso e posicioná-lo no mapa.
+- **Critério de aceite futuro:** o usuário conclui o percurso “criar recurso → salvar comportamento → reencontrar recurso → inserir no mapa” sem repetir importação, sem menus sobrepostos e sem perder funções existentes.
+- **Código já existente (verificado):** `pixel-art/modulo-integrado.js` possui abas de personagens, objetos e mapas; `map-editor/modulo-integrado.js` carrega editor integrado sob demanda; `biblioteca/index.html` e `shared/asset-library.js` implementam parte da biblioteca. Isso é **parcial**, não a reorganização proposta.
+
+### GC-ANIM-005 — Dois modos de animação do personagem
+- **Decisão de produto:** preservar e ampliar dois fluxos complementares, sem obrigar o autor a escolher um só:
+  1. **Animação 2D tradicional** por sprites/quadros, direções e ações; montagem de spritesheet e exportação compatível com HTML e Godot.
+  2. **Animação por partes recortadas**: importar fotografia/desenho original, separar cabeça, tronco, braços, antebraços, mãos, quadril, pernas e acessórios; alinhar pivôs/articulações; vincular **esqueleto 2D hierárquico** e simular profundidade/perspectiva para aparência 2.5D/pseudotridimensional, com rotação/escala/deslocamento das peças, ordenação de camadas e animação de ossos.
+- **Restrições:** a aparência de profundidade não deve ser confundida com reconstrução automática de geometria 3D real. Não exigir Blender, GPU dedicada ou serviço pago; mirar HTML/Canvas/WebGL leve e exportação futura para Godot sem prometer compatibilidade ainda não testada.
+- **Requisitos de trabalho:** ajustar pivôs, hierarquia de ossos e camadas sem destruir imagens; alternar visualização 2D e pseudo-3D; timeline/keyframes, pose, prévia, desfazer/refazer, salvar projeto editável e exportar resultados.
+- **Liberdade criativa:** nunca recortar, deformar, redesenhar ou substituir parte da imagem de origem sem prévia e controle do autor.
+- **Estado conferido:** gerador modular com spritesheet e estúdio de recortes já existem em `pixel-art/modulo-integrado.js`, `pixel-art/estudio.html` e `pixel-art/estudio.js`. O editor completo de rig 2D com profundidade simulada **não foi comprovado** nesses arquivos, portanto está **PENDENTE**.
+
+### GC-LIB-006 — Biblioteca persistente de recursos e comportamentos
+- **Objetivo:** um tileset/objeto/bananeira/personagem cadastrado uma vez deve ser recuperado na próxima sessão e reutilizável no mapa com sua ficha funcional: ID, tipo, imagem original, grade, animação, colisão, grupo de conexão/autotile, interação, ambiente e demais parâmetros pertinentes.
+- **Estado parcial comprovado:** `shared/asset-library.js` usa IndexedDB no navegador e preserva recursos e metadados; `biblioteca/index.html` fornece busca e backup exportável; o editor de mapas integrado já inclui catálogo de regras de terreno e de objetos. Isso **não é** escrita automática numa pasta do Windows.
+- **Problema específico encontrado:** o editor de mapas separado `map-editor/index.html` salva perfil de tileset em metadados mas força `manual` na recarga; verificar fluxos separados e integrados antes de unificar. Nunca declarar persistência completa de comportamento sem teste de salvar → fechar → reabrir → reutilizar.
+- **Planejamento:** reutilizar a Biblioteca Central atual, criar formato de definição do recurso desacoplado de um mapa, dar IDs estáveis, associar regras a cada tileset e propagar configurações ao reabrir. Oferecer **backup/exportação** e posterior integração opt-in com pasta local (por exemplo em Documentos), respeitando permissões reais do navegador/Windows; não afirmar que acesso irrestrito à pasta existe por padrão.
+- **Critério de aceite:** cadastrar bananeira/tileset com configurações; fechar e reabrir; localizar pela categoria; inserir em novo mapa sem importar imagem novamente; manter comportamento e edição íntegros; exportar backup e restaurá-lo.
+
+### GC-KEY-007 — Teclas de movimento interferem na digitação de formulários
+- **Relato:** em campos de texto do Creator, inclusive o de ID do item produzido, a tecla minúscula `a` parece não produzir texto; com Shift (maiúscula) funciona. Outras teclas também foram mencionadas.
+- **Hipótese técnica forte (não validada em navegador):** a arena de teste usa atalhos WASD; `pixel-art/modulo-integrado.js` intercepta `a` em um listener de `keydown` no `document`, usando `typing(e.target)` para verificar input. Em formulários dentro de Shadow DOM, `e.target` observado no `document` pode ser o host, não o input interno, por retargeting. Assim, `preventDefault()` pode suprimir letras minúsculas `w,a,s,d`, enquanto maiúsculas não correspondem ao mapeamento.
+- **Solução proposta, NÃO aplicada:** reconhecer campos editáveis via `event.composedPath()`, `isContentEditable` e elementos `input`, `textarea`, `select`; atalhos apenas com arena em foco ativo e sem modificadores; não interceptar digitação em formulários, inclusive dentro de Shadow DOM. Rever listener de `keyup` para evitar tecla presa.
+- **Critério de aceite:** digitar minúsculas `a,w,s,d` e nomes/IDs nos formulários de itens e objetos, com e sem Shift, sem acionamento de movimento; confirmar WASD e setas funcionando na arena focada; repetir em outras abas e navegadores compatíveis.
+- **Estado:** causa plausível identificada no código, mas não reproduzida/validada; **PENDENTE DE CORREÇÃO**.
+
+### GC-MAP-008 — Categorias e regras de interação de objetos 2.5D
+- **Relato:** o autor está cadastrando objetos como **bananeira** e quer configurar colisão e comportamento, depois reencontrá-los ao construir mapas.
+- **Proposta:** separar **colisão física** (onde o personagem não atravessa), **interação** (coletar, cortar, usar), **estado ambiental** (crescimento, chuva, solo, ciclo de vida) e **representação visual 2.5D** (base/altura/camadas). Não aplicar automaticamente colisão em toda a imagem: árvores altas podem ter tronco sólido e copa atravessável visualmente.
+- **Estado parcial:** formulários de colisão e regras ambientais/de objetos existem no módulo integrado, mas integração no runtime do jogo e persistência reutilizável por ativo exigem teste e não devem ser marcadas como prontas.
+- **Critério de aceite:** cadastrar bananeira como planta com imagem e ficha; definir colisão do tronco e interação; salvar; reutilizar o mesmo objeto em novo mapa preservando as configurações, sem reimportar.
+
+### Ordem e limites de implementação futura
+- **Agora:** somente documentação. Não alterar código, UI, testes ou GitHub Actions sem nova instrução explícita do autor.
+- **Depois, quando autorizado:** resolver conflito de digitação (falha básica de usabilidade); validar persistência da biblioteca; definir protótipos de navegação e editor de animação; só então implementar por incrementos pequenos, com testes isolados e CI canônico, **WIP = 1**.
+- Cada tarefa terá indicação de **decisão de produto, hipótese, evidência, implementação e validação**. Não remover funcionalidades antigas; manter histórico e mecanismo de reversão.
