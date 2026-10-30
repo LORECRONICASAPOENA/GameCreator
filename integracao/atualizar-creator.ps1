@@ -9,7 +9,7 @@ $arquivoDestino = Join-Path $pastaConfig 'instalacao.txt'
 $arquivoLog = Join-Path $pastaConfig 'atualizacao.log'
 
 function Registrar([string]$Mensagem) {
-    $linha = ('{0} BRT/horario local | {1}' -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $Mensagem)
+    $linha = ('{0} horario local | {1}' -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz'), $Mensagem)
     Write-Host $linha
     Add-Content -LiteralPath $arquivoLog -Value $linha -Encoding UTF8
 }
@@ -25,7 +25,7 @@ try {
         if (Test-Path -LiteralPath $arquivoDestino) {
             $Destino = (Get-Content -LiteralPath $arquivoDestino -Raw).Trim()
         } else {
-            $sugerido = Join-Path $env:SystemDrive 'ApoenaHub\GAME CREATOR\APP'
+            $sugerido = Join-Path ($env:SystemDrive + '\') 'ApoenaHub\GAME CREATOR\APP'
             Write-Host "Pasta permanente sugerida: $sugerido"
             $resposta = Read-Host 'Primeira instalacao: Enter para aceitar ou digite outra pasta'
             if ([string]::IsNullOrWhiteSpace($resposta)) {
@@ -121,7 +121,7 @@ try {
     }
     Registrar "Concluido. Para testar: $Destino\ABRIR_GAME_CREATOR.cmd"
     Write-Host ''
-    Write-Host 'A biblioteca do navegador/IndexedDB e independente do Git. Faça backup pela tela Biblioteca antes de trocar de navegador/perfil.'
+    Write-Host 'A biblioteca do navegador/IndexedDB e independente do Git. Faca backup pela tela Biblioteca antes de trocar de navegador/perfil.'
     exit 0
 } catch {
     Registrar ("ERRO: " + $_.Exception.Message)
