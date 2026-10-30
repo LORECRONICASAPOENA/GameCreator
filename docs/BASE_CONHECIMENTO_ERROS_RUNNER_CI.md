@@ -236,3 +236,121 @@ Para cada erro novo, adicionar:
 - Prevenção para não repetir:
 
 **Regra final:** uma correção só vira conhecimento reutilizável quando a causa raiz foi comprovada e a solução passou por validação no commit correspondente.
+
+---
+
+## 7. Histórico de incidentes — erro, motivo, solução utilizada e data/hora
+
+**Fuso horário padrão:** BRT (UTC−03:00). Quando o log original está em UTC, o horário abaixo foi convertido e o UTC original foi mantido entre parênteses. “Hora não preservada” significa que a conversa ou o registro original não continha um horário verificável. Não inventar horários retroativos.
+
+### GC-RUN-001 — Job sem runner atribuído (queued)
+
+- **Data/hora da observação:** 29/10/2026 21:37 BRT (snapshot histórico); nova observação em 30/10/2026, hora não preservada.
+- **Execução de referência:** run 40996154391 — https://github.com/apoenalore/GameCreator/actions/runs/40996154391
+- **Erro/sintoma:** job validar em queued, sem runner atribuído; amostras anteriores mostraram runner_id = 0 e runner_name vazio.
+- **Motivo comprovado:** o GitHub não atribuiu o job a um runner compatível naquele momento.
+- **Causa raiz:** NÃO DIAGNOSTICADA. Runner offline, labels, grupo/permissão ou registro incorreto são hipóteses, não fatos.
+- **Solução efetivamente utilizada:** nenhuma solução comprovada registrada para este incidente.
+- **Solução proposta, ainda não comprovada:** conferir estado Online, grupo, autorização e labels self-hosted, Windows, X64; depois corrigir somente a causa identificada.
+- **Resultado:** PENDENTE. Não afirmar que foi resolvido.
+- **Prevenção:** verificar atribuição e labels antes de disparar qualquer nova validação.
+
+### GC-RUN-002 — pwsh: command not found
+
+- **Data/hora do erro:** 28/10/2026 18:24:18.389 BRT (UTC original: 2026-10-28T21:24:18.3899704Z).
+- **Execução:** run 40771579313, job 123109874120 — https://github.com/apoenalore/GameCreator/actions/runs/40771579313/job/123109874120
+- **Erro literal:** ##[error]pwsh: command not found
+- **Motivo comprovado:** o job chegou a um runner Windows identificado como APOENA-GAMECREATOR-RUNNER, mas o processo tentou iniciar pwsh e não encontrou esse executável no ambiente/PATH. O log mostra Node v20.20.2 instalado; portanto, não era ausência geral de execução do runner.
+- **Solução efetivamente utilizada na configuração atual:** o workflow .github/workflows/pixel-art.yml na main declara explicitamente defaults.run.shell como powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'", em vez de depender do shell pwsh padrão.
+- **Evidência da solução:** configuração atual da main, arquivo .github/workflows/pixel-art.yml.
+- **Resultado:** CONFIGURAÇÃO CORRIGIDA no arquivo atual; ainda falta uma execução posterior bem-sucedida que comprove o fim do erro em runtime.
+- **Prevenção:** manter o shell explícito e compatível com Windows PowerShell instalado na conta do serviço do runner.
+
+### GC-RUN-003 — PowerShell ParserError: token PACOTE inesperado
+
+- **Data/hora do erro:** 28/10/2026; hora exata não preservada no registro original.
+- **Execução:** ID/URL da execução não preservados.
+- **Erro literal:** ParserError: Token 'PACOTE' inesperado, associado à linha "APOENA GAME CREATOR V4.1 — PACOTE DE TRABALHO".
+- **Motivo comprovado:** o parser PowerShell rejeitou a expressão na posição indicada.
+- **Causa raiz:** NÃO DIAGNOSTICADA. Aspas, delimitadores, vírgulas, parênteses ou codificação são hipóteses. O travessão longo, isoladamente, não foi comprovado como causa.
+- **Solução efetivamente utilizada:** nenhuma solução confirmada por log ou validação foi localizada.
+- **Solução proposta:** recuperar o .ps1 completo da execução original, inspecionar as linhas anteriores e validar a sintaxe com Parser::ParseFile antes de executar.
+- **Resultado:** PENDENTE DE DIAGNÓSTICO.
+- **Prevenção:** registrar o script temporário completo e a linha/coluna do parser no log.
+
+### GC-RUN-004 — Upload sem arquivos em _delivery/
+
+- **Data/hora do aviso:** 28/10/2026 18:24:18.978 BRT (UTC original: 2026-10-28T21:24:18.9781108Z).
+- **Execução:** mesmo run 40771579313, job 123109874120.
+- **Erro literal:** No files were found with the provided path: _delivery/. No artifacts will be uploaded.
+- **Motivo comprovado:** no mesmo job, os steps PowerShell anteriores falharam com pwsh: command not found. Assim, os comandos que criariam/preencheriam _delivery/ e .ci-results/ não foram executados; o upload recebeu diretórios sem arquivos.
+- **Solução efetivamente utilizada na configuração atual:** a mesma correção de shell de GC-RUN-002 — declarar explicitamente Windows PowerShell no workflow.
+- **Resultado:** CAUSA DO AVISO IDENTIFICADA e configuração atual ajustada; falta confirmar em uma execução posterior que _delivery/ e os artefatos foram realmente produzidos.
+- **Prevenção:** fazer upload somente depois de verificar a criação do pacote e listar os arquivos esperados. Não tratar o aviso como falha independente de build quando o step gerador nem iniciou.
+
+### GC-RUN-005 — AssertionError 128 !== 0
+
+- **Data/hora do erro:** 28/10/2026; hora exata não preservada no registro original.
+- **Execução:** run ID/URL e job não preservados no trecho recebido.
+- **Erro literal:** AssertionError [ERR_ASSERTION]: Expected values to be strictly equal: 128 !== 0.
+- **Contexto preservado:** dez testes de contrato do catálogo foram exibidos como aprovados antes da assertion.
+- **Motivo comprovado:** uma operação retornou código 128, quando o teste esperava 0.
+- **Causa raiz:** NÃO DIAGNOSTICADA. Não há evidência suficiente para afirmar que foi Git, credencial, diretório ou outro subprocesso.
+- **Solução efetivamente utilizada:** nenhuma solução confirmada registrada.
+- **Solução proposta:** recuperar a linha completa do stack trace e o comando executado; registrar cwd, argumentos, stdout, stderr e exit code; corrigir a causa sem enfraquecer a assertion.
+- **Resultado:** PENDENTE.
+- **Prevenção:** toda falha de subprocesso deve imprimir contexto suficiente para identificar o comando e seu diretório de trabalho.
+
+### GC-RUN-006 — Runner ouviu jobs, mas as validações falharam
+
+- **Data/hora dos eventos:** 28/10/2026 18:18:26 BRT (runner Listening for Jobs); 18:20:48 BRT (job validar iniciado); 18:22:46 BRT e 18:23:09 BRT (jobs concluídos como Failed). Horários UTC originais: 21:18:26Z, 21:20:48Z, 21:22:46Z e 21:23:09Z.
+- **Execução:** IDs/URLs individuais não preservados no registro da conversa.
+- **Erro literal:** Job validar completed with result: Failed.
+- **Motivo comprovado:** o runner estava ativo e recebeu jobs; portanto, neste episódio, Listening for Jobs não significava que o runner estava incapaz de receber tarefas.
+- **Causa raiz:** NÃO DIAGNOSTICADA sem o log de cada job.
+- **Solução efetivamente utilizada:** nenhuma solução específica comprovada no registro disponível.
+- **Solução proposta:** consultar o primeiro step com conclusion: failure e seu log, sem reiniciar ou duplicar o runner.
+- **Resultado:** execução recebida, mas validações falharam; causa pendente.
+- **Prevenção:** separar diagnóstico de disponibilidade do runner do diagnóstico de falha interna do job.
+
+### GC-RUN-007 — Suspeita de múltiplos runners ativos
+
+- **Data/hora do registro:** 28/10/2026; hora não preservada.
+- **Erro/sintoma:** pergunta sobre possível conflito entre mais de um runner.
+- **Motivo comprovado:** nenhum conflito foi comprovado.
+- **Solução efetivamente utilizada:** nenhuma remoção ou alteração de runner foi comprovada.
+- **Resultado:** HIPÓTESE, não incidente confirmado.
+- **Prevenção:** inventariar nome, repositório, labels, pasta e serviço de cada instalação antes de remover ou registrar runners.
+
+### GC-RUN-008 — Process completed with exit code 1
+
+- **Data/hora:** não aplicável sem um run específico; mensagem genérica relatada em diferentes contextos.
+- **Erro literal:** Process completed with exit code 1.
+- **Motivo comprovado:** apenas que um step terminou com código diferente de zero.
+- **Causa raiz:** não identificável por essa mensagem isolada.
+- **Solução efetivamente utilizada:** depende do erro causal; não existe solução única.
+- **Resultado:** NÃO DIAGNOSTICADO até recuperar o primeiro erro do log.
+- **Prevenção:** registrar e investigar a primeira mensagem causal, não corrigir apenas o código final.
+
+## 8. Modelo obrigatório para todos os novos registros
+
+Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso, preferencialmente BRT (-03:00), e preservar o horário UTC original quando vier do GitHub.
+
+- ID do incidente:
+- Projeto/repositório:
+- Data/hora da ocorrência:
+- Data/hora do registro:
+- Fuso horário:
+- Run ID / job ID / URL:
+- Branch e commit SHA:
+- Workflow / step:
+- Erro literal (copiado do log):
+- Motivo / causa raiz comprovada:
+- Hipóteses ainda não confirmadas:
+- Solução efetivamente utilizada: descrever somente o que foi aplicado de fato; se não houver, escrever “Nenhuma solução aplicada/comprovada”.
+- Evidência da solução: arquivo/commit/log/teste que demonstra a alteração.
+- Resultado após a solução: aprovado, resolvido, pendente ou não reproduzido.
+- Data/hora da validação:
+- Prevenção para não repetir:
+
+**Regra:** nunca preencher “solução efetivamente utilizada” com uma recomendação que ainda não foi aplicada. Quando a hora original não estiver disponível, registrar “hora não preservada” e manter a data/hora do cadastro separada.
