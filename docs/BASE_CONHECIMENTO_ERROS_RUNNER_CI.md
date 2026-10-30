@@ -472,3 +472,18 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - **Correção aplicada:** marcador clone-pendente.txt em ConfigDir, gravado antes do clone e associado ao destino absoluto. Na retomada, o script verifica git ls-files: índice vazio + árvore HEAD válida identifica clone ainda não materializado. Se o índice já tiver entradas, somente ausências de worktree (status “ D”) são aceitas; alterações rastreadas reais bloqueiam. Se o worktree estiver limpo, o marcador antigo é removido e a execução segue como atualização normal. Após checkout concluído, o marcador é removido.
 - **Teste previsto/aplicado:** o teste Node cria clone temporário com --no-checkout, confirma índice vazio e status “D ”, grava o marcador e executa o atualizador PowerShell real para materializar os arquivos e remover o marcador.
 - **Estado:** IMPLEMENTADO NA BRANCH / AGUARDANDO CI WINDOWS.
+
+### GC-UPDATE-TEST-002 — Bloco duplicado após catch causou erro de parser PowerShell
+
+- **Projeto/repositório:** Game Creator — apoenalore/GameCreator.
+- **Data/hora da ocorrência:** 30/10/2026 16:25:31 -03:00 (19:25:31Z).
+- **Data/hora do registro/correção:** 30/10/2026 16:31 -03:00.
+- **Run/job:** [41114836257](https://github.com/apoenalore/GameCreator/actions/runs/41114836257) / 124266943540.
+- **Commit testado:** 68c63b0b16b434a3482d9e44aa9824f8a27676dc.
+- **Workflow/step:** pixel-art.yml — step 17, “Validar manifesto do atualizador Windows quando presente”.
+- **Erro literal:** Token '}' inesperado na expressão ou instrução.
+- **Causa raiz comprovada:** uma edição anterior da validação do remote deixou um segundo bloco duplicado de código após o primeiro bloco try/catch. O parser encontrou uma chave de fechamento extra e interrompeu a validação antes do teste Node/PowerShell.
+- **Correção aplicada:** removido o trecho duplicado após o primeiro catch, preservando o bloco completo e único de validação. Commit de correção: d90541bd642f17aa681ea7e623b49dba12ca2b36.
+- **Evidência:** inspeção estrutural do arquivo confirmou blocos balanceados e uma única validação de origin; a próxima CI precisa confirmar a análise pelo parser real do Windows PowerShell 5.1.
+- **Resultado:** CORREÇÃO APLICADA / NOVA CI PENDENTE.
+- **Prevenção:** após substituições por trecho, verificar arquivo completo, contagem de blocos e executar o parser PowerShell no runner antes de considerar o teste end-to-end alcançado.
