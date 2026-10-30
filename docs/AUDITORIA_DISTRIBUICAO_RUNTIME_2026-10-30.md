@@ -122,6 +122,12 @@ O teste tests/atualizador-manifest.test.cjs não fica apenas na simulação de c
 O teste executa primeira instalação, verifica arquivos presentes/ausentes, bloqueio de arquivos locais fora da allowlist, atualização fast-forward, preservação de refs/apoena/anterior, execução sem mudanças e bloqueio de conflitos ignorados/não ignorados, inclusive um caminho com acento. Nenhuma pasta permanente do autor é usada.
 
 
-## Incidente de validação — GC-UPDATE-TEST-001
 
-O run 41113920551 falhou no step 17 devido a uma assertion do teste que localizava a primeira ocorrência textual de sparse-checkout set --no-cone, que era um comentário, e não a chamada executável. O guard PowerShell não foi demonstrado como defeituoso por essa falha. A assertion foi corrigida para procurar a linha real do comando no commit 8bbe3d7379b43da5c98c18bd1165e2d8d114a267. Nova CI pendente; não considerar o teste PowerShell end-to-end aprovado até essa execução.
+
+## GC-UPDATE-RECOVERY-001 — Retomada segura da primeira instalação
+
+A revisão identificou que uma interrupção após clone --no-checkout e antes de read-tree deixaria um clone com .git, mas sem arquivos materializados. Na execução seguinte, o status mostraria arquivos rastreados ausentes e o antigo guard trataria isso como alteração local.
+
+O atualizador agora grava clone-pendente.txt em ConfigDir antes de clonar. Se o marcador existir, examina o status: somente ausências de worktree (status “ D”) permitem retomada; qualquer modificação rastreada bloqueia. Se o worktree já estiver limpo, o marcador residual é removido e a execução segue normalmente. O marcador é apagado após a conclusão bem-sucedida.
+
+O teste end-to-end cria um clone --no-checkout, confirma o estado de arquivos ausentes, grava o marcador e executa o PowerShell real para materializar os arquivos essenciais. CI do head atual pendente.
