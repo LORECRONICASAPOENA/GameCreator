@@ -104,6 +104,20 @@ function VerificarConflitosLocais([string]$Referencia) {
     }
 }
 
+function VerificarIgnoradosForaDoRuntime {
+    # sparse-checkout pode remover arquivos ignorados em diretorios que saem do worktree.
+    # Interrompe antes de alterar o checkout se houver dados ignorados fora da allowlist.
+    $ignorados = @(& $git.Source -C $Destino ls-files --others --ignored --exclude-standard)
+    if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar arquivos ignorados fora do runtime.' }
+
+    $foraDoRuntime = @($ignorados | Where-Object { $_ -notmatch $regexRuntime })
+    if ($foraDoRuntime.Count -gt 0) {
+        throw ('Atualizacao bloqueada: existem arquivos ignorados fora do runtime que precisam ser preservados: ' + ($foraDoRuntime -join ', ') + '. Faca backup ou mova esses arquivos antes de atualizar.')
+    }
+}
+
+
+
 try {
     New-Item -ItemType Directory -Force -Path $pastaConfig | Out-Null
     $git = Get-Command git.exe -ErrorAction SilentlyContinue
@@ -206,6 +220,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel configurar o clone parcial.' }
     & $git.Source -C $Destino config remote.origin.partialclonefilter blob:none
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel configurar o filtro de blobs.' }
+    VerificarIgnoradosForaDoRuntime
     & $git.Source -C $Destino sparse-checkout set --no-cone $runtimePatterns
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel aplicar o manifesto de arquivos de runtime. Atualizacao interrompida.' }
 
