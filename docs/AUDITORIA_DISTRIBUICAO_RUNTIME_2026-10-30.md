@@ -98,3 +98,8 @@ Esse achado reforça que o atualizador não pode ser declarado concluído apenas
 ## Compatibilidade mínima corrigida
 
 A revisão de compatibilidade identificou que sparse-checkout check-rules foi incorporado após o Git 2.25. O requisito do atualizador foi corrigido para Git 2.41.0 ou superior, versão que inclui o comando usado para validar a cobertura do manifesto. A suíte estática agora verifica esse requisito. Fonte de referência: documentação e notas de versão do Git 2.41.
+
+
+## Proteção adicional de dados ignorados fora da allowlist
+
+Antes de executar sparse-checkout set, o atualizador agora identifica todos os arquivos ignorados não rastreados. Se algum estiver fora da allowlist de runtime, interrompe a atualização e solicita backup/movimentação manual. A regra é conservadora: não tenta limpar, mover nem apagar dados pessoais automaticamente. O teste de contrato cria um arquivo ignorado em docs/ e confirma que a condição é detectável antes de alterar o checkout.
