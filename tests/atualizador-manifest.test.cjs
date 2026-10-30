@@ -196,12 +196,34 @@ function commitAll(repoPath, message) {
   git(repoPath, ["commit", "-m", message]);
 }
 
+function runUpdater(install, configDir, repoUrl, allowFailure = false) {
+  const result = spawnSync("powershell.exe", [
+    "-NoProfile",
+    "-ExecutionPolicy", "Bypass",
+    "-File", path.join(root, "integracao", "atualizar-creator.ps1"),
+    "-Destino", install,
+    "-RepoUrl", repoUrl,
+    "-ConfigDir", configDir
+  ], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+    env: { ...process.env, APOENA_UPDATER_TEST_MODE: "1" }
+  });
+  if (result.error) throw result.error;
+  if (!allowFailure && result.status !== 0) {
+    throw new Error("Atualizador PowerShell falhou (" + result.status + "): " + result.stdout + result.stderr);
+  }
+  return result;
+}
+
 function testSparseCheckoutAndUpdate() {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), "apoena-gc-update-"));
   try {
     const origin = path.join(temp, "origin.git");
     const source = path.join(temp, "source");
     const install = path.join(temp, "APP");
+    const configDir = path.join(temp, "config");
     fs.mkdirSync(origin, { recursive: true });
     fs.mkdirSync(source, { recursive: true });
     git(origin, ["init", "--bare"]);
@@ -265,61 +287,20 @@ function testSparseCheckoutAndUpdate() {
     git(source, ["remote", "add", "origin", pathToFileURL(origin).href]);
     commitAll(source, "fixture initial");
     git(source, ["push", "-u", "origin", "main"]);
+    git(origin, ["symbolic-ref", "HEAD", "refs/heads/main"]);
+    const repoUrl = pathToFileURL(origin).href;
 
-    git(temp, [
-      "clone", "--filter=blob:none", "--depth", "1", "--single-branch",
-      "--branch", "main", "--no-checkout", pathToFileURL(origin).href, install
-    ]);
-
-    // Simula arquivo pessoal ignorado fora da allowlist antes de sparse-checkout.
-    const personalDoc = "docs/personal-notes.md";
-    const extraLocal = "cache/local-data.json";
-    const excludeFile = path.join(install, ".git", "info", "exclude");
-    fs.appendFileSync(excludeFile, "\n" + personalDoc + "\n");
-    writeFile(install, personalDoc, "anotacao pessoal");
-    writeFile(install, extraLocal, "dado local nao ignorado");
-    const ignoredBeforeSparse = git(install, ["ls-files", "--others", "--ignored", "--exclude-standard"])
-      .stdout.split(/\r?\n/).filter(Boolean);
-    const untrackedBeforeSparse = git(install, ["ls-files", "--others", "--exclude-standard"])
-      .stdout.split(/\r?\n/).filter(Boolean);
-    assert.ok(ignoredBeforeSparse.includes(personalDoc),
-      "O Git precisa identificar arquivo pessoal ignorado fora do runtime.");
-    assert.ok(untrackedBeforeSparse.includes(extraLocal),
-      "O Git precisa identificar arquivo pessoal não ignorado fora do runtime.");
-    assert.equal(runtimeRegex.test(personalDoc), false,
-      "Documento pessoal fora da allowlist deve ser classificado como externo ao runtime.");
-    assert.equal(runtimeRegex.test(extraLocal), false,
-      "Dados locais fora da allowlist devem ser classificados como externos ao runtime.");
-    assert.match(updater, /VerificarArquivosLocaisForaDoRuntime/,
-      "O atualizador deve bloquear o sparse-checkout enquanto houver arquivos locais fora do runtime.");
-    assert.equal(fs.readFileSync(path.join(install, personalDoc), "utf8"), "anotacao pessoal",
-      "A checagem não pode alterar o documento pessoal.");
-    assert.equal(fs.readFileSync(path.join(install, extraLocal), "utf8"), "dado local nao ignorado",
-      "A checagem não pode alterar dados locais não ignorados.");
-    fs.rmSync(path.join(install, personalDoc), { force: true });
-    fs.rmSync(path.join(install, extraLocal), { force: true });
-    fs.writeFileSync(excludeFile, fs.readFileSync(excludeFile, "utf8").replace(personalDoc + "\n", ""));
-
-    git(install, ["sparse-checkout", "set", "--no-cone", ...runtimePatterns]);
-
-    const checkRules = spawnSync("git", ["sparse-checkout", "check-rules", "--no-cone"], {
-      cwd: install, input: essentials.join("\n") + "\n", encoding: "utf8", windowsHide: true
-    });
-    assert.equal(checkRules.status, 0, "Git precisa validar as regras do sparse-checkout.");
-    const includedEssentials = new Set(checkRules.stdout.split(/\r?\n/).filter(Boolean));
-    for (const essential of essentials) {
-      assert.ok(includedEssentials.has(essential), "Sparse-checkout não cobre arquivo essencial: " + essential);
-    }
-
-    // --no-checkout exige uma materialização explícita depois da lista positiva.
-    git(install, ["read-tree", "-mu", "HEAD"]);
+    // Executa o atualizador PowerShell real contra o repositório temporário.
+    const firstRun = runUpdater(install, configDir, repoUrl);
+    assert.equal(firstRun.status, 0, "Primeira instalação PowerShell precisa terminar com sucesso.");
+    assert.ok(firstRun.stdout.includes("Concluido") || firstRun.stdout.includes("Concluído"),
+      "O atualizador precisa registrar conclusão da primeira instalação.");
 
     const filter = git(install, ["config", "--get", "remote.origin.partialclonefilter"]).stdout.trim();
     assert.equal(filter, "blob:none", "Clone precisa manter filtro parcial de blobs.");
-
     for (const essential of essentials) {
       assert.ok(fs.existsSync(path.join(install, essential)),
-        "Sparse-checkout não materializou arquivo essencial: " + essential);
+        "Atualizador PowerShell não materializou arquivo essencial: " + essential);
     }
     assert.ok(fs.existsSync(path.join(install, "legacy/v3_9_parts/extra-future.js")),
       "Wildcard da fábrica precisa incluir JS adicionais do diretório legado.");
@@ -339,75 +320,86 @@ function testSparseCheckoutAndUpdate() {
         "Arquivo interno/documental não pode ser materializado: " + excluded);
     }
 
-    const beforeUpdate = git(install, ["rev-parse", "HEAD"]).stdout.trim();
+    const savedPath = fs.readFileSync(path.join(configDir, "instalacao.txt"), "utf8").replace(/^\uFEFF/, "").trim();
+    assert.equal(path.resolve(savedPath), path.resolve(install),
+      "O atualizador precisa salvar o destino permanente escolhido.");
+
+    const initialHead = git(install, ["rev-parse", "HEAD"]).stdout.trim();
+    const noPreviousRef = git(install, ["show-ref", "--verify", "--quiet", "refs/apoena/anterior"], true);
+    assert.equal(noPreviousRef.status, 1, "Primeira instalação não deve inventar uma versão anterior.");
+
+    // Arquivos locais fora da allowlist bloqueiam o updater sem serem apagados.
+    const personalDoc = "docs/personal-notes.md";
+    const extraLocal = "cache/local-data.json";
+    const excludeFile = path.join(install, ".git", "info", "exclude");
+    fs.appendFileSync(excludeFile, "\n" + personalDoc + "\n");
+    writeFile(install, personalDoc, "anotacao pessoal");
+    writeFile(install, extraLocal, "dado local nao ignorado");
+    const outsideRun = runUpdater(install, configDir, repoUrl, true);
+    assert.notEqual(outsideRun.status, 0, "Arquivos locais fora do runtime precisam bloquear o atualizador.");
+    assert.equal(git(install, ["rev-parse", "HEAD"]).stdout.trim(), initialHead,
+      "Bloqueio de arquivos fora do runtime não pode avançar HEAD.");
+    assert.equal(fs.readFileSync(path.join(install, personalDoc), "utf8"), "anotacao pessoal",
+      "Documento pessoal ignorado precisa permanecer intacto.");
+    assert.equal(fs.readFileSync(path.join(install, extraLocal), "utf8"), "dado local nao ignorado",
+      "Dado local não ignorado precisa permanecer intacto.");
+    fs.rmSync(path.join(install, personalDoc), { force: true });
+    fs.rmSync(path.join(install, extraLocal), { force: true });
+    fs.writeFileSync(excludeFile, fs.readFileSync(excludeFile, "utf8").replace(personalDoc + "\n", ""));
+
+    // Atualização real: o updater deve avançar por fast-forward e guardar o SHA anterior.
     writeFile(source, "index.html", "runtime atualizado");
     commitAll(source, "fixture runtime update");
     git(source, ["push", "origin", "main"]);
-    git(install, [
-      "fetch", "--no-tags", "--filter=blob:none", "origin",
-      "+refs/heads/main:refs/remotes/origin/main"
-    ]);
-    git(install, ["merge-base", "--is-ancestor", "HEAD", "refs/remotes/origin/main"]);
-    git(install, ["update-ref", "refs/apoena/anterior", beforeUpdate]);
-    git(install, ["merge", "--no-overwrite-ignore", "--ff-only", "refs/remotes/origin/main"]);
+    const beforeUpdate = git(install, ["rev-parse", "HEAD"]).stdout.trim();
+    const updateRun = runUpdater(install, configDir, repoUrl);
+    assert.equal(updateRun.status, 0, "Atualização PowerShell fast-forward precisa terminar com sucesso.");
     assert.equal(fs.readFileSync(path.join(install, "index.html"), "utf8"), "runtime atualizado",
-      "Fast-forward precisa atualizar arquivo de runtime.");
-    const savedPrevious = git(install, ["rev-parse", "refs/apoena/anterior"]).stdout.trim();
-    assert.equal(savedPrevious, beforeUpdate, "Referência anterior precisa apontar para o commit anterior.");
-
+      "Atualização precisa substituir o arquivo de runtime pela nova versão.");
     const installedAfterUpdate = git(install, ["rev-parse", "HEAD"]).stdout.trim();
     const remoteAfterUpdate = git(install, ["rev-parse", "refs/remotes/origin/main"]).stdout.trim();
     assert.equal(installedAfterUpdate, remoteAfterUpdate, "Instalação precisa ficar igual ao main remoto após fast-forward.");
-    const noOpReferenceBefore = git(install, ["rev-parse", "refs/apoena/anterior"]).stdout.trim();
-    if (installedAfterUpdate === remoteAfterUpdate) {
-      assert.equal(git(install, ["rev-parse", "refs/apoena/anterior"]).stdout.trim(), noOpReferenceBefore,
-        "Execução sem mudanças não pode substituir a referência da versão anterior.");
-    }
+    assert.equal(git(install, ["rev-parse", "refs/apoena/anterior"]).stdout.trim(), beforeUpdate,
+      "Referência anterior precisa apontar para o commit anterior.");
 
+    // No-op: a referência anterior não pode ser substituída.
+    const previousRefBeforeNoOp = git(install, ["rev-parse", "refs/apoena/anterior"]).stdout.trim();
+    const noOpRun = runUpdater(install, configDir, repoUrl);
+    assert.equal(noOpRun.status, 0, "Atualização sem mudanças precisa terminar com sucesso.");
+    assert.equal(git(install, ["rev-parse", "HEAD"]).stdout.trim(), installedAfterUpdate,
+      "Execução sem mudanças não pode alterar HEAD.");
+    assert.equal(git(install, ["rev-parse", "refs/apoena/anterior"]).stdout.trim(), previousRefBeforeNoOp,
+      "Execução sem mudanças não pode substituir a referência da versão anterior.");
+
+    // Colisão dentro do runtime: o updater real deve bloquear antes do merge.
     const ignoredRelative = "pixel-art/override-ignored.js";
     const untrackedRelative = "pixel-art/override-untracked.js";
-    const exclude = path.join(install, ".git", "info", "exclude");
-    fs.appendFileSync(exclude, "\n" + ignoredRelative + "\n");
+    fs.appendFileSync(excludeFile, "\n" + ignoredRelative + "\n");
     writeFile(install, ignoredRelative, "conteudo pessoal ignorado");
     writeFile(install, untrackedRelative, "conteudo pessoal nao ignorado");
     writeFile(source, ignoredRelative, "conteudo remoto ignorado");
     writeFile(source, untrackedRelative, "conteudo remoto nao ignorado");
     commitAll(source, "fixture introduces conflicting runtime paths");
     git(source, ["push", "origin", "main"]);
-    git(install, [
-      "fetch", "--no-tags", "--filter=blob:none", "origin",
-      "+refs/heads/main:refs/remotes/origin/main"
-    ]);
-
-    const ignored = git(install, ["ls-files", "--others", "--ignored", "--exclude-standard"])
-      .stdout.split(/\r?\n/).filter(Boolean);
-    const untracked = git(install, ["ls-files", "--others", "--exclude-standard"])
-      .stdout.split(/\r?\n/).filter(Boolean);
-    const localFiles = new Set([...ignored, ...untracked]);
-    const remoteFiles = git(install, ["ls-tree", "-r", "--name-only", "refs/remotes/origin/main"])
-      .stdout.split(/\r?\n/).filter(Boolean);
-    const remoteRuntime = new Set(remoteFiles.filter((file) => runtimeRegex.test(file)));
-    const conflicts = [...localFiles].filter((file) => remoteRuntime.has(file));
-    assert.ok(conflicts.includes(ignoredRelative),
-      "Verificação precisa identificar arquivo ignorado do usuário que conflita com runtime novo.");
-    assert.ok(conflicts.includes(untrackedRelative),
-      "Verificação precisa identificar arquivo não ignorado do usuário que conflita com runtime novo.");
-
-    // O guard do atualizador deve abortar ANTES do merge. Em sparse-checkout,
-    // não confiar apenas em --no-overwrite-ignore: a proteção comprovada é a
-    // interseção entre arquivos locais (ignored + untracked) e o runtime remoto.
-    assert.match(updater, /VerificarConflitosLocais 'refs\/remotes\/origin\/main'/,
-      "O atualizador precisa executar a checagem local contra a árvore remota antes do merge.");
+    const beforeConflict = git(install, ["rev-parse", "HEAD"]).stdout.trim();
+    const previousRefBeforeConflict = git(install, ["rev-parse", "refs/apoena/anterior"]).stdout.trim();
+    const conflictRun = runUpdater(install, configDir, repoUrl, true);
+    assert.notEqual(conflictRun.status, 0, "Colisão local/remota dentro do runtime precisa bloquear o atualizador real.");
+    assert.match(conflictRun.stdout + conflictRun.stderr, /conflitam com arquivos do Creator/i,
+      "O atualizador precisa informar a colisão de arquivos locais.");
+    assert.equal(git(install, ["rev-parse", "HEAD"]).stdout.trim(), beforeConflict,
+      "Bloqueio de colisão não pode avançar HEAD.");
+    assert.equal(git(install, ["rev-parse", "refs/apoena/anterior"]).stdout.trim(), previousRefBeforeConflict,
+      "Bloqueio de colisão não pode alterar a referência anterior.");
     assert.equal(fs.readFileSync(path.join(install, ignoredRelative), "utf8"), "conteudo pessoal ignorado",
-      "Conteúdo pessoal ignorado precisa permanecer intacto após o bloqueio.");
+      "Arquivo ignorado pessoal precisa permanecer intacto.");
     assert.equal(fs.readFileSync(path.join(install, untrackedRelative), "utf8"), "conteudo pessoal nao ignorado",
-      "Conteúdo pessoal não ignorado precisa permanecer intacto após o bloqueio.");
-    assert.equal(git(install, ["rev-parse", "HEAD"]).stdout.trim(), installedAfterUpdate,
-      "A checagem de conflito precisa bloquear a atualização sem avançar a versão instalada.");
+      "Arquivo não ignorado pessoal precisa permanecer intacto.");
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }
 }
+
 
 testSparseCheckoutAndUpdate();
 
