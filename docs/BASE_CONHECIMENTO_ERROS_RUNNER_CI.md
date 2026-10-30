@@ -387,7 +387,8 @@ Para cada erro novo, adicionar:
 - **Arquivo:** \`.github/workflows/pixel-art.yml\`, etapa \`Preparar entrega na pasta ChatGPT trabalho do runner\`.
 - **Causa:** o filtro antigo excluía apenas \`.git\`, \`node_modules\`, \`.ci-results\`, \`_delivery\`, \`.godot\` e \`__pycache__\`; a cópia recursiva incluía \`docs/\`, arquivos Markdown/texto, testes e workflows internos.
 - **Correção aplicada:** commit main \`f69a013dcc6f38267e204b50c1df90698dca54a3\`; o mesmo filtro foi levado à branch ambiental no commit \`5f47b1fb2889a7116d02910da09ea9cb4d33003a\`. A cópia recursiva exclui documentação, histórico, testes, CI, package de testes, scripts de publicação e versões antigas. Manifesto e resumo ficam fora do ZIP.
-- **Validação:** pendente no run [#41079295445](https://github.com/apoenalore/GameCreator/actions/runs/41079295445). Só marcar VALIDADO após sucesso no step de empacotamento e conferência do manifesto/artefato.
+- **Validação:** run [#41079295445](https://github.com/apoenalore/GameCreator/actions/runs/41079295445), SHA `f69a013dcc6f38267e204b50c1df90698dca54a3`, success. O empacotador registrou 52 arquivos de runtime; inspeção do ZIP confirmou ausência de docs, testes, CI, `.md`, `.txt` e `package.json`, preservando launcher, fonte V4.0, bundle e módulos necessários. SHA-256 do ZIP interno `7a061059a7d027c45e32ce11fd78c48fd5bdf9a0b0c05e069802cb6c1d3dfda7`.
+- **Resultado:** VALIDADO. A documentação interna permanece no repositório e fora da distribuição.
 - **Prevenção:** manter a lista de exclusões e falhar o step se diretórios/documentos internos aparecerem no pacote.
 
 ## 8. Modelo obrigatório para todos os novos registros
