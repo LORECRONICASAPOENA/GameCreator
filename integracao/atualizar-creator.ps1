@@ -208,7 +208,6 @@ try {
     if ($novoClone) {
         Registrar 'Primeira instalacao: clone parcial sem checkout inicial; documentos e blobs fora do runtime nao serao baixados.'
         Set-Content -LiteralPath $arquivoClonePendente -Value $Destino -Encoding UTF8
-        $retomarClonePendente = $true
         & $git.Source clone --filter=blob:none --depth 1 --single-branch --branch main --no-checkout $repositorio $Destino
         if ($LASTEXITCODE -ne 0) {
             throw 'Clone parcial falhou. O marcador foi preservado para diagnostico/retomada; confira conexao e autenticacao GitHub.'
