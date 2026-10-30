@@ -33,3 +33,29 @@ O atualizador nao sobrescreve uma instalacao ZIP antiga: se o destino ja existir
 ## Criterios para declarar VALIDADO
 
 Testar no Windows: primeira instalacao; atualizacao de versao na mesma pasta; repeticao sem novidades; perda de Internet; Git ausente; mudanca local rastreada; pasta existente nao Git; branch incorreta; remoto diferente; integridade do runner e da biblioteca apos migracao; log e revisoes. Confirmar execucao automatica de CI no commit correto. Ate la, estado: IMPLEMENTADO EM BRANCH / TESTE PENDENTE.
+
+
+## Distribuicao enxuta: somente arquivos de runtime
+
+A instalacao permanente usa clone parcial do Git (--filter=blob:none) e sparse-checkout com uma lista positiva de arquivos de runtime. O manifesto mantem o launcher, a pagina integrada, os modulos JS/HTML/JSON necessarios, a biblioteca e os arquivos de integracao Godot utilizados pelo Creator.
+
+**Ficam fora da pasta APP:** docs/, tests/, .github/, legacy/, historico/, AGENTS.md, README, auditorias, relatorios, bases de erros, planos, documentos de requisitos e arquivos exclusivos de desenvolvimento.
+
+### Primeira instalacao sem baixar a documentacao
+
+Nao e necessario baixar o ZIP completo do repositorio para iniciar a instalacao. Baixe somente estes dois arquivos, mantendo a estrutura:
+
+- ATUALIZAR_CREATOR.cmd
+- integracao/atualizar-creator.ps1
+
+Execute o CMD nessa pasta de bootstrap. Ele cria a instalacao definitiva por clone parcial e materializa somente os arquivos listados no manifesto. Depois de conferir que o Creator abre, a pasta de bootstrap pode ser descartada.
+
+### Atualizacoes seguintes
+
+Execute ATUALIZAR_CREATOR.cmd dentro da pasta APP. O Git busca os commits e blobs necessarios ao runtime; os documentos excluidos nao sao materializados nem baixados como blobs nas novas atualizacoes.
+
+Em uma instalacao antiga que ja tenha recebido o repositorio completo, o sparse-checkout retira os arquivos rastreados fora do manifesto da pasta APP. Os blobs que ja estavam no banco local .git nao serao apagados automaticamente; nao usamos git gc, clean ou remocao de historico para economizar espaco sem uma decisao separada.
+
+**Limite importante:** o repositorio apoenalore/GameCreator e privado. Este atualizador e para instalacoes autorizadas com Git autenticado. Uma distribuicao publica para terceiros devera ser gerada como pacote de release usando o mesmo manifesto, sem dar acesso ao repositorio interno.
+
+O checkout enxuto ainda precisa de validacao em Windows real. Ate essa validacao, o estado permanece **IMPLEMENTADO EM BRANCH / NAO VALIDADO / NAO INTEGRADO NA MAIN**.
