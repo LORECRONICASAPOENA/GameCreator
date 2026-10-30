@@ -292,3 +292,8 @@ A simulação foi executada com Git 2.47.3 em Linux. O novo teste de contrato re
 ## Bloqueio de arquivos locais fora do runtime
 
 Antes de aplicar o sparse-checkout, o atualizador verifica arquivos locais ignorados e não ignorados. Se encontrar qualquer arquivo fora da allowlist de runtime, interrompe e solicita backup ou movimentação manual. Não tenta apagar, mover ou incorporar esses arquivos. Dados locais dentro de caminhos de runtime também bloqueiam a atualização se colidirem com um arquivo que venha do repositório.
+
+
+## Caminhos Unicode
+
+A leitura de árvores e arquivos locais usa core.quotePath=false para que nomes com acentos, como árvore.js, sejam comparados como caminhos reais e não como sequências octais escapadas. O teste PowerShell cria uma colisão com nome Unicode e exige que o atualizador bloqueie sem sobrescrever o arquivo local.
