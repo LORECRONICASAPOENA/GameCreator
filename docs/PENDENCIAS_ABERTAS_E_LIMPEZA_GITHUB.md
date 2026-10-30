@@ -8,17 +8,18 @@
 
 **Protocolo obrigatório:** [Protocolo de trabalho sequencial](PROTOCOLO_TRABALHO_SEQUENCIAL.md) — aplicado também ao [repositório Pixel Art](https://github.com/apoenalore/Apoena-pixel-art-html/blob/main/docs/PROTOCOLO_TRABALHO_SEQUENCIAL.md). Limite de trabalho em andamento: **WIP = 1 para os dois repositórios combinados**.
 
-### Tarefa ativa
+### Tarefa concluída — retirada da fila ativa
 
 - **T-001 — Registrar o protocolo sequencial nos dois repositórios**
-- **Estado:** EM VALIDAÇÃO. Os documentos foram publicados; a execução do Pixel Art disparada pelo commit está em andamento: [40965795436](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40965795436).
-- **Critério de encerramento:** confirmar o resultado dessa execução e registrar o fechamento desta tarefa. Se surgir falha de CI, registrar a evidência e decidir se é uma regressão da alteração documental ou uma falha preexistente, sem iniciar uma tarefa paralela.
+- **Estado:** CONCLUÍDA. Os documentos estão publicados em ambos os repositórios. A validação do Pixel Art [40965795436](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40965795436) terminou com `completed/success` em `main`. Os ajustes posteriores foram exclusivamente documentais e não exigem nova suíte de código.
+- **Critério atendido:** protocolo publicado, validação exigida aprovada, resultado registrado. Mantido somente neste histórico; não é pendência aberta.
 
-### Próxima tarefa no backlog — ainda NÃO iniciada
+### Tarefa ativa única
 
-- **T-002 — Estabilizar o CI/runner do Game Creator e consolidar as falhas de validação.**
-- Escopo inicial: limpar a fila antiga com segurança, confirmar a atribuição do runner, escolher uma validação canônica e tratar os erros conhecidos do PowerShell, testes de integração, catálogo e hidrologia.
-- **Regra:** T-002 só começa depois de T-001 ser marcada como CONCLUÍDA. Não iniciar novas funcionalidades enquanto T-002 estiver aberta ou bloqueada.
+- **T-002 — Estabilizar CI/runner do Game Creator e consolidar as falhas de validação.**
+- **Estado:** BLOQUEADA PELA FILA / ATRIBUIÇÃO DO RUNNER; diagnóstico realizado, nenhuma validação adicional disparada.
+- **Evidência:** consulta de 29/10/2026: 13 execuções `queued` entre as 30 mais recentes do Creator; nenhuma em execução nessa amostra. Priorizar o cancelamento seguro dos jobs obsoletos listados abaixo, verificar runner e labels, então rodar uma única validação canônica.
+- **Escopo:** limpar a fila antiga com segurança, confirmar a atribuição do runner, escolher uma validação canônica e tratar os erros conhecidos do PowerShell, testes de integração, catálogo e hidrologia. Nenhuma funcionalidade nova pode começar antes do encerramento de T-002.
 
 ## 1. Estado geral
 
@@ -100,11 +101,24 @@ Execução [`40942973127`](https://github.com/apoenalore/GameCreator/actions/run
 ## 4. Ordem de fechamento
 
 1. Corrigir a atribuição de jobs ao runner Game Creator.
-2. Confirmar o resultado final da validação Windows atualizada do Pixel Art.
+2. [CONCLUÍDO] Resultado da validação Windows atualizada do Pixel Art: execução 40965795436 aprovada.
 3. Revalidar a branch ambiental do Creator quando o runner voltar a aceitar jobs.
 4. Comparar os dois PRs de protótipo de hidrologia com as implementações atuais e preservar os arquivos únicos que ainda forem necessários.
 5. Revisar os resultados finais dos PRs de modos offline/LAN e sistemas de mundo.
 6. Atualizar este registro com links e resultados finais; marcar uma pendência como concluída somente depois de confirmar a execução correspondente.
+
+## 4A. Como retirar itens da lista de fluxos sem apagar o código
+
+**Três conceitos diferentes:**
+- **Execução do workflow:** `completed/success`, `completed/failure` e `completed/cancelled` são histórico e não ocupam mais runner. `queued`, `in_progress` e estados de espera requerem atenção, mas `queued` não prova erro de código.
+- **Definição do workflow (`.github/workflows/*.yml`):** só desativar/remover gatilhos redundantes após identificar qual fluxo substituto preserva a cobertura necessária. Não apagar o arquivo simplesmente para esconder falhas do histórico.
+- **Tarefa no registro:** retirar da lista ativa quando o commit correto passou pela validação pertinente, a entrega está salva/integrada conforme seu escopo e o resultado está documentado; mover para histórico concluído, sem perder rastreabilidade.
+
+**Critério de limpeza da fila:** antes de cancelar, comparar nome do fluxo, branch, commit, execução mais recente e dependências da PR; cancelar apenas execuções obsoletas, não jobs válidos. Histórico encerrado pode permanecer no Actions: não consome o executor e não precisa ser excluído.
+
+**Diagnóstico obrigatório:** ao falhar, registrar primeiro erro causal, job, logs e tipo de falha; planejar uma correção; validar local/focado; só depois fazer uma nova tentativa canônica. Repetir o mesmo commit sem alteração é reservado a falha transitória identificada (runner/conexão). Não iniciar fluxo duplicado para tentar contornar fila.
+
+**Estado confirmado (29/10/2026):** Pixel Art: a validação principal [40965795436](https://github.com/apoenalore/Apoena-pixel-art-html/actions/runs/40965795436) foi aprovada; nenhuma fila/execução ativa entre as 12 mais recentes consultadas. Game Creator: 13 trabalhos antigos `queued` entre os 30 mais recentes; essa limpeza permanece na T-002.
 
 ## 5. Regra para evitar repetição
 
