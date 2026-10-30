@@ -178,3 +178,13 @@ stepHydrology()
 - [ ] Só declarei concluído após sucesso no commit exato.
 
 **Princípio de encerramento:** primeiro compreender, depois integrar, então implementar e finalmente validar. A velocidade vem de evitar retrabalho — não de escrever mais código rapidamente.
+
+## 12. Diário técnico e relatório de progresso obrigatório
+
+Além deste padrão, é obrigatório manter `docs/DIARIO_TECNICO_E_HISTORICO_DE_ERROS.md` atualizado. Toda IA ou pessoa que executar uma tarefa significativa deve registrar o progresso antes de encerrar ou transferir o trabalho, mesmo quando a tarefa ficar incompleta ou bloqueada.
+
+Para cada tarefa, registre objetivo, data/hora com fuso, branch, commits, arquivos analisados/alterados, trabalho realizado, decisões e justificativas técnicas, testes, evidências, limitações e próximo passo. Para cada erro, registre ID, primeira ocorrência, sintomas, reprodução, log, arquivo/função/linha, hipóteses testadas, caminho de identificação, causa raiz (ou status não confirmado), solução, motivo técnico, testes de regressão/integração e validação no SHA exato.
+
+O registro deve conter raciocínio técnico reproduzível — evidências, hipóteses, verificações e decisões — e não pensamentos privados internos de uma IA. Diferencie fatos de hipóteses. Nunca marque como resolvido sem evidência. Se não puder atualizar o GitHub, declare o bloqueio e entregue o relatório pronto, sem afirmar que foi publicado.
+
+O diário é a memória técnica compartilhada do projeto: desenvolvedores e futuras IAs devem conseguir entender o histórico, reproduzir o diagnóstico e continuar o trabalho sem repetir a investigação do zero.

@@ -61,3 +61,7 @@ A primeira fatia foi integrada à main pela PR #2. Ela adiciona catálogo de ter
 ## Padrão obrigatório para alterações de código
 
 Antes de qualquer implementação, agentes e colaboradores devem ler `AGENTS.md` e `docs/PADRAO_DE_INTEGRACAO_E_PREVENCAO_DE_REGRESSOES.md`. O documento define como investigar dependências, preservar contratos, evitar duplicidades e conflitos, testar integrações e registrar erros. Uma alteração só pode ser declarada concluída após o workflow relevante passar no commit exato.
+
+## Diário técnico e histórico de erros
+
+O registro obrigatório de progresso, investigação, decisões técnicas, erros e soluções está em [docs/DIARIO_TECNICO_E_HISTORICO_DE_ERROS.md](docs/DIARIO_TECNICO_E_HISTORICO_DE_ERROS.md). Toda IA e desenvolvedor deve atualizá-lo ao concluir ou interromper uma tarefa significativa. Leia também `AGENTS.md` antes de alterar o projeto.
