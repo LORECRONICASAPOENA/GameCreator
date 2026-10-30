@@ -58,3 +58,19 @@ O usuário não precisa baixar nem extrair o ZIP completo do repositório para i
 6. Atualizar os registros com commit, data/hora BRT, testes e links de execução.
 
 **Conclusão:** o desenho de distribuição enxuta está implementado na branch da PR #7 e o contrato automatizado do manifesto passou no run citado. A tarefa continua em validação; não marcar como concluída nem publicar o atualizador antes dos critérios acima.
+
+
+## Atualização de auditoria — sincronização e manifesto completo (30/10/2026)
+
+A branch anterior da PR #7 estava divergente da main (16 commits à frente e 33 atrás no snapshot de 30/10/2026). Para evitar integrar uma cópia antiga do workflow e dos documentos de governança:
+
+- foi criada a referência de preservação backup/gc-update-009-before-main-sync-20261030 no head anterior;
+- a implementação foi reaplicada em uma branch baseada no commit atual da main, preservando o workflow canônico e os documentos mais recentes;
+- o manifesto foi ampliado para exigir os três arquivos da integração Godot, shared/library-backup.js, shared/tileset-check.js, os módulos corte-inteligente.js, estudio.js, objetos.js e o catálogo JSON do Pixel Art;
+- a regex de proteção agora cobre qualquer JS sob legacy/v3_9_parts/, alinhada ao padrão de sparse-checkout;
+- o atualizador confere a cobertura de cada arquivo essencial por git sparse-checkout check-rules --no-cone antes de prosseguir;
+- o teste de contrato foi ampliado para criar um repositório Git temporário e testar clone parcial, exclusão de documentos, atualização fast-forward, referência anterior e proteção contra sobrescrita de arquivo ignorado.
+
+Os commits intermediários foram marcados com [skip ci] para evitar várias execuções enquanto os arquivos eram preparados. A CI canônica será executada uma única vez após a atualização final da branch da PR. O teste local automatizado não substitui a validação no computador do autor.
+
+**Estado:** sincronização preparada; validação CI do novo head e teste Windows real ainda pendentes.
