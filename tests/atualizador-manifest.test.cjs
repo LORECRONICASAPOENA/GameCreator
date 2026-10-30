@@ -127,6 +127,12 @@ assert.match(updater, /sparse-checkout check-rules --no-cone/,
   "O atualizador deve conferir o manifesto antes de aplicar um merge.");
 assert.match(updater, /function VerificarConflitosLocais/,
   "O atualizador precisa proteger arquivos locais antes de materializar o sparse-checkout.");
+assert.match(updater, /function VerificarIgnoradosForaDoRuntime/,
+  "O atualizador precisa preservar arquivos ignorados fora da allowlist antes do sparse-checkout.");
+const ignoredOutsideGuardPosition = updater.indexOf("VerificarIgnoradosForaDoRuntime");
+const sparseSetPosition = updater.indexOf("sparse-checkout set --no-cone");
+assert.ok(ignoredOutsideGuardPosition >= 0 && ignoredOutsideGuardPosition < sparseSetPosition,
+  "Arquivos ignorados fora do runtime precisam ser verificados antes de alterar o sparse-checkout.");
 assert.match(updater, /ls-files --others --exclude-standard/,
   "A proteção precisa detectar arquivos locais não ignorados.");
 assert.match(updater, /ls-files --others --ignored --exclude-standard/,
@@ -264,6 +270,25 @@ function testSparseCheckoutAndUpdate() {
       "clone", "--filter=blob:none", "--depth", "1", "--single-branch",
       "--branch", "main", "--no-checkout", pathToFileURL(origin).href, install
     ]);
+
+    // Simula arquivo pessoal ignorado fora da allowlist antes de sparse-checkout.
+    const personalDoc = "docs/personal-notes.md";
+    const excludeFile = path.join(install, ".git", "info", "exclude");
+    fs.appendFileSync(excludeFile, "\n" + personalDoc + "\n");
+    writeFile(install, personalDoc, "anotacao pessoal");
+    const ignoredBeforeSparse = git(install, ["ls-files", "--others", "--ignored", "--exclude-standard"])
+      .stdout.split(/\r?\n/).filter(Boolean);
+    assert.ok(ignoredBeforeSparse.includes(personalDoc),
+      "O Git precisa identificar arquivo pessoal ignorado fora do runtime.");
+    assert.equal(runtimeRegex.test(personalDoc), false,
+      "Documento pessoal fora da allowlist deve ser classificado como externo ao runtime.");
+    assert.match(updater, /VerificarIgnoradosForaDoRuntime/,
+      "O atualizador deve bloquear o sparse-checkout enquanto houver arquivo ignorado fora do runtime.");
+    assert.equal(fs.readFileSync(path.join(install, personalDoc), "utf8"), "anotacao pessoal",
+      "A checagem não pode alterar o documento pessoal.");
+    fs.rmSync(path.join(install, personalDoc), { force: true });
+    fs.writeFileSync(excludeFile, fs.readFileSync(excludeFile, "utf8").replace(personalDoc + "\n", ""));
+
     git(install, ["sparse-checkout", "set", "--no-cone", ...runtimePatterns]);
 
     const checkRules = spawnSync("git", ["sparse-checkout", "check-rules", "--no-cone"], {
