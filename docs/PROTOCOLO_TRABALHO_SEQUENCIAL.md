@@ -31,6 +31,22 @@ Se depender de teste humano ou de dispositivo, o estado será **AGUARDANDO VALID
 - Não declarar sucesso enquanto a execução relevante estiver em fila, em andamento ou com falha.
 - Falhas descobertas durante a tarefa permanecem dentro da tarefa ativa até serem corrigidas ou formalmente identificadas como bloqueio impeditivo; não abrir uma tarefa paralela para contorná-las.
 
+## 3A. Otimização: falhou, diagnosticar antes de repetir
+
+**Proibição de repetição cega:** uma execução com falha não autoriza disparar várias tentativas iguais. A tarefa atual continua ativa até existir diagnóstico, alteração relevante e nova evidência.
+
+1. **Parar e registrar:** guardar o ID do workflow, commit SHA, job/etapa, primeira mensagem de erro relevante e o ambiente (runner/labels).
+2. **Classificar a falha:** código ou teste; configuração de workflow; runner/fila/permissão; dependência externa; aviso não bloqueante. Uma fila `queued` não é falha de código.
+3. **Investigar a causa:** conferir logs da primeira falha causal; verificar arquivos, caminhos, dependências e diferenças entre a branch testada e `main`.
+4. **Planejar uma correção específica:** registrar a hipótese e qual evidência poderá demonstrar que o problema foi corrigido. Não empilhar alterações sem relação.
+5. **Validar barato antes de caro:** inspeção e testes locais/focados primeiro; suíte completa somente quando a falha específica estiver resolvida e o runner disponível.
+6. **Executar apenas uma nova tentativa necessária:** usar o mesmo commit somente para falhas transitórias demonstradas; para erro determinístico, exigir uma correção ou mudança de condição antes de repetir.
+7. **Concluir e arquivar:** encerrar apenas com evidência de sucesso no commit relevante. Mover itens concluídos para o histórico do registro central, sem apagá-los.
+
+**Controle de recursos:** checar filas e execuções equivalentes antes de acionar CI; usar `concurrency`/cancelamento de execuções obsoletas quando seguro; não duplicar workflow por `push` e `pull_request` no mesmo commit sem necessidade; não acionar novamente um runner offline. Alterações exclusivamente documentais podem dispensar uma nova suíte de código quando a validação previamente exigida já foi aprovada e o motivo for registrado.
+
+**Pendências antigas:** não carregar como erro atual uma falha de commit anterior que tenha sido comprovadamente corrigida. Conservar no histórico o link da falha e da validação que a substituiu; PR aberta não é igual a funcionalidade integrada.
+
 ## 4. Trabalho que abrange os dois repositórios
 
 Quando uma funcionalidade exigir mudanças no Game Creator e no Pixel Art, os dois lados formam **uma única tarefa integrada**, com critérios de aceitação para cada repositório. Não iniciar outra funcionalidade entre a implementação e a validação dos dois lados.
