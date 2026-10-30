@@ -6,6 +6,8 @@
 **Atualização:** 30/10/2026  
 **Objetivo:** permitir que agentes de IA reconheçam falhas recorrentes, investiguem a causa real e apliquem correções pequenas sem repetir tentativas cegas.
 
+**Relatório dedicado de comunicação:** [Relatório de erros de comunicação — GitHub Actions e Runner Windows](RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md). Consultar esse documento para o incidente atual GC-COMM-001 e o procedimento de diagnóstico do runner.
+
 > Esta base reúne logs apresentados nas conversas do projeto, registros documentados no repositório e inspeções de workflows. Ela distingue fatos comprovados de hipóteses. Não trate uma hipótese como causa raiz confirmada.
 
 ## 1. Instruções obrigatórias para qualquer agente de IA
@@ -35,39 +37,24 @@ Antes de alterar código, workflow ou runner:
 
 ### GC-RUN-001 — Jobs permanecem em QUEUED e nenhum runner é atribuído
 
-**Classificação:** CONFIRMADO para as execuções consultadas; causa específica do não atendimento ainda NÃO DIAGNOSTICADA.
+**Classificação:** bloqueio de atribuição CONFIRMADO; causa local específica ainda NÃO DIAGNOSTICADA.
 
-**Sinais observados:**
-- Jobs permanecem em estado queued.
-- Amostras retornaram runner_id = 0 e runner_name vazio.
-- O workflow solicita as labels self-hosted, Windows e X64.
-- O registro central de 29/10/2026 21:37 BRT documentou 324 execuções consultadas, 13 queued e 0 in_progress. Um relatório posterior, em 30/10, observou 17 em fila. Esses números pertencem a horários diferentes; não devem ser tratados como contagem atual.
+**Estado revalidado em 30/10/2026:** 346 execuções consultadas; 17 queued, 0 in_progress e 329 completed. Todos os 17 jobs em fila foram inspecionados: solicitam labels self-hosted, Windows, X64, retornam runner_id = 0, runner_name vazio e nenhum step executado. A lista de IDs e o diagnóstico completo estão em [RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md](RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md).
 
-**O que isso significa:** o job ainda não foi atribuído a um runner compatível. O código do job ainda não começou a executar; portanto, não classifique isso como bug do aplicativo.
+**O que isso significa:** o job não foi atribuído a um runner compatível. O checkout e os comandos do job ainda não começaram; não classificar como bug do aplicativo.
 
-**Causas possíveis — ainda precisam ser verificadas:**
-1. Runner desligado, offline ou serviço do Windows parado.
-2. Runner registrado em outro repositório ou grupo sem acesso a este repositório.
-3. Uma ou mais labels exigidas pelo workflow não existem no runner online.
-4. Serviço iniciado com outra conta Windows ou configuração antiga.
-5. Runner está ouvindo em uma pasta/configuração diferente daquela registrada no GitHub.
+**Causa raiz:** ainda NÃO DIAGNOSTICADA. Runner Offline/serviço parado, registro em repositório ou grupo errado, autorização do repositório, labels incompatíveis e instalação/serviço duplicado são hipóteses a verificar, não fatos.
 
-**Procedimento de diagnóstico:**
+**Próximo diagnóstico obrigatório:**
 1. Abrir Settings → Actions → Runners do repositório GameCreator.
-2. Confirmar que o runner está Online e disponível para o repositório correto.
-3. Conferir todas as labels efetivas: self-hosted, Windows e X64.
-4. Conferir o grupo de runners e se o repositório está autorizado a usá-lo.
-5. No PC, conferir o serviço do runner e os logs locais da pasta _diag (Runner_*.log e Worker_*.log).
-6. Comparar o nome do runner e o diretório de instalação com o caminho realmente iniciado.
-7. Só depois de corrigir a causa, permitir uma única validação canônica.
+2. Registrar nome, estado Online/Offline, grupo e labels.
+3. Conferir autorização do repositório no grupo.
+4. No PC, verificar o serviço Windows e a instalação efetivamente ativa; consultar os logs `_diag/Runner_*.log` e `_diag/Worker_*.log`.
+5. Não iniciar uma segunda cópia do runner nem remover instalações antes do inventário.
 
-**Solução conforme a causa:**
-- Runner offline: iniciar ou reparar o serviço já registrado.
-- Label ausente: corrigir a configuração do runner ou o runs-on, sem retirar requisitos de segurança por conveniência.
-- Registro no repositório errado: registrar o runner no repositório correto, seguindo o procedimento oficial.
-- Serviço duplicado ou pasta errada: manter uma instalação identificável por diretório, nome e serviço; não iniciar várias cópias da mesma instalação.
+**Solução efetivamente utilizada para o incidente atual:** nenhuma solução de runner aplicada/comprovada. Foram atualizados o registro de pendências e o relatório dedicado; os jobs antigos ainda exigem cancelamento manual, e duas validações atuais devem ser preservadas.
 
-**Não fazer:** disparar mais workflows, criar runners duplicados, apagar a pasta _work sem diagnóstico ou trocar para ubuntu-latest apenas para fazer a fila andar.
+**Não fazer:** disparar novos workflows para testar a mesma coisa, criar runners duplicados, apagar `_work` sem diagnóstico ou trocar para runner hospedado apenas para esconder o bloqueio.
 
 ### GC-RUN-002 — “pwsh: command not found”
 
@@ -245,15 +232,15 @@ Para cada erro novo, adicionar:
 
 ### GC-RUN-001 — Job sem runner atribuído (queued)
 
-- **Data/hora da observação:** 29/10/2026 21:37 BRT (snapshot histórico); nova observação em 30/10/2026, hora não preservada.
-- **Execução de referência:** run 40996154391 — https://github.com/apoenalore/GameCreator/actions/runs/40996154391
-- **Erro/sintoma:** job validar em queued, sem runner atribuído; amostras anteriores mostraram runner_id = 0 e runner_name vazio.
-- **Motivo comprovado:** o GitHub não atribuiu o job a um runner compatível naquele momento.
-- **Causa raiz:** NÃO DIAGNOSTICADA. Runner offline, labels, grupo/permissão ou registro incorreto são hipóteses, não fatos.
-- **Solução efetivamente utilizada:** nenhuma solução comprovada registrada para este incidente.
-- **Solução proposta, ainda não comprovada:** conferir estado Online, grupo, autorização e labels self-hosted, Windows, X64; depois corrigir somente a causa identificada.
-- **Resultado:** PENDENTE. Não afirmar que foi resolvido.
-- **Prevenção:** verificar atribuição e labels antes de disparar qualquer nova validação.
+- **Data/hora do relato:** 30/10/2026 10:42:01 UTC (07:42:01 BRT).
+- **Data/hora da rechecagem:** 30/10/2026; minuto/segundo da consulta não preservados pela integração.
+- **Execuções de referência:** [40996154391](https://github.com/apoenalore/GameCreator/actions/runs/40996154391) e [40996154399](https://github.com/apoenalore/GameCreator/actions/runs/40996154399).
+- **Erro/sintoma:** 17 jobs em queued; todos solicitam self-hosted, Windows, X64 e apresentam runner_id = 0, runner_name vazio e steps vazios.
+- **Motivo comprovado:** o GitHub não atribuiu os jobs a um runner compatível; a execução não chegou ao checkout nem aos testes.
+- **Causa raiz:** NÃO DIAGNOSTICADA. Estado Online, serviço Windows, grupo, autorização, labels e instalação ativa ainda precisam ser verificados no PC/Settings.
+- **Solução efetivamente utilizada:** nenhuma correção de runner comprovada. Relatório operacional criado em [RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md](RELATORIO_ERROS_COMUNICACAO_RUNNER_GITHUB.md); registro central atualizado. 15 execuções antigas foram identificadas para cancelamento manual; duas validações atuais foram preservadas.
+- **Resultado:** BLOQUEADO / PENDENTE. Não declarar resolvido.
+- **Prevenção:** verificar atribuição, runner_id, runner_name e labels antes de qualquer nova validação. Seguir o relatório dedicado e não repetir workflows equivalentes.
 
 ### GC-RUN-002 — pwsh: command not found
 
