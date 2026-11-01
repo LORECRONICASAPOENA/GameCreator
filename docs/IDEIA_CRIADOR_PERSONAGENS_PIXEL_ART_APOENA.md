@@ -62,6 +62,16 @@ Esses números são hipóteses de trabalho, não padrões aprovados. A escolha d
 
 O plano também propõe esta ordem de dependências: decidir padrão de sprite → criar corpo-base → validar peças e encaixes → validar direções e caminhada → construir o editor → fechar exportação → testar no jogo. As fases e prioridades ainda precisam de debate.
 
+## Apoena — personagem principal e referências visuais
+
+O autor confirmou que o personagem principal do jogo é **Apoena**. As imagens abaixo foram fornecidas para orientar a identidade visual e o desenvolvimento das animações. Elas mostram Apoena com cabelo branco espetado, camisa azul, calça clara e sandálias, incluindo poses de corrida e sequências de ataque com energia azul.
+
+- [Sequência de ataque lateral para a direita](../pixel-art/references/apoena/apoena-ataque-lateral-direita.png) — 2048 × 682.
+- [Sequência de ataque lateral para a esquerda](../pixel-art/references/apoena/apoena-ataque-lateral-esquerda.png) — 2048 × 682.
+- [Poses de corrida em várias direções](../pixel-art/references/apoena/apoena-corrida-multidirecional.png) — 1024 × 1536.
+
+Os arquivos estão preservados como **referências visuais originais**, não como spritesheets prontos ou quadros com grade validada para importar diretamente no jogo. Servem para guiar a criação e edição das animações de caminhada/corrida e ataque; enquadramento, recorte, resolução final e separação em quadros continuam por definir.
+
 ## Estado conhecido do projeto
 
 A documentação do repositório já registra um Estúdio Pixel Art com importação, recorte, spritesheets, biblioteca central e sincronização com a sessão do Creator. Também alerta que spritesheet e manifesto, sozinhos, não comprovam animações de gameplay nem instalação automática no runtime.
