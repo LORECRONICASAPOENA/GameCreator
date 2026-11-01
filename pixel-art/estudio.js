@@ -315,5 +315,31 @@ edit.onpointerdown=ev=>{if(!selected())return;ev.preventDefault();edit.setPointe
 $('undo').onclick=()=>{const f=selected();if(!f||!undo.length)return;f.canvas=undo.pop();drawEdit();list()};$('applyAlpha').onclick=alpha;$('trim').onclick=trim;$('resetFrame').onclick=()=>{const f=selected();if(!f)return;saveUndo();f.canvas=canvasCopy(f.original);drawEdit();list()};
 $('previous').onclick=()=>{if(frames.length)pick((current+frames.length-1)%frames.length)};$('next').onclick=()=>{if(frames.length)pick((current+1)%frames.length)};$('duplicate').onclick=()=>{const f=selected();if(f){frames.splice(current+1,0,{...f,canvas:canvasCopy(f.canvas),original:canvasCopy(f.original)});pick(current+1)}};$('deleteFrame').onclick=()=>{if(current<0)return;frames.splice(current,1);pick(frames.length?Math.min(current,frames.length-1):-1)};$('moveLeft').onclick=()=>{if(current>0){[frames[current-1],frames[current]]=[frames[current],frames[current-1]];pick(current-1)}};$('moveRight').onclick=()=>{if(current<frames.length-1&&current>=0){[frames[current],frames[current+1]]=[frames[current+1],frames[current]];pick(current+1)}};
 $('exportFrame').onclick=()=>{if(selected())download(selected().canvas,safeName()+'_'+(current+1)+'.png')};$('exportSheet').onclick=()=>{if(ready()){download(sheet().out,safeName()+'.png');msg('Spritesheet transparente exportada.')}};$('exportManifest').onclick=()=>{if(ready())download(JSON.stringify(manifest(),null,2),safeName()+'.godot.json')};$('exportProject').onclick=()=>{if(!ready())return;try{const serialized=JSON.stringify(projectData());if(serialized.length>18000000)throw Error('Projeto acima de 18 MB. Exporte em partes menores.');download(serialized,safeName()+'.projeto.json');msg('Projeto editável JSON exportado.')}catch(error){msg('Falha ao exportar projeto: '+error.message)}};
+const apoenaPresets={andar_ref:{file:'references/apoena/apoena-corrida-multidirecional.png',name:'apoena_movimento_andar_previa',cols:4,rows:4,action:'andar',directions:['frente','costas','esquerda','direita'],label:'prévia de andar com poses de corrida'},corrida:{file:'references/apoena/apoena-corrida-multidirecional.png',name:'apoena_corrida',cols:4,rows:4,action:'correr',directions:['frente','costas','esquerda','direita'],label:'corrida multidirecional'},ataque_direita:{file:'references/apoena/apoena-ataque-lateral-direita.png',name:'apoena_ataque_direita',cols:6,rows:2,action:'atacar',directions:['direita','esquerda'],label:'ataque lateral para a direita'},ataque_esquerda:{file:'references/apoena/apoena-ataque-lateral-esquerda.png',name:'apoena_ataque_lateral_esquerda',cols:6,rows:2,action:'atacar',directions:['esquerda','direita'],label:'ataque lateral para a esquerda'}};
+$('loadApoenaPreset').onclick=()=>{
+ const preset=apoenaPresets[$('apoenaPreset').value];if(!preset)return;
+ if((image||frames.length)&&!confirm('Carregar esta referência vai substituir os quadros atualmente abertos. Os arquivos originais permanecem intactos. Continuar?'))return;
+ const im=new Image();
+ im.onload=()=>{
+  if(im.width*im.height>32000000)return msg('A referência excede o limite de imagem do editor.');
+  if(imageUrl){URL.revokeObjectURL(imageUrl);imageUrl=''}
+  image=im;frames=[];current=-1;undo=[];detectedSprites=[];batchBackup=null;smartPending=null;
+  $('smartUndoBatch').disabled=true;$('autoDetectPanel').hidden=true;$('smartPanel').hidden=true;
+  $('cols').value=preset.cols;$('rows').value=preset.rows;$('fps').value=8;
+  $('meshOffsetX').value=0;$('meshOffsetY').value=0;$('meshGapX').value=0;$('meshGapY').value=0;
+  resetMesh();
+  for(let y=0;y<preset.rows;y++)for(let x=0;x<preset.cols;x++){
+   $('action').value=preset.action;$('direction').value=preset.directions[y]||'nenhuma';
+   add({x:mesh.x[x],y:mesh.y[y],w:mesh.x[x+1]-mesh.x[x],h:mesh.y[y+1]-mesh.y[y]},true);
+  }
+  $('name').value=preset.name;$('cell').value='384';
+  setCrop({x:mesh.x[0],y:mesh.y[0],w:mesh.x[1]-mesh.x[0],h:mesh.y[1]-mesh.y[0]});
+  const category=$('categories').querySelector('[data-kind="personagem"]');if(category)category.click();
+  $('sourceInfo').textContent='Referência Apoena · '+preset.label+' · '+im.width+'×'+im.height+' px · '+frames.length+' quadros iniciais';
+  pick(0);drawSource();msg('Quadros do Apoena carregados para edição. Confira os recortes e as direções antes de exportar.');
+ };
+ im.onerror=()=>msg('Não foi possível abrir a referência. Mantenha a pasta references/apoena junto ao Estúdio ou importe a imagem manualmente.');
+ im.src=new URL(preset.file,document.baseURI).href;
+};
 $('categories').querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{kind=b.dataset.kind;$('categories').querySelectorAll('[data-kind]').forEach(v=>v.classList.toggle('selected',v===b));msg('Categoria: '+kind)});const kindQuery=new URLSearchParams(location.search).get('tipo');if(kindQuery){const btn=$('categories').querySelector('[data-kind="'+kindQuery+'"]');if(btn)btn.click()}requestAnimationFrame(animate);
 })();

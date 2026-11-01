@@ -176,14 +176,20 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - Toda correção deve registrar ID, causa comprovada (ou hipótese explicitamente marcada), solução realmente aplicada, data/hora BRT (sem inventar horário retroativo), repositório, branch, commit SHA, testes e link/resultado do Actions.
 - Uma PR aberta, um teste isolado ou um comentário de revisão não equivalem a funcionalidade integrada/concluída.
 
-### Tarefa ativa — WIP 1
+### Tarefa suspensa por decisão expressa do autor
 **GC-UPDATE-009 — Atualizador local incremental do GameCreator**
-- PR [GameCreator #7](https://github.com/apoenalore/GameCreator/pull/7), branch `feat/atualizador-local-incremental`, head `546aafba45140c7dfae016cd7756178b285cca7e`.
-- Estado: **EM VALIDAÇÃO / NÃO INTEGRADO**. PR draft e mergeable; ainda não testado no Windows do autor.
-- GitHub Actions: [run 41064201715](https://github.com/apoenalore/GameCreator/actions/runs/41064201715) — `completed/success`. A suíte canônica executou com sucesso, mas ainda não contém teste específico de comportamento do novo atualizador PowerShell/CMD.
-- CodeRabbit: revisão manual solicitada nesta PR com `@coderabbitai review`; o bot confirmou **“Review triggered”**. Resultado da revisão ainda não apareceu como review formal no momento do snapshot.
-- Critérios pendentes: revisão CodeRabbit; teste automatizado específico do script (sintaxe e cenários seguros); primeira instalação/atualização real no Windows; confirmação de backup/restauração da biblioteca IndexedDB antes de abandonar a instalação antiga.
-- Não instalar no computador do autor nem substituir a instalação antiga até concluir esses critérios e obter autorização para o teste local.
+- PR [GameCreator #7](https://github.com/apoenalore/GameCreator/pull/7), branch `feat/atualizador-local-incremental`, head `ae085d57c3245fb1c5d4956f0b0cd0399e4067c5`.
+- Estado: **AGUARDANDO VALIDAÇÃO / PAUSADA** em 01/11/2026 para priorizar a solicitação do Estúdio/Apoena. A tarefa não está concluída nem integrada.
+- Última evidência conhecida: [run 41116194279](https://github.com/apoenalore/GameCreator/actions/runs/41116194279) — `completed/success` no head citado.
+- Permanecem pendentes a revisão dos achados CodeRabbit e as validações reais no Windows do autor, incluindo cópia de segurança e restauração da biblioteca IndexedDB. Não alterar a instalação existente.
+
+### Tarefa ativa — WIP 1
+**GC-ANIM-006 — Predefinições editáveis de animação para Apoena no Estúdio Pixel Art**
+- Branch: `feat/apoena-personagem-estudio-main`; implementação no GameCreator, usando os assets já preservados em `pixel-art/references/apoena/`.
+- Escopo: carregar corrida multidirecional e ataques laterais como quadros editáveis; preencher ação/direção; pré-visualizar cada sequência; manter edição manual das divisórias e preservar os PNGs originais.
+- A opção de “andar” é uma prévia identificada que reutiliza poses de corrida. Uma animação de caminhada fiel depende de quadros próprios.
+- Critérios: testar os três imports; confirmar 16 quadros de movimento e 12 por ataque com ação/direção corretas; revisar manualmente efeitos que cruzam células; confirmar prévia, salvamento e exportação sem alterar os originais; tratar revisão CodeRabbit e CI canônica no SHA atual.
+- Estado: **EM EXECUÇÃO**. Ainda não validada; esta tarefa não declara integração de gameplay no Godot.
 
 ### Tamanho atual do quadro
 - **8 PRs abertas:** 4 no GameCreator e 4 no Apoena Pixel Art HTML.
