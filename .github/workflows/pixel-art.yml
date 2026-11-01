@@ -36,8 +36,6 @@ on:
       - "README.md"
       - "ORGANIZACAO_EDITOR.md"
       - ".github/workflows/**"
-  schedule:
-    - cron: "0 * * * *"
   workflow_dispatch:
 permissions:
   contents: read
@@ -394,7 +392,7 @@ jobs:
           if ($map -notmatch 'asset-library.js') { throw "O editor de mapas nao carrega a biblioteca central." }
           "Contratos de preservacao e integracao passaram." | Tee-Object -FilePath .ci-results/contracts.log
       - name: Preparar entrega na pasta ChatGPT trabalho do runner
-        if: always()
+        if: github.event_name == 'workflow_dispatch' && success()
         run: |
           $ErrorActionPreference = "Stop"
           $source = $env:GITHUB_WORKSPACE
@@ -516,17 +514,19 @@ jobs:
             Write-Error $errorText
           }
       - name: Disponibilizar pacote de codigo para download
-        if: always()
+        if: github.event_name == 'workflow_dispatch' && success()
         uses: actions/upload-artifact@v4
         with:
           name: Apoena-GameCreator-V4.1-source
           path: _delivery/
+          retention-days: 3
           if-no-files-found: warn
       - name: Anexar logs de diagnostico
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: v41-ci-diagnostics
           path: .ci-results/
           include-hidden-files: true
+          retention-days: 3
           if-no-files-found: warn
