@@ -30,9 +30,11 @@ Cada peça precisa declarar compatibilidade, ponto de encaixe e ordem de desenho
 
 ### Animação e visualização
 
-Começar avaliando animação quadro a quadro com peças alinhadas. A lista conceitual inclui parado, caminhada, ataque básico, corrida, dano, morte, defesa e conjuração. Quatro direções são uma possibilidade de partida; a lista de ações e direções do primeiro corte ainda precisa ser escolhida.
+**Objetivo confirmado pelo autor:** o criador deve permitir animar os movimentos do personagem, incluindo caminhada e ataque. A ferramenta precisa permitir montar/editar e pré-visualizar essas animações, não só exibir sprites já animados.
 
-A versão HTML pode oferecer prévia de frente, costas, esquerda e direita, reprodução da caminhada e uma arena simples para avaliar escala e movimento em tela pequena.
+Começar avaliando animação quadro a quadro com peças alinhadas. A lista conceitual inclui parado, caminhada e ataque básico; corrida, dano, morte, defesa e conjuração são possibilidades para etapas posteriores. Quatro direções são uma possibilidade de partida; a lista de ações e direções do primeiro corte ainda precisa ser escolhida.
+
+A versão HTML pode oferecer prévia de frente, costas, esquerda e direita, reprodução das animações de caminhada e ataque e uma arena simples para avaliar escala e movimento em tela pequena.
 
 ### Exportação e integração
 
