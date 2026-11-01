@@ -1,6 +1,6 @@
 # Ideia em discussão — Criador de personagens pixel art para Apoena
 
-**Estado:** ideia registrada para debate; não é decisão final nem autorização para implementar.  
+**Estado:** pedido expresso do autor para tornar o Estúdio Pixel Art operacional com Apoena. Implementação inicial em andamento na branch `feat/apoena-personagem-estudio`; ainda aguarda validação.  
 **Escopo:** planejamento do GameCreator. Não confundir o editor com o runtime do jogo Apoena.
 
 ## Visão
@@ -46,6 +46,13 @@ Pacote conceitual por personagem:
 - organização de quadros compatível com a ferramenta consumidora.
 
 A proposta cita HTML Canvas e Godot 4. A forma real de integração — spritesheet, camadas, recurso nativo ou combinação — depende do contrato já usado pelo jogo e precisa ser decidida antes de prometer compatibilidade.
+
+## Implementação inicial solicitada — Estúdio e Apoena
+
+- O Estúdio terá predefinições para importar as referências originais de corrida multidirecional e ataques laterais, separando quadros numa grade inicial e marcando ação/direção para pré-visualização.
+- As imagens originais não são alteradas. As divisórias permanecem editáveis e os quadros precisam ser conferidos antes de exportar; em especial, os efeitos dos ataques podem cruzar as células da grade.
+- A referência disponível mostra corrida, não caminhada. A ação “andar” segue disponível no editor para quadros próprios, mas não será preenchida com poses de corrida.
+- **Estado:** implementação em branch; revisão, testes e validação canônica pendentes. Isso ainda não comprova integração de gameplay no Creator/Godot.
 
 ## Dimensões de referência — ainda em debate
 
