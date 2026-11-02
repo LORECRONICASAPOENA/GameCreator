@@ -131,3 +131,11 @@ A revisão identificou que uma interrupção após clone --no-checkout e antes d
 ## GC-UPDATE-TEST-002 — Parser PowerShell
 
 O run 41114836257 falhou antes do teste Node porque o script continha um bloco duplicado depois do catch e uma chave de fechamento extra. O trecho duplicado foi removido no commit d90541bd642f17aa681ea7e623b49dba12ca2b36. O parser PowerShell 5.1 da próxima CI precisa confirmar a correção.
+
+## Atualização final — limpeza do atualizador e CI (2026-11-02)
+
+- **Commit de limpeza:** [0f8c0ec0e9632d931b38da0bc200d1597c762c37](https://github.com/apoenalore/GameCreator/commit/0f8c0ec0e9632d931b38da0bc200d1597c762c37), branch `feat/atualizador-local-incremental`.
+- **Correção:** removido o segundo bloco completo duplicado de `integracao/atualizar-creator.ps1`; permaneceu a implementação inicial, que já atualizava `refs/apoena/anterior` somente após o merge fast-forward.
+- **Validação:** [Actions run #41489368628](https://github.com/apoenalore/GameCreator/actions/runs/41489368628), disparado no commit acima, concluiu com sucesso em 2026-11-02T17:15Z. O step 17, “Validar manifesto do atualizador Windows quando presente”, passou, assim como os demais steps executados.
+- **Achados de revisão do atualizador:** allowlist e ordem de atualização da referência corrigidas; comentários resolvidos após a validação.
+- **Estado atual:** CI automatizada aprovada para este commit. A PR #7 continua aberta em draft e não foi integrada à `main`. Permanecem pendentes os testes na instalação Windows do autor e a conferência da exportação/restauração da Biblioteca IndexedDB; a CI não substitui essas verificações.
