@@ -288,3 +288,22 @@ O autor definiu que o editor 3D e o editor Pixel Art 2D pertencem ao mesmo Game 
 - O backup preserva o histórico versionado e o conhecimento documentado no GitHub, **não** é espelho literal de todas as conversas nem backup dos dados locais de IndexedDB, projetos não exportados, imagens/modelos não enviados ou arquivos pessoais da pasta APP.
 - Manter o protocolo **WIP = 1** e não iniciar refatoração paralela enquanto a validação da tarefa ativa estiver pendente.
 - **Próximo passo:** coletar logs causais das falhas; depois retomar a unificação 3D/2D/2.5D e correção de rotas com testes de regressão.
+
+
+## Checkpoint incremental — 02/11/2026, aproximadamente 07h BRT (10h UTC)
+
+**Pedido recorrente:** backup no GitHub do Game Creator a cada conversa, preservando novidades, requisitos, decisões e informações detalhadas.
+
+### Novidade verificada na base Apoena Skill
+- A `main` de `apoenalore/apoenaskil` avançou ao commit [`633743695`](https://github.com/apoenalore/apoenaskil/commit/633743695d7f1d0a26c3926ef706b61ee9f75df9), datado de 02/11/2026 09:42:49 UTC. Esse commit acrescenta um adendo de recuperação de conversas do projeto, ainda com **cobertura PARCIAL**.
+- O adendo contém requisitos relevantes para o GameCreator: edição Pixel Art com transparência, apagador, recorte manual/inteligente e grade; animações por ação/direção/quadro; biblioteca compartilhada; camadas e composição de objetos; hover amarelo; persistência; tilesets e mapas 2.5D; exportação de metadados.
+- Também recupera requisitos de jogo que afetam o planejamento de metadados do editor: ecologia/plantas/sementes/decomposição, clima contextual, e cooperação local entre dois celulares via Bluetooth ou Wi-Fi Direct. Não confundir com a arquitetura online híbrida Android/PC, que é outra frente.
+- O erro `Identifier not found: EstadoHistoria` (`modelo_heroi_3d.gd:54`) e o timeout `personagens_provisorios_smoke` de 120s são **relatos históricos não reproduzidos no HEAD atual**. Não os atribuir às falhas atuais de CI.
+- O detalhamento, fonte, classificação de status, riscos e próxima sequência estão em [CHECKPOINT_SKILL_REQUISITOS_RECUPERADOS_2026-11-02.md](CHECKPOINT_SKILL_REQUISITOS_RECUPERADOS_2026-11-02.md).
+
+### Snapshot e preservação
+- `GameCreator/main` permanece em `1b95d036c31dfb4ca9f9ce6859510be2c9f7e8cd`; a PR #12 segue draft na branch de auditoria e a PR #7 segue draft sem validação final comprovada.
+- A PR #6 do Apoena Skill continua draft; o novo commit da Skill citado acima está na `main`, em outro arquivo.
+- As execuções de CI `41380526501` e `41367279379` continuam com falha e sem causa comprovada nesta consulta; não houve retry.
+- Esta rodada registra **novos requisitos recuperados**, sem repetir um checkpoint vazio. Somente documentação da branch de auditoria foi modificada; nenhum código funcional, asset, workflow ou `main` foi alterado.
+- Dados de IndexedDB, projetos não exportados e arquivos locais não são incluídos automaticamente no backup do GitHub.
