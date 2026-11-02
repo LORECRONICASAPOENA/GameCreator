@@ -64,3 +64,13 @@
 
 ## 10. Resumo executivo
 A validação da PR #7 no commit `b583663` terminou com falha. O job foi atribuído ao runner Windows, mas os logs/steps causais não ficaram acessíveis pelo conector. Nenhuma alteração de produto foi feita; o próximo passo é obter logs e diagnosticar a causa antes de repetir.
+
+
+## 11. Nova tentativa de coleta de evidências — 02/11/2026, 02h06 BRT
+
+- Consulta atualizada do run e dos jobs: run `41380526501` e job `125071409041` permanecem `completed/failure`.
+- A leitura específica de passos pelo endpoint de job retornou novamente `steps=[]`.
+- A tentativa de baixar o log pelo recurso específico de logs do job retornou **HTTP 404 / `BlobNotFound`** do armazenamento do arquivo redirecionado. O retorno informa `The specified blob does not exist`, com timestamp de resposta `2026-11-02T05:06:09Z`.
+- Essa mensagem é **erro de acesso ao arquivo de log**, não é a mensagem causal do workflow. Não há evidência para afirmar que o job falhou por `BlobNotFound`.
+- **Causa da falha do CI:** ainda NÃO CONFIRMADA. Nenhum retry, mudança de código, workflow, runner ou merge foi executado.
+- **Próxima coleta:** consultar logs e annotations na interface GitHub Actions e logs locais do runner Windows, incluindo diagnóstico de perda de comunicação e retenção dos arquivos de log. Registrar a primeira falha causal antes de alterar código.
