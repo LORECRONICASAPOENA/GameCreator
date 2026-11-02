@@ -3,7 +3,6 @@ on:
     paths:
       - "index.html"
       - "bundle-v4/**"
-      - "ABRIR_GAME_CREATOR.cmd"
       - "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
       - "pixel-art/**"
       - "shared/**"
@@ -22,7 +21,6 @@ on:
     paths:
       - "index.html"
       - "bundle-v4/**"
-      - "ABRIR_GAME_CREATOR.cmd"
       - "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
       - "pixel-art/**"
       - "shared/**"
