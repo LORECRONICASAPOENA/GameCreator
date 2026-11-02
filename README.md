@@ -6,7 +6,7 @@
 - Branch de desenvolvimento: `feature/estudio-unificado-pixelart-v41`.
 - A fonte `APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html` e os módulos anteriores são preservados. A V4.0 nativa continua sendo a base do Creator.
 - `index.html` é o carregador compacto do Creator nativo: monta as 24 partes de `bundle-v4/` e inclui a biblioteca compartilhada, a ponte V4.0/V4.1 e o módulo de Natureza. A entrada principal não usa iframe.
-- `ABRIR_GAME_CREATOR.cmd` executa `integracao/build_unificado.ps1` no Windows e abre a entrada integrada. `integracao/build_unificado.py` oferece o mesmo build para ambientes com Python.
+- `ABRIR_GAME_CREATOR.cmd` é um atalho opcional para uso local no Windows: executa `integracao/build_unificado.ps1` e abre a entrada integrada. Não é usado pelo GitHub Actions; o workflow chama o script PowerShell diretamente. Alterações isoladas nesse atalho não disparam mais o Runner. `integracao/build_unificado.py` oferece o mesmo build para ambientes com Python.
 - O build adiciona a área Pixel Art à fonte V4.0 sem sobrescrever o arquivo original. O CI testa o build em um checkout descartável e entrega o resultado compilado no pacote.
 - O Estúdio Pixel Art e o editor de mapas são ferramentas especializadas abertas pelo menu Pixel Art nativo. Quando abertos por esses links, sincronizam spritesheets/mapas com a sessão V4.0 pela ponte `apoena.creator.v4.bridge.v1`, além de salvar na biblioteca IndexedDB.
 
