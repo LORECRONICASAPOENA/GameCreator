@@ -443,3 +443,22 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - **Testes adicionados:** \`tests/atualizador-manifest.test.cjs\` valida o contrato do sparse-checkout, regex de runtime, os 23 scripts referenciados, a ligação da interface e o empacotador.
 - **Commits:** packager main \`1561a0d08b26177596fafbf21102b739aa4a2b76\`; manifesto \`184102a9317c687485da55bc34ef0f50d5352601\`; teste \`c155207db4a61ce2766ebcbd5dc1a59604c5afee\`; workflow canônico \`65db2b62cc9750f50a3cc595c80466b6344fbc94\`.
 - **Validação do atualizador:** o step 17 do run [#41082083233](https://github.com/apoenalore/GameCreator/actions/runs/41082083233) passou (parser PowerShell e teste estático do manifesto); o job ainda está no step 22 de publicação do artefato. O teste real de clone/fast-forward e preservação local continua pendente.
+
+
+### GC-CI-013 — Run 41357977741 terminou em failure sem logs recuperáveis
+
+**Classificação:** NÃO DIAGNOSTICADO. Falha do run/job CONFIRMADA; causa-raiz NÃO CONFIRMADA.
+
+- Repositório: `apoenalore/GameCreator`.
+- PR: [#11 — GC-ANIM-006](https://github.com/apoenalore/GameCreator/pull/11).
+- Workflow: `.github/workflows/pixel-art.yml`, execução [41357977741](https://github.com/apoenalore/GameCreator/actions/runs/41357977741), tentativa 4.
+- Branch: `feat/apoena-personagem-estudio-main`.
+- Commit: `a9c7148f01504f7be142dd0d852056dd5a9a5114`.
+- Job: `validar`, ID `125207251095`, estado `completed/failure`.
+- Horário da tentativa: início 2026-11-02T06:53:49-03:00; última atualização 2026-11-02T07:03:54-03:00.
+- Evidência disponível: API do GitHub confirma failure no run e no job. A listagem do job não retornou steps.
+- Limitação: a tentativa de baixar os logs do job retornou HTTP 404 / `BlobNotFound`; annotations e primeira mensagem causal não estão disponíveis na consulta.
+- Causa raiz: **CAUSA NÃO CONFIRMADA**. Não afirmar falha de código, teste ou runner sem os logs.
+- Solução aplicada: relatório individual criado em [docs/relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md](relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md). Nenhum código do produto foi alterado para mascarar o erro.
+- Próxima ação: recuperar logs/annotations ou logs locais do runner Windows no intervalo acima; identificar a primeira etapa causal antes de corrigir ou repetir.
+- Estado: **NÃO RESOLVIDO / AGUARDANDO EVIDÊNCIA**.
