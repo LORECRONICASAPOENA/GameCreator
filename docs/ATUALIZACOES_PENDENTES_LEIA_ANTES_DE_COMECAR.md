@@ -187,3 +187,14 @@
 - **Arquitetura detalhada:** [ARQUITETURA_PLATAFORMA_UNICA_APOENA.md](ARQUITETURA_PLATAFORMA_UNICA_APOENA.md).
 - **Critério de conclusão:** entrada única; 3 áreas acessíveis; biblioteca e projeto compartilhados; assets 2D/3D posicionáveis no mapa por ID; mapas salvam/reabrem/exportam; nenhum caminho quebrado; projetos antigos preservados; CI e testes visuais PC/Android concluídos.
 - **Próxima ação única:** Etapa A — inventário de dependências/navegação e matriz de rotas. Não iniciar ainda refatoração de UI nem exclusão de arquivos antes de concluir esse mapa.
+
+
+## GC-PLAT-002 — Requisitos adicionais recuperados da Apoena Skill (02/11/2026)
+
+- **Estado:** RECUPERADO — VALIDAR; não iniciar implementação paralela enquanto GC-UPDATE-009 permanecer WIP 1.
+- **Origem:** `apoenalore/apoenaskil` commit `633743695d7f1d0a26c3926ef706b61ee9f75df9`, adendo de auditoria de conversas; cobertura explicitamente parcial.
+- **Requisitos de editor a auditar:** importação/transferência de imagens; transparência, apagador, grade, recorte manual/inteligente; animação por ação/direção/quadro; fases de espécies; camadas; composição de objetos com interação; realce amarelo em hover; salvar/reabrir; biblioteca central; tilesets e mapas 2.5D; exportação de recursos/metadados.
+- **Requisitos de runtime relacionados, não implementados pelo editor:** ecologia, clima contextual e cooperação local Bluetooth/Wi-Fi Direct para dois celulares. Não misturar cooperação local com multiplayer híbrido online nem impor clima de um cenário a todos os mundos.
+- **Incidente histórico:** `EstadoHistoria` não encontrado em `modelo_heroi_3d.gd:54` e timeout de 120s de `personagens_provisorios_smoke`, sem reprodução no HEAD atual. Não confundir com os incidentes de CI em aberto.
+- **Ação futura:** cruzar cada requisito com a implementação atual antes de criar módulos; preservar contratos existentes e a arquitetura GC-PLAT-001.
+- **Dossiê de continuidade:** [CHECKPOINT_SKILL_REQUISITOS_RECUPERADOS_2026-11-02.md](CHECKPOINT_SKILL_REQUISITOS_RECUPERADOS_2026-11-02.md).
