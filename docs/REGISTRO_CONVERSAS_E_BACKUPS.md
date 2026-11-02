@@ -173,3 +173,15 @@ O autor definiu que o editor 3D e o editor Pixel Art 2D pertencem ao mesmo Game 
 - Próxima etapa única: inventário de dependências, navegação e matriz de rotas; depois integração do shell e biblioteca.
 - Nenhuma funcionalidade, HTML, bundle, workflow ou asset foi removido nesta etapa.
 - Alterações documentais seguem na branch `maintenance/audit-cleanup-20261102`, dentro da PR draft #12; não houve merge na main.
+
+
+## Continuidade: inventário de rotas e backup de decisões — 02/11/2026 (23h BRT, horário aproximado da execução)
+
+- Confirmada a árvore `main` em `1b95d036c31dfb4ca9f9ce6859510be2c9f7e8cd`; PR #12 permanece aberta em rascunho. Nenhuma alteração de código novo na `main` foi observada nesta consulta.
+- Executado inventário estático de páginas e dependências menores: `ORGANIZACAO_EDITOR.html`, páginas Pixel Art, mapa, biblioteca, integração, legacy, ponte compartilhada e builds.
+- Identificados **cinco links HTML quebrados** em `legacy/iniciador-anterior.html` por caminhos relativos que ainda pressupõem a raiz, apesar de a página estar em `legacy/`.
+- Identificadas **nove referências de scripts de poções ausentes** (`assets/pocoes-01.js` a `assets/pocoes-09.js`). Sem esses arquivos, a lista `__APOENA_POTIONS` fica vazia e a importação atual não consegue preencher o catálogo porque percorre apenas os originais. Não inventar as 52 poções mencionadas pela interface.
+- Confirmadas rotas existentes entre organização, Pixel Art, mapa 2.5D, biblioteca, integração e editor legado v3.9. O mapa e o estúdio já chamam a ponte `saveMap`/`saveAsset`; isso não equivale a integração completa de projeto.
+- Atenção de segurança futura: `shared/creator-bridge.js` usa `postMessage` com destino `*` e aceita origem `null` em certas condições; revisar antes de ampliar integração externa, preservando uso offline.
+- Criado `docs/MATRIZ_ROTAS_DEPENDENCIAS_2026-11-02.md`, commit `ef1a307a32b59f05a85c0e3be44bc45fe8a33888`, na branch da PR #12.
+- Estado: **somente documentação e backup do conhecimento**, sem exclusões ou mudanças funcionais. Próxima tarefa única: corrigir os cinco links com teste de resolução; localizar fontes reais das poções e mapear a navegação interna do HTML grande antes de refatorar a plataforma.
