@@ -149,16 +149,33 @@ assert.match(updater, /core\.quotePath=false/,
   "A leitura de caminhos Git precisa preservar nomes Unicode sem escape octal.");
 assert.ok(runtimeRegex.test("pixel-art/árvore.js"),
   "A allowlist precisa reconhecer arquivos com acentos em caminhos de runtime.");
+
+for (const outsideRuntime of [
+  "biblioteca/backup.json",
+  "biblioteca/backup.js",
+  "biblioteca/sub/index.html",
+  "map-editor/cache.json",
+  "pixel-art/sub/natureza.js",
+  "shared/sub/bridge.js",
+  "bundle-v4/sub/parte.js",
+  "legacy/v3_9_parts/sub/parte.js"
+]) {
+  assert.equal(runtimeRegex.test(outsideRuntime), false,
+    "A proteção local não pode aceitar caminho fora dos padrões efetivos do sparse-checkout: " + outsideRuntime);
+}
 assert.match(updater, /read-tree -mu HEAD/,
   "Clone iniciado com --no-checkout precisa materializar o runtime após validar conflitos.");
 const initialGuardPosition = updater.indexOf("VerificarConflitosLocais 'HEAD'");
 const materializePosition = updater.indexOf("read-tree -mu HEAD");
 const remoteGuardPosition = updater.indexOf("VerificarConflitosLocais 'refs/remotes/origin/main'");
 const mergePosition = updater.indexOf("merge --no-overwrite-ignore --ff-only");
+const previousRefUpdatePosition = updater.indexOf("update-ref refs/apoena/anterior");
 assert.ok(initialGuardPosition >= 0 && initialGuardPosition < materializePosition,
   "Conflitos locais precisam ser verificados antes de materializar o checkout inicial.");
 assert.ok(remoteGuardPosition >= 0 && remoteGuardPosition < mergePosition,
   "Conflitos locais precisam ser verificados contra a árvore remota antes do merge.");
+assert.ok(mergePosition >= 0 && previousRefUpdatePosition > mergePosition,
+  "A referência da versão anterior só pode ser gravada depois de um fast-forward bem-sucedido.");
 const noOpBranch = updater.match(/if \(\$remoto -eq \$anterior\) \{([\s\S]*?)\} else \{/);
 assert.ok(noOpBranch, "O fluxo de atualização sem mudanças precisa existir.");
 assert.doesNotMatch(noOpBranch[1], /update-ref/,
