@@ -273,7 +273,8 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - **Preservação:** não usar reset/clean; não apagar runner, biblioteca IndexedDB, arquivos pessoais ou histórico local.
 - **Revisão/sincronização:** a branch anterior da PR #7 estava divergente de main. Foi preservada em backup/gc-update-009-before-main-sync-20261030; a versão de trabalho está sendo reaplicada sobre a main atual antes de atualizar a PR.
 - **Validação automatizada planejada:** teste isolado com repositório Git local para confirmar sparse-checkout, exclusão de documentos, fast-forward, referência anterior e bloqueio de conflito com arquivo ignorado.
-- **Pendências de aceite:** CI canônica no novo SHA; CodeRabbit no diff atualizado; teste real de instalação/atualização no Windows; backup e restauração da biblioteca IndexedDB conferidos pelo autor.
+- **Validação automatizada:** CI canônica aprovada no SHA `b483bff226e5488175b6c776f4cfd24da5f30fae`, run [41488368286](https://github.com/apoenalore/GameCreator/actions/runs/41488368286); manifesto do atualizador, Godot, preservação e job completo passaram.
+- **Pendências de aceite:** revisão CodeRabbit do diff atualizado; teste real de instalação/atualização no Windows; backup e restauração da biblioteca IndexedDB conferidos pelo autor.
 - **Regra:** não integrar a PR nem declarar concluído até todos os critérios acima terem evidência.
 
 
