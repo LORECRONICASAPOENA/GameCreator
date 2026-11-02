@@ -491,3 +491,16 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - **Próxima ação quando o computador estiver disponível:** consultar logs locais do runner no diretório _diag no intervalo do run; verificar estado de energia/suspensão/reinicialização do Windows, rede estável, DNS, HTTPS para GitHub, proxy/firewall e recursos CPU/memória.
 - Relatório individual atualizado: [2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
 - **Estado:** ABERTO / CATEGORIA IDENTIFICADA / CAUSA OPERACIONAL PENDENTE.
+
+
+### Atualização GC-CI-014 — conflito de sessão duplicada (capturas do autor + pesquisa)
+
+- Capturas do console Windows mostram `Connected to GitHub`, `A session for this runner already exists` e `Runner connect error: Error: Conflict. Retrying until reconnected`, repetidamente.
+- Erro imediato: tentativa de criar sessão enquanto o GitHub considera que já existe sessão ativa para a identidade do runner.
+- Hipótese A: duas instâncias/listeners ou serviço Windows e execução manual `run.cmd` simultâneos usando a mesma configuração.
+- Hipótese B: processo anterior encerrado abruptamente/reboot e sessão anterior ainda ativa. Hipótese adicional: OOM/pressão de recursos, ainda sem evidência local.
+- Referências comunitárias: [actions/runner #4312](https://github.com/actions/runner/issues/4312) (mesma mensagem e padrão); [#3441](https://github.com/actions/runner/issues/3441) (mantenedor identificou duas solicitações de sessão em 11 segundos e questionou chamadas duplicadas de run.sh; comentário cita OOM como hipótese); [#3677](https://github.com/actions/runner/issues/3677) (sessão após reboot Windows).
+- Documentação: [configurar runner Windows como serviço](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/configure-the-application?platform=windows).
+- **Ainda não comprovado:** qual processo ou evento causou a sessão conflitante neste computador.
+- **Próxima ação:** não iniciar outra instância; quando disponível, verificar serviço em `services.msc`, processos `Runner.Listener`/`Runner.Worker`/`run.cmd`, caminho/PID, Agendador de Tarefas e Inicialização; preservar `_diag` e Event Viewer antes de parar/reiniciar. Escolher um único modo de inicialização; não apagar `.runner` nem reconfigurar primeiro.
+- Relatório detalhado: [GC-CI-014](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
