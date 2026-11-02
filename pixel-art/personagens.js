@@ -2,6 +2,7 @@
 (()=>{'use strict';
 const C=ApoenaCharacter,$=id=>document.getElementById(id),clone=v=>JSON.parse(JSON.stringify(v));
 let project=C.fresh(),selected=-1,action=0,tick=0,playing=false,editIndex=0,tool='erase',suggestion=null,undo=[],redo=[],cache=new Map(),dirty=false,busy=false;
+let operationQueue=Promise.resolve();
 const canvas=(w,h)=>Object.assign(document.createElement('canvas'),{width:w,height:h});
 function msg(s){$('status').textContent=s;}
 function layer(){return project.layers[selected];}
@@ -9,7 +10,7 @@ function snapshot(){undo.push(JSON.stringify(project));while(undo.length>1&&(und
 function buttons(){$('undo').disabled=!undo.length;$('redo').disabled=!redo.length;for(const id of ['up','down','remove','editLayer'])$(id).disabled=!layer();$('layerSettings').disabled=!layer();$('deleteAnimation').disabled=project.animations.length===1;}
 function loadImage(src){if(cache.has(src))return Promise.resolve(cache.get(src));return new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{if(im.width>4096||im.height>4096||im.width*im.height>16000000){reject(Error('Imagem acima de 4096 px ou 16 milhões de pixels.'));return;}cache.set(src,im);resolve(im);};im.onerror=()=>reject(Error('Não foi possível ler a imagem.'));im.src=src;});}
 async function hydrate(p){await Promise.all(p.layers.map(async l=>{const im=await loadImage(l.source);if(im.width!==l.sourceWidth||im.height!==l.sourceHeight)throw Error('Dimensões da imagem não correspondem ao projeto.');await Promise.all(Object.values(l.edits).map(async src=>{const edit=await loadImage(src);if(edit.width!==l.grid.w||edit.height!==l.grid.h)throw Error('Dimensões da correção inválidas.');}));}));}
-async function guarded(fn){if(busy)return;busy=true;try{await fn();}catch(e){msg('Não foi possível concluir: '+e.message);}finally{busy=false;buttons();}}
+function guarded(fn){const run=async()=>{busy=true;try{await fn();}catch(e){msg('Não foi possível concluir: '+e.message);}finally{busy=false;buttons();}};const task=operationQueue.then(run,run);operationQueue=task.catch(()=>{});return task;}
 function click(id,fn){$(id).addEventListener('click',()=>guarded(fn));}
 function rawFrame(l,i,original=false){const r=C.rect(l.grid,i),c=canvas(r.w,r.h),ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;const edited=!original&&l.edits[i];if(edited)ctx.drawImage(cache.get(edited),0,0);else ctx.drawImage(cache.get(l.source),r.x,r.y,r.w,r.h,0,0,r.w,r.h);return c;}
 function renderFrame(a,t){const c=canvas(project.width,project.height),ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;for(const l of project.layers){if(!l.visible)continue;const i=C.frameIndex(l,a,t);if(i<0)continue;const f=rawFrame(l,i),w=Math.round(f.width*l.scale),h=Math.round(f.height*l.scale);ctx.save();ctx.globalAlpha=l.opacity;ctx.translate(Math.round(project.width/2+l.x),Math.round(project.height+l.y));if(l.flip)ctx.scale(-1,1);ctx.drawImage(f,-Math.round(w/2),-h,w,h);ctx.restore();}return c;}
