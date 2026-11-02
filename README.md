@@ -13,6 +13,7 @@
 ## Ferramentas V4.1
 
 - **Estúdio Pixel Art:** importação PNG/WebP/JPG, recorte livre e por grade, divisórias ajustáveis, transparência, borracha, remoção de fundo por região conectada, detecção de sprites separados, prévia dos limites e desfazer da limpeza em lote.
+- **Criador Modular de Personagens:** editor integrado à aba Pixel Art do Game Creator, com camadas de corpo/rosto/cabelo/roupas/equipamentos, alinhamento, espelhamento, animações por linha/quadros, malha ajustável, corte inteligente com prévia, borracha/restauração por quadro, desfazer/refazer, biblioteca, JSON, PNG e Godot. O gerador anterior permanece disponível na aba “Personagens clássico” durante a validação.
 - **Spritesheets:** células padronizadas, âncora inferior, prévia animada, ações e direções configuráveis por quadro, exportação PNG/JSON e importação de projetos JSON editáveis.
 - **Biblioteca central:** assets, imagens originais, metadados, categorias, etiquetas e projetos editáveis em IndexedDB, com atualização por ID para evitar duplicação.
 - **Backup:** `biblioteca/index.html` exporta recursos e projetos para JSON versionado e restaura o conteúdo sem apagar registros que não estejam no backup. IDs iguais são atualizados após confirmação.
@@ -21,6 +22,7 @@
 
 ## Validação automatizada
 
+- `tests/personagens.test.cjs` e `tests/personagens-browser.html`: modelo, malha, quadros, persistência, exportação Godot, borracha, histórico, biblioteca e sincronização com o Creator.
 - `tests/corte-inteligente.test.cjs`: limpeza/transparência, fragmentos, malha e contratos de integração.
 - `tests/asset-library.test.cjs`: operações da biblioteca com IndexedDB simulado por `fake-indexeddb`.
 - `tests/library-backup.test.cjs`: exportação/restauração, originais, metadados, projetos e rejeição de backups incompatíveis.
