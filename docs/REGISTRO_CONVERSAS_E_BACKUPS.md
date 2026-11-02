@@ -162,3 +162,14 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - Nenhum arquivo funcional apagado. Foi atualizada a auditoria documental na branch isolada: `docs/AUDITORIA_ORGANIZACAO_E_LIMPEZA_2026-11-02.md`.
 - Commit na branch: `204cc95fddd0a7f57ebc99d943e44a8befc87396`.
 - Próximo passo: abrir PR documental para revisão e depois preparar um ambiente de clone local para comparar os HTMLs por hash/diff e executar testes antes de qualquer exclusão.
+
+
+## Decisão de plataforma única — 02/11/2026
+
+O autor definiu que o editor 3D e o editor Pixel Art 2D pertencem ao mesmo Game Creator e ao mesmo jogo Apoena. A proposta aprovada é uma única plataforma com Estúdio 3D, Estúdio Pixel Art 2D e Editor de Mapas 2.5D, todos usando a mesma biblioteca e contexto de projeto. O mapa 2.5D já existe em `map-editor/` como implementação parcial; deve ser integrado/evoluído, não refeito. A bancada 3D existente deve ser preservada após inventário de suas rotas e dependências. Caminhos vazios/órfãos só serão removidos depois de rastrear referências e migrar conteúdo exclusivo.
+
+- Arquitetura registrada em `docs/ARQUITETURA_PLATAFORMA_UNICA_APOENA.md`.
+- Decisão/backlog registrados em `docs/ATUALIZACOES_PENDENTES_LEIA_ANTES_DE_COMECAR.md` como GC-PLAT-001.
+- Próxima etapa única: inventário de dependências, navegação e matriz de rotas; depois integração do shell e biblioteca.
+- Nenhuma funcionalidade, HTML, bundle, workflow ou asset foi removido nesta etapa.
+- Alterações documentais seguem na branch `maintenance/audit-cleanup-20261102`, dentro da PR draft #12; não houve merge na main.
