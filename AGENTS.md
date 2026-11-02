@@ -57,3 +57,14 @@ Sempre que qualquer execução ou job do GitHub Actions terminar em `failure`, o
 - `ABRIR_GAME_CREATOR.cmd` é somente um atalho opcional para o usuário no Windows: chama `integracao/build_unificado.ps1` e abre `index.html` após o build. Não é uma dependência do CI.
 - O GitHub Actions deve chamar diretamente os scripts de build/teste necessários; nunca executar o launcher CMD como etapa do Runner.
 - Alterações isoladas no launcher CMD não devem acionar o workflow canônico. Manter o launcher enquanto for útil ao fluxo local; removê-lo somente após confirmar que nenhum usuário/atalho/documento depende dele e que o build direto continua acessível.
+
+
+## Segurança por padrão e conteúdo comunitário
+
+- Antes de abrir upload/publicação para a comunidade, consultar `docs/SEGURANCA_APOENA_500_CONTROLES.md` e classificar os controles aplicáveis com evidência e teste.
+- Não executar código, scripts, HTML, SVG ativo, plugins ou binários enviados por usuários no processo principal do Creator ou do jogo.
+- A primeira versão de criação comunitária deve ser declarativa: schemas versionados, formatos permitidos, limites rígidos, validação binária, processamento isolado, quarentena e moderação.
+- Tratar `postMessage`, arquivos importados, backups, manifests e metadados como entrada não confiável. Não considerar canal, ID, MIME informado, prefixo de data URL ou origem opaca `null` como autenticação.
+- Não confiar no cliente para saldo, inventário, combate, posse, preços, recompensas, ranking ou elegibilidade. Multiplayer/economia exigem autoridade do servidor e autorização por objeto.
+- Não implementar sandbox de mods executáveis sem modelo de capabilities, isolamento de processo/runtime, quotas, revogação, revisão e testes adversariais aprovados.
+- Mudanças de segurança devem incluir relatório de ameaça, evidência, testes negativos e riscos residuais; não afirmar que o produto está “seguro” com base apenas em testes de contrato.
