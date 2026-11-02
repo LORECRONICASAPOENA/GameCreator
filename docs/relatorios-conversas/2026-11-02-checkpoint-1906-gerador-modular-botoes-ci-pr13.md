@@ -86,3 +86,7 @@ Na inspeção estática do HTML foram identificados **59 controles com `id`**, i
 Este arquivo é um **resumo técnico detalhado** de material visível e verificável, não uma transcrição literal das duas conversas compartilhadas. Os PDFs, imagens de referência, tiles, sprites, anexos, dados IndexedDB e arquivos locais não foram transferidos ao GitHub. O backup de código do repositório é fornecido pelo próprio histórico Git; este registro preserva decisões, contexto e estado observado. Não declarar backup mestre completo sem cópia dos binários e teste de restauração.
 
 **Registro anterior relacionado:** [auditoria da interface e 500 melhorias](2026-11-02-backup-interface-gamecreator-500-melhorias.md) e [índice de backups](../REGISTRO_CONVERSAS_E_BACKUPS.md).
+
+## 7. Snapshot de código preservado neste checkpoint
+
+Além do registro documental na `main`, foi criada a branch de backup [`backup/pr13-gerador-modular-20261102-1906-brt`](https://github.com/apoenalore/GameCreator/tree/backup/pr13-gerador-modular-20261102-1906-brt), apontando exatamente para o commit `34a0a722444448e384c91286affecf0f50217038` da PR #13. Isso preserva no GitHub uma referência estável à implementação do gerador **naquele SHA**, sem fazer merge, editar a PR ou alterar o runtime. É snapshot de código Git, **não** cópia dos dados locais, arquivos anexados ou IndexedDB.
