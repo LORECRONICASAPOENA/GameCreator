@@ -187,3 +187,17 @@ Uma etapa só será concluída com:
 - limitações e riscos residuais registrados.
 
 Não apresentar proposta como implementação, nem teste estático como validação de runtime.
+
+
+## 12. Verificação de continuidade — 2026-11-02, após 10:43 UTC
+
+**Fonte:** GitHub REST, branches, commits, PRs e GitHub Actions, consultados nesta verificação.
+
+- `main` do GameCreator: `1b95d036c31dfb4ca9f9ce6859510be2c9f7e8cd` (sem mudança observada).
+- PR #12 (`maintenance/audit-cleanup-20261102`): aberta, draft, HEAD anterior à presente anotação `05ef347335ae8009b96480b471436f1fe2b32218`; os commits mais recentes dessa branch eram documentais.
+- PR #6 do Apoena Skill: aberta, draft, HEAD anterior à presente anotação `feb653a4f1369a5129b205276d18d40eca891f6b`.
+- **Novo resultado de CI:** workflow `.github/workflows/pixel-art.yml`, execução [#41429123726](https://github.com/apoenalore/GameCreator/actions/runs/41429123726), disparada por `pull_request` no commit `05ef347335ae8009b96480b471436f1fe2b32218`, criada em `2026-11-02T10:28:46Z`, concluída em `2026-11-02T10:43:40Z` com `failure`.
+- A consulta à API de jobs retornou `validar` com conclusão `failure`, início `2026-11-02T10:33:39Z` e término `2026-11-02T10:43:39Z`, porém **sem etapas individuais no retorno**. Assim, não é possível atribuir a falha ao build, aos testes, ao navegador ou ao runner com base nessa evidência.
+- O workflow usa runner `self-hosted, Windows, X64`, agrupa execuções concorrentes por branch e cancela anteriores. Execuções `cancelled` não devem ser confundidas com reprovação de testes.
+- **Ação pendente:** obter logs detalhados do job no GitHub Actions/runner Windows, identificar a primeira etapa falha e reproduzir antes de alterar código ou workflow. Não repetir execução sem hipótese de diagnóstico.
+- **Integridade:** esta atualização é exclusivamente documental; não modifica fontes, bundles, workflow, dados de usuário ou `main`. Não representa backup de dados IndexedDB ou assets locais.
