@@ -26,3 +26,27 @@ Ao acrescentar ou atualizar um erro em docs/BASE_CONHECIMENTO_ERROS_RUNNER_CI.md
 5. Reaproveite a validação canônica existente e respeite WIP = 1 para os dois repositórios combinados. Evite executar testes equivalentes em paralelo ou acumular schedules. Mudanças apenas em documentação podem ser excluídas por filtros de caminho, desde que não alterem código ou configuração de validação.
 6. Quando encontrar falha de autovalidação, investigue a causa raiz, faça uma correção mínima, comprove com nova execução automática e registre erro, causa, correção real, data/hora BRT, commit e run ID em `docs/BASE_CONHECIMENTO_ERROS_RUNNER_CI.md`. Não invente êxito, horário ou solução. Não publique relatórios rotineiros na conversa; informe somente bloqueios e decisões que exijam participação humana.
 7. Aprovação de PR, proteção de branch e autorização de implantação são controles distintos de iniciar testes automaticamente: nunca contorne uma exigência legítima de aprovação para eliminar cliques.
+
+
+## Relatório obrigatório para CADA erro do GitHub Actions
+
+Sempre que qualquer execução ou job do GitHub Actions terminar em `failure`, ou apresentar anotação de erro/infraestrutura, a IA responsável deve produzir e registrar um relatório individual antes de tentar corrigir, repetir ou contornar a execução. A regra vale para falhas de código/teste, build, publicação/artefato, permissões, rede, GitHub, runner self-hosted e ambiente.
+
+### Procedimento obrigatório
+1. Identificar repositório, workflow, run ID e URL, job/step, branch, commit SHA, evento, horário disponível e estado final. Distinguir falha real, cancelamento, timeout, fila (`queued`) e perda de comunicação do runner.
+2. Coletar a mensagem literal, annotations, logs do job/step, logs do runner e evidências correlatas. Se os logs não estiverem disponíveis, registrar a tentativa de acesso e a limitação; nunca preencher lacunas com suposições.
+3. Determinar a causa-raiz com evidências. Separar explicitamente **causa comprovada**, **hipóteses ainda não verificadas** e **informações ausentes**. Se não houver evidência suficiente, declarar `CAUSA NÃO CONFIRMADA` e indicar a próxima coleta necessária.
+4. Descrever o impacto: o que falhou, o que chegou a executar, o que não foi validado e se o resultado diz algo sobre o código. Uma falha de comunicação do runner, por exemplo, não é prova de defeito nos testes ou no produto.
+5. Registrar as soluções possíveis consideradas e seus riscos. Explicar **qual solução foi escolhida e por quê**, incluindo critérios técnicos, menor risco, preservação de dados/código, compatibilidade com WIP = 1 e ausência de workflows redundantes. Se uma alternativa foi descartada, explicar o motivo.
+6. Diferenciar `solução proposta` de `solução aplicada`. Nunca afirmar que corrigiu se apenas recomendou. Registrar arquivos/linhas alterados, commit SHA e autor da mudança quando aplicável.
+7. Definir uma validação objetiva para a correção: teste focado, execução canônica, resultado esperado e evidência. Só marcar como resolvido após a validação passar no commit corrigido. Não repetir o mesmo run/commit cegamente; repetição sem mudança só é aceitável quando a causa transitória estiver demonstrada e a comunicação/serviço tiver sido restabelecida.
+8. Criar um relatório por incidente em `docs/relatorios-actions/`, usando `docs/relatorios-actions/MODELO_RELATORIO_FALHA_ACTIONS.md`. Nome sugerido: `AAAA-MM-DD-run-ID-resumo.md`. Atualizar também `docs/BASE_CONHECIMENTO_ERROS_RUNNER_CI.md` quando o incidente trouxer conhecimento reutilizável, e o registro de conversas/checkpoints quando a falha alterar prioridades ou decisões.
+9. Ao final, apresentar ao autor um resumo direto com: erro, causa comprovada ou estado da investigação, solução escolhida, justificativa, o que foi efetivamente alterado e resultado da validação. Destacar qualquer ação que dependa do usuário.
+
+### Restrições
+- Não alterar código do produto para mascarar falha de infraestrutura.
+- Não enfraquecer testes, apagar assertions, ignorar exit codes, silenciar erros ou remover etapas para obter status verde.
+- Não trocar runner, shell, permissões, labels, gatilhos ou workflow sem evidência e justificativa registradas.
+- Não criar workflow paralelo para substituir uma investigação.
+- Não executar ações destrutivas, cancelar execuções válidas ou sobrescrever dados locais sem autorização e análise de impacto.
+- O relatório é obrigatório mesmo quando a causa for externa, transitória ou ainda desconhecida. Nesses casos, registrar claramente o limite da evidência e a próxima ação diagnóstica.
