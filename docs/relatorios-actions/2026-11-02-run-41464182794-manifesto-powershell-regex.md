@@ -42,15 +42,13 @@
 Fechar a string na atribuição de `$regexRuntime`, preservando os testes e o workflow canônico. A mesma alteração passou por uma execução completa na branch de trabalho, run [41471638006](https://github.com/apoenalore/GameCreator/actions/runs/41471638006), no commit `87e1a6f8d75c044d9c189fd6e8b9e7e6558084fd`. Essa validação não substitui a execução no head da PR #7.
 
 ## 7. Execução da solução
-- Estado deste relatório: investigação concluída; correção validada em branch de trabalho, ainda não aplicada à branch da PR #7 no momento deste registro.
-- Próxima alteração prevista: aplicar somente a mesma correção de uma linha em `integracao/atualizar-creator.ps1` na branch `feat/atualizador-local-incremental`.
+- Estado deste relatório: CORRIGIDO na branch da PR #7. A aspa de fechamento está no commit `1eb2119e3fa0f285e6278d51d0d5eec5ab48399c`; a validação completa do head corrigido passou no run [41488368286](https://github.com/apoenalore/GameCreator/actions/runs/41488368286), SHA `b483bff226e5488175b6c776f4cfd24da5f30fae`.
+- Alteração aplicada em `integracao/atualizar-creator.ps1` na PR #7; a correção de sintaxe permitiu que o teste alcançasse a falha independente da âncora registrada no relatório relacionado.
 - Nenhum Runner, label, shell, gatilho, workflow ou teste foi alterado.
 - Nenhum arquivo local, dado, asset ou instalação do autor foi acessado ou modificado.
 
 ## 8. Plano de validação
-- Teste focado e CI canônica: executar automaticamente após o commit de código na branch da PR #7.
-- Resultado esperado: parsing do PowerShell e teste real `tests/atualizador-manifest.test.cjs` passam; workflow conclui success no SHA corrigido.
-- Estado final: aguardando validação automática no head da PR #7.
+- Validação concluída: run [41488368286](https://github.com/apoenalore/GameCreator/actions/runs/41488368286), job `125425257046`; o step do manifesto, demais verificações e job completo passaram no SHA `b483bff226e5488175b6c776f4cfd24da5f30fae`.
 
 ## 9. Prevenção
 Manter a análise sintática PowerShell e o teste do atualizador no workflow canônico. Corrigir a expressão de origem; não converter falhas de parsing em avisos nem ignorar o exit code.
@@ -60,4 +58,4 @@ Manter a análise sintática PowerShell e o teste do atualizador no workflow can
 - Causa: sintaxe PowerShell incompleta; comprovada pelo código e pelo log.
 - Solução: fechar a string, preservando a validação.
 - Evidência prévia: correção equivalente e workflow completo aprovados em `87e1a6f8` / run `41471638006`.
-- Próxima ação: aplicar no head da PR #7 e aguardar a execução automática.
+- Resultado final: parser e CI Windows aprovados no head da PR #7; teste manual de instalação/atualização pelo autor continua pendente, conforme os critérios GC-UPDATE-009.
