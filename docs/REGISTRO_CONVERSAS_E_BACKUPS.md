@@ -167,3 +167,15 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Preservação e limite:** somente documentação foi adicionada; nenhum arquivo funcional, teste, asset, workflow, runner, banco de dados, IndexedDB ou instalação local foi modificado/copied. O GitHub não dá acesso automático a conversas privadas ou arquivos locais. WIP=1 preservado.
 
 **Próxima verificação:** comparar novo head da main e da PR #11; recuperar evidência de CI; continuar inventário de fontes e atualização documental apenas se houver fatos novos. Não produzir commits horários vazios.
+
+
+## Checkpoint — 02/11/2026 — lacunas do backup e auditoria estática de ZIPs
+
+**Origem:** solicitação do autor para verificar o que falta no backup; relatório de auditoria estática recebido em conversa. **Documento detalhado:** [2026-11-02-lacunas-backup-auditoria-estatica.md](relatorios-conversas/2026-11-02-lacunas-backup-auditoria-estatica.md).
+
+- **Dois ZIPs idênticos no relatório recebido:** SHA-256 `bb40c8419056dfecdf75f9db99ee2deecfe6963a7fbe5b3d5b804b8b7346dfd9`, 60.120.095 bytes cada, 155 entradas. O ZIP não certifica branch ou commit do GitHub. Outros pacotes mencionados em conversa anterior não foram revalidados nesta execução.
+- **Testes relatados:** 71 JS/CJS e 57 blocos inline passaram em sintaxe; oito arquivos/suítes de testes executaram com sucesso, com 10 casos internos de catálogo; duas suítes IndexedDB bloqueadas pela ausência de `fake-indexeddb/auto`; sem validação integral Godot, PowerShell, Android, navegador interativo ou CI no SHA do ZIP.
+- **Achados a verificar no código atual:** GC-SEC-001 (origem `null` na ponte), GC-MAP-001 (perfil de tileset descartado), GC-MAP-002 (autotiling de água incompleto), GC-CI-001 (workflows sobrepostos), GC-BUILD-001 (paridade de builds), GC-DOC-001 (documentação contraditória), GC-TEST-001 (smoke estrutural) e GC-TEST-002 (dependência de testes). **Nenhum marcado como corrigido**.
+- **Lacunas de preservação:** transcrições integrais, originais narrativos e binários, biblioteca IndexedDB, arquivos locais, índice unificado, matriz de problemas/testes, evidências de execução, sprites citados como ausentes e restauração comprovada. Dossiê estratégico da conversa permanece em [branch documental](https://github.com/apoenalore/GameCreator/blob/backup/gamecreator-conversa-20261102-0904-brt/docs/relatorios-conversas/2026-11-02-dossie-analise-evolucao-gamecreator-recebido.md).
+- **Próximo pacote proposto:** `APOENA_BACKUP_MESTRE_2026-11-02` com oito seções e manifestos SHA-256, **ainda não gerado**. Não declarar backup completo sem cópias externas e teste de restauração.
+- **Preservação:** somente documentação; nenhum código, workflow, teste, runner, asset, ZIP original ou IndexedDB alterado. WIP=1 preservado.
