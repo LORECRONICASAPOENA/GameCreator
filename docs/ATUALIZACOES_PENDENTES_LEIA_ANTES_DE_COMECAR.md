@@ -172,3 +172,18 @@
 - O ZIP final contém 76 arquivos de runtime; a fábrica original está preservada somente com a página e as 23 partes JS necessárias. Não contém documentação, testes, CI ou arquivos Markdown/texto.
 - SHA-256 do ZIP interno: \`62407aaad9bd183d78bd3a29a65752f8325981a4191aa77b084be49b818eb55d\`.
 - O teste do manifesto do atualizador no PR7 passou no step 17 do run #41082083233; a simulação real de clone/fast-forward e preservação local continua pendente. A branch ambiental PR6 passou no run #41081917796.
+
+
+## GC-PLAT-001 — Plataforma única 3D + Pixel Art 2D + Mapas 2.5D
+
+- **Estado:** DECISÃO APROVADA PELO AUTOR; arquitetura registrada; implementação ainda não iniciada.
+- **Decisão:** os editores 3D e Pixel Art são ferramentas do mesmo Game Creator e do mesmo jogo Apoena. Devem compartilhar entrada, contexto de projeto, biblioteca de assets e exportação. Não manter dois Creators independentes.
+- **Áreas da plataforma:** Estúdio 3D; Estúdio Pixel Art 2D; Editor de mapas 2.5D; biblioteca central; itens/regras; exportação para runtime.
+- **Mapa existente:** `map-editor/` já implementa uma primeira versão 2.5D com grade, tilesets, terrenos, alturas visuais limitadas, objetos com profundidade, marcadores, JSON e PNG. Evoluir e integrar esse editor; não iniciar outro do zero.
+- **Biblioteca:** `shared/asset-library.js` e `biblioteca/` são a base a consolidar. IDs estáveis e referências compartilhadas devem impedir recadastro/duplicação.
+- **Bancada 3D:** a auditoria existente identifica recursos de animação/modelagem 3D na fonte do Creator. A localização exata de cada tela/rota e sua dependência deve ser confirmada na Etapa A antes de refatorar.
+- **Diretriz de interface:** uma entrada e navegação única, com áreas especializadas; mapa acessível como etapa/ferramenta própria, sem ocupar a interface durante a criação de assets.
+- **Limpeza:** remover apenas placeholders, rotas vazias, links quebrados e duplicações comprovadas após rastrear referências e migrar conteúdo exclusivo. Não apagar bundle, fontes históricas, scripts ou iniciadores só por tamanho/idade.
+- **Arquitetura detalhada:** [ARQUITETURA_PLATAFORMA_UNICA_APOENA.md](ARQUITETURA_PLATAFORMA_UNICA_APOENA.md).
+- **Critério de conclusão:** entrada única; 3 áreas acessíveis; biblioteca e projeto compartilhados; assets 2D/3D posicionáveis no mapa por ID; mapas salvam/reabrem/exportam; nenhum caminho quebrado; projetos antigos preservados; CI e testes visuais PC/Android concluídos.
+- **Próxima ação única:** Etapa A — inventário de dependências/navegação e matriz de rotas. Não iniciar ainda refatoração de UI nem exclusão de arquivos antes de concluir esse mapa.
