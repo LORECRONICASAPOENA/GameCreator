@@ -12,7 +12,7 @@
 
 ## Criador de Personagens Apoena (protótipo)
 
-- Abrir: [character-creator/index.html](character-creator/index.html).
+- **Acesso principal:** o Criador Modular substitui o gerador antigo na aba **Pixel Art → Criador de Personagens** do Game Creator. A página independente continua disponível em [character-creator/index.html](character-creator/index.html) para diagnóstico.
 - Protótipo funcional para importar PNG/WebP/JPG transparentes como camadas independentes (corpo, cabeça, cabelo, roupas, calçados, armas e efeitos), ajustar posição/escala/opacidade, ordenar e ocultar camadas, montar uma prévia, salvar localmente e exportar PNG/JSON.
 - Inclui recorte inicial de spritesheets por grade, seleção de quadros e exportação dos quadros recortados.
 - Para testar com o Apoena de referência, importe os PNGs fornecidos nas categorias correspondentes. A referência completa não foi embutida como recurso binário nesta primeira entrega; os arquivos originais do usuário não são modificados.
