@@ -200,3 +200,14 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Apoena Skill:** os commits [`82d9789`](https://github.com/apoenalore/apoenaskil/commit/82d978989b025858d53abe92044cfeca2b09caeb) e [`9ff515d`](https://github.com/apoenalore/apoenaskil/commit/9ff515d11a13ab489b22b01c34234b5b93f3c213) criaram e indexaram um registro de **recuperação parcial** de conversa sobre Apoena protagonista, animações de caminhada/ataque e pedidos de backup. O inventário de 32 conversas não equivale a 32 conversas integralmente lidas; anexos e sprites originais ainda não foram incorporados nesse registro.
 - **Próximas verificações:** conclusão da CI no novo SHA, revisão visual de sprites/animações, validação de gameplay Godot e Android, recuperação de originais e teste de restauração do Backup Mestre.
 - **Preservação:** nenhum código, workflow, asset, runner, PR ou biblioteca IndexedDB foi alterado nesta atualização; apenas documentação na `main`. WIP = 1 mantido. Não produzir commits horários vazios.
+
+
+## Checkpoint — 02/11/2026 — CI da PR #11 aprovada e Zodíaco de 96 estrelas
+
+**Fonte:** consulta autenticada ao GitHub; [relatório detalhado](relatorios-conversas/2026-11-02-checkpoint-ci-pr11-zodiaco-apoena.md).
+
+- **PR #11 (GC-ANIM-006):** segue aberta, em draft e sem merge, no head `0447ea9dc9d9310e985247325e3af1d1c726519a`.
+- **Nova confirmação:** run [41461801598](https://github.com/apoenalore/GameCreator/actions/runs/41461801598) concluiu com **success** no SHA `0447ea9...`; job `validar` ID `125332443319` também **success**. O teste de exportação pixel-perfect foi aprovado em ambiente simulado, assim como as verificações de integração, persistência e Godot headless listadas no relatório. Três etapas de entrega/diagnósticos foram `skipped`; não presumir publicação de artefatos.
+- **Apoena Skill:** commit [`50a672a`](https://github.com/apoenalore/apoenaskil/commit/50a672ab15b3f784dff0dcf864dac15c87989894) registra `docs/lore/zodiaco-de-apoena.md`: 13 constelações, com Cordeiro 10 estrelas, Serpentário 9 e as demais onze com 7 cada (**96 estrelas**); cada estrela deve ser ponto amarelo individual, claramente contável. Informação de lore, **não funcionalidade comprovada no GameCreator**.
+- **Limites:** a CI aprovada não equivale a revisão visual de animações, teste Android físico, gameplay completo ou autorização de merge. Não houve mudança em código, workflow, runner, assets ou IndexedDB nesta atualização. WIP=1 mantido.
+- **Backup Mestre:** ainda pendente a cópia integral de anexos e arquivos locais, IndexedDB e teste de restauração.
