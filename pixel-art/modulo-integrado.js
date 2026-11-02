@@ -446,6 +446,7 @@ modularFrame.style.cssText="display:block;width:100%;height:calc(100vh - 190px);
 modularContainer.append(modularFrame);
 main.hidden=true;
 main.after(modularContainer);
+modularContainer.after(host);
 const mapContainer=document.createElement("section");mapContainer.hidden=true;host.after(mapContainer);
 host.innerHTML=
 '<section class="apoobj-pane"><h2>Objetos Pixel Art • comportamento do mundo</h2><p class="apoobj-warning">Os objetos usam <strong>o mesmo item da Fábrica de Itens do Game Creator</strong>. Escolha o item da Fábrica de Itens ou crie um novo, configure seu comportamento e salve no projeto central. Os efeitos no mundo exigem conexão com o jogo.</p><div class="apoobj-top"><label class="button secondary">Projeto atual conectado à Fábrica de Itens<input type="file" id="apoobj-import" accept=".json,application/json" hidden></label><button type="button" id="apoobj-save-project">Baixar projeto atualizado</button><button type="button" class="alt" id="apoobj-new">Novo item</button></div><p id="apoobj-info" class="apoobj-note">Catálogo central do Game Creator v4.0 conectado. Os itens e as receitas são os mesmos.</p></section>'+
