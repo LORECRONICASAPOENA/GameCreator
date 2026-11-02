@@ -75,3 +75,8 @@ Pesquisa comunitária encontrou a mesma sequência em [actions/runner #4312](htt
 **Decisão:** não alterar código do Creator. Quando o PC estiver disponível, preservar `_diag`/Event Viewer, verificar serviço, processos e tarefas de inicialização, identificar PIDs e caminhos; parar de forma controlada a instância duplicada, se confirmada, e manter apenas um mecanismo de execução. Não apagar credenciais nem reconfigurar runner como primeira ação.
 
 Relatório atualizado: [GC-CI-014](../relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
+
+
+## Atualização — runner recuperado e `Listening for Jobs`
+
+Nova captura do autor mostra o terminal `run.cmd - game creator` após mensagens de conflito de sessão, seguido por `Runner reconnected`, `Current runner version: '2.338.0'` e `Listening for Jobs` às 13:12:43Z. O runner visível voltou a escutar trabalhos. Isso não comprova causa-raiz resolvida nem ausência de outra instância; a segunda janela de terminal ao fundo não pode ser identificada apenas pela imagem. Próximo passo: confirmar Online/Idle em Settings → Actions → Runners e conferir processos/serviço sem iniciar outro runner. Se houver uma única instância estável, reexecutar uma vez o workflow da PR #11. Nenhuma alteração de código foi feita.
