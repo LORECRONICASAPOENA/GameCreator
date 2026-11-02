@@ -88,3 +88,13 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Decisão de produto proposta:** primeira versão comunitária deve ser declarativa, sem execução de código; opções limitadas de aparência, geometria e materiais; atributos competitivos calculados por templates oficiais no servidor. Conteúdo passa por validação, quarentena e moderação. Mods executáveis ficam fora do escopo até haver sandbox real e revisão de segurança.
 - **Limite:** auditoria documental parcial, não pentest nem certificação. Nenhuma correção de código foi aplicada nesta conversa; somente documentação e instruções de agentes foram atualizadas.
 - **Commits:** `fd56632f29acc8daa68a93720134b813a245eb67` (catálogo de 500 controles); `cdf27a6d6f822b8003a84937d15f9d962e489d71` (gates de segurança em AGENTS.md).
+
+
+## Pesquisa complementar: anti-cheat, ataques multiplayer, SQL e TLS (02/11/2026)
+
+- **Solicitação:** estudar sistemas de segurança de jogos como GTA/Free Fire, vetores de ataque, SQL e SSL/TLS para o Apoena.
+- **Pesquisa registrada:** `docs/PESQUISA_ANTI_CHEAT_SQL_TLS_JOGOS.md`.
+- **Referências comerciais:** documentação Rockstar confirma BattlEye no GTA Online PC; documentação Garena descreve defesa anti-hack, clientes modificados, denúncias e programa de vulnerabilidades. Não inferir a arquitetura de GTA 6 a partir do GTA Online.
+- **Decisões recomendadas:** servidor autoritativo; cliente não decide combate/inventário/economia; consultas SQL parametrizadas e privilégio mínimo; TLS 1.3 padrão/TLS 1.2 compatibilidade, SSL antigo desativado; validação de certificados; anti-replay e protocolo seguro maduro para transporte multiplayer; evitar anti-cheat kernel no primeiro estágio; usar OWASP GameSec como referência de requisitos.
+- **Limite:** pesquisa documental, não pentest nem confirmação de vulnerabilidade no produto. Backend SQL/multiplayer ainda requer auditoria quando implementado.
+- **Commit do relatório:** `964f7fe9a0418db812719f82a85c992cb4a7c87f`.
