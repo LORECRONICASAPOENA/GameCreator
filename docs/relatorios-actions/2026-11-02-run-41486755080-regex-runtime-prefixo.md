@@ -42,15 +42,14 @@
 Adicionar `$` ao fim de `$regexRuntime`, preservando o teste existente. A mudança limita a correspondência ao caminho inteiro e impede que extensões maiores sejam aceitas por prefixo.
 
 ## 7. Execução da solução
-- Estado deste relatório: diagnóstico concluído; solução escolhida; correção ainda não aplicada no momento do registro.
+- Estado deste relatório: CORRIGIDO. A regex foi ancorada ao caminho completo no commit `b483bff226e5488175b6c776f4cfd24da5f30fae`, sem alteração da assertion.
 - Arquivo previsto: `integracao/atualizar-creator.ps1`, somente na regex de proteção.
 - Nenhum teste, workflow, shell, gatilho, Runner, dado local ou asset será alterado.
-- Commit da correção e ações posteriores: pendentes.
+- CI canônica aprovada: run [41488368286](https://github.com/apoenalore/GameCreator/actions/runs/41488368286), job `125425257046`, SHA `b483bff226e5488175b6c776f4cfd24da5f30fae`.
 
 ## 8. Plano de validação
 - A alteração deve disparar automaticamente a CI canônica da PR #7.
-- Resultado esperado: assertion para `map-editor/cache.json` e demais caminhos fora do manifesto passa; o step do atualizador e a validação completa concluem com success no SHA corrigido.
-- Estado final: aguardando aplicação e validação automática.
+- Resultado observado: a assertion para caminhos fora do manifesto passou; step do atualizador e job completo concluíram com success no SHA `b483bff226e5488175b6c776f4cfd24da5f30fae`.
 
 ## 9. Prevenção
 Manter a assertion que compara a regex de proteção com os padrões de sparse-checkout e exigir correspondência do caminho inteiro. Não enfraquecer a assertion para obter CI verde.
@@ -60,4 +59,4 @@ Manter a assertion que compara a regex de proteção com os padrões de sparse-c
 - Causa: falta de âncora de fim na regex.
 - Solução: ancorar a expressão no fim da string.
 - Evidência: saída da assertion Node e padrão presente em `integracao/atualizar-creator.ps1`.
-- Próxima ação: aplicar a mudança mínima e aguardar a CI automática da PR #7.
+- Validação concluída no run [41488368286](https://github.com/apoenalore/GameCreator/actions/runs/41488368286). A PR #7 segue sujeita aos demais critérios de revisão e teste manual do GC-UPDATE-009.
