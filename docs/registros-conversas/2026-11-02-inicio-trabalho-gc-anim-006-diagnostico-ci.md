@@ -62,3 +62,16 @@ O autor enviou captura da anotação expandida do run 41433942503. O GitHub Acti
 **Decisão:** não alterar o código do Estúdio e não remover testes. Quando o computador estiver disponível, coletar logs locais em _diag e verificar estado de energia/suspensão/reinicialização, rede, DNS, proxy/firewall e CPU/memória do runner no horário do run.
 
 O relatório individual e a base GC-CI-014 foram atualizados na branch feat/apoena-personagem-estudio-main. Nenhuma correção de produto foi aplicada; a PR continua não validada e não integrada à main.
+
+
+## Atualização — conflito de sessão duplicada no runner (02/11/2026)
+
+O autor enviou duas capturas do console do runner Windows. Ambas mostram `Connected to GitHub`, `A session for this runner already exists` e `Runner connect error: Error: Conflict. Retrying until reconnected`, repetidamente.
+
+Pesquisa comunitária encontrou a mesma sequência em [actions/runner #4312](https://github.com/actions/runner/issues/4312). Em [#3441](https://github.com/actions/runner/issues/3441), um mantenedor observou duas solicitações de sessão em 11 segundos e questionou se o processo de inicialização era chamado mais de uma vez; um comentário sugeriu OOM como hipótese. [#3677](https://github.com/actions/runner/issues/3677) relata conflito após reinicialização Windows.
+
+**Diagnóstico imediato:** conflito porque já existe uma sessão ativa para a identidade do runner. **Causa no computador ainda não comprovada:** duplicidade de processo/serviço e execução manual é hipótese prioritária; sessão antiga após encerramento abrupto/reboot e OOM são hipóteses alternativas.
+
+**Decisão:** não alterar código do Creator. Quando o PC estiver disponível, preservar `_diag`/Event Viewer, verificar serviço, processos e tarefas de inicialização, identificar PIDs e caminhos; parar de forma controlada a instância duplicada, se confirmada, e manter apenas um mecanismo de execução. Não apagar credenciais nem reconfigurar runner como primeira ação.
+
+Relatório atualizado: [GC-CI-014](../relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
