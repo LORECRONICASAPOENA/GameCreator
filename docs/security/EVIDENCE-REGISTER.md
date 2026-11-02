@@ -13,6 +13,7 @@
 | EV-009 | Apoena-GameCreator-V4.1.zip | Mencionado | Conteúdo interno não integralmente extraído |
 | EV-010 | 1000066266.jpg e 1000066265.jpg | Anexos mencionados | Não reanalisados visualmente de forma independente |
 | EV-011 | GitHub Actions run 41347018076 | Referenciado no manifesto da entrega | Não prova, por si só, auditoria de segurança ou correção |
+| EV-012 | [GitHub Actions run 41429123726](https://github.com/apoenalore/GameCreator/actions/runs/41429123726), 2026-11-02T10:28:46Z–10:43:40Z, SHA 05ef347335ae8009b96480b471436f1fe2b32218, PR #12 | API: run failure; job validar failure, etapas ausentes | Causa raiz não identificada; exigir logs do runner Windows antes de concluir falha de código, teste ou infraestrutura |
 
 ## Regras para novas evidências
 
