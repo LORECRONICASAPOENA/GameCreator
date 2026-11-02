@@ -41,3 +41,17 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Preservação:** nenhuma alteração de código, assets, CI, runner, branch de funcionalidade, merge, instalação Windows ou biblioteca IndexedDB foi executada. O GitHub guarda o código rastreado e este registro, mas **não** copia automaticamente conversas integrais, arquivos locais, binários não enviados nem os dados da biblioteca do navegador.
 
 **Próxima ação da frente ativa:** obter diagnóstico verificável da falha do job da PR #11, sem repetição cega de workflow; somente após identificar causa e validar correção, avançar para revisão dos spritesheets, caminhada fiel, ataques e integração no gameplay. Manter WIP = 1.
+
+
+## Evidência adicional — falha do Runner na PR #11 (01/11/2026, aproximadamente 21:24 BRT)
+
+**Origem:** captura de tela enviada pelo autor, exibindo o job `validar` da execução #265 do workflow `.github/workflows/pixel-art.yml`, associado à PR `GC-ANIM-006` (PR #11).
+
+- A anotação visível no GitHub informa: **“The self-hosted runner lost communication w…”**. A mensagem identifica perda de comunicação do executor self-hosted com o servidor do GitHub durante o job.
+- **Atualização do diagnóstico:** há agora evidência direta de uma falha de comunicação do Runner. Portanto, a falha dessa execução não deve ser tratada como prova de erro nos fontes ou nos testes das animações. O status vermelho indica que o job falhou, mas não demonstra que os testes de código tenham encontrado defeitos.
+- **Causa-raiz ainda não identificada:** a captura não informa se houve queda de internet, encerramento/travamento do processo ou serviço do Runner, suspensão/reinicialização do Windows, nem outro problema de rede/host. Não escolher uma dessas hipóteses sem consultar o histórico local do Runner e o estado do computador no horário da falha.
+- **Ação recomendada:** verificar no Windows se o serviço/processo `APOENA-GAMECREATOR-RUNNER` está em execução e online, conferir conectividade e logs locais do Runner no intervalo do job e observar se houve suspensão, reinicialização ou desligamento. Depois de restabelecer a comunicação, executar uma única validação controlada da PR #11, sem alterar código apenas para tentar corrigir a desconexão.
+- **Estado da PR:** permanece aberta em rascunho e não integrada. A captura não comprova aprovação de testes, nem validação funcional das animações no Godot.
+- **Preservação:** esta atualização é documental. Nenhum código, workflow, configuração do Runner ou arquivo local foi alterado. A captura é evidência fornecida nesta conversa; ela não foi adicionada como arquivo binário ao repositório.
+
+**Correção de interpretação do checkpoint anterior:** a causa da falha estava indeterminada porque os logs não puderam ser recuperados. Com a nova captura, a classificação sustentada pela evidência passa a ser **perda de comunicação do self-hosted runner**; a causa-raiz operacional permanece pendente de investigação.
