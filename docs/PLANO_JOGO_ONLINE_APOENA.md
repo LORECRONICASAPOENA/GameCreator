@@ -127,3 +127,55 @@ Critérios de aceite: clientes não definem posição final; um cliente não con
 Começar por uma vertical slice online com dois clientes e um servidor dedicado. Só depois acrescentar persistência, combate, economia e mundo persistente. Manter segurança no desenho desde o primeiro endpoint. O Game Creator continuará sendo ferramenta de autoria; o jogo online terá runtime, backend, servidores e pipeline próprios.
 
 **Não declarar “online pronto” até passar testes de autorização, integridade, reconexão, carga, backups e segurança.**
+
+
+## Decisões de arquitetura após escolha do autor (02/11/2026)
+
+**Escolhas confirmadas:** modelo híbrido; meta inicial de 20–50 jogadores simultâneos; plataformas Android e PC.
+
+### Topologia recomendada para o MVP
+- **Cliente multiplataforma:** Android e PC usando o mesmo protocolo e regras de gameplay; diferenças de input/UI tratadas no cliente.
+- **Gateway/API:** HTTPS para autenticação, perfil, inventário, loja, catálogo e operações não realtime.
+- **Servidor autoritativo de mundo:** processo dedicado/headless por região compartilhada. O cliente envia inputs/intenção; servidor valida e publica estado.
+- **Instâncias:** processos/sessões isolados sob demanda para dungeons e arenas, com limites e encerramento controlados.
+- **Persistência:** PostgreSQL como candidato recomendado para dados canônicos; Redis apenas quando houver necessidade demonstrada de presença, filas ou cache. Object storage/CDN para assets aprovados.
+- **Admin/observabilidade:** logs estruturados, métricas, alertas, trilha de auditoria, ferramentas de suporte e moderação.
+
+### Capacidade inicial
+Meta de teste: 20–50 jogadores simultâneos no conjunto do ambiente de teste, não promessa de capacidade de produção. Começar com uma região de teste e uma instância de dungeon; medir tick rate, latência p50/p95/p99, uso CPU/RAM, tráfego, entidades por jogador, perda de pacotes e consultas ao banco. Só então definir capacidade por processo e escalar.
+
+### Tecnologia candidata e ressalvas
+- Godot Dedicated Server/headless é candidato se Godot for confirmado como engine/runtime final. A presença de scripts de integração Godot no Game Creator não prova que o jogo executável esteja finalizado nessa engine.
+- Nakama deve ser avaliado como opção de backend pronto (contas, sessões, matchmaking, storage e realtime) versus backend próprio. Não adotar ambos indiscriminadamente; escolher após protótipo de integração, custo operacional, compatibilidade com engine e modelo de autoridade.
+- PostgreSQL é a opção relacional inicial recomendada; Redis é opcional, não requisito do primeiro protótipo.
+- HTTPS/TLS para API e downloads. Para realtime UDP, escolher transporte/protocolo seguro compatível com engine e validar autenticação, integridade e anti-replay; não presumir que HTTPS/TLS de API protege automaticamente pacotes UDP.
+
+### Primeira vertical slice
+1. Confirmar engine, versão, projeto executável e build Android/PC.
+2. Criar um mapa pequeno de teste e um servidor headless.
+3. Conectar 2 clientes (um Android e um PC, se possível) e validar handshake/sessão.
+4. Sincronizar spawn, movimento e presença com autoridade do servidor.
+5. Implementar interpolação e reconexão sem duplicar sessão/personagem.
+6. Persistir somente perfil/personagem mínimo no backend; ainda sem economia negociável.
+7. Testar tentativa de falsificar posição, velocidade, ID de outro jogador e replay de mensagens.
+8. Subir gradualmente a 5, 10, 20 e 50 clientes simulados/reais; medir e documentar limites.
+9. Adicionar uma dungeon instanciada após estabilidade da região compartilhada.
+
+### Critérios de aceite do primeiro protótipo
+- Android e PC conseguem entrar na mesma sessão.
+- Servidor decide posição/estado canônico; cliente não consegue impor estado arbitrário.
+- Usuário não consegue ler ou alterar perfil de outra conta.
+- Reconexão/retry não duplica jogador nem recompensa.
+- Falha de servidor não concede penalidade nem perde progresso confirmado.
+- Métricas de latência e recursos são coletadas e registradas.
+- Testes negativos e logs demonstram rejeição de entradas inválidas.
+
+### Pendências antes de comprar hospedagem ou iniciar implementação definitiva
+- Confirmar engine e versão do runtime real do jogo.
+- Escolher stack de servidor compatível com a engine.
+- Definir região inicial de hospedagem, orçamento mensal e política de dados.
+- Definir número de jogadores por zona, taxa de atualização e densidade de NPCs/monstros.
+- Decidir Nakama versus backend próprio após prova técnica.
+- Definir escopo mínimo de gameplay: login, spawn, movimento, chat, reconexão; combate vem depois.
+
+**Não iniciado:** esta seção registra a arquitetura e os critérios; não cria servidor, banco, API, contas ou conectividade real.
