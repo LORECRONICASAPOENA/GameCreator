@@ -55,3 +55,13 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Preservação:** esta atualização é documental. Nenhum código, workflow, configuração do Runner ou arquivo local foi alterado. A captura é evidência fornecida nesta conversa; ela não foi adicionada como arquivo binário ao repositório.
 
 **Correção de interpretação do checkpoint anterior:** a causa da falha estava indeterminada porque os logs não puderam ser recuperados. Com a nova captura, a classificação sustentada pela evidência passa a ser **perda de comunicação do self-hosted runner**; a causa-raiz operacional permanece pendente de investigação.
+
+
+## Política permanente — relatório para cada erro do GitHub Actions (01/11/2026)
+
+- **Solicitação explícita do autor:** a cada erro do Actions, a IA deve produzir um relatório com a causa, a solução, o motivo da escolha e as evidências.
+- **Regra implementada em `AGENTS.md`:** toda falha/anotação de erro exige investigação e relatório individual antes de corrigir, repetir ou contornar. O relatório deve identificar run/job/step/branch/SHA; preservar a mensagem literal; separar causa comprovada, hipóteses e lacunas; explicar impacto; comparar alternativas; justificar a solução escolhida; distinguir proposta de ação aplicada; registrar commit e validação; e indicar prevenção e participação necessária do autor.
+- **Modelo criado:** `docs/relatorios-actions/MODELO_RELATORIO_FALHA_ACTIONS.md`.
+- **Incidente atual documentado:** `docs/relatorios-actions/2026-11-01-run-41357977741-runner-perdeu-comunicacao.md`. A captura enviada pelo autor mostra a annotation “The self-hosted runner lost communication w…”. A perda de comunicação está comprovada pela captura; a causa-raiz operacional (rede, serviço/processo, suspensão/reinicialização ou outra) continua não confirmada. Nenhum código ou configuração foi alterado. Próxima ação é verificar o runner no Windows antes de uma única nova validação controlada.
+- **Commits documentais:** `5f198f452427265c6a01f10b89cbb9d442f4c2a4` (AGENTS.md); `66a6335ec0a39aeea6fa8c273729fc3149493523` (modelo); `31cde018cad9016eeaf938721e9d47a60e38c4de` (relatório do incidente atual).
+- **Limite:** esta regra orienta agentes que leem `AGENTS.md`; não significa que o GitHub Actions, sozinho, esteja configurado para chamar uma IA ou gerar relatórios automaticamente. A IA precisa consultar e seguir as instruções durante cada investigação.
