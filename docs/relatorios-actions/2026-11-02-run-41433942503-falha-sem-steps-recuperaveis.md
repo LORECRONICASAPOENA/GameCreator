@@ -126,3 +126,23 @@ Em 02/11/2026, o autor enviou duas fotografias do console do runner Windows. O t
 
 ### Decisão
 Não modificar o código do GameCreator nem o workflow de testes para contornar o conflito. A prioridade é diagnosticar e normalizar a identidade/sessão do runner Windows. O diagnóstico está mais específico, mas a causa operacional final ainda depende de inspeção local.
+
+
+## 11. Recuperação observada — runner voltou a escutar trabalhos
+
+Em 02/11/2026, o autor enviou nova captura do console `run.cmd - game creator`. Após mensagens repetidas de conflito (`A session for this runner already exists` / `Error: Conflict`), o console mostra:
+
+- `2026-11-02 13:12:43Z: Runner reconnected.`
+- `Current runner version: '2.338.0'`
+- `2026-11-02 13:12:43Z: Listening for Jobs`
+
+**Conclusão:** o processo visível recuperou a conexão com GitHub e voltou ao estado de escuta de trabalhos. A versão observada é 2.338.0. Isso confirma recuperação operacional naquele instante, mas não comprova que a causa do conflito foi removida nem que não existam outras instâncias. A fotografia também mostra uma segunda janela de terminal ao fundo, mas não permite identificar seu processo ou afirmar que seja outro runner.
+
+### Próximo passo seguro
+1. Não iniciar outro `run.cmd` nem iniciar o serviço em paralelo.
+2. Conferir em Settings → Actions → Runners se a identidade aparece Online/Idle.
+3. Verificar processos e serviço Windows para confirmar que só existe uma instância usando essa configuração. Preservar logs `_diag` antes de reiniciar/parar.
+4. Se estiver Online/Idle e houver somente uma instância, então reexecutar uma única vez o workflow da PR #11 para validar a recuperação. Observar se o job inicia e conclui; se houver novo conflito, interromper novas tentativas e coletar logs.
+5. Não alterar o código do GameCreator por causa do conflito de sessão.
+
+**Estado atualizado:** runner recuperado e escutando trabalhos na captura; estabilidade e causa-raiz ainda pendentes; PR #11 ainda sem validação aprovada no CI.
