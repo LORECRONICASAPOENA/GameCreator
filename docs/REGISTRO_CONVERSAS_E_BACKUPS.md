@@ -110,3 +110,16 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Referências:** Riot Support AFK FAQ, queue dodge, ranked decay, Apex tiers, Instant Feedback e Disruptive Behavior Repair; OWASP Game Security Framework.
 - **Commit:** `9d68305cd9b93d326b424d109b679e170293c17a`.
 - **Limite:** pesquisa e proposta de design; nenhuma regra de jogo foi implementada.
+
+
+## Plano para tornar Apoena um jogo online (02/11/2026)
+
+- **Solicitação:** explicar o que é necessário para colocar o jogo online.
+- **Arquitetura proposta:** cliente mobile; API HTTPS; servidores dedicados autoritativos para zonas/instâncias realtime; banco relacional (PostgreSQL como candidato, não decisão); storage/CDN para assets; painel administrativo; observabilidade, segurança e backups.
+- **Princípio:** cliente envia intenções; servidor valida e calcula combate, movimentação, inventário, economia e resultados. Cliente nunca conecta diretamente ao banco.
+- **Fases:** (0) confirmar engine, modelo de mundo, plataformas, simultaneidade e orçamento; (1) protótipo com servidor dedicado e 2–5 clientes; (2) contas e persistência; (3) combate, monstros, grupos e dungeons; (4) economia e mundo persistente; (5) beta fechado, carga, pentest e rollout.
+- **Primeiro MVP técnico:** uma área pequena, dois a cinco clientes, movimento sincronizado, validação no servidor, reconexão e persistência mínima.
+- **Decisões pendentes:** engine final, zonas vs mundo contínuo, jogadores simultâneos, plataforma, região/orçamento de hospedagem, backend próprio vs plataforma, funcionalidades iniciais.
+- **Documento:** `docs/PLANO_JOGO_ONLINE_APOENA.md`.
+- **Commit do plano:** `73d494674e6000f6deb8b44f5bd35517dc43bb7e`.
+- **Limite:** arquitetura planejada; nenhum backend, servidor ou recurso online foi implementado nesta conversa.
