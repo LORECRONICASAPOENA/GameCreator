@@ -50,3 +50,10 @@ Sempre que qualquer execução ou job do GitHub Actions terminar em `failure`, o
 - Não criar workflow paralelo para substituir uma investigação.
 - Não executar ações destrutivas, cancelar execuções válidas ou sobrescrever dados locais sem autorização e análise de impacto.
 - O relatório é obrigatório mesmo quando a causa for externa, transitória ou ainda desconhecida. Nesses casos, registrar claramente o limite da evidência e a próxima ação diagnóstica.
+
+
+## Launcher local e GitHub Actions
+
+- `ABRIR_GAME_CREATOR.cmd` é somente um atalho opcional para o usuário no Windows: chama `integracao/build_unificado.ps1` e abre `index.html` após o build. Não é uma dependência do CI.
+- O GitHub Actions deve chamar diretamente os scripts de build/teste necessários; nunca executar o launcher CMD como etapa do Runner.
+- Alterações isoladas no launcher CMD não devem acionar o workflow canônico. Manter o launcher enquanto for útil ao fluxo local; removê-lo somente após confirmar que nenhum usuário/atalho/documento depende dele e que o build direto continua acessível.
