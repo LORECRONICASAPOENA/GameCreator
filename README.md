@@ -59,3 +59,10 @@ O plano consolidado de História, Exploração Livre, MOBA, ecossistema, NPCs, e
 
 A primeira fatia foi integrada à main pela PR #2. Ela adiciona catálogo de terreno, propriedades ambientais e autotile, metadados de interação para objetos, perfis de plantas/animais/montarias, profissão e rotina de NPCs, papel econômico, perfis de mapa e validação. O editor inicia com a Cidade Capital de Agar no perfil História e mantém o preset de MOBA. Esses dados são a fundação de autoria/exportação; a simulação ecológica, as transações, as rotinas autônomas e o comportamento no jogo ainda exigem implementação e testes no runtime.
 
+
+
+## Segurança e continuidade técnica
+
+A documentação operacional de segurança do editor está em [docs/security/README.md](docs/security/README.md). Ela reúne auditoria histórica V4.1, achados SEC-001 a SEC-007, plano de remediação, evidências, backup/recuperação, segurança do GitHub e changelog. Os achados são preliminares e precisam ser revalidados no SHA atual.
+
+O histórico amplo de conversas, decisões transversais e proveniência do ecossistema Apoena fica centralizado no repositório [Apoena Skill](https://github.com/apoenalore/apoenaskil). GameCreator mantém apenas documentação técnica pertinente ao editor; não duplica lore ou memória administrativa.
