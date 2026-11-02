@@ -462,3 +462,20 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - Solução aplicada: relatório individual criado em [docs/relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md](relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md). Nenhum código do produto foi alterado para mascarar o erro.
 - Próxima ação: recuperar logs/annotations ou logs locais do runner Windows no intervalo acima; identificar a primeira etapa causal antes de corrigir ou repetir.
 - Estado: **NÃO RESOLVIDO / AGUARDANDO EVIDÊNCIA**.
+
+
+### GC-CI-014 — Run 41433942503 terminou em failure sem steps/logs recuperáveis
+
+- **Classificação:** falha confirmada; causa-raiz NÃO CONFIRMADA.
+- **Registro:** 02/11/2026; hora exata do cadastro não preservada nesta sessão.
+- **Repositório/PR:** `apoenalore/GameCreator`, [PR #11 — GC-ANIM-006](https://github.com/apoenalore/GameCreator/pull/11).
+- **Run:** [41433942503](https://github.com/apoenalore/GameCreator/actions/runs/41433942503), workflow `.github/workflows/pixel-art.yml`, evento `pull_request`, tentativa 1.
+- **Branch/SHA:** `feat/apoena-personagem-estudio-main` / `70a4e09e7243d56f0f0313a7791a849218514055`.
+- **Horários UTC:** criado/iniciado 2026-11-02T11:05:16Z; concluído/atualizado 2026-11-02T11:17:48Z.
+- **Evidência:** API confirma run `completed/failure` e job `validar` `completed/failure`; a resposta não contém steps individuais. Consulta de reviews e comentários da PR não encontrou revisão formal nem comentários de CodeRabbit.
+- **Erro literal/log causal:** indisponível; não foi retornado pela API consultada. Não inferir a etapa nem atribuir ao código/runner.
+- **Causa comprovada:** apenas o estado failure do job. **Causa-raiz: NÃO CONFIRMADA.**
+- **Solução efetivamente utilizada:** nenhuma correção técnica. Relatório individual publicado em [2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
+- **Próxima ação:** coletar logs/annotations do GitHub Actions ou logs locais do runner Windows; localizar primeira etapa causal. Não repetir o mesmo commit sem evidência de falha transitória e recuperação.
+- **Prevenção:** preservar relatório individual antes de qualquer correção/reexecução; não remover steps, assertions ou testes para obter CI verde.
+- **Estado:** ABERTO / AGUARDANDO EVIDÊNCIA.
