@@ -222,3 +222,14 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Agar:** auditoria anterior registrou falha do controle mobile da Floresta Viva, divergências de cenas/teclas e contratos QWERF contraditórios; nenhum teste novo foi executado nesta verificação. Não alterar cânone ou gameplay sem reconciliação.
 - **Pixel Art:** ideias de ondas de minions, torres, missões, inventário e menus podem ser adaptadas a 2D, preservando clima/ecossistema existente. Spritesheet esperado 128×192 (quadros 32×48) não foi confirmado como asset disponível.
 - **Preservação:** apenas documentos no GameCreator. Código, workflows, runners, PRs, assets e IndexedDB inalterados. WIP=1 mantido. Backup Mestre com originais e teste de restauração segue pendente.
+
+
+## Checkpoint — 02/11/2026, aproximadamente 17:59 BRT — Apoena jovem, Aurium, Ludo.ai e PR #13
+
+**Fonte:** imagens e diálogo da conversa + consulta autenticada ao GitHub. **Relatório detalhado:** [Apoena jovem, prompt Ludo e PR #13](relatorios-conversas/2026-11-02-checkpoint-2059-apoena-jovem-aurium-ludo-pr13.md).
+
+- **Identidade visual/cânone:** Apoena jovem (12 anos na abertura da aventura), cabelo branco volumoso, pele morena, olhos castanhos, camiseta azul-marinho, calça bege larga e sandálias marrons. **Usuário de Aurium, não arqueiro**; não atribuir arco, flechas, armas ou classe por inferência.
+- **Ludo.ai:** usuário anexou turnaround em três vistas e captura do Gerador de Sprites em modo Novo Sprite. Foi entregue prompt completo em inglês para criar primeiro sprite-base 2D pixel art, sem efeitos ativos; movimentos e spritesheets são próximos passos **não executados**. O prompt integral está no relatório.
+- **PR #13 GC-CHAR-001:** [Criador Modular de Personagens](https://github.com/apoenalore/GameCreator/pull/13) observado aberto e em rascunho. O arquivo `character-creator/index.html` existe na branch `feat/apoena-character-creator-prototype`, mas não há comprovação de substituição do gerador atual na `main`. O default "Guardião" não foi homologado como cânone.
+- **PR #11:** continua aberta em rascunho. CI anterior da PR #11 não homologa PR #13, sprite Ludo ou runtime.
+- **Preservação:** commit do relatório [`c5605ed`](https://github.com/apoenalore/GameCreator/commit/c5605ed91700686bf89751d23dca90e6e0992acb). Imagens originais e dados IndexedDB **não copiados**; Backup Mestre e restauração integral seguem pendentes. Nenhum código funcional, runner, workflow, asset, PR ou dado local alterado.
