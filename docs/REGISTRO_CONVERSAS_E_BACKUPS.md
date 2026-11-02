@@ -185,3 +185,36 @@ O autor definiu que o editor 3D e o editor Pixel Art 2D pertencem ao mesmo Game 
 - Atenção de segurança futura: `shared/creator-bridge.js` usa `postMessage` com destino `*` e aceita origem `null` em certas condições; revisar antes de ampliar integração externa, preservando uso offline.
 - Criado `docs/MATRIZ_ROTAS_DEPENDENCIAS_2026-11-02.md`, commit `ef1a307a32b59f05a85c0e3be44bc45fe8a33888`, na branch da PR #12.
 - Estado: **somente documentação e backup do conhecimento**, sem exclusões ou mudanças funcionais. Próxima tarefa única: corrigir os cinco links com teste de resolução; localizar fontes reais das poções e mapear a navegação interna do HTML grande antes de refatorar a plataforma.
+
+
+## Checkpoint de continuidade — 02/11/2026, aproximadamente 00h BRT (03h UTC)
+
+**Objetivo:** preservar a situação atual do Game Creator, as novidades efetivamente observadas e as limitações de backup sem interferir nas tarefas de código em andamento.
+
+### Referências Git confirmadas
+- `main`: `1b95d036c31dfb4ca9f9ce6859510be2c9f7e8cd`. Não foram observados commits posteriores na branch principal nesta consulta.
+- `maintenance/audit-cleanup-20261102`: `956f3e5ebcd47a2dcd0a7f38019dfd979640970f` antes deste checkpoint. [PR #12](https://github.com/apoenalore/GameCreator/pull/12) aberta, em rascunho, sem merge. Contém apenas documentação: arquitetura única 3D/2D/2.5D, matriz de rotas, auditoria e registro de decisões.
+- `feat/atualizador-local-incremental`: `b5836634b19dfcad3fa61fc3f7a85561c5be1f95`. [PR #7](https://github.com/apoenalore/GameCreator/pull/7) aberta em rascunho; branch divergente de `main` (4 commits à frente, 27 atrás no snapshot). Não considerar o atualizador integrado à principal.
+
+### Novidades detectadas na PR #7
+- `ATUALIZAR_CREATOR.cmd` e `integracao/atualizar-creator.ps1` introduzem instalador/atualizador Windows baseado em clone parcial, sparse-checkout e fast-forward, com verificações conservadoras de arquivos locais.
+- `tests/atualizador-manifest.test.cjs` testa manifesto e cenários de atualização/colisão, inclusive PowerShell real em repositório Git temporário, segundo a documentação da branch.
+- `docs/ATUALIZADOR_CREATOR_WINDOWS.md` esclarece que a pasta APP deve conter somente runtime, preservando docs/testes/histórico no GitHub; a instalação não deve tocar a pasta RUNNER.
+- Commits recentes observados: `b854f7f` (proteção de caminhos e referência anterior), `ddfd541` (teste contra caminhos fora da allowlist), `b583663` (proveniência e timestamps de incidente).
+- **Estado:** implementação e testes em evolução; ainda exige CI do head atualizado e teste de instalação/atualização no Windows do autor. Não declarar entregue.
+
+### Estado de validação consultado
+- [Run #41380526501](https://github.com/apoenalore/GameCreator/actions/runs/41380526501) do head `b583663`: `pending` na consulta; sem resultado final.
+- [Run #41380498183](https://github.com/apoenalore/GameCreator/actions/runs/41380498183) do commit `ddfd541`: `in_progress` na consulta; sem resultado final.
+- [Run #41367279379](https://github.com/apoenalore/GameCreator/actions/runs/41367279379), `main`, commit `57c8208`: `completed/failure`. A API forneceu job `validar`, mas não trouxe steps nem mensagem causal; **causa não confirmada**. Requer logs antes de propor correção; não repetir execução sem diagnóstico.
+- Nenhum workflow foi disparado manualmente nesta verificação e nenhum teste foi declarado aprovado sem evidência.
+
+### Limites reais do backup
+- O histórico de commits, branches e documentação está preservado no GitHub; este checkpoint é um resumo factual, **não** um espelho literal das conversas nem um backup dos arquivos locais do computador.
+- O conteúdo de IndexedDB da biblioteca do navegador, projetos não exportados, assets binários que não foram enviados e arquivos pessoais da pasta APP **não são automaticamente protegidos pelo Git**. A documentação do atualizador exige exportação e conferência de restauração da biblioteca antes de abandonar uma instalação antiga.
+- A PR #12 ainda depende de revisão e merge para que seus registros façam parte da `main`. Nenhum HTML, script, asset, workflow ou módulo funcional foi apagado/alterado por este checkpoint.
+
+### Próxima ação coordenada
+- Respeitar WIP = 1: acompanhar a validação do atualizador (PR #7) antes de iniciar refatorações de código concorrentes.
+- Depois, seguir a integração da plataforma única 3D + Pixel Art 2D + mapas 2.5D, corrigindo primeiro os links quebrados comprovados e preservando o catálogo antigo até localizar suas fontes de poções.
+- Continuar registrando novidades com SHA, branch, arquivos, estado de CI e distinção entre proposta, implementação e validação.
