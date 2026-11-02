@@ -256,3 +256,35 @@ O autor definiu que o editor 3D e o editor Pixel Art 2D pertencem ao mesmo Game 
 - Preservar os cinco links legados quebrados e as nove fontes de poções ausentes como achados documentados; corrigir/migrar apenas após rastrear dependências, sem inventar assets nem remover conteúdo exclusivo.
 - O backup Git registra **commits, documentos e decisões acessíveis**, mas não é cópia literal de todas as conversas nem protege automaticamente projetos em IndexedDB, assets locais não enviados ou dados da pasta APP. A restauração real desses dados exige exportação e teste.
 - Esta execução atualiza **somente documentação na branch de auditoria**; não altera a `main`, scripts, builds, editores ou assets.
+
+
+## Checkpoint incremental — 02/11/2026, 02h06 BRT (05h06 UTC)
+
+**Pedido recorrente do autor:** fazer backup no GitHub do projeto Game Creator após as conversas e preservar novidades e informações detalhadas, sem perder decisões, limitações ou histórico.
+
+### 1. Novidades de conversas e decisões
+- Na revisão de continuidade desta janela não foram identificadas novas decisões ou novas conversas do projeto posteriores ao checkpoint anterior de aproximadamente 01h BRT. A arquitetura aprovada continua sendo **uma plataforma única** com Estúdio 3D, Estúdio Pixel Art 2D e Editor de Mapas 2.5D, projeto e biblioteca compartilhados; prioridade de integração Godot 4 e suporte HTML5.
+- Permanecem pendentes a limpeza criteriosa de rotas vazias/links quebrados e a recuperação das fontes de poções ausentes. Não eliminar módulos antigos sem rastrear dependências e migrar conteúdo exclusivo.
+- Nenhuma alteração funcional foi solicitada nesta janela além da manutenção do backup detalhado.
+
+### 2. Estado GitHub consultado
+- Repositório: https://github.com/apoenalore/GameCreator.
+- `main`: SHA `1b95d036c31dfb4ca9f9ce6859510be2c9f7e8cd`, sem novos commits na consulta.
+- PR #12: https://github.com/apoenalore/GameCreator/pull/12 — aberta em **rascunho**, branch `maintenance/audit-cleanup-20261102`. Head antes desta verificação: `7b0856492b9f0445a277fa36e7163256f1ef0bd0`; a PR preserva auditoria, arquitetura, matriz de rotas, incidentes e checkpoints, **sem merge na main**.
+- PR #7: https://github.com/apoenalore/GameCreator/pull/7 — aberta, head `b5836634b19dfcad3fa61fc3f7a85561c5be1f95`, atualizador incremental Windows; ainda não validada no head.
+- PRs #11, #6, #5 e #4 permaneciam abertas na consulta. Não houve evidência de merge recente dessas PRs.
+
+### 3. Evidência nova: indisponibilidade dos logs de duas falhas do CI
+- Run `41380526501` (PR #7, commit `b583663`, job `125071409041`) permanece `completed/failure`.
+- Run `41367279379` (`main`, commit `57c8208`, job `125031378121`) permanece `completed/failure`.
+- A consulta específica aos steps retornou `steps=[]` nos dois jobs.
+- O download específico de logs dos dois jobs retornou **HTTP 404 / `BlobNotFound`** do armazenamento de logs, em 02/11/2026 05:06:09Z e 05:06:10Z, respectivamente. A mensagem do serviço foi `The specified blob does not exist`.
+- **Interpretação rigorosa:** `BlobNotFound` é erro ao obter o arquivo de log; **não** demonstra a causa das falhas dos workflows. As causas continuam **NÃO CONFIRMADAS**.
+- Foram complementados os relatórios `docs/relatorios-actions/2026-11-02-run-41380526501-validacao-atualizador-sem-logs.md` e `docs/relatorios-actions/2026-11-01-run-41367279379-main-sem-logs.md` com a nova evidência.
+- Próxima coleta necessária: annotations/logs na interface GitHub Actions e logs locais do runner Windows. Não repetir workflow cegamente nem alterar código com base em hipótese.
+
+### 4. Integridade e limites do backup
+- Esta rodada modificou **somente documentação** na branch de auditoria. Nenhum HTML, asset, script, workflow, configuração de runner ou arquivo funcional foi excluído/alterado. Nenhum merge ou retry foi efetuado.
+- O backup preserva o histórico versionado e o conhecimento documentado no GitHub, **não** é espelho literal de todas as conversas nem backup dos dados locais de IndexedDB, projetos não exportados, imagens/modelos não enviados ou arquivos pessoais da pasta APP.
+- Manter o protocolo **WIP = 1** e não iniciar refatoração paralela enquanto a validação da tarefa ativa estiver pendente.
+- **Próximo passo:** coletar logs causais das falhas; depois retomar a unificação 3D/2D/2.5D e correção de rotas com testes de regressão.
