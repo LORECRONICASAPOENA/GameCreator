@@ -271,10 +271,11 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - **Objetivo:** manter documentação, auditorias, histórico, testes e workflows no repositório privado, mas materializar somente os arquivos necessários ao runtime na pasta APP.
 - **Implementação:** clone parcial com --filter=blob:none, sparse-checkout por lista positiva, manifesto de arquivos essenciais, fetch explícito de origin/main, fast-forward e proteção de arquivos ignorados.
 - **Preservação:** não usar reset/clean; não apagar runner, biblioteca IndexedDB, arquivos pessoais ou histórico local.
-- **Revisão/sincronização:** a branch anterior da PR #7 estava divergente de main. Foi preservada em backup/gc-update-009-before-main-sync-20261030; a versão de trabalho está sendo reaplicada sobre a main atual antes de atualizar a PR.
-- **Validação automatizada planejada:** teste isolado com repositório Git local para confirmar sparse-checkout, exclusão de documentos, fast-forward, referência anterior e bloqueio de conflito com arquivo ignorado.
-- **Validação automatizada:** CI canônica aprovada no SHA `b483bff226e5488175b6c776f4cfd24da5f30fae`, run [41488368286](https://github.com/apoenalore/GameCreator/actions/runs/41488368286); manifesto do atualizador, Godot, preservação e job completo passaram.
-- **Pendências de aceite:** revisão CodeRabbit do diff atualizado; teste real de instalação/atualização no Windows; backup e restauração da biblioteca IndexedDB conferidos pelo autor.
+- **Revisão/sincronização:** a branch de trabalho da PR #7 foi reaplicada sobre a `main` atual; o backup `backup/gc-update-009-before-main-sync-20261030` preserva a branch anterior.
+- **Testes automatizados:** o workflow Windows executa parser PowerShell 5.1 e o contrato/end-to-end do atualizador contra repositório Git temporário, cobrindo sparse-checkout, exclusão de documentos, fast-forward, referência anterior, retomada e bloqueio de conflitos.
+- **Validação automatizada:** CI canônica aprovada no head atual `2546c1b79964c0e46b95b6de0791aad765d3fe8c`, run [41490114161](https://github.com/apoenalore/GameCreator/actions/runs/41490114161); manifesto, Godot, preservação e job completo passaram.
+- **Revisão CodeRabbit:** achados sobre allowlist e atualização de `refs/apoena/anterior` corrigidos; comentários registrados como resolvidos após validação.
+- **Pendências de aceite:** teste real de instalação/atualização no Windows do autor; exportação e restauração da Biblioteca IndexedDB antes de abandonar a instalação antiga.
 - **Regra:** não integrar a PR nem declarar concluído até todos os critérios acima terem evidência.
 
 
