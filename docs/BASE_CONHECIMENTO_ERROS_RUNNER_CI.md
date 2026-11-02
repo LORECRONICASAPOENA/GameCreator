@@ -456,8 +456,8 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - Commit: `a9c7148f01504f7be142dd0d852056dd5a9a5114`.
 - Job: `validar`, ID `125207251095`, estado `completed/failure`.
 - Horário da tentativa: início 2026-11-02T06:53:49-03:00; última atualização 2026-11-02T07:03:54-03:00.
-- Evidência disponível: API do GitHub confirma failure no run e no job. A listagem do job não retornou steps.
-- Limitação: a tentativa de baixar os logs do job retornou HTTP 404 / `BlobNotFound`; annotations e primeira mensagem causal não estão disponíveis na consulta.
+- Evidência disponível: API do GitHub confirma failure no run e no job; runner ID `2` (`APOENA-GAMECREATOR-RUNNER`), grupo `Default`, labels `self-hosted`, `Windows`, `X64`, foi atribuído. O job iniciou em `2026-11-02T09:53:53Z` e concluiu em `2026-11-02T10:03:54Z`; a resposta da tentativa 4 retornou `steps=[]`.
+- Limitação: a tentativa de baixar os logs do job retornou HTTP 404 / `BlobNotFound`; o endpoint de logs da tentativa retornou conteúdo vazio; annotations e primeira mensagem causal não estão disponíveis. O runner atribuído elimina a hipótese de job nunca agendado, mas não prova se a falha foi do runner ou do código.
 - Causa raiz: **CAUSA NÃO CONFIRMADA**. Não afirmar falha de código, teste ou runner sem os logs.
 - Solução aplicada: relatório individual criado em [docs/relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md](relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md). Nenhum código do produto foi alterado para mascarar o erro.
 - Próxima ação: recuperar logs/annotations ou logs locais do runner Windows no intervalo acima; identificar a primeira etapa causal antes de corrigir ou repetir.
