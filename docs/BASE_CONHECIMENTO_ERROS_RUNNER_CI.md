@@ -479,3 +479,15 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - **Próxima ação:** coletar logs/annotations do GitHub Actions ou logs locais do runner Windows; localizar primeira etapa causal. Não repetir o mesmo commit sem evidência de falha transitória e recuperação.
 - **Prevenção:** preservar relatório individual antes de qualquer correção/reexecução; não remover steps, assertions ou testes para obter CI verde.
 - **Estado:** ABERTO / AGUARDANDO EVIDÊNCIA.
+
+
+### Atualização GC-CI-014 — evidência visual recebida em 02/11/2026
+
+- O autor forneceu captura da anotação expandida do GitHub Actions para o run [41433942503](https://github.com/apoenalore/GameCreator/actions/runs/41433942503).
+- Texto exibido: **“0 executor auto-hospedado perdeu a comunicação com o servidor. Verifique se a máquina está em execução e possui uma conexão de rede estável. Qualquer fator no seu fluxo de trabalho que encerre o processo do executor, consuma toda a CPU/memória necessária ou bloqueie seu acesso à rede pode causar esse erro.”**
+- **Categoria confirmada:** perda de comunicação do runner auto-hospedado com o servidor GitHub.
+- **Causa operacional específica ainda não confirmada:** rede/DNS/proxy/firewall, suspensão/desligamento do Windows, encerramento do processo/serviço do runner, saturação de CPU/memória ou outro bloqueio. A anotação enumera possibilidades; não prova qual ocorreu.
+- **Implicação:** não há evidência nesta anotação de defeito no código de animação nem de falha em teste funcional. Priorizar diagnóstico de runner/ambiente. Não alterar o código do Estúdio para corrigir esta falha de comunicação.
+- **Próxima ação quando o computador estiver disponível:** consultar logs locais do runner no diretório _diag no intervalo do run; verificar estado de energia/suspensão/reinicialização do Windows, rede estável, DNS, HTTPS para GitHub, proxy/firewall e recursos CPU/memória.
+- Relatório individual atualizado: [2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
+- **Estado:** ABERTO / CATEGORIA IDENTIFICADA / CAUSA OPERACIONAL PENDENTE.
