@@ -79,7 +79,7 @@ $arquivosEssenciais += @(0..23 | ForEach-Object { 'bundle-v4/parte_{0:D3}.js' -f
 $arquivosEssenciais += @(0..22 | ForEach-Object { 'legacy/v3_9_parts/parte_{0:D3}.js' -f $_ })
 
 # Impede que um arquivo ignorado do usuario seja substituido por um arquivo do Creator.
-$regexRuntime = '^(ABRIR_GAME_CREATOR\.cmd|ATUALIZAR_CREATOR\.cmd|APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA\.html|index\.html|bundle-v4/[^/]*\.js|integracao/(index\.html|catalogo\.js|build_unificado\.ps1|atualizar-creator\.ps1|godot/(ApoenaCatalogo\.gd|project\.godot|dados/apoena_catalogo\.json))|legacy/(abrir-editor-v3\.9\.html|v3_9_parts/[^/]*\.js)|shared/[^/]*\.js|biblioteca/[^/]*\.html|map-editor/[^/]*\.(js|html)|pixel-art/[^/]*\.(js|html|json))
+$regexRuntime = '^(ABRIR_GAME_CREATOR\.cmd|ATUALIZAR_CREATOR\.cmd|APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA\.html|index\.html|bundle-v4/[^/]*\.js|integracao/(index\.html|catalogo\.js|build_unificado\.ps1|atualizar-creator\.ps1|godot/(ApoenaCatalogo\.gd|project\.godot|dados/apoena_catalogo\.json))|legacy/(abrir-editor-v3\.9\.html|v3_9_parts/[^/]*\.js)|shared/[^/]*\.js|biblioteca/[^/]*\.html|map-editor/[^/]*\.(js|html)|pixel-art/[^/]*\.(js|html|json))$'
 
 function Registrar([string]$Mensagem) {
     $linha = ('{0} horario local | {1}' -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz'), $Mensagem)
