@@ -10,6 +10,14 @@
 - O build adiciona a área Pixel Art à fonte V4.0 sem sobrescrever o arquivo original. O CI testa o build em um checkout descartável e entrega o resultado compilado no pacote.
 - O Estúdio Pixel Art e o editor de mapas são ferramentas especializadas abertas pelo menu Pixel Art nativo. Quando abertos por esses links, sincronizam spritesheets/mapas com a sessão V4.0 pela ponte `apoena.creator.v4.bridge.v1`, além de salvar na biblioteca IndexedDB.
 
+## Criador de Personagens Apoena (protótipo)
+
+- Abrir: [character-creator/index.html](character-creator/index.html).
+- Protótipo funcional para importar PNG/WebP/JPG transparentes como camadas independentes (corpo, cabeça, cabelo, roupas, calçados, armas e efeitos), ajustar posição/escala/opacidade, ordenar e ocultar camadas, montar uma prévia, salvar localmente e exportar PNG/JSON.
+- Inclui recorte inicial de spritesheets por grade, seleção de quadros e exportação dos quadros recortados.
+- Para testar com o Apoena de referência, importe os PNGs fornecidos nas categorias correspondentes. A referência completa não foi embutida como recurso binário nesta primeira entrega; os arquivos originais do usuário não são modificados.
+- **Limites desta versão:** não gera peças automaticamente a partir de uma imagem única; não tem rig/esqueleto, animação por ossos, catálogo compartilhado IndexedDB nem instalação validada no runtime Godot. O JSON atual registra metadados e transformações; exporte também o PNG composto. Integração com a biblioteca e contrato Godot são próximos passos, não capacidades concluídas.
+
 ## Ferramentas V4.1
 
 - **Estúdio Pixel Art:** importação PNG/WebP/JPG, recorte livre e por grade, divisórias ajustáveis, transparência, borracha, remoção de fundo por região conectada, detecção de sprites separados, prévia dos limites e desfazer da limpeza em lote.
