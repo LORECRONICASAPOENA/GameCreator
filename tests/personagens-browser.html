@@ -1,24 +1,25 @@
-<!doctype html><meta charset="utf-8"><title>Character integration test</title><pre id="result">RUNNING</pre><iframe id="app" src="../pixel-art/personagens.html" style="width:1280px;height:1100px"></iframe><script src="../shared/asset-library.js"></script><script src="../shared/creator-bridge.js"></script><script>
+<!doctype html><meta charset="utf-8"><title>Character integration test</title><pre id="result">RUNNING</pre><iframe id="app" src="../pixel-art/personagens.html?test=1" style="width:1280px;height:1100px"></iframe><script src="../shared/asset-library.js"></script><script src="../shared/creator-bridge.js"></script><script>
 let received;
 window.addEventListener('message', async e=>{const m=e.data;if(e.source!==document.getElementById('app').contentWindow||m?.channel!==ApoenaLibrary.schema||m.type!=='request')return;try{const value=await ApoenaLibrary.dispatch(m.action,m.payload);e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:true,value},'*');}catch(error){e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:false,error:{message:error.message}},'*');}});
 ApoenaCreatorBridge.listen((action,payload)=>{if(action!=='saveAsset')throw Error('Wrong bridge action');received=payload;return {id:'test-character'};});
 document.getElementById('app').onload=async()=>{
 const w=document.getElementById('app').contentWindow,d=w.document,$=id=>d.getElementById(id),assert=(ok,m)=>{if(!ok)throw Error(m)},pause=()=>new Promise(r=>setTimeout(r,50));
 async function until(fn){for(let i=0;i<180;i++){if(fn())return;await pause();}throw Error('Timeout: '+$('status').textContent);}
-async function click(id){$(id).click();await pause();}
-function change(id,value){$(id).value=value;$(id).dispatchEvent(new Event('change'));}
+async function idle(){const timeout=new Promise((_,reject)=>setTimeout(()=>reject(Error('Timeout aguardando fila de operações. Status: '+$('status').textContent)),5000));await Promise.race([w.__apoenaTestHooks.whenIdle(),timeout]);}
+async function click(id){$(id).click();await idle();}
+async function change(id,value){$(id).value=value;$(id).dispatchEvent(new Event('change'));await idle();}
 try{
 const c=d.createElement('canvas');c.width=48;c.height=64;const ctx=c.getContext('2d');for(let row=0;row<4;row++)for(let col=0;col<3;col++){ctx.fillStyle=['#f00','#0f0','#00f'][col];ctx.fillRect(col*16+4,row*16+4,8,12);}const original=c.toDataURL();const png=await new Promise(r=>c.toBlob(r));const transfer=new w.DataTransfer();transfer.items.add(new w.File([png],'corpo.png',{type:'image/png'}));$('pieces').files=transfer.files;$('pieces').dispatchEvent(new Event('change'));await until(()=>$('layers').children.length===1);
-await click('editLayer');change('cols',3);change('rows',4);await click('fitGrid');await click('applyGrid');assert($('cellW').value==='16','Grid width');assert($('cellH').value==='16','Grid height');
+await click('editLayer');await change('cols',3);await change('rows',4);await click('fitGrid');await click('applyGrid');assert($('cellW').value==='16','Grid width');assert($('cellH').value==='16','Grid height');
 // Exercise brush mutation at a known opaque pixel; pointer capture is browser-owned.
 const ed=$('editor'),box=ed.getBoundingClientRect();ed.setPointerCapture=()=>{};
 const alpha=()=>ed.getContext('2d').getImageData(8,10,1,1).data[3];assert(alpha()===255,'Opaque fixture pixel');
 ed.dispatchEvent(new w.PointerEvent('pointerdown',{pointerId:1,clientX:box.left+box.width*.5,clientY:box.top+box.height*.625,bubbles:true}));
-ed.dispatchEvent(new w.PointerEvent('pointerup',{pointerId:1,bubbles:true}));await pause();assert(alpha()===0,'Borracha removes selected pixel');
+ed.dispatchEvent(new w.PointerEvent('pointerup',{pointerId:1,bubbles:true}));await idle();assert(alpha()===0,'Borracha removes selected pixel');
 await click('undo');assert(alpha()===255,'Undo restores pixel');await click('redo');assert(alpha()===0,'Redo reapplies erase');
 
 await click('smart');assert(!$('smartActions').hidden,'Smart crop preview');await click('cancelSmart');assert($('smartActions').hidden,'Smart cancel');
-await click('backCompose');change('name','Personagem teste');await pause();await click('save');await until(()=>$('status').textContent.includes('Projeto editável salvo'));
+await click('backCompose');await change('name','Personagem teste');await click('save');await until(()=>$('status').textContent.includes('Projeto editável salvo'));
 const projects=await w.ApoenaLibrary.listProjects({}),saved=projects.find(p=>p.name==='Personagem teste');assert(saved,'Saved project');assert(saved.data.layers[0].source===original,'Original source persisted');assert(saved.data.layers[0].grid.cols===3,'Grid persisted');
 await click('saveLibrary');await until(()=>$('status').textContent.includes('Spritesheet e projeto'));
 const assets=await w.ApoenaLibrary.listAssets({category:'personagem'});assert(assets.some(a=>a.id===saved.id+'-sheet'),'Central library asset');
