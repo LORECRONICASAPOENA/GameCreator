@@ -285,3 +285,12 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 ## Evidência recebida — GC-ANIM-006 / run 41433942503
 
 Em 02/11/2026, o autor enviou captura da anotação expandida do GitHub Actions. A mensagem confirma que o executor auto-hospedado perdeu comunicação com o servidor. A categoria da falha é infraestrutura/conectividade do runner; a causa específica (rede, suspensão/desligamento, processo encerrado, CPU/memória ou bloqueio de acesso) continua pendente. Não há evidência de erro de código do Estúdio nesta anotação. Não alterar código de produto para tentar resolver a desconexão. Quando o computador estiver disponível, consultar os logs locais do runner no diretório _diag e verificar energia, rede, DNS, proxy/firewall e recursos do runner. Relatório atualizado: [GC-CI-014](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
+
+## GC-CHAR-001 — Integração funcional do criador modular (EM EXECUÇÃO)
+
+Em 02/11/2026, o autor autorizou implementar o gerador dentro do Creator, com todos os controles operacionais. Esta é a tarefa ativa por decisão expressa do autor.
+
+Escopo: entrada Pixel Art → Criador modular; importação de peças; camadas e transformações; animações por linha; malha com origem/espaçamento; limpeza reversível por quadro; projeto portátil; biblioteca central; gravação no Creator; exportação PNG e SpriteFrames Godot 4. Preservar o gerador clássico e as abas existentes.
+
+Critérios: testes de modelo e importação; teste de navegador com montagem, limpeza, reabertura e integração; validação canônica no SHA publicado; revisão técnica. Arquivos: pixel-art/personagens.*, pixel-art/modulo-integrado.js, tests e workflow canônico. Não declarar 100% antes da CI/revisão.
+

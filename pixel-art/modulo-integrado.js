@@ -6,25 +6,426 @@ window.ApoenaPixelIntegrado={mount(container){
  const html="\n<header>\n<span class=\"tag\">Pixel Art integrado ao Game Creator v4.0</span>\n<div class=\"tag\">APOENA AGAR • PIXEL ART 2.5D</div>\n<h1>Gerador modular de personagens</h1>\n<p>Corpo, cabelo, roupas, tribos, armas e acessórios. Funciona offline no navegador do celular, sem cadastro ou IA paga.</p>\n</header>\n<section class=\"card\">\n<h2>Ferramentas do Creator V4.1</h2>\n<p>O editor nativo da V4.0 continua sendo a base. Use as ferramentas adicionais para editar spritesheets, trabalhar com mapas e administrar recursos compartilhados.</p>\n<div class=\"actions\">\n<a class=\"button\" href=\"pixel-art/estudio.html\" target=\"_blank\" rel=\"opener\">Estúdio de spritesheets</a>\n<a class=\"button secondary\" href=\"map-editor/index.html\" target=\"_blank\" rel=\"opener\">Editor de mapas 2.5D</a>\n<a class=\"button secondary\" href=\"biblioteca/index.html\" target=\"_blank\" rel=\"noopener\">Biblioteca central</a>\n<a class=\"button secondary\" href=\"integracao/index.html\" target=\"_blank\" rel=\"noopener\">Exportação para Godot</a>\n</div>\n</section>\n<main>\n<div class=\"grid\">\n<section class=\"card\">\n<h2>1. Monte seu personagem</h2>\n<div class=\"actions\" style=\"margin-bottom:12px\">\n<button type=\"button\" class=\"secondary\" data-preset=\"apoena\">Apoena</button>\n<button type=\"button\" class=\"secondary\" data-preset=\"agua\">Água</button>\n<button type=\"button\" class=\"secondary\" data-preset=\"fogo\">Fogo</button>\n<button type=\"button\" class=\"secondary\" data-preset=\"terra\">Terra</button>\n<button type=\"button\" class=\"secondary\" data-preset=\"ar\">Ar</button>\n</div>\n<div class=\"fields\">\n<label><span>Nome</span><input data-key=\"nome\" type=\"text\" maxlength=\"40\" value=\"Apoena\" autocomplete=\"off\"></label>\n<label><span>Tribo</span><select data-key=\"tribo\"><option value=\"nenhuma\">Sem tribo</option><option value=\"agua\">Água (azul)</option><option value=\"fogo\">Fogo (vermelho)</option><option value=\"terra\">Terra (verde)</option><option value=\"ar\">Ar (amarelo)</option></select></label>\n<label><span>Corpo</span><select data-key=\"corpo\"><option value=\"juvenil\">Juvenil</option><option value=\"adulto\">Adulto</option><option value=\"forte\">Forte</option></select></label>\n<label><span>Cabelo (formato)</span><select data-key=\"cabeloTipo\"><option value=\"espetado\">Espetado</option><option value=\"curto\">Curto</option><option value=\"longo\">Longo</option><option value=\"preso\">Preso</option><option value=\"raspado\">Raspado</option></select></label>\n<label><span>Roupa</span><select data-key=\"roupaTipo\"><option value=\"aventureiro\">Aventureiro</option><option value=\"tunica\">Túnica</option><option value=\"armadura\">Armadura</option><option value=\"mago\">Mago</option><option value=\"sacerdote\">Sacerdote</option></select></label>\n<label><span>Calça</span><select data-key=\"calcaTipo\"><option value=\"comprida\">Comprida</option><option value=\"curta\">Curta</option></select></label>\n<label><span>Capa</span><select data-key=\"capa\"><option value=\"nenhuma\">Sem capa</option><option value=\"curta\">Curta</option><option value=\"longa\">Longa</option></select></label>\n<label><span>Equipamento</span><select data-key=\"acessorio\"><option value=\"manopla\">Manopla de cristais</option><option value=\"colar\">Colar</option><option value=\"espada\">Espada</option><option value=\"lanca\">Lança</option><option value=\"arco\">Arco</option><option value=\"grimorio\">Grimório</option><option value=\"cajado\">Cajado</option><option value=\"nenhum\">Nenhum</option></select></label>\n<label><span>Pele</span><input data-key=\"pele\" type=\"color\" value=\"#a97657\"></label>\n<label><span>Olhos</span><input data-key=\"olhos\" type=\"color\" value=\"#634027\"></label>\n<label><span>Cabelo (cor)</span><input data-key=\"cabelo\" type=\"color\" value=\"#ebf0f5\"></label>\n<label><span>Roupa (cor)</span><input data-key=\"roupa\" type=\"color\" value=\"#3a6c83\"></label>\n<label><span>Calça (cor)</span><input data-key=\"calca\" type=\"color\" value=\"#f0ece2\"></label>\n<label><span>Botas (cor)</span><input data-key=\"botas\" type=\"color\" value=\"#765139\"></label>\n</div>\n<p class=\"muted\">As peças são desenhadas separadamente, mantendo o encaixe de corpo, roupa e cabelo em todas as direções. Esta é a biblioteca inicial de modelos, não uma IA de imagem.</p>\n</section>\n<section class=\"card\">\n<h2>2. Visualize o resultado</h2>\n<div class=\"preview-layout\">\n<div class=\"center\">\n<canvas id=\"preview\" width=\"192\" height=\"288\" aria-label=\"Prévia ampliada do personagem\"></canvas>\n<label style=\"margin-top:9px\"><span>Vista do personagem</span><select id=\"direction\"><option value=\"0\">Frente (sul)</option><option value=\"1\">Esquerda (oeste)</option><option value=\"2\">Direita (leste)</option><option value=\"3\">Costas (norte)</option></select></label>\n</div>\n<div class=\"center\">\n<div class=\"tag\">SPRITESHEET</div>\n<canvas id=\"sheetPreview\" width=\"128\" height=\"192\" aria-label=\"Spritesheet 4 direções por 4 quadros\"></canvas>\n<small>128 × 192 px · 16 poses · transparência · pixel perfeito</small>\n</div>\n</div>\n<h3>3. Salvar e levar ao Godot 4</h3>\n<div class=\"actions\">\n<button id=\"exportZip\" type=\"button\">Baixar pacote Godot (.zip)</button>\n<button id=\"exportPng\" type=\"button\" class=\"secondary\">Spritesheet PNG</button>\n<button id=\"exportJson\" type=\"button\" class=\"secondary\">Salvar personagem JSON</button>\n<button id=\"exportLayer\" type=\"button\" class=\"secondary\">Baixar peça PNG</button>\n</div>\n<label style=\"margin:12px 0\"><span>Peça para exportar separadamente</span><select id=\"layer\"><option value=\"capa\">Capa</option><option value=\"corpo\">Corpo e rosto</option><option value=\"calca\">Calça</option><option value=\"botas\">Botas</option><option value=\"roupa\">Roupa</option><option value=\"cabelo\">Cabelo</option><option value=\"acessorio\">Acessórios / armas</option></select></label>\n<label class=\"button secondary\" style=\"display:inline-block;text-align:center;cursor:pointer\">Importar personagem JSON\n<input id=\"importJson\" type=\"file\" accept=\".json,application/json\" hidden>\n</label>\n<div class=\"note\" style=\"margin:15px 0;padding:13px;border:1px solid #466374;border-radius:9px\">\n<strong>Vincular item do Game Creator ao personagem</strong>\n<p>Importe o catálogo criado na Central de Integração e escolha uma arma, acessório ou outro item cadastrado. O ID ficará no JSON e no ZIP do personagem para o jogo usar depois. <strong>Isso não desenha automaticamente a arma no sprite.</strong></p>\n<label style=\"cursor:pointer\">Importar catálogo de itens (.json)\n<input id=\"catalogJson\" type=\"file\" accept=\".json,application/json\"></label>\n<label>Item do catálogo para vincular</label>\n<select id=\"catalogItem\"><option value=\"\">Nenhum item vinculado</option></select>\n<small id=\"catalogInfo\">Nenhum catálogo importado.</small>\n</div>\n<p id=\"status\" class=\"status\" role=\"status\" aria-live=\"polite\"></p>\n<p class=\"note\">O ZIP inclui PNG completo, PNG de cada camada, JSON e um <strong>SpriteFrames .tres</strong> para Godot 4. Extraia a pasta <code>personagem</code> dentro da raiz do projeto Godot. Não muda o jogo automaticamente.</p>\n</section>\n</div>\n<section class=\"card\">\n<h2>4. Testar no celular — pequena arena HTML</h2>\n<p class=\"muted\">Movimente o personagem com os botões de direção ou setas/WASD. O piso e os obstáculos são uma demonstração 2.5D, não o mapa MOBA completo. Funciona sem internet.</p>\n<canvas id=\"arena\" width=\"320\" height=\"216\" aria-label=\"Arena demonstrativa com personagem controlável\"></canvas>\n<div class=\"dpad\" aria-label=\"Controles de movimento\">\n<button type=\"button\" data-dir=\"up\" aria-label=\"Mover para cima\">▲</button>\n<button type=\"button\" data-dir=\"left\" aria-label=\"Mover para esquerda\">◀</button>\n<button type=\"button\" data-dir=\"right\" aria-label=\"Mover para direita\">▶</button>\n<button type=\"button\" data-dir=\"down\" aria-label=\"Mover para baixo\">▼</button>\n</div>\n<p class=\"center muted\">Sem bibliotecas externas, sem servidor e sem conexão com o Runner. Os arquivos são baixados para seu dispositivo.</p>\n</section>\n</main>\n";
  pixelRoot.innerHTML='<style>'+css+'</style>'+html;
  
+(function(){
+"use strict";
+const W=32,H=48,DIRS=["sul","oeste","leste","norte"];
+const LAYERS=["capa","corpo","calca","botas","roupa","cabelo","acessorio"];
+const keys=["nome","tribo","corpo","cabeloTipo","roupaTipo","calcaTipo","capa","acessorio","pele","olhos","cabelo","roupa","calca","botas"];
+const presets={
+ apoena:{nome:"Apoena",tribo:"nenhuma",corpo:"juvenil",cabeloTipo:"espetado",roupaTipo:"aventureiro",calcaTipo:"comprida",capa:"nenhuma",acessorio:"manopla",pele:"#a97657",olhos:"#634027",cabelo:"#ebf0f5",roupa:"#3a6c83",calca:"#f0ece2",botas:"#765139"},
+ agua:{nome:"Guardião da Água",tribo:"agua",corpo:"adulto",cabeloTipo:"longo",roupaTipo:"mago",calcaTipo:"comprida",capa:"curta",acessorio:"cajado",pele:"#bc8a6c",olhos:"#2f5777",cabelo:"#2a6f9e",roupa:"#277ca9",calca:"#d6e8ef",botas:"#405768"},
+ fogo:{nome:"Guerreiro do Fogo",tribo:"fogo",corpo:"forte",cabeloTipo:"espetado",roupaTipo:"armadura",calcaTipo:"comprida",capa:"longa",acessorio:"espada",pele:"#ac714e",olhos:"#624029",cabelo:"#492c2a",roupa:"#b23f38",calca:"#383a44",botas:"#553d35"},
+ terra:{nome:"Protetor da Terra",tribo:"terra",corpo:"forte",cabeloTipo:"curto",roupaTipo:"tunica",calcaTipo:"comprida",capa:"nenhuma",acessorio:"lanca",pele:"#845a41",olhos:"#3b2c1e",cabelo:"#3c342b",roupa:"#478255",calca:"#d4c7a1",botas:"#514635"},
+ ar:{nome:"Arqueiro do Ar",tribo:"ar",corpo:"adulto",cabeloTipo:"preso",roupaTipo:"aventureiro",calcaTipo:"curta",capa:"curta",acessorio:"arco",pele:"#c49170",olhos:"#644d29",cabelo:"#c9ac55",roupa:"#ceb753",calca:"#e9ddaa",botas:"#6f5638"}
+};
+let model={...presets.apoena};
+let linkedCatalogGame="";
+const $=id=>pixelRoot.getElementById(id);
+const inputs=[...pixelRoot.querySelectorAll("[data-key]")];
+const colors={nenhuma:"#79c9d6",agua:"#4cb6ee",fogo:"#ee6254",terra:"#65c77e",ar:"#eed169"};
+function shade(hex,amount){
+ const n=parseInt(hex.slice(1),16);
+ const f=n=>Math.max(0,Math.min(255,Math.round(n+amount))).toString(16).padStart(2,"0");
+ return "#"+f((n>>16)&255)+f((n>>8)&255)+f(n&255);
+}
+function filled(c,x,y,w,h,color,outline=true){
+ x=Math.round(x);y=Math.round(y);w=Math.round(w);h=Math.round(h);
+ if(w<1||h<1)return;
+ if(outline){c.fillStyle="#172432";c.fillRect(x,y,w,h);if(w>2&&h>2){c.fillStyle=color;c.fillRect(x+1,y+1,w-2,h-2)}}
+ else{c.fillStyle=color;c.fillRect(x,y,w,h)}
+}
+function pixel(c,x,y,col){c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),1,1)}
+function part(c,kind,dir,frame,m){
+ const isBack=dir===3,side=dir===1||dir===2,bob=(frame===1||frame===3)?-1:0;
+ const step=frame===1?-2:frame===3?2:0;
+ const torsoX=m.corpo==="forte"?9:11,torsoW=m.corpo==="forte"?14:10;
+ const baseY=(m.corpo==="adulto"?6:8)+bob;
+ const accent=colors[m.tribo]||colors.nenhuma;
+ const skin=m.pele,cloth=m.roupa,boots=m.botas;
+ c.save();
+ if(dir===1){c.translate(W,0);c.scale(-1,1)}
+ if(kind==="capa"){
+  if(m.capa!=="nenhuma"){
+   const y=19+bob,bottom=m.capa==="longa"?44:37;
+   filled(c,7,y,18,bottom-y,shade(cloth,-28));
+   filled(c,9,y+1,14,bottom-y-2,shade(cloth,-12),false);
+   if(isBack){filled(c,14,y+2,4,bottom-y-5,accent,false)}
+  }
+ }
+ if(kind==="corpo"){
+  // Pele, braços, rosto, pernas e pescoço. Todas as roupas encaixam nestes pontos.
+  filled(c,11+step,31+bob,4,12,skin);
+  filled(c,17-step,31+bob,4,12,skin);
+  filled(c,7,22+bob,5,13,skin);
+  filled(c,20,22+bob,5,13,skin);
+  filled(c,torsoX,20+bob,torsoW,13,skin);
+  filled(c,14,18+bob,4,4,shade(skin,-12));
+  filled(c,10,baseY+2,12,12,skin);
+  filled(c,11,baseY,10,4,skin);
+  filled(c,9,baseY+7,2,4,skin);
+  filled(c,21,baseY+7,2,4,skin);
+  if(!isBack){
+   if(side){pixel(c,20,baseY+8,m.olhos);pixel(c,21,baseY+11,shade(skin,-30))}
+   else{
+    filled(c,12,baseY+8,2,2,m.olhos,false);
+    filled(c,18,baseY+8,2,2,m.olhos,false);
+    pixel(c,16,baseY+11,shade(skin,-39));
+    pixel(c,15,baseY+13,shade(skin,-20));
+   }
+  }
+ }
+ if(kind==="calca"){
+  const len=m.calcaTipo==="curta"?6:10;
+  filled(c,11+step,31+bob,5,len,m.calca);
+  filled(c,17-step,31+bob,5,len,shade(m.calca,-12));
+  filled(c,11,30+bob,11,4,m.calca);
+ }
+ if(kind==="botas"){
+  filled(c,10+step,39+bob,6,6,boots);
+  filled(c,17-step,39+bob,6,6,shade(boots,-7));
+  filled(c,10+step,43+bob,7,2,shade(boots,-21),false);
+  filled(c,17-step,43+bob,7,2,shade(boots,-21),false);
+ }
+ if(kind==="roupa"){
+  let y=20+bob,wide=torsoW;
+  filled(c,torsoX,y,wide,13,cloth);
+  if(m.roupaTipo==="armadura"){
+   filled(c,torsoX-3,y,5,6,shade(cloth,25));
+   filled(c,torsoX+wide-2,y,5,6,shade(cloth,25));
+   filled(c,torsoX+3,y+2,wide-6,7,shade(cloth,12),false);
+   filled(c,torsoX+wide/2-1,y+2,2,8,accent,false);
+  }else if(m.roupaTipo==="mago"){
+   filled(c,torsoX-1,y+7,wide+2,14,cloth);
+   filled(c,torsoX,y+1,wide,4,shade(cloth,19),false);
+   filled(c,torsoX+wide/2-1,y+3,2,13,accent,false);
+  }else if(m.roupaTipo==="sacerdote"){
+   filled(c,torsoX-1,y+8,wide+2,17,shade(cloth,15));
+   filled(c,torsoX+wide/2-1,y+2,2,19,accent,false);
+   filled(c,torsoX+3,y+2,wide-6,2,"#ebdfb3",false);
+  }else if(m.roupaTipo==="tunica"){
+   filled(c,torsoX-1,y+10,wide+2,5,cloth);
+   filled(c,torsoX,y+2,wide,2,shade(cloth,25),false);
+  }else{
+   filled(c,torsoX+2,y+1,3,11,shade(cloth,-24),false);
+   filled(c,torsoX+wide-4,y+1,2,11,shade(cloth,-24),false);
+   filled(c,torsoX,y+9,wide,2,shade(m.botas,-15),false);
+  }
+  if(m.roupaTipo!=="sacerdote"&&m.roupaTipo!=="mago"){
+   filled(c,torsoX,y+11,wide,2,shade(m.botas,-12),false);
+   filled(c,15,y+11,2,2,accent,false);
+  }
+  if(isBack){filled(c,torsoX+2,y+4,wide-4,2,shade(cloth,-18),false)}
+ }
+ if(kind==="cabelo"){
+  const top=baseY-2,base=shade(m.cabelo,-20);
+  if(m.cabeloTipo==="raspado"){
+   filled(c,11,top+2,10,4,m.cabelo);
+  }else{
+   filled(c,9,top+2,14,7,base);
+   filled(c,10,top,12,5,m.cabelo);
+   if(m.cabeloTipo==="espetado"){
+    filled(c,9,top-3,3,6,m.cabelo);
+    filled(c,14,top-5,3,7,m.cabelo);
+    filled(c,20,top-2,3,6,m.cabelo);
+   }else if(m.cabeloTipo==="curto"){
+    filled(c,9,top+4,3,6,m.cabelo);
+    filled(c,20,top+4,3,6,m.cabelo);
+   }else if(m.cabeloTipo==="longo"){
+    filled(c,8,top+3,4,20,base);
+    filled(c,20,top+3,4,20,base);
+    if(isBack)filled(c,11,top+6,10,18,m.cabelo);
+   }else if(m.cabeloTipo==="preso"){
+    filled(c,10,top+1,12,5,m.cabelo);
+    filled(c,13,top+7,6,13,base);
+    filled(c,14,top+17,4,5,m.cabelo);
+   }
+   if(!isBack){
+    filled(c,10,top+5,5,3,m.cabelo,false);
+    if(side)filled(c,17,top+5,5,2,m.cabelo,false);
+   }
+  }
+ }
+ if(kind==="acessorio"){
+  if(m.acessorio==="manopla"){
+   filled(c,7,29+bob,5,4,"#526b77");
+   ["#52bfe8","#e56b52","#68d081","#e9d16b"].forEach((color,i)=>pixel(c,8+i,30+bob,color));
+   if(!isBack)filled(c,15,22+bob,2,3,"#57b8e3",false);
+  }else if(m.acessorio==="colar"){
+   if(!isBack)filled(c,15,22+bob,2,3,accent,false);
+  }else if(m.acessorio==="espada"){
+   filled(c,26,10+bob,2,24,"#cbd4dc");
+   filled(c,25,30+bob,5,3,"#b99963");
+   filled(c,26,33+bob,2,7,shade(boots,-18));
+  }else if(m.acessorio==="lanca"){
+   filled(c,26,6+bob,2,37,"#9b7450",false);
+   filled(c,25,3+bob,4,7,"#bdccd1");
+  }else if(m.acessorio==="arco"){
+   filled(c,25,15+bob,3,24,shade(boots,-5));
+   filled(c,27,20+bob,2,13,"#d3b783",false);
+   filled(c,24,15+bob,2,3,shade(boots,17),false);
+   filled(c,24,36+bob,2,3,shade(boots,17),false);
+  }else if(m.acessorio==="grimorio"){
+   filled(c,23,26+bob,8,10,shade(cloth,-30));
+   filled(c,25,27+bob,4,7,accent,false);
+   filled(c,26,29+bob,2,3,"#e9e1bd",false);
+  }else if(m.acessorio==="cajado"){
+   filled(c,26,11+bob,2,33,"#b89a6c",false);
+   filled(c,24,7+bob,6,7,accent);
+   pixel(c,26,9+bob,"#e9f8ff");
+  }
+ }
+ c.restore();
+}
+function drawCharacter(c,dir,frame,m,only){
+ if(only){part(c,only,dir,frame,m);return}
+ for(const layer of LAYERS)part(c,layer,dir,frame,m);
+}
+function sheet(layer){
+ const canvas=document.createElement("canvas");
+ canvas.width=W*4;canvas.height=H*4;
+ const c=canvas.getContext("2d");
+ for(let d=0;d<4;d++)for(let f=0;f<4;f++){
+  c.save();c.translate(f*W,d*H);drawCharacter(c,d,f,model,layer);c.restore();
+ }
+ return canvas;
+}
+function sync(){
+ inputs.forEach(el=>{if(Object.prototype.hasOwnProperty.call(model,el.dataset.key))el.value=model[el.dataset.key]});
+}
+function showMessage(msg){$("status").textContent=msg}
+let currentFrame=0;
+function preview(){
+ const d=Number($("direction").value),c=$("preview").getContext("2d");
+ c.imageSmoothingEnabled=false;c.clearRect(0,0,192,288);
+ c.fillStyle="#183249";c.fillRect(0,0,192,288);
+ for(let y=0;y<288;y+=24)for(let x=0;x<192;x+=24){
+  c.fillStyle=(x/24+y/24)%2===0?"#203e50":"#1a3548";c.fillRect(x,y,24,24);
+ }
+ c.fillStyle="#132c35";c.beginPath();c.ellipse(96,248,55,10,0,0,Math.PI*2);c.fill();
+ const mini=document.createElement("canvas");mini.width=W;mini.height=H;
+ drawCharacter(mini.getContext("2d"),d,currentFrame,model);
+ c.drawImage(mini,0,0,W,H,24,19,144,216);
+}
+function sheetPreview(){
+ const c=$("sheetPreview").getContext("2d");
+ c.clearRect(0,0,128,192);c.imageSmoothingEnabled=false;
+ c.drawImage(sheet(),0,0);
+}
+function update(){sync();sheetPreview();preview();showMessage("Personagem atualizado.");try{localStorage.setItem("apoena-pixel-v1",JSON.stringify(model))}catch(e){}}
+function slug(s){return String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9_-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,36)||"personagem"}
+function download(blob,name){
+ const href=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=href;a.download=name;document.body.append(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(href),5000);
+}
+function canvasBytes(canvas){
+ const raw=atob(canvas.toDataURL("image/png").split(",")[1]),b=new Uint8Array(raw.length);
+ for(let i=0;i<raw.length;i++)b[i]=raw.charCodeAt(i);
+ return b;
+}
+function manifest(){
+ return {schema:"apoena-pixel-v1",version:1,cell:{width:W,height:H},sheet:{columns:4,rows:4},directions:DIRS,frames_per_direction:4,animation:"0=parado, 1=passo esquerdo, 2=parado, 3=passo direito",layers:LAYERS,linked_catalog_game_id:linkedCatalogGame,character:{...model}};
+}
+function animationResource(){
+ let result='[gd_resource type="SpriteFrames" load_steps=18 format=3]\n\n';
+ result+='[ext_resource type="Texture2D" path="res://personagem/spritesheet.png" id="1_sprites"]\n\n';
+ for(let d=0;d<4;d++)for(let f=0;f<4;f++){
+  result+='[sub_resource type="AtlasTexture" id="A_'+d+'_'+f+'"]\n';
+  result+='atlas = ExtResource("1_sprites")\n';
+  result+='region = Rect2('+f*W+', '+d*H+', '+W+', '+H+')\n\n';
+ }
+ result+='[resource]\nanimations = [';
+ for(let d=0;d<4;d++){
+  if(d)result+=', ';
+  result+='{\n"frames": [';
+  for(let f=0;f<4;f++){
+   if(f)result+=', ';
+   result+='{"duration": 1.0, "texture": SubResource("A_'+d+'_'+f+'")}';
+  }
+  result+='],\n"loop": true,\n"name": &"'+DIRS[d]+'",\n"speed": 6.0\n}';
+ }
+ return result+']\n';
+}
+const encoder=new TextEncoder();
+function crc32(data){
+ let crc=0xffffffff;
+ for(const byte of data){crc^=byte;for(let j=0;j<8;j++)crc=(crc>>>1)^((crc&1)?0xedb88320:0)}
+ return (crc^0xffffffff)>>>0;
+}
+function zipStored(files){
+ const local=[],central=[];let offset=0,sizeCentral=0;
+ for(const file of files){
+  const name=encoder.encode(file.name),bytes=file.bytes,crc=crc32(bytes);
+  const head=new Uint8Array(30+name.length),dv=new DataView(head.buffer);
+  dv.setUint32(0,0x04034b50,true);dv.setUint16(4,20,true);dv.setUint16(6,0x0800,true);
+  dv.setUint16(8,0,true);dv.setUint32(14,crc,true);
+  dv.setUint32(18,bytes.length,true);dv.setUint32(22,bytes.length,true);
+  dv.setUint16(26,name.length,true);head.set(name,30);
+  local.push(head,bytes);
+  const cd=new Uint8Array(46+name.length),cv=new DataView(cd.buffer);
+  cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);
+  cv.setUint16(8,0x0800,true);cv.setUint32(16,crc,true);
+  cv.setUint32(20,bytes.length,true);cv.setUint32(24,bytes.length,true);
+  cv.setUint16(28,name.length,true);cv.setUint32(42,offset,true);cd.set(name,46);
+  central.push(cd);offset+=head.length+bytes.length;sizeCentral+=cd.length;
+ }
+ const end=new Uint8Array(22),e=new DataView(end.buffer);
+ e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);
+ e.setUint16(10,files.length,true);e.setUint32(12,sizeCentral,true);e.setUint32(16,offset,true);
+ return new Blob([...local,...central,end],{type:"application/zip"});
+}
+function packageZip(){
+ const files=[
+  {name:"personagem/spritesheet.png",bytes:canvasBytes(sheet())},
+  {name:"personagem/frames.tres",bytes:encoder.encode(animationResource())},
+  {name:"personagem/personagem.json",bytes:encoder.encode(JSON.stringify(manifest(),null,2))},
+  {name:"personagem/LEIA-ME-GODOT.txt",bytes:encoder.encode(
+   "APOENA GAMECREATOR — PERSONAGEM PIXEL ART\n\n1. Extraia a pasta personagem dentro da raiz do projeto Godot 4 (res://personagem/).\n2. Crie um nó AnimatedSprite2D e no inspetor Sprite Frames escolha Carregar e selecione res://personagem/frames.tres.\n3. Reproduza as animacoes: sul, oeste, leste e norte. Por padrao, sul e a frente.\n4. Configure o filtro de textura como Nearest (mais proximo) para preservar pixels.\n5. O spritesheet tem 128x192 pixels: 4 colunas (quadros) x 4 linhas (direcoes), celulas de 32x48.\n6. Camadas PNG tem as mesmas dimensoes, fundo transparente, e podem ser editadas separadamente.\n7. Este arquivo NAO instala scripts, nao integra habilidades ou combate, e nao substitui a importacao dos personagens no jogo.\n")}
+ ];
+ for(const layer of LAYERS)files.push({name:"personagem/camadas/"+layer+".png",bytes:canvasBytes(sheet(layer))});
+ download(zipStored(files),slug(model.nome)+"-godot-pixel.zip");
+ showMessage("Pacote ZIP gerado: personagem com sprites, camadas e SpriteFrames para Godot.");
+}
+function validateImport(obj){
+ if(!obj||obj.schema!=="apoena-pixel-v1"||!obj.character||typeof obj.character!=="object")throw new Error("Arquivo não é um personagem Apoena Pixel Art.");
+ const out={...presets.apoena};
+ for(const el of inputs){
+  const k=el.dataset.key,v=obj.character[k];
+  if(typeof v!=="string"||v.length>80)continue;
+  if(el.type==="color"){if(/^#[0-9a-fA-F]{6}$/.test(v))out[k]=v}
+  else if(el.tagName==="SELECT"){if([...el.options].some(o=>o.value===v))out[k]=v}
+  else if(k==="nome")out[k]=v.slice(0,40);
+ }
+ out.linkedItemId=(typeof obj.character.linkedItemId==="string"&&obj.character.linkedItemId.length<=120)?obj.character.linkedItemId:"";
+ return out;
+}
+inputs.forEach(el=>el.addEventListener(el.type==="color"||el.tagName==="SELECT"?"change":"input",()=>{
+ model[el.dataset.key]=el.value;update();
+}));
+pixelRoot.querySelectorAll("[data-preset]").forEach(btn=>btn.onclick=()=>{model={...presets[btn.dataset.preset]};update()});
+$("direction").onchange=preview;
+$("exportPng").onclick=()=>{download(new Blob([canvasBytes(sheet())],{type:"image/png"}),slug(model.nome)+"-spritesheet.png");showMessage("Spritesheet PNG exportado.")};
+$("exportLayer").onclick=()=>{const l=$("layer").value;download(new Blob([canvasBytes(sheet(l))],{type:"image/png"}),slug(model.nome)+"-"+l+".png");showMessage("Camada "+l+" exportada.")};
+$("exportJson").onclick=()=>{download(new Blob([JSON.stringify(manifest(),null,2)],{type:"application/json"}),slug(model.nome)+".json");showMessage("Projeto JSON salvo.")};
+$("exportZip").onclick=()=>{try{packageZip()}catch(e){showMessage("Não foi possível criar o ZIP: "+e.message)}};
+$("importJson").onchange=async ev=>{
+ const file=ev.target.files&&ev.target.files[0];if(!file)return;
+ try{if(file.size>100000)throw new Error("Arquivo muito grande.");const imported=JSON.parse(await file.text());model=validateImport(imported);linkedCatalogGame=typeof imported.linked_catalog_game_id==="string"?imported.linked_catalog_game_id:"";update();if(model.linkedItemId){$("catalogInfo").textContent="Item vinculado à ficha: "+model.linkedItemId+". Importe o catálogo para selecionar outro item.";}showMessage("Personagem importado.");}
+ catch(e){showMessage("Erro ao importar: "+e.message)}
+ ev.target.value="";
+};
+$("catalogJson").addEventListener("change",async ev=>{
+ const file=ev.target.files?.[0];if(!file)return;
+ try{
+  if(file.size>35000000)throw Error("O catálogo ultrapassa o limite de 35 MB.");
+  const data=JSON.parse(await file.text());
+  if(!["apoena.gamecreator.catalogo.v1","apoena.central.v1","apoena.items.v1"].includes(data.schema)||!Array.isArray(data.items))throw Error("Catálogo de itens não reconhecido.");
+  const ids=new Set();const candidates=data.items.filter(item=>{
+    if(!item||typeof item.id!=="string"||!item.id||ids.has(item.id))return false;
+    ids.add(item.id);return true;
+  });
+  const select=$("catalogItem");
+  select.replaceChildren(new Option("Nenhum item vinculado",""));
+  for(const item of candidates)select.add(new Option((item.name||item.id)+" • "+(item.category||"item"),item.id));
+  linkedCatalogGame=typeof data.game_id==="string"?data.game_id:"";
+  if(model.linkedItemId&&candidates.some(x=>x.id===model.linkedItemId))select.value=model.linkedItemId;
+  else{model.linkedItemId="";select.value="";}
+  $("catalogInfo").textContent=candidates.length+" itens carregados do projeto "+(data.project||data.name||"Game Creator")+".";
+  showMessage("Itens importados. Selecione qual item do catálogo este personagem usa.");
+ }catch(e){showMessage("Erro no catálogo: "+e.message)}
+ ev.target.value="";
+});
+$("catalogItem").addEventListener("change",()=>{
+ model.linkedItemId=$("catalogItem").value;
+ update();
+ showMessage(model.linkedItemId?"Item vinculado ao personagem: "+model.linkedItemId+". A arte ainda é editada separadamente.":"Vínculo de item removido.");
+});
+// Arena de teste: cenario procedural, sem sprites externos ou dados do servidor.
+const arena=$("arena"),ac=arena.getContext("2d");
+const player={x:160,y:144,dir:0},held=new Set();
+function setHeld(key,on){if(on)held.add(key);else held.delete(key)}
+pixelRoot.querySelectorAll(".dpad [data-dir]").forEach(btn=>{
+ const key=btn.dataset.dir;
+ btn.addEventListener("pointerdown",e=>{e.preventDefault();btn.setPointerCapture(e.pointerId);setHeld(key,true);btn.classList.add("active")});
+ const end=e=>{e.preventDefault();setHeld(key,false);btn.classList.remove("active")};
+ btn.addEventListener("pointerup",end);btn.addEventListener("pointercancel",end);btn.addEventListener("lostpointercapture",()=>{setHeld(key,false);btn.classList.remove("active")});
+});
+const mapping={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",s:"down",a:"left",d:"right"};
+function typing(t){return t&&["INPUT","SELECT","TEXTAREA"].includes(t.tagName)}
+document.addEventListener("keydown",e=>{if(!pixelRoot.host.closest(".page")?.classList.contains("active")||pixelRoot.querySelector(".apo-objects-main")?.hidden===false||typing(e.target))return;const k=mapping[e.key];if(k){e.preventDefault();setHeld(k,true)}});
+document.addEventListener("keyup",e=>{if(!pixelRoot.host.closest(".page")?.classList.contains("active"))return;const k=mapping[e.key];if(k)setHeld(k,false)});
+window.addEventListener("blur",()=>held.clear());
+function arenaGround(){
+ ac.fillStyle="#44684a";ac.fillRect(0,0,320,216);
+ for(let y=0;y<216;y+=16)for(let x=0;x<320;x+=16){
+  ac.fillStyle=(Math.floor(x/16)+Math.floor(y/16))%2?"#476e50":"#4b7252";ac.fillRect(x,y,16,16);
+  if((x*13+y*7)%9===0){ac.fillStyle="#6a925c";ac.fillRect(x+5,y+8,2,3)}
+ }
+ ac.fillStyle="#ab9972";ac.beginPath();ac.moveTo(0,119);ac.lineTo(60,92);ac.lineTo(260,92);ac.lineTo(320,119);ac.lineTo(320,172);ac.lineTo(260,144);ac.lineTo(60,144);ac.lineTo(0,172);ac.fill();
+ ac.fillStyle="#c1ac82";ac.fillRect(54,112,215,10);
+ for(const [x,y,clr] of [[50,93,"#529fca"],[270,154,"#b8584a"]]){
+  ac.fillStyle="#324656";ac.fillRect(x-11,y-4,23,9);
+  ac.fillStyle="#2d3940";ac.fillRect(x-7,y-23,15,22);
+  ac.fillStyle=clr;ac.fillRect(x-5,y-27,11,7);
+  ac.fillStyle="#d1cdae";ac.fillRect(x-2,y-30,5,4);
+ }
+ for(const [x,y] of [[27,34],[96,34],[222,37],[296,45],[47,191],[290,190]]){
+  ac.fillStyle="#284c34";ac.fillRect(x-8,y-9,18,12);
+  ac.fillStyle="#306741";ac.fillRect(x-12,y-12,15,14);
+  ac.fillStyle="#448154";ac.fillRect(x-1,y-15,14,12);
+ }
+}
+let last=0,elapsed=0,prevTick=-1,lastSheet=null,changed=true;
+function loop(t){
+ const dt=Math.min(40,t-last||16);last=t;
+ let vx=(held.has("right")?1:0)-(held.has("left")?1:0);
+ let vy=(held.has("down")?1:0)-(held.has("up")?1:0);
+ const moving=vx!==0||vy!==0;
+ if(moving){
+  const len=Math.hypot(vx,vy);vx/=len;vy/=len;
+  player.x=Math.max(22,Math.min(298,player.x+vx*dt*.085));
+  player.y=Math.max(67,Math.min(204,player.y+vy*dt*.085));
+  if(Math.abs(vx)>Math.abs(vy))player.dir=vx<0?1:2;
+  else player.dir=vy<0?3:0;
+ }
+ elapsed+=dt;
+ const tick=Math.floor(elapsed/160)%4;
+ if(tick!==prevTick){currentFrame=tick;preview();prevTick=tick}
+ if(changed){lastSheet=sheet();changed=false}
+ ac.imageSmoothingEnabled=false;arenaGround();
+ ac.fillStyle="#213c35";ac.beginPath();ac.ellipse(player.x,player.y-2,13,4,0,0,Math.PI*2);ac.fill();
+ if(!moving)ac.drawImage(lastSheet,0,player.dir*H,W,H,Math.round(player.x-16),Math.round(player.y-44),W,H);
+ else ac.drawImage(lastSheet,tick*W,player.dir*H,W,H,Math.round(player.x-16),Math.round(player.y-44),W,H);
+ requestAnimationFrame(loop);
+}
+function wrappedUpdate(){changed=true;update()}
+inputs.forEach(el=>el.addEventListener("change",()=>{changed=true}));
+inputs.forEach(el=>el.addEventListener("input",()=>{changed=true}));
+pixelRoot.querySelectorAll("[data-preset]").forEach(el=>el.addEventListener("click",()=>{changed=true}));
+$("importJson").addEventListener("change",()=>{changed=true});
+try{let saved=localStorage.getItem("apoena-pixel-v1");if(saved)model=validateImport({schema:"apoena-pixel-v1",character:JSON.parse(saved)})}catch(e){}
+update();changed=true;requestAnimationFrame(loop);
 
- // GC-CHAR-001: substitui o gerador procedural anterior pelo Criador Modular.
- // A tela de personagens passa a carregar a ferramenta nova dentro do próprio Pixel Art.
- const characterFrame=document.createElement("iframe");
- characterFrame.title="Criador Modular de Personagens Apoena";
- characterFrame.src=new URL("character-creator/index.html",document.baseURI).href;
- characterFrame.loading="eager";
- characterFrame.referrerPolicy="same-origin";
- characterFrame.style.cssText="display:block;width:100%;height:calc(100vh - 190px);min-height:720px;border:0;background:#071426;border-radius:12px";
- characterFrame.setAttribute("allow","clipboard-read; clipboard-write");
- const characterHost=pixelRoot.querySelector("main");
- characterHost.replaceChildren(characterFrame);
+const registerPixelButton=document.createElement("button");
+registerPixelButton.type="button";registerPixelButton.textContent="Gravar personagem no Game Creator";
+registerPixelButton.className="secondary";
+registerPixelButton.addEventListener("click",()=>{
+ try{
+  if(!window.ApoenaCreatorIntegrated?.savePixelCharacter)throw Error("A ponte Game Creator v4.0 não foi inicializada.");
+  const data=manifest(),png=sheet().toDataURL("image/png");
+  window.ApoenaCreatorIntegrated.savePixelCharacter(data,png);
+  showMessage("Personagem salvo no projeto Game Creator atual. Use Salvar projeto editável para guardar.");
+ }catch(e){showMessage("Não foi possível gravar personagem: "+e.message)}
+});
+$("exportJson").after(registerPixelButton);
+})();
 
  (()=>{
 "use strict";
 const nav=document.createElement("nav");
 nav.setAttribute("aria-label","Ferramentas Pixel Art do Game Creator");
 nav.className="apo-pixel-tabs";
-nav.innerHTML='<button type="button" data-pixel-tab="characters" aria-selected="true">◉ Criador de Personagens</button><button type="button" data-pixel-tab="objects" aria-selected="false">▧ Objetos / Funções / Clima</button><button type="button" data-pixel-tab="maps" aria-selected="false">▤ Mapas / Cenários</button>';
+nav.innerHTML='<button type="button" data-pixel-tab="modular" aria-selected="true">◉ Criador modular</button><button type="button" data-pixel-tab="characters" aria-selected="false">Gerador clássico</button><button type="button" data-pixel-tab="objects" aria-selected="false">▧ Objetos / Funções / Clima</button><button type="button" data-pixel-tab="maps" aria-selected="false">▤ Mapas / Cenários</button>';
 const main=pixelRoot.querySelector("main");
 if(!main)return;
 const host=document.createElement("main");
@@ -34,6 +435,12 @@ const style=document.createElement("style");
 style.textContent='.apo-pixel-tabs{display:flex;overflow-x:auto;gap:9px;padding:10px 14px;background:#10283b;border-bottom:1px solid #355064;white-space:nowrap}.apo-pixel-tabs button{background:#26495b;color:#f5f9ff;min-width:max-content}.apo-pixel-tabs button[aria-selected=true]{background:#f0d08e;color:#132433}.apo-objects-main[hidden],main[hidden]{display:none!important}.apo-objects-main{display:grid;gap:12px;max-width:1200px;margin:0 auto;padding:14px}.apoobj-top{display:flex;gap:8px;flex-wrap:wrap}.apoobj-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.apoobj-pane{background:#17283a;border:1px solid #355064;border-radius:11px;padding:14px}.apoobj-pane h2{margin:0 0 12px;color:#f0d08e}.apoobj-pane label{display:block;font-size:13px;color:#c4d3df}.apoobj-pane input,.apoobj-pane select,.apoobj-pane textarea{width:100%;padding:10px;min-height:41px;border:1px solid #355064;border-radius:7px;background:#0d1b2b;color:#f3f8ff;font:inherit}.apoobj-pane textarea{min-height:78px}.apoobj-pane input[type=checkbox]{width:22px;min-height:22px}.apoobj-top button,.apoobj-pane button{min-height:43px;border-radius:8px;background:#8cdbe0;color:#0b1d25;padding:9px 12px;border:0;font-weight:700;cursor:pointer}.apoobj-pane button.alt{background:#294458;color:#f3f8ff}.apoobj-note{font-size:12px;color:#c4d3df;line-height:1.5}.apoobj-status{white-space:pre-wrap;color:#a3eabe;font-size:13px;min-height:18px}.apoobj-art{display:grid;grid-template-columns:minmax(128px,260px) minmax(140px,1fr);gap:14px}.apoobj-art canvas{width:100%;max-width:256px;aspect-ratio:1;background-color:#1b3345;background-image:linear-gradient(45deg,#29485b 25%,transparent 25%),linear-gradient(-45deg,#29485b 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#29485b 75%),linear-gradient(-45deg,transparent 75%,#29485b 75%);background-position:0 0,0 8px,8px -8px,-8px 0;background-size:16px 16px;image-rendering:pixelated;touch-action:none;border:1px solid #658092}.apoobj-conditions{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px}.apoobj-conditions fieldset{border:1px solid #45657a;border-radius:8px;min-width:0}.apoobj-conditions legend{color:#f0d08e}.apoobj-warning{border-left:3px solid #f0d08e;padding-left:10px;color:#f1e5c4}.apoobj-inline{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.apoobj-inline>*{flex:1 1 140px}@media(max-width:550px){.apoobj-art{grid-template-columns:1fr}.apo-objects-main{padding:10px}}';
 pixelRoot.append(style);
 pixelRoot.querySelector("header").after(nav);
+const modular=document.createElement("section");
+const characterFrame=document.createElement("iframe");
+characterFrame.title="Criador modular de personagens";
+characterFrame.src=new URL("pixel-art/personagens.html",document.baseURI).href;
+characterFrame.style.cssText="display:block;width:100%;height:1100px;max-height:none;border:0";
+modular.append(characterFrame);main.before(modular);main.hidden=true;
 main.after(host);const mapContainer=document.createElement("section");mapContainer.hidden=true;host.after(mapContainer);
 host.innerHTML=
 '<section class="apoobj-pane"><h2>Objetos Pixel Art • comportamento do mundo</h2><p class="apoobj-warning">Os objetos usam <strong>o mesmo item da Fábrica de Itens do Game Creator</strong>. Escolha o item da Fábrica de Itens ou crie um novo, configure seu comportamento e salve no projeto central. Os efeitos no mundo exigem conexão com o jogo.</p><div class="apoobj-top"><label class="button secondary">Projeto atual conectado à Fábrica de Itens<input type="file" id="apoobj-import" accept=".json,application/json" hidden></label><button type="button" id="apoobj-save-project">Baixar projeto atualizado</button><button type="button" class="alt" id="apoobj-new">Novo item</button></div><p id="apoobj-info" class="apoobj-note">Catálogo central do Game Creator v4.0 conectado. Os itens e as receitas são os mesmos.</p></section>'+
@@ -224,7 +631,7 @@ for(const btn of nav.querySelectorAll("button")){
  btn.addEventListener("click",()=>{
   const tab=btn.dataset.pixelTab,isObject=tab==="objects",isMap=tab==="maps";
   for(const x of nav.querySelectorAll("button"))x.setAttribute("aria-selected",String(x===btn));
-  main.hidden=isObject||isMap;host.hidden=!isObject;mapContainer.hidden=!isMap;
+  main.hidden=tab!=="characters";modular.hidden=tab!=="modular";host.hidden=!isObject;mapContainer.hidden=!isMap;
   if(isMap)window.ApoenaMapaIntegrado?.mount(mapContainer);
   try{history.replaceState(null,"",isObject?"#objetos":"#personagens")}catch(_){}
  });

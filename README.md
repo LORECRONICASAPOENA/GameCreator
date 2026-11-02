@@ -6,7 +6,7 @@
 - Branch de desenvolvimento: `feature/estudio-unificado-pixelart-v41`.
 - A fonte `APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html` e os módulos anteriores são preservados. A V4.0 nativa continua sendo a base do Creator.
 - `index.html` é o carregador compacto do Creator nativo: monta as 24 partes de `bundle-v4/` e inclui a biblioteca compartilhada, a ponte V4.0/V4.1 e o módulo de Natureza. A entrada principal não usa iframe.
-- `ABRIR_GAME_CREATOR.cmd` executa `integracao/build_unificado.ps1` no Windows e abre a entrada integrada. `integracao/build_unificado.py` oferece o mesmo build para ambientes com Python.
+- `ABRIR_GAME_CREATOR.cmd` é um atalho opcional para uso local no Windows: executa `integracao/build_unificado.ps1` e abre a entrada integrada. Não é usado pelo GitHub Actions; o workflow chama o script PowerShell diretamente. Alterações isoladas nesse atalho não disparam mais o Runner. `integracao/build_unificado.py` oferece o mesmo build para ambientes com Python.
 - O build adiciona a área Pixel Art à fonte V4.0 sem sobrescrever o arquivo original. O CI testa o build em um checkout descartável e entrega o resultado compilado no pacote.
 - O Estúdio Pixel Art e o editor de mapas são ferramentas especializadas abertas pelo menu Pixel Art nativo. Quando abertos por esses links, sincronizam spritesheets/mapas com a sessão V4.0 pela ponte `apoena.creator.v4.bridge.v1`, além de salvar na biblioteca IndexedDB.
 
@@ -67,3 +67,14 @@ O plano consolidado de História, Exploração Livre, MOBA, ecossistema, NPCs, e
 
 A primeira fatia foi integrada à main pela PR #2. Ela adiciona catálogo de terreno, propriedades ambientais e autotile, metadados de interação para objetos, perfis de plantas/animais/montarias, profissão e rotina de NPCs, papel econômico, perfis de mapa e validação. O editor inicia com a Cidade Capital de Agar no perfil História e mantém o preset de MOBA. Esses dados são a fundação de autoria/exportação; a simulação ecológica, as transações, as rotinas autônomas e o comportamento no jogo ainda exigem implementação e testes no runtime.
 
+
+
+### Criador modular de personagens
+
+Abra **Pixel Art → Criador modular** no Creator. Importe uma peça por camada (PNG, WebP ou JPEG); para folhas RPG Maker, escolha a camada → **Editar malha / apagar sobras**, defina 3 colunas e 4 linhas (ou o formato da sua folha), calcule as células e aplique. Origem, célula e espaços são ajustáveis. As ações selecionam linhas da folha. Camadas de um quadro permanecem fixas.
+
+A borracha e o corte inteligente alteram apenas o quadro selecionado. O original permanece incorporado no projeto; Restaurar, Desfazer e Refazer permitem recuperar a edição. O corte inteligente propõe uma prévia conservadora; figuras conectadas precisam de correção manual.
+
+**Salvar projeto** guarda imagens, camadas e correções na biblioteca central. **Baixar JSON / Abrir JSON** transporta a montagem entre computadores. **Adicionar à biblioteca** grava também a spritesheet. **Gravar no Creator** atualiza o personagem no projeto principal, que ainda deve ser salvo pelo Creator. **Exportar Godot .tres** gera SpriteFrames Godot 4 com textura incorporada, para atribuir a AnimatedSprite2D → Sprite Frames.
+
+Limites: 32 camadas e ações; 160 células por camada; fontes até 1024×1024 (folhas maiores podem ser recortadas no Estúdio); saída PNG até 16 milhões de pixels e recurso Godot até 4 milhões. Nenhum recurso exige geração de imagem ou upload externo. O gerador clássico, objetos e mapas continuam disponíveis.

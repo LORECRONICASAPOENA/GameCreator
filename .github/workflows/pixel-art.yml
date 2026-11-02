@@ -3,7 +3,6 @@ on:
     paths:
       - "index.html"
       - "bundle-v4/**"
-      - "ABRIR_GAME_CREATOR.cmd"
       - "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
       - "pixel-art/**"
       - "shared/**"
@@ -22,7 +21,6 @@ on:
     paths:
       - "index.html"
       - "bundle-v4/**"
-      - "ABRIR_GAME_CREATOR.cmd"
       - "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
       - "pixel-art/**"
       - "shared/**"
@@ -109,6 +107,11 @@ jobs:
           "Browser: $browser | Viewport mobile: 390x844" | Set-Content -Encoding UTF8 $logPath
           $targets = @(
             @{
+              Name = "characters"
+              RelativePath = "pixel-art/personagens.html"
+              Required = @('id="pieces"', 'id="applyGrid"', 'id="sendCreator"', 'personagens-core.js')
+            },
+            @{
               Name = "studio"
               RelativePath = "pixel-art/estudio.html"
               Required = @('id="file"', 'id="librarySave"', 'id="detectSprites"', 'id="exportSheet"', 'corte-inteligente.js')
@@ -149,6 +152,24 @@ jobs:
             Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
             Remove-Item -LiteralPath $profile -Recurse -Force -ErrorAction SilentlyContinue
           }
+      - name: Testar criador modular no navegador
+        run: |
+          $ErrorActionPreference = "Stop"
+          $browser = @((Join-Path $env:ProgramFiles "Microsoft/Edge/Application/msedge.exe"), (Join-Path ([Environment]::GetEnvironmentVariable("ProgramFiles(x86)")) "Microsoft/Edge/Application/msedge.exe"), (Join-Path $env:ProgramFiles "Google/Chrome/Application/chrome.exe")) | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $browser) { throw "Navegador necessario para testar personagens." }
+          $uri = ([System.Uri](Join-Path $env:GITHUB_WORKSPACE "tests/personagens-browser.html")).AbsoluteUri
+          $profile = Join-Path $env:RUNNER_TEMP ("apoena-character-" + $env:GITHUB_RUN_ID)
+          $args = '--headless --disable-gpu --allow-file-access-from-files --window-size=1500,1200 --virtual-time-budget=20000 --user-data-dir="' + $profile + '" --dump-dom "' + $uri + '"'
+          $output = Join-Path $env:GITHUB_WORKSPACE ".ci-results/characters-browser.html"
+          $proc = Start-Process -FilePath $browser -ArgumentList $args -RedirectStandardOutput $output -RedirectStandardError .ci-results/characters-browser.log -Wait -PassThru
+          if ($proc.ExitCode -ne 0) { throw "Navegador falhou no teste de personagens." }
+          if (-not (Get-Content -Raw $output).Contains('<pre id="result">CHARACTER BROWSER OK</pre>')) { throw "Teste funcional de personagens falhou; consulte characters-browser.html." }
+      - name: Testar modelo e exportacao de personagens
+        run: |
+          node --check pixel-art/personagens.js
+          if ($LASTEXITCODE -ne 0) { throw "Sintaxe de personagens invalida." }
+          node tests/personagens.test.cjs --fixture
+          if ($LASTEXITCODE -ne 0) { throw "Teste de personagens falhou." }
       - name: Verificar sintaxe do build Python quando disponivel
         run: |
           $ErrorActionPreference = "Stop"
