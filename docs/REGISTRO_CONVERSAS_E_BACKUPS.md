@@ -123,3 +123,16 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Documento:** `docs/PLANO_JOGO_ONLINE_APOENA.md`.
 - **Commit do plano:** `73d494674e6000f6deb8b44f5bd35517dc43bb7e`.
 - **Limite:** arquitetura planejada; nenhum backend, servidor ou recurso online foi implementado nesta conversa.
+
+
+## Arquitetura híbrida confirmada para planejamento online (02/11/2026)
+
+- **Escolhas do autor:** mundo híbrido (regiões compartilhadas + dungeons/arenas instanciadas), teste inicial de 20–50 jogadores simultâneos, plataformas Android e PC.
+- **Topologia definida para MVP:** clientes Android/PC; gateway/API HTTPS; servidor dedicado autoritativo por região; processos/sessões de instância sob demanda; PostgreSQL candidato para persistência; Redis opcional apenas se necessário; object storage/CDN para assets; painel, logs, métricas e auditoria.
+- **Estratégia:** começar com uma região pequena e 2 clientes, depois escalar testes para 5/10/20/50. Medir latência p50/p95/p99, tick rate, CPU/RAM, tráfego, perda de pacotes e densidade de entidades. Meta de teste não é capacidade de produção garantida.
+- **Engine:** Godot Dedicated Server é candidato condicionado à confirmação do runtime final. Scripts Godot de integração existentes no Creator não provam que o jogo final esteja definido nessa engine.
+- **Backend:** avaliar Nakama versus backend próprio por prova técnica; não adotar redundâncias antes de decidir. TLS para APIs; transporte realtime UDP precisa protocolo seguro apropriado, autenticação e anti-replay.
+- **Critérios de aceite:** Android e PC na mesma sessão; autoridade do servidor sobre posição/estado; isolamento de contas; reconexão sem duplicação; testes contra spoofing/replay; métricas e logs.
+- **Documento atualizado:** `docs/PLANO_JOGO_ONLINE_APOENA.md`.
+- **Commit do plano atualizado:** `57fd61f88fedcb4fd14fe9409d3159ceace0a632`.
+- **Estado:** arquitetura registrada, implementação ainda não iniciada.
