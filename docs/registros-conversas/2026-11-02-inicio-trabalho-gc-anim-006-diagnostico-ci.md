@@ -51,3 +51,14 @@ O operador deve abrir o run 41433942503 no GitHub Actions e recuperar a primeira
 - Código de produto alterado nesta sessão: **não**.
 - Integração na `main`: **não**.
 - Evidência e relatórios: publicados na branch da PR #11; não confundir com merge na `main`.
+
+
+## Atualização após captura enviada pelo autor — 02/11/2026, 13:01 UTC
+
+O autor enviou captura da anotação expandida do run 41433942503. O GitHub Actions exibe: “0 executor auto-hospedado perdeu a comunicação com o servidor. Verifique se a máquina está em execução e possui uma conexão de rede estável. Qualquer fator no seu fluxo de trabalho que encerre o processo do executor, consuma toda a CPU/memória necessária ou bloqueie seu acesso à rede pode causar esse erro.”
+
+**Conclusão atualizada:** a categoria da falha está identificada como perda de comunicação do runner auto-hospedado com o servidor GitHub. A causa operacional específica ainda não está identificada. As possibilidades citadas pelo GitHub são hipóteses, não fatos comprovados. Não há, nesta anotação, erro de código de animação nem falha funcional demonstrada.
+
+**Decisão:** não alterar o código do Estúdio e não remover testes. Quando o computador estiver disponível, coletar logs locais em _diag e verificar estado de energia/suspensão/reinicialização, rede, DNS, proxy/firewall e CPU/memória do runner no horário do run.
+
+O relatório individual e a base GC-CI-014 foram atualizados na branch feat/apoena-personagem-estudio-main. Nenhuma correção de produto foi aplicada; a PR continua não validada e não integrada à main.
