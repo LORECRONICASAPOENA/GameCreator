@@ -136,3 +136,17 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Documento atualizado:** `docs/PLANO_JOGO_ONLINE_APOENA.md`.
 - **Commit do plano atualizado:** `57fd61f88fedcb4fd14fe9409d3159ceace0a632`.
 - **Estado:** arquitetura registrada, implementação ainda não iniciada.
+
+
+## Auditoria de organização e limpeza do Game Creator (02/11/2026)
+
+- **Solicitação:** avaliar volume de informações, pendências e arquivos repetidos; identificar versões antigas, iniciadores HTML e itens que podem ser removidos; confirmar registro desta conversa.
+- **Inspeção real da main:** árvore recursiva com 134 arquivos; tamanho do repositório informado pela API ~49.847 KB; 6 issues abertas no snapshot da API do repositório.
+- **Achados:** HTML V4.0 fonte (~16.3 MB), index.html (~16.3 MB), HTML V3.9.2 (~16.3 MB), bundle-v4 com 24 partes (~16.5 MB), legacy V3.9 com 23 partes, iniciador legado, launcher CMD, utilitários de publicação, dois scripts de build e dois workflows.
+- **Contradições:** README descreve index como loader compacto, embora a árvore mostre ~16.3 MB e os scripts possam gerar index a partir da fonte; README identifica HTML V4.0 como fonte, enquanto integracao/README.md diz que HTML completo V4.0 não está publicado e identifica a versão do repositório como V3.9. Precisamos resolver por comparação de conteúdo e build reproduzível.
+- **Possível sobreposição:** `pixel-art.yml` e `publicar-creator-unificado.yml` executam build; o segundo tem `contents: write` e publica index. Avaliar triggers, permissões e outputs antes de remover qualquer workflow.
+- **Candidatos não autorizados para exclusão ainda:** HTML V3.9.2, `legacy/iniciador-anterior.html`, scripts PUBLICAR_NO_GITHUB, um dos workflows, um dos builds e guias V3. Fonte V4.0, index, bundle e módulos ativos devem permanecer até provar dependências.
+- **Documento criado:** `docs/AUDITORIA_ORGANIZACAO_E_LIMPEZA_2026-11-02.md`.
+- **Commit:** `02606935d68cdc76e5f110b7084aeb3e6e2cbe67`.
+- **Estado da limpeza:** nenhum arquivo apagado; inspeção e inventário apenas. Próximo passo: comparar HTMLs e workflows, corrigir documentação contraditória e depois abrir PR de limpeza revisável.
+- **Backup da conversa:** esta sessão foi resumida neste registro e na auditoria; não é cópia literal de toda a transcrição.
