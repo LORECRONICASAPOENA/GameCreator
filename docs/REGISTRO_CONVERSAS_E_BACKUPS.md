@@ -150,3 +150,15 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Commit:** `02606935d68cdc76e5f110b7084aeb3e6e2cbe67`.
 - **Estado da limpeza:** nenhum arquivo apagado; inspeção e inventário apenas. Próximo passo: comparar HTMLs e workflows, corrigir documentação contraditória e depois abrir PR de limpeza revisável.
 - **Backup da conversa:** esta sessão foi resumida neste registro e na auditoria; não é cópia literal de toda a transcrição.
+
+
+## Continuação da auditoria de limpeza (02/11/2026)
+
+- Criada branch isolada `maintenance/audit-cleanup-20261102` para organizar a revisão sem tocar diretamente na main.
+- Inspecionados integralmente (texto disponível) README, `integracao/README.md`, scripts de build PowerShell/Python, os dois workflows, launcher CMD, iniciador legado e scripts de publicação local.
+- Conclusões: os workflows têm funções distintas (CI abrangente com `contents: read` versus publicação automática do index com `contents: write`); não remover nenhum sem redesenho. `ABRIR_GAME_CREATOR.cmd` realmente executa build e abre o editor, não é mero redirect. `legacy/iniciador-anterior.html` contém catálogo de poções e links, não é mero redirect. `PUBLICAR_NO_GITHUB.ps1` sincroniza diretório via Robocopy e faz commit/push para main; requer revisão de segurança antes de uso.
+- Os builds PowerShell e Python têm lógica semelhante, mas o CI apenas valida sintaxe Python quando disponível, sem provar paridade. Manter ambos até teste de paridade.
+- README e `integracao/README.md` divergem sobre a fonte V3.9/V4.0/V4.1. Arquivos grandes não puderam ser comparados por conteúdo através do conector; tamanho semelhante não prova duplicação.
+- Nenhum arquivo funcional apagado. Foi atualizada a auditoria documental na branch isolada: `docs/AUDITORIA_ORGANIZACAO_E_LIMPEZA_2026-11-02.md`.
+- Commit na branch: `204cc95fddd0a7f57ebc99d943e44a8befc87396`.
+- Próximo passo: abrir PR documental para revisão e depois preparar um ambiente de clone local para comparar os HTMLs por hash/diff e executar testes antes de qualquer exclusão.
