@@ -179,3 +179,13 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Lacunas de preservação:** transcrições integrais, originais narrativos e binários, biblioteca IndexedDB, arquivos locais, índice unificado, matriz de problemas/testes, evidências de execução, sprites citados como ausentes e restauração comprovada. Dossiê estratégico da conversa permanece em [branch documental](https://github.com/apoenalore/GameCreator/blob/backup/gamecreator-conversa-20261102-0904-brt/docs/relatorios-conversas/2026-11-02-dossie-analise-evolucao-gamecreator-recebido.md).
 - **Próximo pacote proposto:** `APOENA_BACKUP_MESTRE_2026-11-02` com oito seções e manifestos SHA-256, **ainda não gerado**. Não declarar backup completo sem cópias externas e teste de restauração.
 - **Preservação:** somente documentação; nenhum código, workflow, teste, runner, asset, ZIP original ou IndexedDB alterado. WIP=1 preservado.
+
+
+## Checkpoint — 02/11/2026 — PR #11 com CI aprovada e Skills de engenharia/segurança
+
+**Fonte:** GitHub autenticado; [relatório detalhado](relatorios-conversas/2026-11-02-checkpoint-pr11-ci-aprovada-e-novas-skills.md).
+
+- **PR #11 (GC-ANIM-006):** permanece aberta em rascunho, sem merge; novo head observado `0dd0b9ee90409654958f010eef9303f0dca8c7c7` na branch `feat/apoena-personagem-estudio-main` (22 commits, 11 arquivos alterados). A mudança mais recente no head é documental, sobre o runner em escuta.
+- **CI da PR #11:** run [41451250043](https://github.com/apoenalore/GameCreator/actions/runs/41451250043) no SHA `0dd0b9e...` terminou **completed/success**; job `validar` ID `125298759580` também **success**, incluindo testes de biblioteca/backup, integração e Godot headless. Atualiza o estado de validação anterior, **sem** provar caminhada fiel, revisão visual, Android físico, gameplay completo ou autorização de merge. Histórico de falhas anteriores preservado.
+- **Apoena Skill:** commits [`51ed1e6`](https://github.com/apoenalore/apoenaskil/commit/51ed1e667ecddb854bf7152a9201f57453b99caf) e [`6337436`](https://github.com/apoenalore/apoenaskil/commit/633743695d7f1d0a26c3926ef706b61ee9f75df9) adicionaram Skills de engenharia/segurança/arquitetura, dossiê de auditoria parcial e nova atualização de recuperação de conversas. Nenhum desses registros comprova correção dos achados SEC-001 a SEC-007 nem recuperação integral de anexos.
+- **Preservação:** checkpoint documental, sem alteração de código, workflow, runner, assets, merge ou dados locais. WIP=1 mantido. O backup mestre binário e a restauração integral seguem pendentes.
