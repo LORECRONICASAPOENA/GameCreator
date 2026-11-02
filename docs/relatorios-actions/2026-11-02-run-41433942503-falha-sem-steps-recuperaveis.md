@@ -57,3 +57,36 @@ Nenhuma correção de produto ou infraestrutura foi aplicada. Foi criado este re
 - CodeRabbit: **AGUARDANDO REVISÃO**; não há review formal localizada nesta consulta.
 - Integração na `main`: **NÃO INTEGRADO**.
 - Commit deste relatório: a ser confirmado após publicação.
+
+
+## 9. Pesquisa externa — documentação oficial e relatos da comunidade (02/11/2026)
+
+A pesquisa foi feita após o autor solicitar que a investigação também consultasse Google/GitHub Community e experiências de desenvolvedores independentes. Os relatos abaixo são referências para formular hipóteses e testes; não provam que a causa deste incidente seja idêntica.
+
+### Documentação oficial
+- GitHub Docs — [Monitoring and troubleshooting self-hosted runners](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/monitor-and-troubleshoot): runner pode ficar offline quando a máquina está desligada, o aplicativo do runner não está ativo ou não consegue comunicar-se com GitHub. A documentação descreve a verificação de conectividade usando o script de configuração com `--check`, URL do repositório e PAT com permissões adequadas. O PAT deve ser fornecido apenas localmente, nunca compartilhado em conversa ou commit.
+
+### Relatos do projeto oficial actions/runner e comunidade
+- [actions/runner #2624](https://github.com/actions/runner/issues/2624): relato da mesma mensagem de perda de comunicação em self-hosted runner; útil como referência histórica, não prova a causa deste caso.
+- [actions/runner #4703](https://github.com/actions/runner/issues/4703): relato recente em que `Runner.Listener` continua ativo, mas deixa de avançar/comunicar-se; jobs aparecem sem steps e são posteriormente marcados como lost communication. Ambiente descrito no issue é Linux, portanto serve como hipótese de listener/broker, não como reprodução do nosso Windows.
+- [actions/runner #4444](https://github.com/actions/runner/issues/4444): relato Windows do listener parar de buscar novos jobs após uma transição de estado; reiniciar o serviço recuperava temporariamente. Não é evidência de que nosso incidente tenha essa mesma causa.
+- [GitHub Community #173431](https://github.com/orgs/community/discussions/173431): relato da mensagem em job Windows com alto consumo de CPU/RAM.
+- [Microsoft Q&A — self-hosted runner Windows](https://learn.microsoft.com/en-us/answers/questions/5996434/github-actions-self-hosted-runner-on-azure-windows): relato de runner Windows que volta a aceitar jobs após reinício do serviço; hipótese de listener/conexão degradada.
+
+### Hipóteses priorizadas para o nosso runner Windows
+1. Serviço/processo do runner foi encerrado, travou ou perdeu o canal de comunicação.
+2. Máquina Windows entrou em suspensão, reiniciou ou perdeu conectividade durante o job.
+3. Rede, DNS, proxy ou firewall interrompeu a conexão de saída com os serviços do GitHub Actions.
+4. CPU, memória ou disco foram esgotados e impediram o listener de responder.
+5. Possível comportamento específico da versão do runner/listener; só considerar após identificar versão e comparar logs com issues relevantes.
+
+### Plano de coleta recomendado
+- Confirmar no GitHub Settings > Actions > Runners se o runner está Online/Idle/Offline e registrar a hora da observação.
+- No Windows, consultar logs locais do runner em `_diag` para o intervalo do run; preservar os arquivos antes de reiniciar o serviço.
+- Consultar Visualizador de Eventos do Windows (Sistema e Aplicativo) para eventos de desligamento, suspensão, reinício, falha de serviço e rede no mesmo intervalo.
+- Registrar versão do runner, nome/estado do serviço, uso de CPU/RAM/disco e estabilidade da rede.
+- Executar o diagnóstico oficial `config.cmd --check` no computador, com URL do repositório e PAT apropriado inserido localmente. Não colocar PAT em logs públicos, issues, commits ou mensagens.
+- Somente após preservar evidências, se o serviço estiver travado/offline, reiniciá-lo e registrar o resultado. Reexecutar a validação canônica depois da recuperação.
+
+### Decisão técnica
+Não alterar código de animação nem remover etapas de teste para corrigir uma falha cuja evidência atual aponta perda de comunicação do executor. A pesquisa externa amplia as hipóteses e define coleta direcionada; a causa operacional específica permanece **PENDENTE** até a análise dos logs do computador que hospeda o runner.
