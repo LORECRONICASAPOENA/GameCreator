@@ -218,3 +218,41 @@ O autor definiu que o editor 3D e o editor Pixel Art 2D pertencem ao mesmo Game 
 - Respeitar WIP = 1: acompanhar a validação do atualizador (PR #7) antes de iniciar refatorações de código concorrentes.
 - Depois, seguir a integração da plataforma única 3D + Pixel Art 2D + mapas 2.5D, corrigindo primeiro os links quebrados comprovados e preservando o catálogo antigo até localizar suas fontes de poções.
 - Continuar registrando novidades com SHA, branch, arquivos, estado de CI e distinção entre proposta, implementação e validação.
+
+
+## Checkpoint incremental — 02/11/2026, aproximadamente 01h BRT
+
+**Finalidade:** registrar novas conversas e verificar o estado atual do GitHub, sem substituir o histórico anterior nem criar um novo backup idêntico. As informações abaixo distinguem decisão do autor, proposta de IA, evidência técnica externa e resultado confirmado no GitHub.
+
+### 1. Novas diretrizes do autor em conversas recentes
+
+- **Perfil e escopo:** o autor se declarou iniciante no uso do Codex e deseja empregá-lo em todas as frentes do projeto `Apoena Game Creator`, descrito também como **franquia**. A visão de produto é **completa**, **multiplataforma**, apta a **diferentes tipos de jogos** e com público inicial de criadores iniciantes. O projeto já foi iniciado; não se deve reconstruí-lo do zero.
+- **Plataforma única preservada:** o Estúdio 3D, o Estúdio Pixel Art 2D e o Editor de Mapas 2.5D devem pertencer ao mesmo Creator, com um projeto ativo, biblioteca compartilhada e integração para o jogo Apoena. O escopo geral de múltiplos jogos não elimina Apoena como primeiro projeto consumidor.
+- **Entrada e destinos:** foi aceita como direção a entrada `index.html`, suporte a **Godot 4 e HTML5**, com **prioridade de implementação Godot**. O diretório inicial de trabalho do Codex ainda não estava estabelecido nessa conversa.
+- **Diretriz de planejamento:** diagnosticar o código existente, registrar dependências e contratos, preservar a bancada 3D e as funções já implementadas, e evoluir em etapas com testes. Uma proposta de IA para uma V0.1 de organização/interface/primeiro jogo funcional **não equivale a funcionalidade entregue nem a escopo técnico fechado**.
+
+### 2. Diagnóstico relatado em análise externa de pacote do Creator (ainda não reproduzido neste checkpoint)
+
+- Uma inspeção de ZIP do GameCreator relatou **155 entradas**, **71 arquivos JavaScript verificados sintaticamente sem erros** e **oito testes não executados/concluídos por indisponibilidade de `fake-indexeddb`**. Testes Godot e Android **não foram executados** nessa inspeção. Esses números se referem ao pacote analisado naquela conversa, **não** à árvore Git atual nem a validação canônica.
+- A análise externa apontou possível divergência entre a documentação que chama `index.html` de loader de 24 partes e o `index.html` do pacote, descrito como HTML monolítico de aproximadamente 16,3 MB sem referências diretas às partes. **A confirmar por comparação reproduzível da árvore/artefato correspondente.** Não substituir o index, fonte V4.0 ou bundle com base apenas nesse relato.
+- Foi proposta pela IA uma primeira integração **Godot Map Runtime Bridge**: ler JSON do mapa do Creator, converter para `TileMapLayer`/terrenos, posicionar personagem, suportar colisão, coleta e salvar/restaurar. **Estado: proposta técnica, não implementação nem aprovação de escopo integral.**
+- Contratos já citados no projeto: `apoena.central.v1`, `apoena.gamecreator.catalogo.v1`, `apoena.map2d.v1`. Antes de inventar outro schema, conferir os consumidores e a compatibilidade existente.
+- O planejamento da primeira fatia de runtime não deve ser confundido com a implementação completa de multiplayer, ecologia, autotiling avançado ou mapa 2.5D físico.
+
+### 3. Snapshot GitHub verificado nesta execução
+
+- Repositório: [apoenalore/GameCreator](https://github.com/apoenalore/GameCreator); branch principal `main` permanece em `1b95d036c31dfb4ca9f9ce6859510be2c9f7e8cd` no momento da consulta.
+- [PR #12](https://github.com/apoenalore/GameCreator/pull/12): aberta, em rascunho, branch `maintenance/audit-cleanup-20261102`. Head antes deste checkpoint: `e86895c3f7fe9d172beb399c931d564dec95ee37`. Contém documentação, matriz de rotas e decisões de arquitetura; **não está integrada na main**.
+- [PR #7](https://github.com/apoenalore/GameCreator/pull/7): aberta, em rascunho, head `b5836634b19dfcad3fa61fc3f7a85561c5be1f95`, referente ao atualizador incremental Windows. A API informou `mergeable_state=unstable`; isso não é diagnóstico causal de código.
+- **Mudança de estado importante:** [run 41380526501](https://github.com/apoenalore/GameCreator/actions/runs/41380526501) da PR #7, antes `pending`, terminou `completed/failure` no head `b583663`. Job `validar` atribuído a `APOENA-GAMECREATOR-RUNNER`, mas o conector retornou `steps=[]` e não forneceu logs causais. **CAUSA NÃO CONFIRMADA**. Relatório: `docs/relatorios-actions/2026-11-02-run-41380526501-validacao-atualizador-sem-logs.md`.
+- [Run 41380498183](https://github.com/apoenalore/GameCreator/actions/runs/41380498183) do head anterior `ddfd541` terminou `completed/cancelled`, não `failure`. Não serve como validação do head novo.
+- [Run 41367279379](https://github.com/apoenalore/GameCreator/actions/runs/41367279379), `main`, SHA `57c8208`, segue `completed/failure` sem mensagem causal disponível. Relatório documental: `docs/relatorios-actions/2026-11-01-run-41367279379-main-sem-logs.md`.
+- Não houve acesso ao conteúdo dos logs locais do runner, não foi disparado workflow manual e não foi aplicado código de correção. **Não declarar CI verde**.
+
+### 4. Continuidade, limites e próxima ação
+
+- A integração 3D + Pixel Art 2D + mapas 2.5D continua como arquitetura aprovada, com prioridade Godot para o primeiro fluxo de runtime. O Creator permanece concebido como ferramenta reutilizável para diferentes jogos.
+- A tarefa técnica ativa deve respeitar **WIP = 1** entre GameCreator e Apoena Pixel Art HTML. A PR #7 não pode ser considerada concluída até obter logs, resolver a causa e validar seu head. As propostas de ponte de mapa e limpeza de rotas permanecem em planejamento.
+- Preservar os cinco links legados quebrados e as nove fontes de poções ausentes como achados documentados; corrigir/migrar apenas após rastrear dependências, sem inventar assets nem remover conteúdo exclusivo.
+- O backup Git registra **commits, documentos e decisões acessíveis**, mas não é cópia literal de todas as conversas nem protege automaticamente projetos em IndexedDB, assets locais não enviados ou dados da pasta APP. A restauração real desses dados exige exportação e teste.
+- Esta execução atualiza **somente documentação na branch de auditoria**; não altera a `main`, scripts, builds, editores ou assets.
