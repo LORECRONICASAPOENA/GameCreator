@@ -73,3 +73,41 @@ O autor pediu avaliação do volume de informação, pendências e arquivos repe
 Só excluir depois de confirmar que o arquivo não é fonte única, buscar referências, identificar substituto, preservar conteúdo exclusivo, executar testes e registrar motivo/impacto. Quando houver dúvida, arquivar em vez de apagar.
 
 **Resultado desta auditoria:** somente inspeção; nenhum arquivo funcional ou histórico foi apagado.
+
+
+## Verificação adicional — fluxos e iniciadores (02/11/2026)
+
+### Workflows: não são duplicatas idênticas
+- `.github/workflows/pixel-art.yml` declara-se CI canônico, tem `contents: read`, executa build/testes, valida DOM mobile, dependências e runtime. Tem triggers de push/PR com filtros amplos e workflow_dispatch.
+- `.github/workflows/publicar-creator-unificado.yml` é um fluxo de publicação específico: roda em push para main com paths selecionados, chama build, valida saída e faz commit/push de `index.html` se houver mudança. Usa `contents: write` e runner self-hosted.
+- **Conclusão:** ambos invocam build, mas possuem finalidades distintas (validação abrangente versus publicação do artefato). Não apagar nenhum sem desenhar um fluxo substituto. A possível duplicidade é de compilação/execução e deve ser resolvida por desenho, não por exclusão cega.
+- **Risco a avaliar:** o workflow de publicação usa credenciais persistentes no checkout e permissão de escrita. Manter apenas se a publicação automática do index for requisito; preferir artifact/release ou PR automático, se o processo atual permitir.
+
+### Builds PowerShell e Python
+- PowerShell é chamado por `ABRIR_GAME_CREATOR.cmd` e pelo CI Windows.
+- Python tem função equivalente documentada, mas o workflow atual apenas verifica sintaxe quando Python está disponível; não executa teste de paridade funcional.
+- Os dois scripts têm caminho alternativo para fonte V4.0 vazia e bundle. Não há prova de que ambos gerem o mesmo resultado em todos os cenários.
+- **Decisão provisória:** manter ambos até executar testes de paridade. Se a equipe só suporta Windows, PowerShell pode ser o build canônico e Python pode ser removido após confirmar que nenhum consumidor externo o usa.
+
+### Iniciadores e publicação local
+- `ABRIR_GAME_CREATOR.cmd` não é apenas um redirecionador HTML: executa o build PowerShell e abre `index.html`. Não é chamado pelo Runner, mas tem função local real no Windows. **Não apagar sem substituir o fluxo local.**
+- `legacy/iniciador-anterior.html` não é um simples redirect: contém catálogo de poções editável/exportável e links para editor v3.9, integração, Pixel Art e Map Editor. É legado, mas possui conteúdo funcional específico. **Não apagar antes de migrar catálogo e verificar referências.**
+- `PUBLICAR_NO_GITHUB.cmd` é wrapper para `PUBLICAR_NO_GITHUB.ps1`. O PowerShell clona/atualiza o repositório, copia arquivos via Robocopy e faz commit/push para main. Não é o Runner e tem função diferente do launcher. Pode publicar arquivos locais amplamente; revisar exclusões, branch e prevenção de segredos antes de recomendar uso. **Não apagar sem saber se o autor ainda usa esse fluxo.**
+
+### Divergência da documentação V3.9/V4.0/V4.1
+- README atual declara “V4.1 em desenvolvimento”, V4.0 como base, `index.html` como loader e bundle-v4 como 24 partes.
+- `integracao/README.md` declara que o HTML completo do repositório é V3.9 e que V3.9.2/V4.0 não foram publicados integralmente.
+- O build PowerShell exige a existência do arquivo V4.0 e, se seu conteúdo estiver vazio, valida bundle e preserva index. O build Python segue lógica parecida. Isso indica entradas alternativas de build, mas não resolve qual versão é funcionalmente canônica.
+- O fetch de arquivos grandes não devolveu conteúdo textual utilizável nesta inspeção. Portanto, não foi possível comparar os HTMLs por diff/hash local. Semelhança de tamanho não comprova duplicação.
+- **Ação necessária:** obter clones/artefatos em ambiente de trabalho, calcular SHA-256 real, comparar estrutura e executar testes. Até lá, manter os arquivos grandes.
+
+## Decisão de limpeza após a verificação
+Nenhum alvo atual atende aos critérios de exclusão segura. A limpeza imediata recomendada é documental/organizacional:
+1. corrigir a descrição da fonte de verdade somente após comparação local;
+2. manter CI e publicação como workflows distintos até redesenho validado;
+3. manter launcher local e scripts de publicação enquanto houver uso;
+4. migrar catálogo/conteúdo exclusivo do iniciador legado antes de arquivar;
+5. manter ambos os builds até prova de paridade;
+6. criar PR separado para qualquer remoção futura, com diff e testes.
+
+**Status desta rodada:** inventário e análise estática dos scripts/workflows concluídos parcialmente. Não houve exclusão nem alteração de runtime.

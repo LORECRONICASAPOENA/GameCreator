@@ -172,3 +172,29 @@
 - O ZIP final contém 76 arquivos de runtime; a fábrica original está preservada somente com a página e as 23 partes JS necessárias. Não contém documentação, testes, CI ou arquivos Markdown/texto.
 - SHA-256 do ZIP interno: \`62407aaad9bd183d78bd3a29a65752f8325981a4191aa77b084be49b818eb55d\`.
 - O teste do manifesto do atualizador no PR7 passou no step 17 do run #41082083233; a simulação real de clone/fast-forward e preservação local continua pendente. A branch ambiental PR6 passou no run #41081917796.
+
+
+## GC-PLAT-001 — Plataforma única 3D + Pixel Art 2D + Mapas 2.5D
+
+- **Estado:** DECISÃO APROVADA PELO AUTOR; arquitetura registrada; implementação ainda não iniciada.
+- **Decisão:** os editores 3D e Pixel Art são ferramentas do mesmo Game Creator e do mesmo jogo Apoena. Devem compartilhar entrada, contexto de projeto, biblioteca de assets e exportação. Não manter dois Creators independentes.
+- **Áreas da plataforma:** Estúdio 3D; Estúdio Pixel Art 2D; Editor de mapas 2.5D; biblioteca central; itens/regras; exportação para runtime.
+- **Mapa existente:** `map-editor/` já implementa uma primeira versão 2.5D com grade, tilesets, terrenos, alturas visuais limitadas, objetos com profundidade, marcadores, JSON e PNG. Evoluir e integrar esse editor; não iniciar outro do zero.
+- **Biblioteca:** `shared/asset-library.js` e `biblioteca/` são a base a consolidar. IDs estáveis e referências compartilhadas devem impedir recadastro/duplicação.
+- **Bancada 3D:** a auditoria existente identifica recursos de animação/modelagem 3D na fonte do Creator. A localização exata de cada tela/rota e sua dependência deve ser confirmada na Etapa A antes de refatorar.
+- **Diretriz de interface:** uma entrada e navegação única, com áreas especializadas; mapa acessível como etapa/ferramenta própria, sem ocupar a interface durante a criação de assets.
+- **Limpeza:** remover apenas placeholders, rotas vazias, links quebrados e duplicações comprovadas após rastrear referências e migrar conteúdo exclusivo. Não apagar bundle, fontes históricas, scripts ou iniciadores só por tamanho/idade.
+- **Arquitetura detalhada:** [ARQUITETURA_PLATAFORMA_UNICA_APOENA.md](ARQUITETURA_PLATAFORMA_UNICA_APOENA.md).
+- **Critério de conclusão:** entrada única; 3 áreas acessíveis; biblioteca e projeto compartilhados; assets 2D/3D posicionáveis no mapa por ID; mapas salvam/reabrem/exportam; nenhum caminho quebrado; projetos antigos preservados; CI e testes visuais PC/Android concluídos.
+- **Próxima ação única:** Etapa A — inventário de dependências/navegação e matriz de rotas. Não iniciar ainda refatoração de UI nem exclusão de arquivos antes de concluir esse mapa.
+
+
+## GC-PLAT-002 — Requisitos adicionais recuperados da Apoena Skill (02/11/2026)
+
+- **Estado:** RECUPERADO — VALIDAR; não iniciar implementação paralela enquanto GC-UPDATE-009 permanecer WIP 1.
+- **Origem:** `apoenalore/apoenaskil` commit `633743695d7f1d0a26c3926ef706b61ee9f75df9`, adendo de auditoria de conversas; cobertura explicitamente parcial.
+- **Requisitos de editor a auditar:** importação/transferência de imagens; transparência, apagador, grade, recorte manual/inteligente; animação por ação/direção/quadro; fases de espécies; camadas; composição de objetos com interação; realce amarelo em hover; salvar/reabrir; biblioteca central; tilesets e mapas 2.5D; exportação de recursos/metadados.
+- **Requisitos de runtime relacionados, não implementados pelo editor:** ecologia, clima contextual e cooperação local Bluetooth/Wi-Fi Direct para dois celulares. Não misturar cooperação local com multiplayer híbrido online nem impor clima de um cenário a todos os mundos.
+- **Incidente histórico:** `EstadoHistoria` não encontrado em `modelo_heroi_3d.gd:54` e timeout de 120s de `personagens_provisorios_smoke`, sem reprodução no HEAD atual. Não confundir com os incidentes de CI em aberto.
+- **Ação futura:** cruzar cada requisito com a implementação atual antes de criar módulos; preservar contratos existentes e a arquitetura GC-PLAT-001.
+- **Dossiê de continuidade:** [CHECKPOINT_SKILL_REQUISITOS_RECUPERADOS_2026-11-02.md](CHECKPOINT_SKILL_REQUISITOS_RECUPERADOS_2026-11-02.md).

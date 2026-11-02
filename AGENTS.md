@@ -68,3 +68,28 @@ Sempre que qualquer execução ou job do GitHub Actions terminar em `failure`, o
 - Não confiar no cliente para saldo, inventário, combate, posse, preços, recompensas, ranking ou elegibilidade. Multiplayer/economia exigem autoridade do servidor e autorização por objeto.
 - Não implementar sandbox de mods executáveis sem modelo de capabilities, isolamento de processo/runtime, quotas, revogação, revisão e testes adversariais aprovados.
 - Mudanças de segurança devem incluir relatório de ameaça, evidência, testes negativos e riscos residuais; não afirmar que o produto está “seguro” com base apenas em testes de contrato.
+
+
+## Continuidade obrigatória — documentação de segurança
+
+Para qualquer auditoria, correção ou alteração relacionada a segurança, backup, importação/exportação, bridge, biblioteca, distribuição ou GitHub Actions, leia também, antes de agir:
+1. docs/security/README.md;
+2. docs/security/AUDIT-V4.1.md;
+3. docs/security/FINDINGS.md;
+4. docs/security/REMEDIATION-PLAN.md;
+5. docs/security/EVIDENCE-REGISTER.md;
+6. docs/security/BACKUP-AND-RECOVERY.md;
+7. docs/security/GITHUB-SECURITY.md;
+8. docs/security/CHANGELOG-SECURITY.md.
+
+Os achados SEC-001 a SEC-007 são históricos/preliminares e devem ser revalidados no SHA atual. Não declarar exploração, vulnerabilidade confirmada, correção, teste ou release sem evidência. A memória geral, decisões transversais e arquivo de conversas pertencem ao repositório Apoena Skill; este repositório mantém somente documentação técnica operacional do GameCreator.
+
+
+## Arquitetura e fonte oficial — leitura obrigatória
+
+Antes de alterar a entrada principal, build, distribuição, módulos compartilhados, Map Editor, Pixel Art ou integração Godot, leia:
+1. docs/architecture/README.md;
+2. docs/architecture/ENGINEERING-BASELINE-2026-11-02.md;
+3. README.md e os documentos de build correspondentes.
+
+A identificação registrada é: fonte de entrada do build = APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html; artefato integrado = index.html; caminho operacional predominante = integracao/build_unificado.ps1. Trate como baseline verificado no ZIP A1, não como certificação de distribuição em produção. O index depende de módulos externos; não o distribuir isoladamente. O build Python apresentou diferença de dois bytes em relação ao index recebido; não declarar equivalência até alinhar e testar. WIP = 1. A próxima atividade é A2, mapa de dependências/contratos; não refatorar antes de concluir esse levantamento.

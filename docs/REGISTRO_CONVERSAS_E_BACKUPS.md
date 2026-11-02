@@ -150,3 +150,160 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Commit:** `02606935d68cdc76e5f110b7084aeb3e6e2cbe67`.
 - **Estado da limpeza:** nenhum arquivo apagado; inspeção e inventário apenas. Próximo passo: comparar HTMLs e workflows, corrigir documentação contraditória e depois abrir PR de limpeza revisável.
 - **Backup da conversa:** esta sessão foi resumida neste registro e na auditoria; não é cópia literal de toda a transcrição.
+
+
+## Continuação da auditoria de limpeza (02/11/2026)
+
+- Criada branch isolada `maintenance/audit-cleanup-20261102` para organizar a revisão sem tocar diretamente na main.
+- Inspecionados integralmente (texto disponível) README, `integracao/README.md`, scripts de build PowerShell/Python, os dois workflows, launcher CMD, iniciador legado e scripts de publicação local.
+- Conclusões: os workflows têm funções distintas (CI abrangente com `contents: read` versus publicação automática do index com `contents: write`); não remover nenhum sem redesenho. `ABRIR_GAME_CREATOR.cmd` realmente executa build e abre o editor, não é mero redirect. `legacy/iniciador-anterior.html` contém catálogo de poções e links, não é mero redirect. `PUBLICAR_NO_GITHUB.ps1` sincroniza diretório via Robocopy e faz commit/push para main; requer revisão de segurança antes de uso.
+- Os builds PowerShell e Python têm lógica semelhante, mas o CI apenas valida sintaxe Python quando disponível, sem provar paridade. Manter ambos até teste de paridade.
+- README e `integracao/README.md` divergem sobre a fonte V3.9/V4.0/V4.1. Arquivos grandes não puderam ser comparados por conteúdo através do conector; tamanho semelhante não prova duplicação.
+- Nenhum arquivo funcional apagado. Foi atualizada a auditoria documental na branch isolada: `docs/AUDITORIA_ORGANIZACAO_E_LIMPEZA_2026-11-02.md`.
+- Commit na branch: `204cc95fddd0a7f57ebc99d943e44a8befc87396`.
+- Próximo passo: abrir PR documental para revisão e depois preparar um ambiente de clone local para comparar os HTMLs por hash/diff e executar testes antes de qualquer exclusão.
+
+
+## Decisão de plataforma única — 02/11/2026
+
+O autor definiu que o editor 3D e o editor Pixel Art 2D pertencem ao mesmo Game Creator e ao mesmo jogo Apoena. A proposta aprovada é uma única plataforma com Estúdio 3D, Estúdio Pixel Art 2D e Editor de Mapas 2.5D, todos usando a mesma biblioteca e contexto de projeto. O mapa 2.5D já existe em `map-editor/` como implementação parcial; deve ser integrado/evoluído, não refeito. A bancada 3D existente deve ser preservada após inventário de suas rotas e dependências. Caminhos vazios/órfãos só serão removidos depois de rastrear referências e migrar conteúdo exclusivo.
+
+- Arquitetura registrada em `docs/ARQUITETURA_PLATAFORMA_UNICA_APOENA.md`.
+- Decisão/backlog registrados em `docs/ATUALIZACOES_PENDENTES_LEIA_ANTES_DE_COMECAR.md` como GC-PLAT-001.
+- Próxima etapa única: inventário de dependências, navegação e matriz de rotas; depois integração do shell e biblioteca.
+- Nenhuma funcionalidade, HTML, bundle, workflow ou asset foi removido nesta etapa.
+- Alterações documentais seguem na branch `maintenance/audit-cleanup-20261102`, dentro da PR draft #12; não houve merge na main.
+
+
+## Continuidade: inventário de rotas e backup de decisões — 02/11/2026 (23h BRT, horário aproximado da execução)
+
+- Confirmada a árvore `main` em `1b95d036c31dfb4ca9f9ce6859510be2c9f7e8cd`; PR #12 permanece aberta em rascunho. Nenhuma alteração de código novo na `main` foi observada nesta consulta.
+- Executado inventário estático de páginas e dependências menores: `ORGANIZACAO_EDITOR.html`, páginas Pixel Art, mapa, biblioteca, integração, legacy, ponte compartilhada e builds.
+- Identificados **cinco links HTML quebrados** em `legacy/iniciador-anterior.html` por caminhos relativos que ainda pressupõem a raiz, apesar de a página estar em `legacy/`.
+- Identificadas **nove referências de scripts de poções ausentes** (`assets/pocoes-01.js` a `assets/pocoes-09.js`). Sem esses arquivos, a lista `__APOENA_POTIONS` fica vazia e a importação atual não consegue preencher o catálogo porque percorre apenas os originais. Não inventar as 52 poções mencionadas pela interface.
+- Confirmadas rotas existentes entre organização, Pixel Art, mapa 2.5D, biblioteca, integração e editor legado v3.9. O mapa e o estúdio já chamam a ponte `saveMap`/`saveAsset`; isso não equivale a integração completa de projeto.
+- Atenção de segurança futura: `shared/creator-bridge.js` usa `postMessage` com destino `*` e aceita origem `null` em certas condições; revisar antes de ampliar integração externa, preservando uso offline.
+- Criado `docs/MATRIZ_ROTAS_DEPENDENCIAS_2026-11-02.md`, commit `ef1a307a32b59f05a85c0e3be44bc45fe8a33888`, na branch da PR #12.
+- Estado: **somente documentação e backup do conhecimento**, sem exclusões ou mudanças funcionais. Próxima tarefa única: corrigir os cinco links com teste de resolução; localizar fontes reais das poções e mapear a navegação interna do HTML grande antes de refatorar a plataforma.
+
+
+## Checkpoint de continuidade — 02/11/2026, aproximadamente 00h BRT (03h UTC)
+
+**Objetivo:** preservar a situação atual do Game Creator, as novidades efetivamente observadas e as limitações de backup sem interferir nas tarefas de código em andamento.
+
+### Referências Git confirmadas
+- `main`: `1b95d036c31dfb4ca9f9ce6859510be2c9f7e8cd`. Não foram observados commits posteriores na branch principal nesta consulta.
+- `maintenance/audit-cleanup-20261102`: `956f3e5ebcd47a2dcd0a7f38019dfd979640970f` antes deste checkpoint. [PR #12](https://github.com/apoenalore/GameCreator/pull/12) aberta, em rascunho, sem merge. Contém apenas documentação: arquitetura única 3D/2D/2.5D, matriz de rotas, auditoria e registro de decisões.
+- `feat/atualizador-local-incremental`: `b5836634b19dfcad3fa61fc3f7a85561c5be1f95`. [PR #7](https://github.com/apoenalore/GameCreator/pull/7) aberta em rascunho; branch divergente de `main` (4 commits à frente, 27 atrás no snapshot). Não considerar o atualizador integrado à principal.
+
+### Novidades detectadas na PR #7
+- `ATUALIZAR_CREATOR.cmd` e `integracao/atualizar-creator.ps1` introduzem instalador/atualizador Windows baseado em clone parcial, sparse-checkout e fast-forward, com verificações conservadoras de arquivos locais.
+- `tests/atualizador-manifest.test.cjs` testa manifesto e cenários de atualização/colisão, inclusive PowerShell real em repositório Git temporário, segundo a documentação da branch.
+- `docs/ATUALIZADOR_CREATOR_WINDOWS.md` esclarece que a pasta APP deve conter somente runtime, preservando docs/testes/histórico no GitHub; a instalação não deve tocar a pasta RUNNER.
+- Commits recentes observados: `b854f7f` (proteção de caminhos e referência anterior), `ddfd541` (teste contra caminhos fora da allowlist), `b583663` (proveniência e timestamps de incidente).
+- **Estado:** implementação e testes em evolução; ainda exige CI do head atualizado e teste de instalação/atualização no Windows do autor. Não declarar entregue.
+
+### Estado de validação consultado
+- [Run #41380526501](https://github.com/apoenalore/GameCreator/actions/runs/41380526501) do head `b583663`: `pending` na consulta; sem resultado final.
+- [Run #41380498183](https://github.com/apoenalore/GameCreator/actions/runs/41380498183) do commit `ddfd541`: `in_progress` na consulta; sem resultado final.
+- [Run #41367279379](https://github.com/apoenalore/GameCreator/actions/runs/41367279379), `main`, commit `57c8208`: `completed/failure`. A API forneceu job `validar`, mas não trouxe steps nem mensagem causal; **causa não confirmada**. Requer logs antes de propor correção; não repetir execução sem diagnóstico.
+- Nenhum workflow foi disparado manualmente nesta verificação e nenhum teste foi declarado aprovado sem evidência.
+
+### Limites reais do backup
+- O histórico de commits, branches e documentação está preservado no GitHub; este checkpoint é um resumo factual, **não** um espelho literal das conversas nem um backup dos arquivos locais do computador.
+- O conteúdo de IndexedDB da biblioteca do navegador, projetos não exportados, assets binários que não foram enviados e arquivos pessoais da pasta APP **não são automaticamente protegidos pelo Git**. A documentação do atualizador exige exportação e conferência de restauração da biblioteca antes de abandonar uma instalação antiga.
+- A PR #12 ainda depende de revisão e merge para que seus registros façam parte da `main`. Nenhum HTML, script, asset, workflow ou módulo funcional foi apagado/alterado por este checkpoint.
+
+### Próxima ação coordenada
+- Respeitar WIP = 1: acompanhar a validação do atualizador (PR #7) antes de iniciar refatorações de código concorrentes.
+- Depois, seguir a integração da plataforma única 3D + Pixel Art 2D + mapas 2.5D, corrigindo primeiro os links quebrados comprovados e preservando o catálogo antigo até localizar suas fontes de poções.
+- Continuar registrando novidades com SHA, branch, arquivos, estado de CI e distinção entre proposta, implementação e validação.
+
+
+## Checkpoint incremental — 02/11/2026, aproximadamente 01h BRT
+
+**Finalidade:** registrar novas conversas e verificar o estado atual do GitHub, sem substituir o histórico anterior nem criar um novo backup idêntico. As informações abaixo distinguem decisão do autor, proposta de IA, evidência técnica externa e resultado confirmado no GitHub.
+
+### 1. Novas diretrizes do autor em conversas recentes
+
+- **Perfil e escopo:** o autor se declarou iniciante no uso do Codex e deseja empregá-lo em todas as frentes do projeto `Apoena Game Creator`, descrito também como **franquia**. A visão de produto é **completa**, **multiplataforma**, apta a **diferentes tipos de jogos** e com público inicial de criadores iniciantes. O projeto já foi iniciado; não se deve reconstruí-lo do zero.
+- **Plataforma única preservada:** o Estúdio 3D, o Estúdio Pixel Art 2D e o Editor de Mapas 2.5D devem pertencer ao mesmo Creator, com um projeto ativo, biblioteca compartilhada e integração para o jogo Apoena. O escopo geral de múltiplos jogos não elimina Apoena como primeiro projeto consumidor.
+- **Entrada e destinos:** foi aceita como direção a entrada `index.html`, suporte a **Godot 4 e HTML5**, com **prioridade de implementação Godot**. O diretório inicial de trabalho do Codex ainda não estava estabelecido nessa conversa.
+- **Diretriz de planejamento:** diagnosticar o código existente, registrar dependências e contratos, preservar a bancada 3D e as funções já implementadas, e evoluir em etapas com testes. Uma proposta de IA para uma V0.1 de organização/interface/primeiro jogo funcional **não equivale a funcionalidade entregue nem a escopo técnico fechado**.
+
+### 2. Diagnóstico relatado em análise externa de pacote do Creator (ainda não reproduzido neste checkpoint)
+
+- Uma inspeção de ZIP do GameCreator relatou **155 entradas**, **71 arquivos JavaScript verificados sintaticamente sem erros** e **oito testes não executados/concluídos por indisponibilidade de `fake-indexeddb`**. Testes Godot e Android **não foram executados** nessa inspeção. Esses números se referem ao pacote analisado naquela conversa, **não** à árvore Git atual nem a validação canônica.
+- A análise externa apontou possível divergência entre a documentação que chama `index.html` de loader de 24 partes e o `index.html` do pacote, descrito como HTML monolítico de aproximadamente 16,3 MB sem referências diretas às partes. **A confirmar por comparação reproduzível da árvore/artefato correspondente.** Não substituir o index, fonte V4.0 ou bundle com base apenas nesse relato.
+- Foi proposta pela IA uma primeira integração **Godot Map Runtime Bridge**: ler JSON do mapa do Creator, converter para `TileMapLayer`/terrenos, posicionar personagem, suportar colisão, coleta e salvar/restaurar. **Estado: proposta técnica, não implementação nem aprovação de escopo integral.**
+- Contratos já citados no projeto: `apoena.central.v1`, `apoena.gamecreator.catalogo.v1`, `apoena.map2d.v1`. Antes de inventar outro schema, conferir os consumidores e a compatibilidade existente.
+- O planejamento da primeira fatia de runtime não deve ser confundido com a implementação completa de multiplayer, ecologia, autotiling avançado ou mapa 2.5D físico.
+
+### 3. Snapshot GitHub verificado nesta execução
+
+- Repositório: [apoenalore/GameCreator](https://github.com/apoenalore/GameCreator); branch principal `main` permanece em `1b95d036c31dfb4ca9f9ce6859510be2c9f7e8cd` no momento da consulta.
+- [PR #12](https://github.com/apoenalore/GameCreator/pull/12): aberta, em rascunho, branch `maintenance/audit-cleanup-20261102`. Head antes deste checkpoint: `e86895c3f7fe9d172beb399c931d564dec95ee37`. Contém documentação, matriz de rotas e decisões de arquitetura; **não está integrada na main**.
+- [PR #7](https://github.com/apoenalore/GameCreator/pull/7): aberta, em rascunho, head `b5836634b19dfcad3fa61fc3f7a85561c5be1f95`, referente ao atualizador incremental Windows. A API informou `mergeable_state=unstable`; isso não é diagnóstico causal de código.
+- **Mudança de estado importante:** [run 41380526501](https://github.com/apoenalore/GameCreator/actions/runs/41380526501) da PR #7, antes `pending`, terminou `completed/failure` no head `b583663`. Job `validar` atribuído a `APOENA-GAMECREATOR-RUNNER`, mas o conector retornou `steps=[]` e não forneceu logs causais. **CAUSA NÃO CONFIRMADA**. Relatório: `docs/relatorios-actions/2026-11-02-run-41380526501-validacao-atualizador-sem-logs.md`.
+- [Run 41380498183](https://github.com/apoenalore/GameCreator/actions/runs/41380498183) do head anterior `ddfd541` terminou `completed/cancelled`, não `failure`. Não serve como validação do head novo.
+- [Run 41367279379](https://github.com/apoenalore/GameCreator/actions/runs/41367279379), `main`, SHA `57c8208`, segue `completed/failure` sem mensagem causal disponível. Relatório documental: `docs/relatorios-actions/2026-11-01-run-41367279379-main-sem-logs.md`.
+- Não houve acesso ao conteúdo dos logs locais do runner, não foi disparado workflow manual e não foi aplicado código de correção. **Não declarar CI verde**.
+
+### 4. Continuidade, limites e próxima ação
+
+- A integração 3D + Pixel Art 2D + mapas 2.5D continua como arquitetura aprovada, com prioridade Godot para o primeiro fluxo de runtime. O Creator permanece concebido como ferramenta reutilizável para diferentes jogos.
+- A tarefa técnica ativa deve respeitar **WIP = 1** entre GameCreator e Apoena Pixel Art HTML. A PR #7 não pode ser considerada concluída até obter logs, resolver a causa e validar seu head. As propostas de ponte de mapa e limpeza de rotas permanecem em planejamento.
+- Preservar os cinco links legados quebrados e as nove fontes de poções ausentes como achados documentados; corrigir/migrar apenas após rastrear dependências, sem inventar assets nem remover conteúdo exclusivo.
+- O backup Git registra **commits, documentos e decisões acessíveis**, mas não é cópia literal de todas as conversas nem protege automaticamente projetos em IndexedDB, assets locais não enviados ou dados da pasta APP. A restauração real desses dados exige exportação e teste.
+- Esta execução atualiza **somente documentação na branch de auditoria**; não altera a `main`, scripts, builds, editores ou assets.
+
+
+## Checkpoint incremental — 02/11/2026, 02h06 BRT (05h06 UTC)
+
+**Pedido recorrente do autor:** fazer backup no GitHub do projeto Game Creator após as conversas e preservar novidades e informações detalhadas, sem perder decisões, limitações ou histórico.
+
+### 1. Novidades de conversas e decisões
+- Na revisão de continuidade desta janela não foram identificadas novas decisões ou novas conversas do projeto posteriores ao checkpoint anterior de aproximadamente 01h BRT. A arquitetura aprovada continua sendo **uma plataforma única** com Estúdio 3D, Estúdio Pixel Art 2D e Editor de Mapas 2.5D, projeto e biblioteca compartilhados; prioridade de integração Godot 4 e suporte HTML5.
+- Permanecem pendentes a limpeza criteriosa de rotas vazias/links quebrados e a recuperação das fontes de poções ausentes. Não eliminar módulos antigos sem rastrear dependências e migrar conteúdo exclusivo.
+- Nenhuma alteração funcional foi solicitada nesta janela além da manutenção do backup detalhado.
+
+### 2. Estado GitHub consultado
+- Repositório: https://github.com/apoenalore/GameCreator.
+- `main`: SHA `1b95d036c31dfb4ca9f9ce6859510be2c9f7e8cd`, sem novos commits na consulta.
+- PR #12: https://github.com/apoenalore/GameCreator/pull/12 — aberta em **rascunho**, branch `maintenance/audit-cleanup-20261102`. Head antes desta verificação: `7b0856492b9f0445a277fa36e7163256f1ef0bd0`; a PR preserva auditoria, arquitetura, matriz de rotas, incidentes e checkpoints, **sem merge na main**.
+- PR #7: https://github.com/apoenalore/GameCreator/pull/7 — aberta, head `b5836634b19dfcad3fa61fc3f7a85561c5be1f95`, atualizador incremental Windows; ainda não validada no head.
+- PRs #11, #6, #5 e #4 permaneciam abertas na consulta. Não houve evidência de merge recente dessas PRs.
+
+### 3. Evidência nova: indisponibilidade dos logs de duas falhas do CI
+- Run `41380526501` (PR #7, commit `b583663`, job `125071409041`) permanece `completed/failure`.
+- Run `41367279379` (`main`, commit `57c8208`, job `125031378121`) permanece `completed/failure`.
+- A consulta específica aos steps retornou `steps=[]` nos dois jobs.
+- O download específico de logs dos dois jobs retornou **HTTP 404 / `BlobNotFound`** do armazenamento de logs, em 02/11/2026 05:06:09Z e 05:06:10Z, respectivamente. A mensagem do serviço foi `The specified blob does not exist`.
+- **Interpretação rigorosa:** `BlobNotFound` é erro ao obter o arquivo de log; **não** demonstra a causa das falhas dos workflows. As causas continuam **NÃO CONFIRMADAS**.
+- Foram complementados os relatórios `docs/relatorios-actions/2026-11-02-run-41380526501-validacao-atualizador-sem-logs.md` e `docs/relatorios-actions/2026-11-01-run-41367279379-main-sem-logs.md` com a nova evidência.
+- Próxima coleta necessária: annotations/logs na interface GitHub Actions e logs locais do runner Windows. Não repetir workflow cegamente nem alterar código com base em hipótese.
+
+### 4. Integridade e limites do backup
+- Esta rodada modificou **somente documentação** na branch de auditoria. Nenhum HTML, asset, script, workflow, configuração de runner ou arquivo funcional foi excluído/alterado. Nenhum merge ou retry foi efetuado.
+- O backup preserva o histórico versionado e o conhecimento documentado no GitHub, **não** é espelho literal de todas as conversas nem backup dos dados locais de IndexedDB, projetos não exportados, imagens/modelos não enviados ou arquivos pessoais da pasta APP.
+- Manter o protocolo **WIP = 1** e não iniciar refatoração paralela enquanto a validação da tarefa ativa estiver pendente.
+- **Próximo passo:** coletar logs causais das falhas; depois retomar a unificação 3D/2D/2.5D e correção de rotas com testes de regressão.
+
+
+## Checkpoint incremental — 02/11/2026, aproximadamente 07h BRT (10h UTC)
+
+**Pedido recorrente:** backup no GitHub do Game Creator a cada conversa, preservando novidades, requisitos, decisões e informações detalhadas.
+
+### Novidade verificada na base Apoena Skill
+- A `main` de `apoenalore/apoenaskil` avançou ao commit [`633743695`](https://github.com/apoenalore/apoenaskil/commit/633743695d7f1d0a26c3926ef706b61ee9f75df9), datado de 02/11/2026 09:42:49 UTC. Esse commit acrescenta um adendo de recuperação de conversas do projeto, ainda com **cobertura PARCIAL**.
+- O adendo contém requisitos relevantes para o GameCreator: edição Pixel Art com transparência, apagador, recorte manual/inteligente e grade; animações por ação/direção/quadro; biblioteca compartilhada; camadas e composição de objetos; hover amarelo; persistência; tilesets e mapas 2.5D; exportação de metadados.
+- Também recupera requisitos de jogo que afetam o planejamento de metadados do editor: ecologia/plantas/sementes/decomposição, clima contextual, e cooperação local entre dois celulares via Bluetooth ou Wi-Fi Direct. Não confundir com a arquitetura online híbrida Android/PC, que é outra frente.
+- O erro `Identifier not found: EstadoHistoria` (`modelo_heroi_3d.gd:54`) e o timeout `personagens_provisorios_smoke` de 120s são **relatos históricos não reproduzidos no HEAD atual**. Não os atribuir às falhas atuais de CI.
+- O detalhamento, fonte, classificação de status, riscos e próxima sequência estão em [CHECKPOINT_SKILL_REQUISITOS_RECUPERADOS_2026-11-02.md](CHECKPOINT_SKILL_REQUISITOS_RECUPERADOS_2026-11-02.md).
+
+### Snapshot e preservação
+- `GameCreator/main` permanece em `1b95d036c31dfb4ca9f9ce6859510be2c9f7e8cd`; a PR #12 segue draft na branch de auditoria e a PR #7 segue draft sem validação final comprovada.
+- A PR #6 do Apoena Skill continua draft; o novo commit da Skill citado acima está na `main`, em outro arquivo.
+- As execuções de CI `41380526501` e `41367279379` continuam com falha e sem causa comprovada nesta consulta; não houve retry.
+- Esta rodada registra **novos requisitos recuperados**, sem repetir um checkpoint vazio. Somente documentação da branch de auditoria foi modificada; nenhum código funcional, asset, workflow ou `main` foi alterado.
+- Dados de IndexedDB, projetos não exportados e arquivos locais não são incluídos automaticamente no backup do GitHub.
