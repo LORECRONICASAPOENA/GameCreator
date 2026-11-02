@@ -207,6 +207,28 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --check integracao/catalogo.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Validar e testar Criador Modular de Personagens
+        run: |
+          node --check pixel-art/personagens.js
+          if ($LASTEXITCODE -ne 0) { throw "Sintaxe de personagens.js inválida." }
+          node --check pixel-art/personagens-core.js
+          if ($LASTEXITCODE -ne 0) { throw "Sintaxe de personagens-core.js inválida." }
+          node tests/personagens.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw "Teste de modelo do Criador Modular falhou." }
+      - name: Testar Criador Modular no navegador
+        run: |
+          $ErrorActionPreference = "Stop"
+          $browser = @((Join-Path $env:ProgramFiles "Microsoft/Edge/Application/msedge.exe"), (Join-Path ([Environment]::GetEnvironmentVariable("ProgramFiles(x86)")) "Microsoft/Edge/Application/msedge.exe"), (Join-Path $env:ProgramFiles "Google/Chrome/Application/chrome.exe")) | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $browser) { throw "Edge/Chrome necessário para testar o Criador Modular." }
+          $uri = ([System.Uri](Join-Path $env:GITHUB_WORKSPACE "tests/personagens-browser.html")).AbsoluteUri
+          $profile = Join-Path $env:RUNNER_TEMP ("apoena-character-" + $env:GITHUB_RUN_ID)
+          $args = '--headless --disable-gpu --allow-file-access-from-files --window-size=1500,1200 --virtual-time-budget=20000 --user-data-dir="' + $profile + '" --dump-dom "' + $uri + '"'
+          $output = Join-Path $env:GITHUB_WORKSPACE ".ci-results/characters-browser.html"
+          $log = Join-Path $env:GITHUB_WORKSPACE ".ci-results/characters-browser.log"
+          $proc = Start-Process -FilePath $browser -ArgumentList $args -RedirectStandardOutput $output -RedirectStandardError $log -Wait -PassThru
+          if ($proc.ExitCode -ne 0) { throw "Navegador falhou no teste do Criador Modular." }
+          if (-not (Get-Content -Raw $output).Contains('<pre id="result">CHARACTER BROWSER OK</pre>')) { throw "Teste funcional do Criador Modular falhou. Consulte .ci-results/characters-browser.html e .log." }
+          "CHARACTER BROWSER OK" | Add-Content -Encoding UTF8 $log
       - name: Testar Corte Inteligente e contratos da interface
         run: |
           node tests/corte-inteligente.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/corte.log
