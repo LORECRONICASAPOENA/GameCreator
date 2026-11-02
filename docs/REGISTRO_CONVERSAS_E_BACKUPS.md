@@ -98,3 +98,15 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Decisões recomendadas:** servidor autoritativo; cliente não decide combate/inventário/economia; consultas SQL parametrizadas e privilégio mínimo; TLS 1.3 padrão/TLS 1.2 compatibilidade, SSL antigo desativado; validação de certificados; anti-replay e protocolo seguro maduro para transporte multiplayer; evitar anti-cheat kernel no primeiro estágio; usar OWASP GameSec como referência de requisitos.
 - **Limite:** pesquisa documental, não pentest nem confirmação de vulnerabilidade no produto. Backend SQL/multiplayer ainda requer auditoria quando implementado.
 - **Commit do relatório:** `964f7fe9a0418db812719f82a85c992cb4a7c87f`.
+
+
+## Integridade do mundo, economia e experiência do jogador (02/11/2026)
+
+- **Solicitação:** consultar medidas atuais de segurança/integridade em jogos e esclarecer o exemplo de punição do LoL por inatividade/ausência.
+- **Pesquisa oficial Riot:** FAQ AFK/abandono (02/06/2026) descreve tiers escalonados de atraso de fila e bloqueios temporários; abandono de fila tem regras próprias; decaimento competitivo aplica-se a Diamond+ e regras Apex incluem dias acumulados; comportamento tóxico e reparação/compensação possuem sistemas separados.
+- **Conclusão de design:** não punir login ausente diário em modos casuais. Diferenciar ausência, AFK durante partida, abandono de lobby, decaimento competitivo e comportamento/cheating. Decaimento, se adotado, deve ser restrito a ranques de topo, com tolerância e avisos. Preservar personagem/economia legítimos. Penalidades competitivas graduais, recurso e proteção contra falso positivo. Compensar participantes prejudicados por abandono confirmado.
+- **Mundo persistente:** estado canônico e relógio no servidor; transações autorizadas para construção, captura, saque e crafting; qualquer decay de território deve ser mecânica transparente com aviso e período de graça.
+- **Documento criado:** `docs/POLITICA_INTEGRIDADE_E_EXPERIENCIA_JOGADOR.md`.
+- **Referências:** Riot Support AFK FAQ, queue dodge, ranked decay, Apex tiers, Instant Feedback e Disruptive Behavior Repair; OWASP Game Security Framework.
+- **Commit:** `9d68305cd9b93d326b424d109b679e170293c17a`.
+- **Limite:** pesquisa e proposta de design; nenhuma regra de jogo foi implementada.
