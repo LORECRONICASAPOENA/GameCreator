@@ -84,7 +84,7 @@ $runtimeRegexParts = @(
         [regex]::Escape($_.TrimStart('/')).Replace('\*', '[^/]*').Replace('\?', '[^/]')
     }
 )
-$regexRuntime = '^(?:' + ($runtimeRegexParts -join '|') + ')
+$regexRuntime = '^(?:' + ($runtimeRegexParts -join '|') + ')'
 
 function Registrar([string]$Mensagem) {
     $linha = ('{0} horario local | {1}' -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz'), $Mensagem)
