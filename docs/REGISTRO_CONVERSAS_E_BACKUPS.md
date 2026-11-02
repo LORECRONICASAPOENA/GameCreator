@@ -65,3 +65,15 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Incidente atual documentado:** `docs/relatorios-actions/2026-11-01-run-41357977741-runner-perdeu-comunicacao.md`. A captura enviada pelo autor mostra a annotation “The self-hosted runner lost communication w…”. A perda de comunicação está comprovada pela captura; a causa-raiz operacional (rede, serviço/processo, suspensão/reinicialização ou outra) continua não confirmada. Nenhum código ou configuração foi alterado. Próxima ação é verificar o runner no Windows antes de uma única nova validação controlada.
 - **Commits documentais:** `5f198f452427265c6a01f10b89cbb9d442f4c2a4` (AGENTS.md); `66a6335ec0a39aeea6fa8c273729fc3149493523` (modelo); `31cde018cad9016eeaf938721e9d47a60e38c4de` (relatório do incidente atual).
 - **Limite:** esta regra orienta agentes que leem `AGENTS.md`; não significa que o GitHub Actions, sozinho, esteja configurado para chamar uma IA ou gerar relatórios automaticamente. A IA precisa consultar e seguir as instruções durante cada investigação.
+
+
+## Decisão sobre ABRIR_GAME_CREATOR.cmd e redução de acionamentos do Runner (02/11/2026)
+
+- **Solicitação do autor:** avaliar a remoção do instalador/iniciador CMD por entender que apenas encaminha para o HTML e pode atrapalhar o Runner.
+- **Inspeção do arquivo:** `ABRIR_GAME_CREATOR.cmd` não é apenas um redirecionador. Ele chama `integracao/build_unificado.ps1` para montar a página integrada e, se o build terminar sem erro, abre `index.html`. É um atalho local opcional para Windows.
+- **Inspeção do CI:** `.github/workflows/pixel-art.yml` já chama `integracao/build_unificado.ps1` diretamente no job `validar`; não depende do CMD. Portanto, o CMD não é executado pelo Runner. Porém, o nome do CMD estava listado nos filtros `paths` de `push` e `pull_request`, fazendo uma alteração isolada nele disparar a validação.
+- **Decisão aplicada:** preservar o CMD como conveniência local, mas remover `ABRIR_GAME_CREATOR.cmd` dos filtros de caminho do workflow canônico. Assim, editar apenas o atalho não inicia Runner. O CI continua compilando pelo script PowerShell diretamente.
+- **Documentação atualizada:** README esclarece que o CMD é opcional e local; `AGENTS.md` instrui agentes a nunca executar o launcher como etapa do Runner e a removê-lo apenas após verificar dependências locais.
+- **Commits:** `2de026134f6e3d11805b168db1aaf5e446240d06` (filtros do workflow); `57c8208a0746a78d2321452c0cf63fabee2e1616` (README); `52458c83215a0f7e81654ac8ce00abbf4235e746` (AGENTS.md).
+- **Validação:** alteração do workflow e documentação foi registrada na `main`; não foi disparada execução manual. Como `README.md` permanece nos filtros, a alteração documental do README pode acionar o CI automaticamente; alterações em `AGENTS.md` e neste registro não estão nos filtros de caminho. A confirmação final deve ser feita consultando o Actions no commit atual.
+- **Estado:** CMD não apagado, pois realiza um build local real. Runner desobrigado de usá-lo; alteração isolada do CMD não deve consumir execução. Nenhuma configuração do produto foi removida.
