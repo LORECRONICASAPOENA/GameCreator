@@ -492,3 +492,23 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - **Evidência de correção:** [run #41116194279](https://github.com/apoenalore/GameCreator/actions/runs/41116194279), step 17 — parser PowerShell 5.1, `node --check` e execução de `tests/atualizador-manifest.test.cjs` concluídos; teste end-to-end reportou aprovação, inclusive colisão com nome acentuado. Merge commit testado: `c6562464c96e9bfaaff70b68a1d8a2ce624ae6d2`; head da branch na execução: `ae085d57c3245fb1c5d4956f0b0cd0399e4067c5`.
 - **Resultado:** CORREÇÃO APLICADA / PARSER E TESTE END-TO-END WINDOWS APROVADOS NO RUN CITADO.
 - **Prevenção:** após substituições por trecho, verificar arquivo completo, contagem de blocos e executar o parser PowerShell no runner antes de considerar o teste end-to-end alcançado.
+
+
+
+### GC-UPDATE-PS-001 — Aspa ausente e regex sem âncora no manifesto do atualizador
+
+- **Projeto/repositório:** Game Creator — apoenalore/GameCreator.
+- **Ocorrências:** [run 41464182794](https://github.com/apoenalore/GameCreator/actions/runs/41464182794), job 125340620373, SHA `78a162e76b49a7862cb96bec87d5795c1c797ff2`; e [run 41486755080](https://github.com/apoenalore/GameCreator/actions/runs/41486755080), job 125419616782, SHA `1eb2119e3fa0f285e6278d51d0d5eec5ab48399c`.
+- **Causas comprovadas:** a atribuição de `$regexRuntime` estava sem aspa simples final, causando erro de parsing PowerShell. Após fechar a string, a assertion encontrou que a regex sem âncora aceitava por prefixo caminhos como `map-editor/cache.json`.
+- **Correção:** fechar a string e exigir correspondência do caminho completo com `$`, sem afrouxar os testes. Correção final na PR #7: commit `b483bff226e5488175b6c776f4cfd24da5f30fae`.
+- **Validação:** o run canônico [41488368286](https://github.com/apoenalore/GameCreator/actions/runs/41488368286), job 125425257046, passou integralmente no SHA corrigido; o step do manifesto passou.
+- **Prevenção:** após editar linha PowerShell via API, conferir os caracteres finais e o diff completo, manter o teste de caminho completo e aguardar somente a CI automática do head mais recente.
+
+### GC-UPDATE-PS-002 — Edição remota truncou a linha e repetiu código do atualizador
+
+- **Projeto/repositório:** Game Creator — apoenalore/GameCreator.
+- **Ocorrência:** [run 41487673698](https://github.com/apoenalore/GameCreator/actions/runs/41487673698), job 125422177253, branch `feat/atualizador-local-incremental`, SHA `b29adee6023f225f88275eb2be397c40cdb5f1af`.
+- **Erro:** parser PowerShell reportou `Token '{' inesperado na expressão ou instrução.` A linha `$regexRuntime` terminava sem âncora e sem aspa final; a edição remota também repetiu o final do script.
+- **Correção:** restaurar o conteúdo-base de 666 linhas do commit anterior e aplicar somente a âncora `$` antes da aspa de fechamento. Commit final `b483bff226e5488175b6c776f4cfd24da5f30fae`.
+- **Validação:** run canônico [41488368286](https://github.com/apoenalore/GameCreator/actions/runs/41488368286), job 125425257046, sucesso integral; arquivo final conferido com 666 linhas.
+- **Prevenção:** para correção pontual, editar o arquivo completo a partir de um blob-base conhecido, verificar contagem estrutural e diff antes de considerar a alteração pronta.
