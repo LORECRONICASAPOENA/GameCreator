@@ -83,3 +83,13 @@ Para qualquer auditoria, correção ou alteração relacionada a segurança, bac
 8. docs/security/CHANGELOG-SECURITY.md.
 
 Os achados SEC-001 a SEC-007 são históricos/preliminares e devem ser revalidados no SHA atual. Não declarar exploração, vulnerabilidade confirmada, correção, teste ou release sem evidência. A memória geral, decisões transversais e arquivo de conversas pertencem ao repositório Apoena Skill; este repositório mantém somente documentação técnica operacional do GameCreator.
+
+
+## Arquitetura e fonte oficial — leitura obrigatória
+
+Antes de alterar a entrada principal, build, distribuição, módulos compartilhados, Map Editor, Pixel Art ou integração Godot, leia:
+1. docs/architecture/README.md;
+2. docs/architecture/ENGINEERING-BASELINE-2026-11-02.md;
+3. README.md e os documentos de build correspondentes.
+
+A identificação registrada é: fonte de entrada do build = APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html; artefato integrado = index.html; caminho operacional predominante = integracao/build_unificado.ps1. Trate como baseline verificado no ZIP A1, não como certificação de distribuição em produção. O index depende de módulos externos; não o distribuir isoladamente. O build Python apresentou diferença de dois bytes em relação ao index recebido; não declarar equivalência até alinhar e testar. WIP = 1. A próxima atividade é A2, mapa de dependências/contratos; não refatorar antes de concluir esse levantamento.
