@@ -233,3 +233,16 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **PR #13 GC-CHAR-001:** [Criador Modular de Personagens](https://github.com/apoenalore/GameCreator/pull/13) observado aberto e em rascunho. O arquivo `character-creator/index.html` existe na branch `feat/apoena-character-creator-prototype`, mas não há comprovação de substituição do gerador atual na `main`. O default "Guardião" não foi homologado como cânone.
 - **PR #11:** continua aberta em rascunho. CI anterior da PR #11 não homologa PR #13, sprite Ludo ou runtime.
 - **Preservação:** commit do relatório [`c5605ed`](https://github.com/apoenalore/GameCreator/commit/c5605ed91700686bf89751d23dca90e6e0992acb). Imagens originais e dados IndexedDB **não copiados**; Backup Mestre e restauração integral seguem pendentes. Nenhum código funcional, runner, workflow, asset, PR ou dado local alterado.
+
+
+## Checkpoint — 02/11/2026 — auditoria da interface e 500 melhorias para o GameCreator
+
+**Horário exato da conversa:** não preservado. **Relatório completo:** [backup-interface-gamecreator-500-melhorias.md](relatorios-conversas/2026-11-02-backup-interface-gamecreator-500-melhorias.md).
+
+- **Pedido:** avaliar o repositório GameCreator e listar 500 formas de melhorar a interface, deixando-a mais limpa e otimizada. O relatório organiza 500 propostas em 20 áreas; são oportunidades a priorizar, não 500 falhas confirmadas.
+- **Referência visual:** usuário mostrou o editor de personagens desejado e a página inicial local v4.0. Direção registrada: preservar a página inicial e integrar o editor modular como módulo de Personagens, com canvas central, categorias, animação/prévia, camadas e exportação.
+- **Diferença de versão:** a captura local mostra v4.0, enquanto o README na main descreve v4.1 em desenvolvimento. Confirmar a base do usuário antes de editar a interface.
+- **Repositório:** main contém entrada HTML de aproximadamente 16,3 MB, 24 partes em bundle-v4 e ferramentas separadas de Pixel Art, mapas e biblioteca. Documentação existente alerta para sobreposição entre Fábrica de Itens e editor tradicional; mapear antes de consolidar.
+- **GC-CHAR-001 / PR #13:** aberta em rascunho e mergeable na consulta; base feat/apoena-personagem-estudio-main e head feat/apoena-character-creator-prototype. O escopo declara pendentes validação no Creator compilado, sincronização com IndexedDB e validação Godot. Ver [PR #13](https://github.com/apoenalore/GameCreator/pull/13).
+- **Prioridade sugerida:** alinhar versão local e branch; validar a PR #13 no Creator compilado; depois simplificar navegação/painéis e unificar padrões visuais sem recriar ferramentas existentes.
+- **Método e limites:** revisão estática de documentação, árvore, trechos dos módulos e PR; sem execução do app ou testes. Imagens anexadas e conceito visual não foram copiados como binários. Nenhum código, workflow, teste, asset, PR ou dado IndexedDB foi alterado; somente documentação.
