@@ -90,3 +90,39 @@ A pesquisa foi feita após o autor solicitar que a investigação também consul
 
 ### Decisão técnica
 Não alterar código de animação nem remover etapas de teste para corrigir uma falha cuja evidência atual aponta perda de comunicação do executor. A pesquisa externa amplia as hipóteses e define coleta direcionada; a causa operacional específica permanece **PENDENTE** até a análise dos logs do computador que hospeda o runner.
+
+
+## 10. Nova evidência: conflito de sessão duplicada — pesquisa comunitária
+
+Em 02/11/2026, o autor enviou duas fotografias do console do runner Windows. O texto visível é:
+
+- `Connected to GitHub`
+- `A session for this runner already exists.`
+- `Runner connect error: Error: Conflict. Retrying until reconnected.`
+- A sequência se repete após novas mensagens `Connected to GitHub`.
+
+### Comparação com relatos públicos
+1. **Correspondência muito forte:** [actions/runner #4312](https://github.com/actions/runner/issues/4312), relato de 2026 com a mesma sequência de logs (`The session for this runner already exists`, `Runner connect error: Error: Conflict`, retries e posterior reconexão). O caso mostra que a mensagem pode persistir e depois reconectar; não determina a causa do nosso host.
+2. **Hipótese de inicialização duplicada:** [actions/runner #3441](https://github.com/actions/runner/issues/3441). Um mantenedor observou duas solicitações de criação de sessão com intervalo de 11 segundos e perguntou se a automação estava chamando `run.sh` múltiplas vezes. Outro participante levantou encerramento por OOM como causa possível de uma sessão anterior não ser encerrada corretamente. O issue também registra relatos em Windows.
+3. **Reinicialização não graciosa:** [actions/runner #3677](https://github.com/actions/runner/issues/3677), relato de sessão conflitante após reboot Windows; o autor suspeita de encerramento abrupto do runner.
+4. **Configuração de serviço:** [GitHub Docs — configurar runner como serviço no Windows](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/configure-the-application?platform=windows). A documentação orienta parar a aplicação antes de instalar/configurar o serviço e gerenciar o serviço pelo Windows Services/PowerShell.
+
+### Diagnóstico atualizado
+- **Erro imediato confirmado:** o GitHub rejeita a criação de uma nova sessão porque já existe uma sessão ativa associada à identidade deste runner (`Conflict`).
+- **Hipótese prioritária A:** dois processos/listeners ou dois mecanismos de inicialização (serviço Windows + `run.cmd` manual/Inicialização/Agendador) usam a mesma configuração/identidade.
+- **Hipótese prioritária B:** processo anterior caiu, foi encerrado à força ou o Windows reiniciou sem encerramento gracioso; a sessão anterior ainda é considerada ativa.
+- **Hipótese adicional:** pressão de memória/recursos causou encerramento ou reinício inesperado. Só considerar comprovada após logs/Event Viewer.
+- **Não comprovado:** que o runner foi definitivamente iniciado duas vezes neste computador. As fotografias provam conflito de sessão, não a origem.
+
+### Procedimento seguro quando o computador estiver disponível
+1. Não iniciar outro `run.cmd` enquanto o console atual estiver em loop de conflito.
+2. Verificar `services.msc` e localizar o serviço `GitHub Actions Runner (...)`; registrar se existe e seu estado.
+3. No PowerShell, consultar processos relacionados a `Runner.Listener`, `Runner.Worker` e `run.cmd`, sem encerrá-los inicialmente. Correlacionar PID, caminho e serviço para identificar se serviço e terminal iniciaram a mesma pasta/configuração.
+4. Verificar Agendador de Tarefas, pasta Inicializar e scripts de inicialização para chamadas duplicadas.
+5. Preservar logs `_diag` e eventos do Windows antes de qualquer parada/reinício.
+6. Se serviço e console estiverem executando a mesma identidade, escolher um único modo de operação e parar o mecanismo duplicado de forma controlada. Não remover/reconfigurar o runner no GitHub nem apagar `.runner`/credenciais como primeiro passo.
+7. Se só houver um processo, investigar sessão anterior não encerrada, reinício abrupto, falha do listener e OOM; então seguir procedimento de recuperação documentado.
+8. Confirmar que o runner aparece uma única vez e como `Idle` no GitHub antes de reexecutar o workflow.
+
+### Decisão
+Não modificar o código do GameCreator nem o workflow de testes para contornar o conflito. A prioridade é diagnosticar e normalizar a identidade/sessão do runner Windows. O diagnóstico está mais específico, mas a causa operacional final ainda depende de inspeção local.
