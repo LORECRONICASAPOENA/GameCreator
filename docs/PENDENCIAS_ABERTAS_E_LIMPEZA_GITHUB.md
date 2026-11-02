@@ -273,7 +273,7 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - **Preservação:** não usar reset/clean; não apagar runner, biblioteca IndexedDB, arquivos pessoais ou histórico local.
 - **Revisão/sincronização:** a branch de trabalho da PR #7 foi reaplicada sobre a `main` atual; o backup `backup/gc-update-009-before-main-sync-20261030` preserva a branch anterior.
 - **Testes automatizados:** o workflow Windows executa parser PowerShell 5.1 e o contrato/end-to-end do atualizador contra repositório Git temporário, cobrindo sparse-checkout, exclusão de documentos, fast-forward, referência anterior, retomada e bloqueio de conflitos.
-- **Validação automatizada:** CI canônica aprovada no head atual `2546c1b79964c0e46b95b6de0791aad765d3fe8c`, run [41490114161](https://github.com/apoenalore/GameCreator/actions/runs/41490114161); manifesto, Godot, preservação e job completo passaram.
+- **Validação automatizada:** CI canônica aprovada no commit de código `2546c1b79964c0e46b95b6de0791aad765d3fe8c`, run [41490114161](https://github.com/apoenalore/GameCreator/actions/runs/41490114161); manifesto, Godot, preservação e job completo passaram. O head posterior contém apenas atualização documental.
 - **Revisão CodeRabbit:** achados sobre allowlist e atualização de `refs/apoena/anterior` corrigidos; comentários registrados como resolvidos após validação.
 - **Pendências de aceite:** teste real de instalação/atualização no Windows do autor; exportação e restauração da Biblioteca IndexedDB antes de abandonar a instalação antiga.
 - **Regra:** não integrar a PR nem declarar concluído até todos os critérios acima terem evidência.
