@@ -211,3 +211,14 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Apoena Skill:** commit [`50a672a`](https://github.com/apoenalore/apoenaskil/commit/50a672ab15b3f784dff0dcf864dac15c87989894) registra `docs/lore/zodiaco-de-apoena.md`: 13 constelações, com Cordeiro 10 estrelas, Serpentário 9 e as demais onze com 7 cada (**96 estrelas**); cada estrela deve ser ponto amarelo individual, claramente contável. Informação de lore, **não funcionalidade comprovada no GameCreator**.
 - **Limites:** a CI aprovada não equivale a revisão visual de animações, teste Android físico, gameplay completo ou autorização de merge. Não houve mudança em código, workflow, runner, assets ou IndexedDB nesta atualização. WIP=1 mantido.
 - **Backup Mestre:** ainda pendente a cópia integral de anexos e arquivos locais, IndexedDB e teste de restauração.
+
+
+## Checkpoint — 02/11/2026, aproximadamente 16:02 BRT — recuperação Agar, runners e transferência ao Pixel Art
+
+**Origem:** consulta autenticada aos commits novos do `apoenalore/apoenaskil`. **Relatório detalhado:** [2026-11-02-checkpoint-1902-agar-runners-recovery.md](relatorios-conversas/2026-11-02-checkpoint-1902-agar-runners-recovery.md).
+
+- **Novo registro no Apoena Skill:** [`5b802a4`](https://github.com/apoenalore/apoenaskil/commit/5b802a4453a1627d1852ac1d51c17864871278b7) acrescentou adendo com 29 mensagens/solicitações visíveis sobre runners, Actions, Agar e Pixel Art; [`6c6df4f`](https://github.com/apoenalore/apoenaskil/commit/6c6df4fe918c0ffc8d8f2f888fa5c8d65160428d) atualizou o índice. A recuperação é **parcial**, não transcrição integral.
+- **Runners e Actions:** houve reconexão e job `validar` bem-sucedido em captura, mas não foi comprovada estabilidade permanente. A falha PowerShell `Token '{' inesperado` reapareceu em captura de CI mesmo após parser local indicar sintaxe OK no arquivo do checkout. **Correção dessa falha não comprovada.** Não confundir com a CI aprovada da PR #11 em outro SHA.
+- **Agar:** auditoria anterior registrou falha do controle mobile da Floresta Viva, divergências de cenas/teclas e contratos QWERF contraditórios; nenhum teste novo foi executado nesta verificação. Não alterar cânone ou gameplay sem reconciliação.
+- **Pixel Art:** ideias de ondas de minions, torres, missões, inventário e menus podem ser adaptadas a 2D, preservando clima/ecossistema existente. Spritesheet esperado 128×192 (quadros 32×48) não foi confirmado como asset disponível.
+- **Preservação:** apenas documentos no GameCreator. Código, workflows, runners, PRs, assets e IndexedDB inalterados. WIP=1 mantido. Backup Mestre com originais e teste de restauração segue pendente.
