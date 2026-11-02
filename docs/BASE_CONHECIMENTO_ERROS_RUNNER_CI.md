@@ -504,3 +504,8 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - **Ainda não comprovado:** qual processo ou evento causou a sessão conflitante neste computador.
 - **Próxima ação:** não iniciar outra instância; quando disponível, verificar serviço em `services.msc`, processos `Runner.Listener`/`Runner.Worker`/`run.cmd`, caminho/PID, Agendador de Tarefas e Inicialização; preservar `_diag` e Event Viewer antes de parar/reiniciar. Escolher um único modo de inicialização; não apagar `.runner` nem reconfigurar primeiro.
 - Relatório detalhado: [GC-CI-014](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
+
+
+### Atualização GC-CI-014 — runner reconectado (captura 02/11/2026)
+
+Nova captura mostra `Runner reconnected`, versão `2.338.0` e `Listening for Jobs` às 13:12:43Z. Isso confirma que o processo exibido recuperou comunicação e voltou a escutar tarefas. Não prova que a causa do conflito de sessão foi corrigida nem que só exista uma instância. A imagem inclui outra janela de terminal ao fundo, mas não permite identificá-la. Não iniciar outro `run.cmd`/serviço em paralelo. Conferir Settings → Actions → Runners (Online/Idle), identificar processos/serviço e preservar `_diag`; só então reexecutar uma vez o workflow da PR #11. Código do Creator permanece inalterado.
