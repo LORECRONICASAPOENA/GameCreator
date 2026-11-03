@@ -313,3 +313,12 @@ Em 02/11/2026, o autor enviou captura da anotação expandida do GitHub Actions.
 - **Estado:** integração ainda não validada; causa-raiz do atraso não confirmada. Relatório: [2026-11-03-run-41728611799-character-bridge-timeout.md](relatorios-actions/2026-11-03-run-41728611799-character-bridge-timeout.md).
 - **Correção aplicada no harness:** após capturar o payload, o teste espera a fila assíncrona real do editor via hook de inatividade e mantém as verificações de mensagem de sucesso, manifesto com 12 quadros e PNG. O código de produção do bridge não foi alterado.
 - Aguardar somente a execução canônica automática do novo commit; não iniciar workflow duplicado nem marcar a tarefa como concluída antes de todos os steps obrigatórios passarem.
+
+
+### Atualização — run #41731726616 terminou sem diagnóstico acessível (03/11/2026)
+
+- O run [#41731726616](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41731726616), HEAD 71c142bc4371c1f7b1a4ca047b6c61fb1f5be0f1, terminou em failure.
+- A API mostra o step 6, “Verificar DOM responsivo do Estúdio, Mapas e Biblioteca no navegador”, como in_progress sem horário de conclusão, embora o job tenha encerrado às 19:50:16 BRT. Os steps seguintes, inclusive o teste funcional do Criador Modular, ficaram pending.
+- Logs do job retornaram BlobNotFound; a listagem do run não contém artefatos. Causa-raiz não confirmada, portanto essa execução não valida nem refuta a correção do harness.
+- Relatório individual: [2026-11-03-run-41731726616-step6-runner-diagnostics.md](relatorios-actions/2026-11-03-run-41731726616-step6-runner-diagnostics.md).
+- **Próxima ação pendente:** coletar os logs locais _diag do runner no intervalo 19:39:56–19:50:16 BRT e verificar o processo do navegador. Não repetir o mesmo SHA manualmente sem essa evidência ou confirmação de que a comunicação do runner foi restabelecida.

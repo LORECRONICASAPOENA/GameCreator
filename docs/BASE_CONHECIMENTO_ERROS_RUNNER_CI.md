@@ -552,3 +552,13 @@ O run [#41704904027](https://github.com/apoenalore/GameCreator/actions/runs/4170
 - **Correção escolhida:** substituir a espera temporal do status pela espera do hook whenIdle() da fila assíncrona do editor e manter a assertion de mensagem de sucesso e as assertions do manifesto/PNG. Nenhuma alteração de produção do bridge.
 - **Relatório individual:** [run #41728611799](relatorios-actions/2026-11-03-run-41728611799-character-bridge-timeout.md).
 - **Estado:** correção do harness aplicada; aguarda CI automático no novo commit. Resolver somente após a execução canônica passar.
+
+
+### Atualização GC-CI-017 — run terminal com step 6 ainda em andamento (run #41731726616)
+
+- **Ocorrência:** 2026-11-03, 19:32:46–19:50:16 BRT, PR #14, HEAD 71c142bc4371c1f7b1a4ca047b6c61fb1f5be0f1, job 126251213495.
+- **Resultado:** run/job completed failure; step 5 compilação passou; step 6 smoke test DOM permaneceu in_progress no payload da API sem completed_at; steps 7–26 ficaram pending.
+- **Coleta:** consulta dos logs do job retornou HTTP 404 BlobNotFound; listagem de artefatos vazia; check run indicou uma annotation, mas o conteúdo não pôde ser lido pelo conector. Horário para investigar nos logs locais do runner: 19:39:56–19:50:16 BRT.
+- **Causa-raiz:** NÃO CONFIRMADA. Travamento do navegador headless e perda de comunicação do runner são hipóteses, não fatos.
+- **Ação:** nenhuma alteração de código em resposta a este run. Não repetir cegamente o mesmo SHA. Coletar _diag e estado do processo do navegador antes de nova execução manual.
+- **Relatório:** [run #41731726616](relatorios-actions/2026-11-03-run-41731726616-step6-runner-diagnostics.md).
