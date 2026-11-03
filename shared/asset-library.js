@@ -31,9 +31,6 @@
     try { return JSON.parse(JSON.stringify(value == null ? fallback : value)); }
     catch (_) { return clone(fallback); }
   }
-  function trace(stage, detail) {
-    try { if (root && typeof root.__apoenaLibraryTrace === "function") root.__apoenaLibraryTrace(stage, detail == null ? "" : String(detail)); } catch (_) {}
-  }
   function validTimestamp(value) {
     return typeof value === "string" && Number.isFinite(Date.parse(value)) ? value : null;
   }
@@ -75,11 +72,9 @@
       return Promise.reject(new Error("Este navegador não disponibilizou IndexedDB. Abra o GameCreator em um navegador compatível."));
     }
     if (dbPromise) return dbPromise;
-    trace("db-open-start");
     dbPromise = new Promise(function(resolve, reject) {
       const request = root.indexedDB.open(DB_NAME, DB_VERSION);
       request.onupgradeneeded = function() {
-        trace("db-upgrade");
         const db = request.result;
         if (!db.objectStoreNames.contains(ASSETS)) {
           const assets = db.createObjectStore(ASSETS, { keyPath: "id" });
@@ -95,23 +90,21 @@
       request.onsuccess = function() {
         const db = request.result;
         db.onversionchange = function() { db.close(); dbPromise = null; };
-        trace("db-open-success");
         resolve(db);
       };
-      request.onerror = function() { trace("db-open-error", request.error && request.error.name); reject(request.error || new Error("Não foi possível abrir a biblioteca.")); };
-      request.onblocked = function() { trace("db-open-blocked"); reject(new Error("A biblioteca está aberta em outra versão. Feche outras abas do GameCreator e tente novamente.")); };
+      request.onerror = function() { reject(request.error || new Error("Não foi possível abrir a biblioteca.")); };
+      request.onblocked = function() { reject(new Error("A biblioteca está aberta em outra versão. Feche outras abas do GameCreator e tente novamente.")); };
     });
     return dbPromise;
   }
   async function getRecord(storeName, id) {
-    trace("get-record-start", storeName);
     const db = await openDB();
     if (!db) return clone(memory[storeName].get(id) || null);
     return new Promise(function(resolve, reject) {
       const tx = db.transaction(storeName, "readonly");
       const request = tx.objectStore(storeName).get(id);
-      request.onsuccess = function() { trace("get-record-success", storeName); resolve(request.result || null); };
-      request.onerror = function() { trace("get-record-error", request.error && request.error.name); reject(request.error || new Error("Falha ao consultar a biblioteca.")); };
+      request.onsuccess = function() { resolve(request.result || null); };
+      request.onerror = function() { reject(request.error || new Error("Falha ao consultar a biblioteca.")); };
     });
   }
   async function getAllRecords(storeName) {
@@ -131,14 +124,11 @@
       return clone(record);
     }
     return new Promise(function(resolve, reject) {
-      trace("put-record-start", storeName);
       const tx = db.transaction(storeName, "readwrite");
-      const request = tx.objectStore(storeName).put(record);
-      request.onsuccess = function() { trace("put-request-success", storeName); };
-      request.onerror = function() { trace("put-request-error", request.error && request.error.name); };
-      tx.oncomplete = function() { trace("put-transaction-complete", storeName); resolve(record); };
-      tx.onerror = function() { trace("put-transaction-error", tx.error && tx.error.name); reject(tx.error || new Error("Falha ao salvar na biblioteca.")); };
-      tx.onabort = function() { trace("put-transaction-abort", tx.error && tx.error.name); reject(tx.error || new Error("O salvamento foi cancelado.")); };
+      tx.objectStore(storeName).put(record);
+      tx.oncomplete = function() { resolve(record); };
+      tx.onerror = function() { reject(tx.error || new Error("Falha ao salvar na biblioteca.")); };
+      tx.onabort = function() { reject(tx.error || new Error("O salvamento foi cancelado.")); };
     });
   }
   async function removeRecord(storeName, id) {
