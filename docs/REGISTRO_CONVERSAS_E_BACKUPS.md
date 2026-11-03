@@ -279,3 +279,11 @@ Esta captura registra o **estado remoto comprovado** e o resumo de decisões rec
 - **Validação pendente:** a consulta aos runs vinculados ao SHA `7193362...` não retornou execução; essa API só lista runs acionados por PR e não demonstra inexistência de outros eventos. **Não há evidência de CI verde** no commit. A falha posterior de fila assíncrona no [run #341](https://github.com/apoenalore/GameCreator/actions/runs/41547503382) também continua registrada como não resolvida.
 - **Orientação de continuidade:** conferir artefatos `characters-browser.html`/`.log`, isolar fila de operações e IndexedDB, executar testes de todos os botões, biblioteca e exportação Godot; não mesclar PR #14 sem aprovação integral. Não confundir PR #13, PR #14 e `main`.
 - **Preservação:** histórico e snapshot da PR #14 já documentados no checkpoint anterior; nenhum novo snapshot foi necessário neste registro. Dados locais, imagens, PDFs originais e IndexedDB continuam fora do backup Git. Evitar commits vazios em execuções sem novidades.
+
+
+## Checkpoint incremental — 02/11/2026, 23:59 BRT — instrumentação do teste e Apoena Skill
+
+- **Relatório:** [harness de personagens e registro de continuidade](relatorios-conversas/2026-11-02-checkpoint-2359-harness-personagens-memoria.md).
+- **Nova evidência:** o teste `tests/personagens-browser.html` na branch de integração agora possui host de biblioteca em memória, rastreio `hostTrace`, marcação de bootstrap, diagnóstico de carregamento do iframe e timeout de 15 segundos. Blob consultado: `9b5e9b8272f0e2d59186606f62e0d840b95906e4`. Isso não equivale a CI verde.
+- **Apoena Skill:** README registra documento de continuidade do Animador Maker Apoena e seu protótipo HTML independente; rig real, exportação e integração com Creator continuam sem homologação.
+- **Preservação:** documentação incremental somente; snapshots PR #13/#14 anteriores mantidos. Não houve merge, mudança funcional nem cópia de dados locais/IndexedDB. Backup Mestre e teste de restauração pendentes.
