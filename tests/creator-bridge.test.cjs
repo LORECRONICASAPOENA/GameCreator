@@ -93,6 +93,36 @@ async function flush() {
   assert.ok(studioHtml.includes("../shared/creator-bridge.js") && studioJs.includes("ApoenaCreatorBridge.request('saveAsset'"), "Estúdio carrega e usa a ponte compartilhada");
   assert.ok(mapHtml.includes("../shared/creator-bridge.js") && mapHtml.includes("ApoenaCreatorBridge.request('saveMap'"), "editor de mapas envia alterações ao Creator");
   assert.ok(pixelModuleSource.includes('rel="opener"') || pixelModuleSource.includes('rel=\\"opener\\"'), "links locais preservam window.opener para a ponte");
+
+
+  const nativeState = { assets: [], characters: [], pixelArtMaps: [], items: [] };
+  const nativeWindow = fakeWindow();
+  const nativeDocument = {
+    getElementById(id) {
+      return id === "page-pixelart" || id === "gc40PixelRoot" ? {} : null;
+    },
+    querySelector() { return { querySelector() { return null; } }; },
+    createElement() { return { style: {}, addEventListener() {} }; }
+  };
+  vm.runInNewContext(nativeBridgeSource, {
+    window: nativeWindow, document: nativeDocument, state: nativeState,
+    switchPage() {}, location: { hash: "" }, console, JSON, Object, Array, String, Math, Error
+  });
+  const largeManifest = {
+    schema: "apoena.pixelart.v1", name: "Apoena", kind: "personagem",
+    frames: Array.from({ length: 768 }, (_, index) => ({
+      index, action: ("acao_" + index).padEnd(40, "x"), direction: "nenhuma",
+      atlas: { x: index * 128, y: 0, w: 128, h: 128 }
+    }))
+  };
+  const largeManifestSize = JSON.stringify(largeManifest).length;
+  assert.ok(largeManifestSize > 50000, "fixture deve reproduzir o limite anterior da ponte");
+  assert.ok(largeManifestSize <= nativeWindow.ApoenaCreatorIntegrated.maxPixelManifestChars);
+  const savedCharacter = nativeWindow.ApoenaCreatorIntegrated.savePixelAsset(largeManifest, "data:image/png;base64,AA==");
+  assert.equal(savedCharacter.category, "personagem");
+  assert.equal(nativeState.characters.length, 1, "manifesto grande válido deve ser salvo no Creator");
+  assert.equal(nativeState.assets.length, 1, "spritesheet deve ser registrada como asset");
+
   console.log("CREATOR BRIDGE OK: request/response, validação de origem, erros e contratos de sincronização");
 })().catch(error => {
   console.error(error);

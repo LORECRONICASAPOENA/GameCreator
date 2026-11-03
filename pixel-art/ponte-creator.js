@@ -2,6 +2,7 @@
    Executar após os scripts originais da v4.0. */
 (function(){
 "use strict";
+const MAX_PIXEL_MANIFEST_CHARS=256000;
 if(typeof state==="undefined"||typeof switchPage!=="function"){
  console.error("Pixel Art integrado: estado principal da v4.0 não foi carregado.");
  return;
@@ -88,7 +89,8 @@ function saveMap(map){
 function savePixelAsset(manifest,png){
  if(!manifest||manifest.schema!=="apoena.pixelart.v1"||typeof manifest.name!=="string")throw Error("Manifesto Pixel Art inválido.");
  if(typeof png!=="string"||!png.startsWith("data:image/png;base64,"))throw Error("Spritesheet PNG inválido.");
- if(JSON.stringify(manifest).length>50000)throw Error("Metadados Pixel Art acima de 50 KB.");
+ const serializedManifest=JSON.stringify(manifest);
+ if(serializedManifest.length>MAX_PIXEL_MANIFEST_CHARS)throw Error("Metadados Pixel Art acima de 256 KB.");
  const name=String(manifest.name||"apoena_asset").trim().slice(0,80)||"apoena_asset";
  const category=["personagem","animal","cenario","efeito","objeto"].includes(manifest.kind)?manifest.kind:"personagem";
  if(category==="personagem"){
@@ -104,6 +106,7 @@ function savePixelAsset(manifest,png){
 }
 window.ApoenaCreatorIntegrated=Object.freeze({
  version:"4.1.integrated",
+ maxPixelManifestChars:MAX_PIXEL_MANIFEST_CHARS,
  getProject:()=>state,
  refresh,
  savePixelCharacter,

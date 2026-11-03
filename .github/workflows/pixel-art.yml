@@ -18,7 +18,7 @@ on:
       - "ORGANIZACAO_EDITOR.md"
       - ".github/workflows/**"
   pull_request:
-    branches: [main]
+    branches: [main, feat/apoena-personagem-estudio-main]
     paths:
       - "index.html"
       - "bundle-v4/**"
@@ -218,7 +218,8 @@ jobs:
       - name: Testar Criador Modular no navegador
         run: |
           $ErrorActionPreference = "Stop"
-          $browser = @((Join-Path $env:ProgramFiles "Microsoft/Edge/Application/msedge.exe"), (Join-Path ([Environment]::GetEnvironmentVariable("ProgramFiles(x86)")) "Microsoft/Edge/Application/msedge.exe"), (Join-Path $env:ProgramFiles "Google/Chrome/Application/chrome.exe")) | Where-Object { Test-Path $_ } | Select-Object -First 1
+          $programFilesX86 = [Environment]::GetEnvironmentVariable("ProgramFiles(x86)")
+          $browser = @((Join-Path $env:ProgramFiles "Microsoft/Edge/Application/msedge.exe"), (Join-Path $programFilesX86 "Microsoft/Edge/Application/msedge.exe"), (Join-Path $env:ProgramFiles "Google/Chrome/Application/chrome.exe"), (Join-Path $programFilesX86 "Google/Chrome/Application/chrome.exe")) | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1
           if (-not $browser) { throw "Edge/Chrome necessário para testar o Criador Modular." }
           $port = 4173
           $serverLog = Join-Path $env:GITHUB_WORKSPACE ".ci-results/character-server.log"
@@ -249,7 +250,7 @@ jobs:
             foreach ($route in $requiredRoutes) {
               $routeUrl = "http://127.0.0.1:$port/$route"
               try { $response = Invoke-WebRequest -UseBasicParsing -Uri $routeUrl -TimeoutSec 5 }
-              catch { throw "Rota obrigatória do Criador Modular inacessível: $routeUrl — $($_.Exception.Message)" }
+              catch { $routeError = $_.Exception.Message; throw ("Required Creator route is inaccessible: " + $routeUrl + " - " + $routeError) }
               if ($response.StatusCode -ne 200) { throw "Rota obrigatória retornou HTTP $($response.StatusCode): $routeUrl" }
             }
             $uri = "http://127.0.0.1:$port/tests/personagens-browser.html"
