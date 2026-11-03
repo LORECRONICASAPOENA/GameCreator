@@ -181,3 +181,11 @@
 - O teste funcional no navegador passou após o harness aguardar o fim real das operações assíncronas; IndexedDB foi validado separadamente no mesmo workflow.
 - Execução comprovadora: [Actions run 41565001752](https://github.com/apoenalore/GameCreator/actions/runs/41565001752), concluída com sucesso no SHA acima. Incluiu build, testes do Criador Modular, biblioteca/backup, exportação, contratos de integração, hidrologia/erosão, Godot 4 e preservação do Creator.
 - O snapshot técnico e sua proveniência serão indexados no Apoena Skill. Não altera as Skills de cânone/lore.
+
+
+### Reabertura da validação do Criador Modular — 03/11/2026
+
+- A validação bem-sucedida do SHA `03382b02e74e2b39da0924bd0ff72ddacdf27e5a` continua comprovada para aquele commit.
+- No head da PR #14, commit `37e026a8da5bd55aa823e49fa36fe81f16f20647`, o Actions #41632223425 falhou no teste funcional “Gravar no Creator”. O mesmo timeout foi reproduzido no run #41663786861, SHA `1775d77f447e9e245c7a71a35327d935ebaf6bc1`, sem mudanças no runtime ou no teste.
+- Causa-raiz ainda não confirmada. O registro individual está em [relatório do run #41632223425](relatorios-actions/2026-11-03-run-41632223425-character-bridge-timeout.md).
+- Estado da PR #14: **EM INVESTIGAÇÃO / NÃO VALIDADA NO HEAD ATUAL**. PR #13 permanece aberta com escopo sobreposto; não declarar integração concluída nem mesclar até reconciliar as PRs e validar o fluxo do bridge.

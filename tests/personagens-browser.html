@@ -2,7 +2,7 @@
 let bootStage='inline-bootstrap';
 document.getElementById('result').textContent='BOOTSTRAP';
 window.addEventListener('error',e=>{document.getElementById('result').textContent='FAIL: '+e.message+' [stage='+bootStage+']';});
-let received;const hostTrace=[];const app=document.getElementById('app');let started=false;
+window.__creatorReceived=null;const bridgeTrace=[],hostTrace=[];const app=document.getElementById('app');let started=false;
 const testProjects=new Map(),testAssets=new Map();
 async function testLibraryDispatch(action,payload={}){switch(action){
 case 'saveProject':{const record={id:payload.id,name:payload.name,schema:payload.schema,type:payload.type,data:payload.data,metadata:payload.metadata||{}};testProjects.set(record.id,record);return record;}
@@ -16,7 +16,8 @@ case 'deleteAsset':return {id:payload.id,deleted:testAssets.delete(payload.id)};
 default:throw Error('Ação de biblioteca não permitida: '+action);
 }}
 window.addEventListener('message', async e=>{const m=e.data;if(e.source!==app.contentWindow||m?.channel!==ApoenaLibrary.schema||m.type!=='request')return;hostTrace.push('start:'+m.action);try{const value=await testLibraryDispatch(m.action,m.payload||{});hostTrace.push('done:'+m.action);e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:true,value},'*');}catch(error){hostTrace.push('error:'+m.action+':'+error.message);e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:false,error:{message:error.message}},'*');}});
-ApoenaCreatorBridge.listen((action,payload)=>{if(action!=='saveAsset')throw Error('Wrong bridge action');received=payload;return {id:'test-character'};});
+window.addEventListener('message',e=>{const m=e.data;if(m?.channel===ApoenaCreatorBridge.channel)bridgeTrace.push('message:'+m.type+':sourceIsApp='+(e.source===app.contentWindow)+':origin='+e.origin+':action='+(m.action||''));});
+ApoenaCreatorBridge.listen((action,payload,event)=>{bridgeTrace.push('listener:'+action+':sourceIsApp='+(event.source===app.contentWindow)+':origin='+event.origin);if(action!=='saveAsset')throw Error('Wrong bridge action');window.__creatorReceived=payload;return {id:'test-character'};});
 async function runCharacterBrowserTest(){if(started)return;started=true;bootStage='browser-test-started';document.getElementById('result').textContent='RUNNING_TEST';
 const w=document.getElementById('app').contentWindow,d=w.document,$=id=>d.getElementById(id),assert=(ok,m)=>{if(!ok)throw Error(m)},pause=()=>new Promise(r=>setTimeout(r,50));
 async function until(fn){for(let i=0;i<180;i++){if(fn())return;await pause();}throw Error('Timeout: '+$('status').textContent);}
@@ -38,14 +39,14 @@ await click('backCompose');await change('name','Personagem teste');$('save').cli
 const projects=await w.ApoenaLibrary.listProjects({}),saved=projects.find(p=>p.name==='Personagem teste');assert(saved,'Saved project');assert(saved.data.layers[0].source===original,'Original source persisted');assert(saved.data.layers[0].grid.cols===3,'Grid persisted');
 await click('saveLibrary');await until(()=>$('status').textContent.includes('Spritesheet e projeto'));
 const assets=await w.ApoenaLibrary.listAssets({category:'personagem'});assert(assets.some(a=>a.id===saved.id+'-sheet'),'Central library asset');
-await click('sendCreator');await until(()=>received);assert(received.manifest.frames.length===12,'Bridge frames');assert(received.png.startsWith('data:image/png;base64,'),'Bridge PNG');
+await click('sendCreator');await until(()=>window.__creatorReceived);assert(window.__creatorReceived.manifest.frames.length===12,'Bridge frames');assert(window.__creatorReceived.png.startsWith('data:image/png;base64,'),'Bridge PNG');
 await click('next');assert($('frameInfo').textContent==='2 / 3','Next frame');await click('previous');assert($('frameInfo').textContent==='1 / 3','Previous frame');
 await click('play');await until(()=>$('frameInfo').textContent!=='1 / 3');await click('play');
 window.confirm=()=>true;w.confirm=()=>true;await click('new');assert($('layers').children.length===0,'New clears layers');
 d.querySelector('[data-view="library"]').click();await until(()=>$('projects').children.length>0);$('projects').querySelector('button').click();await until(()=>$('layers').children.length===1);await click('editLayer');assert(alpha()===0,'Reopened edit mask');await click('resetFrame');assert(alpha()===255,'Restored original after reopen');
 await w.ApoenaLibrary.deleteAsset(saved.id+'-sheet');await w.ApoenaLibrary.deleteProject(saved.id);
 document.getElementById('result').textContent='CHARACTER BROWSER OK';
-}catch(e){document.getElementById('result').textContent='FAIL: '+(e&&e.stack||e)+' HOSTTRACE='+hostTrace.join('|');}
+}catch(e){document.getElementById('result').textContent='FAIL: '+(e&&e.stack||e)+' HOSTTRACE='+hostTrace.join('|')+' BRIDGETRACE='+bridgeTrace.join('|');}
 }
 app.addEventListener('load',runCharacterBrowserTest,{once:true});
 const startProbe=setInterval(()=>{try{if(app.contentDocument?.readyState==='complete'&&app.contentDocument.getElementById('status')){clearInterval(startProbe);runCharacterBrowserTest();}}catch(error){clearInterval(startProbe);document.getElementById('result').textContent='FAIL: '+(error&&error.stack||error);}},50);

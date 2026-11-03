@@ -74,3 +74,13 @@
 - Alteração efetuada: relatório de incidente; nenhuma mudança de runtime.
 - Validação: continua falhando no head atual; novo run não executado.
 - Próxima ação: aplicar instrumentação mínima e validar uma vez no workflow canônico.
+
+
+### Reprodução no run #41663786861
+
+- Em 2026-11-03 12:33:11 BRT (15:33:11Z), o run [#41663786861](https://github.com/apoenalore/GameCreator/actions/runs/41663786861), job 126013580379, repetiu a mesma falha no step 11, SHA `1775d77f447e9e245c7a71a35327d935ebaf6bc1`.
+- O único delta de código desde o run #41632223425 foi este relatório; nenhum arquivo do runtime ou do teste funcional mudou. A repetição confirma que o timeout é reproduzível no código atual, mas não identifica a origem do acknowledgement.
+- Runner confirmado: `APOENA-GAMECREATOR-RUNNER`, runner 2. O restante do pipeline passou até a etapa de integração funcional; os steps posteriores foram pulados.
+- Artefato `v41-ci-diagnostics`: ID 13246855533, SHA-256 `07b2a2c6f9908978bccccee87ca96da0864098293036840e44b4ecca118f046f`. Mensagem/host trace repetem o sintoma anterior.
+- Próxima coleta: registrar mensagens do bridge (origin, source, action e presença do payload) no harness; preservar a assertion dos 12 frames e do PNG.
+- Classificação e estado permanecem: falha de teste confirmada; causa-raiz ainda não confirmada; aguardando nova validação após instrumentação.

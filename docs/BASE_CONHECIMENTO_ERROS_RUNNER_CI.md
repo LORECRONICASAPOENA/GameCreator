@@ -520,3 +520,14 @@ Nova captura mostra `Runner reconnected`, versão `2.338.0` e `Listening for Job
 - **Ajuste do teste:** o commit `03382b02e74e2b39da0924bd0ff72ddacdf27e5a` adicionou contagem explícita de operações em andamento e sinal `apoena:character-idle` ao hook do teste, que passa a esperar o término real das ações enfileiradas.
 - **Validação:** run [41565001752](https://github.com/apoenalore/GameCreator/actions/runs/41565001752) terminou `completed/success` no SHA `03382b02e74e2b39da0924bd0ff72ddacdf27e5a`. Passaram build nativo, smoke test do navegador, sintaxe JS, teste de modelo/personagens, teste funcional no navegador, exportação pixel-perfect, tileset, IndexedDB, backup/restauração da biblioteca, catálogo/Godot, integração, manifesto do atualizador, hidrologia/erosão, runtime Godot 4 e preservação dos módulos. O teste de sintaxe Python foi pulado como opcional porque Python não estava instalado no runner.
 - **Estado:** **RESOLVIDO E VALIDADO NO PR**; PR continua draft e não foi integrada à `main`.
+
+
+### Atualização GC-CI-015 — timeout de bridge reproduzido no run #41663786861
+
+- Ocorrência: 2026-11-03 12:33:11 BRT (15:33:11Z), PR #14, job 126013580379, step 11 “Testar Criador Modular no navegador”, commit `1775d77f447e9e245c7a71a35327d935ebaf6bc1`.
+- Mensagem: `Timeout: Personagem gravado no projeto atual do Creator. Salve o projeto principal para guardar essa alteração.`
+- O run anterior #41632223425 apresentou a mesma mensagem. Entre os heads não houve mudança de runtime/teste; foi adicionado somente o relatório de incidente. Portanto a falha é reproduzível e não foi resolvida pela validação anterior no SHA `03382b0...` para o novo head atual.
+- Runner 2 `APOENA-GAMECREATOR-RUNNER` executou a suíte; build, smoke, sintaxe e modelo passaram. A integração funcional permanece sem validação.
+- Artefato #13246855533, digest SHA-256 `07b2a2c6f9908978bccccee87ca96da0864098293036840e44b4ecca118f046f`.
+- Causa-raiz permanece **NÃO CONFIRMADA**: o status da UI muda para sucesso, mas o harness não observa o payload. A próxima mudança registra origin/source/action e payload recebido sem remover assertions.
+- Estado: **ABERTO / REPRODUZÍVEL / AGUARDANDO INSTRUMENTAÇÃO E VALIDAÇÃO**.
