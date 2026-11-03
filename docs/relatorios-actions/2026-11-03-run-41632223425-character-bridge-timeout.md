@@ -106,3 +106,13 @@
 - **Correção escolhida:** aumentar somente a espera dessa chamada para 30 segundos e reavaliar a condição uma vez depois do último intervalo. Preservar assertions de 12 frames, PNG e todos os demais testes.
 - Artefato `v41-ci-diagnostics`: ID 13247763001; SHA-256 `f811e1431fd95ff0b701f5ca8c65cdbb63c7bb95437b7997a1e1da061a5049df`.
 - Estado: correção de timing aplicada no commit seguinte; aguarda CI canônico para confirmação. Causa classificada como **PROVÁVEL**, não confirmada até a nova execução passar.
+
+
+### Resultado da correção de espera e nova abordagem (run #41704904027)
+
+- Ocorrência: 2026-11-03 16:39–16:40 BRT (19:39–19:40Z), job 126157506102, step 11, SHA `8756adc6df548042cc26cf95b69a35e3a1fd9d48`.
+- A espera de 30 segundos ainda expirou. O log continuou mostrando `GLOBAL_RECEIVED=true`, `FRAME_RECEIVED=false`, `stored=true:keys=manifest,png`; a mensagem chegou ao listener e o payload foi armazenado no host.
+- Isso descarta o limite curto como explicação suficiente. A condição baseada em polling não observa de forma confiável o valor global, mesmo após o callback executado; a causa subjacente do desacordo de escopo/observação ainda não está confirmada.
+- Correção seguinte: substituir o polling desta assertion por uma Promise resolvida diretamente no mesmo callback que recebe `saveAsset`. Mantém timeout de proteção de 30 s e as assertions de 12 frames e PNG.
+- Artefato do run: ID 13247795010, digest SHA-256 `0856001e880f14e24fd22033608369483ed0b090e3aa8561519144f9111a1a74`.
+- Estado: falha reproduzida; captura no host confirmada; aguarda CI após sincronização por Promise.

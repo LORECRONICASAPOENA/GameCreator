@@ -197,3 +197,10 @@
 - Causa provável: espera do harness curta/condição final sem rechecagem; o evento chegou após o polling deixar de observar a variável.
 - Correção enviada: espera ampliada para 30 s somente em “Gravar no Creator” e checagem final; assertions de conteúdo mantidas.
 - Estado da PR #14: aguarda nova execução canônica. PR #13 segue sobreposta e ainda requer reconciliação; não mesclar até CI completo.
+
+
+### Atualização Creator — 03/11/2026
+
+- A espera de 30 s no teste de “Gravar no Creator” não resolveu o run #41704904027: o trace mostra payload capturado no host (`GLOBAL_RECEIVED=true`, `FRAME_RECEIVED=false`, `stored=true:keys=manifest,png`) mesmo com timeout.
+- O harness agora aguarda uma Promise resolvida diretamente pelo callback de bridge em vez de consultar a variável por polling; assertions de manifesto e PNG mantidas.
+- Estado: nova execução canônica pendente. CI verde necessário; PRs #13 e #14 continuam exigindo reconciliação.

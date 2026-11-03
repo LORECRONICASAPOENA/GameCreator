@@ -47,3 +47,10 @@
 - Correção enviada no commit 
 7cfcdf6f670bb6c86ff72aac9a5d0f9c72388bd5. Foi ampliado para 30 s apenas o limite da espera da captura do bridge, com checagem final; as assertions permanecem.
 - Run [#41702943279](https://github.com/apoenalore/GameCreator/actions/runs/41702943279) falhou antes dessa correção. A execução automática seguinte decide se o problema está resolvido.
+
+
+## Atualização após run #41704904027
+
+- A espera de 30 s ainda expirou. O log confirmou que o callback do host recebeu e armazenou `manifest` e `png`, mas a condição de polling não percebeu o valor.
+- Commit seguinte substitui o polling por Promise resolvida no callback, mantendo 30 s de timeout e todas as assertions.
+- Run [#41704904027](https://github.com/apoenalore/GameCreator/actions/runs/41704904027) falhou antes dessa mudança; a correção ainda precisa passar no workflow canônico.

@@ -536,3 +536,8 @@ Nova captura mostra `Runner reconnected`, versão `2.338.0` e `Listening for Job
 ### Atualização GC-CI-015 — payload capturado após timeout (run #41702943279)
 
 No run [#41702943279](https://github.com/apoenalore/GameCreator/actions/runs/41702943279), SHA `7cfcdf6f670bb6c86ff72aac9a5d0f9c72388bd5`, o step 11 ainda expirou. O log do catch mostrou `GLOBAL_RECEIVED=true`, `stored=true:keys=manifest,png` e `FRAME_RECEIVED=false`: o listener da janela host recebeu e armazenou o payload válido antes de o catch montar o erro, apesar de a espera de nove segundos ter expirado. Build, DOM, sintaxe e teste de modelo passaram. Causa **PROVÁVEL**: o limite/último polling da espera era curto para este fluxo. Correção aplicada no commit seguinte: limite de 30 segundos somente para a captura do bridge, com uma checagem final; assertions de manifesto/PNG intactas. Run 41702943279 falhou antes da correção; aguarda validação canônica da nova versão.
+
+
+### Atualização GC-CI-015 — polling ainda falha, callback captura payload (run #41704904027)
+
+O run [#41704904027](https://github.com/apoenalore/GameCreator/actions/runs/41704904027), SHA `8756adc6df548042cc26cf95b69a35e3a1fd9d48`, ainda expirou no step 11 mesmo com espera de 30 s. O catch mostra `GLOBAL_RECEIVED=true`, `FRAME_RECEIVED=false` e `stored=true:keys=manifest,png`. Assim, o payload chegou e foi salvo no host; o polling continua sem observar a variável. A alteração de 30 s não foi suficiente. Nova correção troca polling por Promise resolvida no callback que recebe `saveAsset`, preservando assertions de 12 frames e PNG. Aguardando novo Actions para confirmar.
