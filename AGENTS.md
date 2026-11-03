@@ -26,3 +26,8 @@ Ao acrescentar ou atualizar um erro em docs/BASE_CONHECIMENTO_ERROS_RUNNER_CI.md
 5. Reaproveite a validação canônica existente e respeite WIP = 1 para os dois repositórios combinados. Evite executar testes equivalentes em paralelo ou acumular schedules. Mudanças apenas em documentação podem ser excluídas por filtros de caminho, desde que não alterem código ou configuração de validação.
 6. Quando encontrar falha de autovalidação, investigue a causa raiz, faça uma correção mínima, comprove com nova execução automática e registre erro, causa, correção real, data/hora BRT, commit e run ID em `docs/BASE_CONHECIMENTO_ERROS_RUNNER_CI.md`. Não invente êxito, horário ou solução. Não publique relatórios rotineiros na conversa; informe somente bloqueios e decisões que exijam participação humana.
 7. Aprovação de PR, proteção de branch e autorização de implantação são controles distintos de iniciar testes automaticamente: nunca contorne uma exigência legítima de aprovação para eliminar cliques.
+
+
+## Relatório obrigatório de falhas do GitHub Actions
+
+Sempre que um workflow falhar: (1) identificar run, commit, job e step; (2) baixar/inspecionar logs e artefatos relevantes; (3) registrar sintoma, causa comprovada, hipóteses, solução escolhida e motivo; (4) alterar somente o escopo necessário; (5) executar novo CI e registrar o resultado. Nunca declarar correção antes de novo run aprovado. Indexar relatórios em docs/ci/. Não repetir apenas a mensagem genérica do PowerShell; encontrar a primeira falha causal no log.
