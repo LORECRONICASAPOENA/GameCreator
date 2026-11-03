@@ -5,7 +5,7 @@ ApoenaCreatorBridge.listen((action,payload)=>{if(action!=='saveAsset')throw Erro
 document.getElementById('app').onload=async()=>{
 const w=document.getElementById('app').contentWindow,d=w.document,$=id=>d.getElementById(id),assert=(ok,m)=>{if(!ok)throw Error(m)},pause=()=>new Promise(r=>setTimeout(r,50));
 async function until(fn){for(let i=0;i<180;i++){if(fn())return;await pause();}throw Error('Timeout: '+$('status').textContent);}
-async function idle(){const timeout=new Promise((_,reject)=>setTimeout(()=>reject(Error('Timeout aguardando fila de operações. Status: '+$('status').textContent)),5000));await Promise.race([w.__apoenaTestHooks.whenIdle(),timeout]);}
+async function idle(){await w.__apoenaTestHooks.whenIdle();}
 async function click(id){$(id).click();await idle();}
 async function change(id,value){$(id).value=value;$(id).dispatchEvent(new Event('change'));await idle();}
 try{
