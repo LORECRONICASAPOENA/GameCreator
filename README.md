@@ -61,3 +61,8 @@ O plano consolidado de História, Exploração Livre, MOBA, ecossistema, NPCs, e
 
 A primeira fatia foi integrada à main pela PR #2. Ela adiciona catálogo de terreno, propriedades ambientais e autotile, metadados de interação para objetos, perfis de plantas/animais/montarias, profissão e rotina de NPCs, papel econômico, perfis de mapa e validação. O editor inicia com a Cidade Capital de Agar no perfil História e mantém o preset de MOBA. Esses dados são a fundação de autoria/exportação; a simulação ecológica, as transações, as rotinas autônomas e o comportamento no jogo ainda exigem implementação e testes no runtime.
 
+
+
+## Diagnóstico CI
+
+- [Incidente 2026-11-02 — timeout do Criador Modular no navegador](docs/ci/INCIDENT-2026-11-02-character-browser-timeout.md): logs e artefato examinados, causa imediata do timeout do harness, correção do teste e estado da revalidação.
