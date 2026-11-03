@@ -1,6 +1,7 @@
 <!doctype html><meta charset="utf-8"><title>Character integration test</title><pre id="result">RUNNING</pre><iframe id="app" style="width:1280px;height:1100px"></iframe><script src="../shared/asset-library.js"></script><script src="../shared/creator-bridge.js"></script><script>
+let bootStage='inline-bootstrap';
 document.getElementById('result').textContent='BOOTSTRAP';
-window.addEventListener('error',e=>{document.getElementById('result').textContent='FAIL: '+e.message;});
+window.addEventListener('error',e=>{document.getElementById('result').textContent='FAIL: '+e.message+' [stage='+bootStage+']';});
 let received;const hostTrace=[];const app=document.getElementById('app');let started=false;
 const testProjects=new Map(),testAssets=new Map();
 async function testLibraryDispatch(action,payload={}){switch(action){
@@ -16,7 +17,7 @@ default:throw Error('Ação de biblioteca não permitida: '+action);
 }}
 window.addEventListener('message', async e=>{const m=e.data;if(e.source!==app.contentWindow||m?.channel!==ApoenaLibrary.schema||m.type!=='request')return;hostTrace.push('start:'+m.action);try{const value=await testLibraryDispatch(m.action,m.payload||{});hostTrace.push('done:'+m.action);e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:true,value},'*');}catch(error){hostTrace.push('error:'+m.action+':'+error.message);e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:false,error:{message:error.message}},'*');}});
 ApoenaCreatorBridge.listen((action,payload)=>{if(action!=='saveAsset')throw Error('Wrong bridge action');received=payload;return {id:'test-character'};});
-async function runCharacterBrowserTest(){if(started)return;started=true;document.getElementById('result').textContent='RUNNING_TEST';
+async function runCharacterBrowserTest(){if(started)return;started=true;bootStage='browser-test-started';document.getElementById('result').textContent='RUNNING_TEST';
 const w=document.getElementById('app').contentWindow,d=w.document,$=id=>d.getElementById(id),assert=(ok,m)=>{if(!ok)throw Error(m)},pause=()=>new Promise(r=>setTimeout(r,50));
 async function until(fn){for(let i=0;i<180;i++){if(fn())return;await pause();}throw Error('Timeout: '+$('status').textContent);}
 async function idle(label){const result=document.getElementById('result');result.textContent='WAITING: '+label;const timeout=new Promise((_,reject)=>setTimeout(()=>reject(Error('Timeout aguardando fila após '+label+'. Status: '+$('status').textContent)),20000));await Promise.race([w.__apoenaTestHooks.whenIdle(),timeout]);result.textContent='DONE: '+label;}
@@ -48,7 +49,8 @@ document.getElementById('result').textContent='CHARACTER BROWSER OK';
 }
 app.addEventListener('load',runCharacterBrowserTest,{once:true});
 const startProbe=setInterval(()=>{try{if(app.contentDocument?.readyState==='complete'&&app.contentDocument.getElementById('status')){clearInterval(startProbe);runCharacterBrowserTest();}}catch(error){clearInterval(startProbe);document.getElementById('result').textContent='FAIL: '+(error&&error.stack||error);}},50);
-setTimeout(()=>{if(!started){clearInterval(startProbe);document.getElementById('result').textContent='FAIL: iframe did not finish loading the modular editor within 15 seconds.';}},15000);
+setTimeout(()=>{if(!started&&document.getElementById('result').textContent==='BOOTSTRAP'){clearInterval(startProbe);let frameState='unavailable';try{frameState='readyState='+app.contentDocument.readyState+', href='+app.contentWindow.location.href+', status='+Boolean(app.contentDocument.getElementById('status'));}catch(e){frameState='frame access error: '+e.message;}document.getElementById('result').textContent='FAIL: iframe did not finish loading the modular editor within 15 seconds. stage='+bootStage+' src='+app.src+' '+frameState;}},15000);
 // This browser integration test uses an in-memory Creator host. IndexedDB persistence is covered by tests/asset-library.test.cjs.
+bootStage='iframe-src-assigned';
 app.src='../pixel-art/personagens.html?test=1';
 </script>
