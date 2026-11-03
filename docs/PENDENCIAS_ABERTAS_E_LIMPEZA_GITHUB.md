@@ -285,3 +285,11 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 ## Evidência recebida — GC-ANIM-006 / run 41433942503
 
 Em 02/11/2026, o autor enviou captura da anotação expandida do GitHub Actions. A mensagem confirma que o executor auto-hospedado perdeu comunicação com o servidor. A categoria da falha é infraestrutura/conectividade do runner; a causa específica (rede, suspensão/desligamento, processo encerrado, CPU/memória ou bloqueio de acesso) continua pendente. Não há evidência de erro de código do Estúdio nesta anotação. Não alterar código de produto para tentar resolver a desconexão. Quando o computador estiver disponível, consultar os logs locais do runner no diretório _diag e verificar energia, rede, DNS, proxy/firewall e recursos do runner. Relatório atualizado: [GC-CI-014](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
+
+
+## Atualização — PR #14 / CI do Criador Modular (03/11/2026)
+
+- **Estado:** validação do head de código concluída; PR [#14](https://github.com/apoenalore/GameCreator/pull/14) permanece aberta em draft, sem merge.
+- O CI executou uma única validação por evento `pull_request` depois que o gatilho de `push` foi limitado a `main`. O run [41565001752](https://github.com/apoenalore/GameCreator/actions/runs/41565001752) passou em `03382b02e74e2b39da0924bd0ff72ddacdf27e5a`.
+- Correção do teste funcional: aguardar o contador explícito de operações pendentes e o evento `apoena:character-idle`. A validação funcional no navegador, a persistência IndexedDB e as demais etapas obrigatórias do workflow passaram.
+- Snapshot do Apoena Skill será registrado em `apoena-knowledge/backups/gamecreator-pr14-ci-fixes-2026-11-03/`, identificando repositório-fonte, branch, SHA, run e arquivos copiados. Esse snapshot é cópia técnica de implementação, não atualização de cânone.

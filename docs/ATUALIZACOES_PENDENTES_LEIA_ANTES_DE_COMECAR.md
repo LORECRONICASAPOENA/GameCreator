@@ -172,3 +172,12 @@
 - O ZIP final contém 76 arquivos de runtime; a fábrica original está preservada somente com a página e as 23 partes JS necessárias. Não contém documentação, testes, CI ou arquivos Markdown/texto.
 - SHA-256 do ZIP interno: \`62407aaad9bd183d78bd3a29a65752f8325981a4191aa77b084be49b818eb55d\`.
 - O teste do manifesto do atualizador no PR7 passou no step 17 do run #41082083233; a simulação real de clone/fast-forward e preservação local continua pendente. A branch ambiental PR6 passou no run #41081917796.
+
+
+## Resultado validado — Criador Modular de Personagens no GameCreator (03/11/2026)
+
+- **IMPLEMENTADO E VALIDADO no branch do PR #14** no SHA `03382b02e74e2b39da0924bd0ff72ddacdf27e5a`; ainda não integrado à `main`.
+- Causa do CI duplicado: `push` e `pull_request` concorriam no mesmo grupo e cancelavam execuções. Push agora é filtrado para `main`; PRs de branches de trabalho mantêm validação automática.
+- O teste funcional no navegador passou após o harness aguardar o fim real das operações assíncronas; IndexedDB foi validado separadamente no mesmo workflow.
+- Execução comprovadora: [Actions run 41565001752](https://github.com/apoenalore/GameCreator/actions/runs/41565001752), concluída com sucesso no SHA acima. Incluiu build, testes do Criador Modular, biblioteca/backup, exportação, contratos de integração, hidrologia/erosão, Godot 4 e preservação do Creator.
+- O snapshot técnico e sua proveniência serão indexados no Apoena Skill. Não altera as Skills de cânone/lore.
