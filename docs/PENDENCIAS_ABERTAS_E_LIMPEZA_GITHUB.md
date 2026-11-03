@@ -293,3 +293,13 @@ Em 02/11/2026, o autor enviou captura da anotação expandida do GitHub Actions.
 - O CI executou uma única validação por evento `pull_request` depois que o gatilho de `push` foi limitado a `main`. O run [41565001752](https://github.com/apoenalore/GameCreator/actions/runs/41565001752) passou em `03382b02e74e2b39da0924bd0ff72ddacdf27e5a`.
 - Correção do teste funcional: aguardar o contador explícito de operações pendentes e o evento `apoena:character-idle`. A validação funcional no navegador, a persistência IndexedDB e as demais etapas obrigatórias do workflow passaram.
 - Snapshot do Apoena Skill será registrado em `apoena-knowledge/backups/gamecreator-pr14-ci-fixes-2026-11-03/`, identificando repositório-fonte, branch, SHA, run e arquivos copiados. Esse snapshot é cópia técnica de implementação, não atualização de cânone.
+
+
+## Ponto de situação — Criador Modular / GC-CHAR-001 (03/11/2026)
+
+- **WIP = 1:** manter esta integração como a única tarefa de implementação ativa entre GameCreator e Apoena Pixel Art HTML.
+- **PR #11:** aberta em draft, base `main`, branch `feat/apoena-personagem-estudio-main`, HEAD `0447ea9dc9d9310e985247325e3af1d1c726519a`.
+- **PR #13:** aberta, fora de draft, base `main`, HEAD `34a0a722444448e384c91286affecf0f50217038`. O workflow mais recente consultado para esse SHA foi o run [#41528996973](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41528996973), concluído com falha; esse resultado não valida o HEAD atual se houver commits posteriores.
+- **PR #14:** aberta em draft, base na branch da PR #11 (`feat/apoena-personagem-estudio-main`), HEAD consultado `98c46503ed1ec567422b947d2fec88d470a25b39`. O run automático [#41728100712](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41728100712) estava `in_progress` na consulta de 03/11/2026. A validação anterior [#41565001752](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41565001752) passou no SHA `03382b02e74e2b39da0924bd0ff72ddacdf27e5a`, que não é o HEAD consultado agora.
+- **Bloqueio de integração:** PRs #13 e #14 cobrem a mesma integração do Criador Modular; a #14 também depende da branch ainda draft da #11. Não declarar concluído nem mesclar enquanto o run do HEAD atual não terminar e as diferenças entre as PRs não forem reconciliadas.
+- **Próxima ação:** acompanhar o run #41728100712 sem iniciar execução duplicada. Depois, comparar os arquivos/commits das PRs #11, #13 e #14 e definir uma única rota de integração. Se houver falha, coletar logs e seguir o procedimento individual de incidente antes de alterar código.
