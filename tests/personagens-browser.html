@@ -5,9 +5,9 @@ ApoenaCreatorBridge.listen((action,payload)=>{if(action!=='saveAsset')throw Erro
 document.getElementById('app').onload=async()=>{
 const w=document.getElementById('app').contentWindow,d=w.document,$=id=>d.getElementById(id),assert=(ok,m)=>{if(!ok)throw Error(m)},pause=()=>new Promise(r=>setTimeout(r,50));
 async function until(fn){for(let i=0;i<180;i++){if(fn())return;await pause();}throw Error('Timeout: '+$('status').textContent);}
-async function idle(){await w.__apoenaTestHooks.whenIdle();}
-async function click(id){$(id).click();await idle();}
-async function change(id,value){$(id).value=value;$(id).dispatchEvent(new Event('change'));await idle();}
+async function idle(label){const result=document.getElementById('result');result.textContent='WAITING: '+label;const timeout=new Promise((_,reject)=>setTimeout(()=>reject(Error('Timeout aguardando fila após '+label+'. Status: '+$('status').textContent)),20000));await Promise.race([w.__apoenaTestHooks.whenIdle(),timeout]);result.textContent='DONE: '+label;}
+async function click(id){$(id).click();await idle('clique '+id);}
+async function change(id,value){$(id).value=value;$(id).dispatchEvent(new Event('change'));await idle('alteração '+id);}
 try{
 const c=d.createElement('canvas');c.width=48;c.height=64;const ctx=c.getContext('2d');for(let row=0;row<4;row++)for(let col=0;col<3;col++){ctx.fillStyle=['#f00','#0f0','#00f'][col];ctx.fillRect(col*16+4,row*16+4,8,12);}const original=c.toDataURL();const png=await new Promise(r=>c.toBlob(r));const transfer=new w.DataTransfer();transfer.items.add(new w.File([png],'corpo.png',{type:'image/png'}));$('pieces').files=transfer.files;$('pieces').dispatchEvent(new Event('change'));await until(()=>$('layers').children.length===1);
 await click('editLayer');await change('cols',3);await change('rows',4);await click('fitGrid');await click('applyGrid');assert($('cellW').value==='16','Grid width');assert($('cellH').value==='16','Grid height');
