@@ -236,9 +236,25 @@ jobs:
               } catch { Start-Sleep -Milliseconds 250 }
             }
             if (-not $ready) { throw "Servidor HTTP de teste não ficou pronto em 10 segundos." }
+            $requiredRoutes = @(
+              "tests/personagens-browser.html",
+              "pixel-art/personagens.html",
+              "pixel-art/personagens.css",
+              "pixel-art/personagens.js",
+              "pixel-art/personagens-core.js",
+              "pixel-art/corte-inteligente.js",
+              "shared/asset-library.js",
+              "shared/creator-bridge.js"
+            )
+            foreach ($route in $requiredRoutes) {
+              $routeUrl = "http://127.0.0.1:$port/$route"
+              try { $response = Invoke-WebRequest -UseBasicParsing -Uri $routeUrl -TimeoutSec 5 }
+              catch { throw "Rota obrigatória do Criador Modular inacessível: $routeUrl — $($_.Exception.Message)" }
+              if ($response.StatusCode -ne 200) { throw "Rota obrigatória retornou HTTP $($response.StatusCode): $routeUrl" }
+            }
             $uri = "http://127.0.0.1:$port/tests/personagens-browser.html"
             $profile = Join-Path $env:RUNNER_TEMP ("apoena-character-" + $env:GITHUB_RUN_ID)
-            $args = '--headless --disable-gpu --no-first-run --no-default-browser-check --disable-extensions --window-size=1500,1200 --virtual-time-budget=30000 --user-data-dir="' + $profile + '" --dump-dom "' + $uri + '"'
+            $args = '--headless --disable-gpu --no-first-run --no-default-browser-check --disable-extensions --window-size=1500,1200 --timeout=90000 --user-data-dir="' + $profile + '" --dump-dom "' + $uri + '"'
             $output = Join-Path $env:GITHUB_WORKSPACE ".ci-results/characters-browser.html"
             $log = Join-Path $env:GITHUB_WORKSPACE ".ci-results/characters-browser.log"
             $proc = Start-Process -FilePath $browser -ArgumentList $args -RedirectStandardOutput $output -RedirectStandardError $log -Wait -PassThru
