@@ -6,7 +6,7 @@ window.addEventListener('message', async e=>{const m=e.data;if(e.source!==docume
 ApoenaCreatorBridge.listen((action,payload)=>{if(action!=='saveAsset')throw Error('Wrong bridge action');received=payload;return {id:'test-character'};});
 const app=document.getElementById('app');let started=false;async function runCharacterBrowserTest(){if(started)return;started=true;document.getElementById('result').textContent='RUNNING_TEST';
 const w=document.getElementById('app').contentWindow,d=w.document,$=id=>d.getElementById(id),assert=(ok,m)=>{if(!ok)throw Error(m)},pause=()=>new Promise(r=>setTimeout(r,50));
-async function until(fn){for(let i=0;i<180;i++){if(fn())return;await pause();}throw Error('Timeout: '+$('status').textContent);}
+async function until(fn){for(let i=0;i<180;i++){if(fn())return;await pause();}throw Error('Timeout: '+$('status').textContent+'; saveDisabled='+$('save').disabled+'; hostTrace='+hostTrace.join('|'));}
 async function idle(label){const result=document.getElementById('result');result.textContent='WAITING: '+label;const timeout=new Promise((_,reject)=>setTimeout(()=>reject(Error('Timeout aguardando fila após '+label+'. Status: '+$('status').textContent)),20000));await Promise.race([w.__apoenaTestHooks.whenIdle(),timeout]);result.textContent='DONE: '+label;}
 async function click(id){$(id).click();await idle('clique '+id);}
 async function change(id,value){$(id).value=value;$(id).dispatchEvent(new Event('change'));await idle('alteração '+id);}
