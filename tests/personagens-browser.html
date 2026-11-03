@@ -1,8 +1,8 @@
-<!doctype html><meta charset="utf-8"><title>Character integration test</title><pre id="result">RUNNING</pre><iframe id="app" src="../pixel-art/personagens.html?test=1" style="width:1280px;height:1100px"></iframe><script src="../shared/asset-library.js"></script><script src="../shared/creator-bridge.js"></script><script>
+<!doctype html><meta charset="utf-8"><title>Character integration test</title><pre id="result">RUNNING</pre><iframe id="app" style="width:1280px;height:1100px"></iframe><script src="../shared/asset-library.js"></script><script src="../shared/creator-bridge.js"></script><script>
 let received;
 window.addEventListener('message', async e=>{const m=e.data;if(e.source!==document.getElementById('app').contentWindow||m?.channel!==ApoenaLibrary.schema||m.type!=='request')return;try{const value=await ApoenaLibrary.dispatch(m.action,m.payload);e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:true,value},'*');}catch(error){e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:false,error:{message:error.message}},'*');}});
 ApoenaCreatorBridge.listen((action,payload)=>{if(action!=='saveAsset')throw Error('Wrong bridge action');received=payload;return {id:'test-character'};});
-document.getElementById('app').onload=async()=>{
+const app=document.getElementById('app');let started=false;app.addEventListener('load',async()=>{if(started)return;started=true;
 const w=document.getElementById('app').contentWindow,d=w.document,$=id=>d.getElementById(id),assert=(ok,m)=>{if(!ok)throw Error(m)},pause=()=>new Promise(r=>setTimeout(r,50));
 async function until(fn){for(let i=0;i<180;i++){if(fn())return;await pause();}throw Error('Timeout: '+$('status').textContent);}
 async function idle(label){const result=document.getElementById('result');result.textContent='WAITING: '+label;const timeout=new Promise((_,reject)=>setTimeout(()=>reject(Error('Timeout aguardando fila após '+label+'. Status: '+$('status').textContent)),20000));await Promise.race([w.__apoenaTestHooks.whenIdle(),timeout]);result.textContent='DONE: '+label;}
@@ -30,6 +30,7 @@ window.confirm=()=>true;w.confirm=()=>true;await click('new');assert($('layers')
 d.querySelector('[data-view="library"]').click();await until(()=>$('projects').children.length>0);$('projects').querySelector('button').click();await until(()=>$('layers').children.length===1);await click('editLayer');assert(alpha()===0,'Reopened edit mask');await click('resetFrame');assert(alpha()===255,'Restored original after reopen');
 await w.ApoenaLibrary.deleteAsset(saved.id+'-sheet');await w.ApoenaLibrary.deleteProject(saved.id);
 document.getElementById('result').textContent='CHARACTER BROWSER OK';
-}catch(e){document.getElementById('result').textContent='FAIL: '+e.stack;}
-};
+}catch(e){document.getElementById('result').textContent='FAIL: '+(e&&e.stack||e);}
+},{once:true});
+app.src='../pixel-art/personagens.html?test=1';
 </script>
