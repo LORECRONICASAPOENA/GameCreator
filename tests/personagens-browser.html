@@ -19,7 +19,7 @@ ed.dispatchEvent(new w.PointerEvent('pointerup',{pointerId:1,bubbles:true}));awa
 await click('undo');assert(alpha()===255,'Undo restores pixel');await click('redo');assert(alpha()===0,'Redo reapplies erase');
 
 await click('smart');assert(!$('smartActions').hidden,'Smart crop preview');await click('cancelSmart');assert($('smartActions').hidden,'Smart cancel');
-await click('backCompose');await change('name','Personagem teste');await click('save');await until(()=>$('status').textContent.includes('Projeto editável salvo'));
+await click('backCompose');await change('name','Personagem teste');$('save').click();await until(()=>$('status').textContent.includes('Projeto editável salvo'));
 const projects=await w.ApoenaLibrary.listProjects({}),saved=projects.find(p=>p.name==='Personagem teste');assert(saved,'Saved project');assert(saved.data.layers[0].source===original,'Original source persisted');assert(saved.data.layers[0].grid.cols===3,'Grid persisted');
 await click('saveLibrary');await until(()=>$('status').textContent.includes('Spritesheet e projeto'));
 const assets=await w.ApoenaLibrary.listAssets({category:'personagem'});assert(assets.some(a=>a.id===saved.id+'-sheet'),'Central library asset');
