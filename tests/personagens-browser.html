@@ -2,7 +2,7 @@
 let received;
 window.addEventListener('message', async e=>{const m=e.data;if(e.source!==document.getElementById('app').contentWindow||m?.channel!==ApoenaLibrary.schema||m.type!=='request')return;try{const value=await ApoenaLibrary.dispatch(m.action,m.payload);e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:true,value},'*');}catch(error){e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:false,error:{message:error.message}},'*');}});
 ApoenaCreatorBridge.listen((action,payload)=>{if(action!=='saveAsset')throw Error('Wrong bridge action');received=payload;return {id:'test-character'};});
-const app=document.getElementById('app');let started=false;app.addEventListener('load',async()=>{if(started)return;started=true;
+const app=document.getElementById('app');let started=false;async function runCharacterBrowserTest(){if(started)return;started=true;
 const w=document.getElementById('app').contentWindow,d=w.document,$=id=>d.getElementById(id),assert=(ok,m)=>{if(!ok)throw Error(m)},pause=()=>new Promise(r=>setTimeout(r,50));
 async function until(fn){for(let i=0;i<180;i++){if(fn())return;await pause();}throw Error('Timeout: '+$('status').textContent);}
 async function idle(label){const result=document.getElementById('result');result.textContent='WAITING: '+label;const timeout=new Promise((_,reject)=>setTimeout(()=>reject(Error('Timeout aguardando fila após '+label+'. Status: '+$('status').textContent)),20000));await Promise.race([w.__apoenaTestHooks.whenIdle(),timeout]);result.textContent='DONE: '+label;}
@@ -31,6 +31,9 @@ d.querySelector('[data-view="library"]').click();await until(()=>$('projects').c
 await w.ApoenaLibrary.deleteAsset(saved.id+'-sheet');await w.ApoenaLibrary.deleteProject(saved.id);
 document.getElementById('result').textContent='CHARACTER BROWSER OK';
 }catch(e){document.getElementById('result').textContent='FAIL: '+(e&&e.stack||e);}
-},{once:true});
+}
+app.addEventListener('load',runCharacterBrowserTest,{once:true});
 app.src='../pixel-art/personagens.html?test=1';
+const startProbe=setInterval(()=>{try{if(app.contentDocument?.readyState==='complete'&&app.contentDocument.getElementById('status')){clearInterval(startProbe);runCharacterBrowserTest();}}catch(error){clearInterval(startProbe);document.getElementById('result').textContent='FAIL: '+(error&&error.stack||error);}},50);
+setTimeout(()=>{if(!started){clearInterval(startProbe);document.getElementById('result').textContent='FAIL: iframe did not finish loading the modular editor within 15 seconds.';}},15000);
 </script>
