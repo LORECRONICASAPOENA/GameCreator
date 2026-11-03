@@ -531,3 +531,8 @@ Nova captura mostra `Runner reconnected`, versão `2.338.0` e `Listening for Job
 - Artefato #13246855533, digest SHA-256 `07b2a2c6f9908978bccccee87ca96da0864098293036840e44b4ecca118f046f`.
 - Causa-raiz permanece **NÃO CONFIRMADA**: o status da UI muda para sucesso, mas o harness não observa o payload. A próxima mudança registra origin/source/action e payload recebido sem remover assertions.
 - Estado: **ABERTO / REPRODUZÍVEL / AGUARDANDO INSTRUMENTAÇÃO E VALIDAÇÃO**.
+
+
+### Atualização GC-CI-015 — payload capturado após timeout (run #41702943279)
+
+No run [#41702943279](https://github.com/apoenalore/GameCreator/actions/runs/41702943279), SHA `7cfcdf6f670bb6c86ff72aac9a5d0f9c72388bd5`, o step 11 ainda expirou. O log do catch mostrou `GLOBAL_RECEIVED=true`, `stored=true:keys=manifest,png` e `FRAME_RECEIVED=false`: o listener da janela host recebeu e armazenou o payload válido antes de o catch montar o erro, apesar de a espera de nove segundos ter expirado. Build, DOM, sintaxe e teste de modelo passaram. Causa **PROVÁVEL**: o limite/último polling da espera era curto para este fluxo. Correção aplicada no commit seguinte: limite de 30 segundos somente para a captura do bridge, com uma checagem final; assertions de manifesto/PNG intactas. Run 41702943279 falhou antes da correção; aguarda validação canônica da nova versão.

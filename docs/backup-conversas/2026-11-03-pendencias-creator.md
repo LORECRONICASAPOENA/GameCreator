@@ -38,3 +38,12 @@
 - Manter WIP = 1 entre GameCreator e Apoena Pixel Art HTML.
 - Não mesclar PRs automaticamente.
 - Manter relatórios de CI e planos técnicos no repositório; este documento registra o resumo da conversa.
+
+
+## Atualização após run #41702943279
+
+- Resultado: o step de navegador falhou, embora o log final mostre `GLOBAL_RECEIVED=true`, `FRAME_RECEIVED=false` e `stored=true:keys=manifest,png`.
+- Evidência aponta para timeout de observação no harness: o callback do host armazenou o payload manifest+PNG, mas a condição de espera não o viu a tempo.
+- Correção enviada no commit 
+7cfcdf6f670bb6c86ff72aac9a5d0f9c72388bd5. Foi ampliado para 30 s apenas o limite da espera da captura do bridge, com checagem final; as assertions permanecem.
+- Run [#41702943279](https://github.com/apoenalore/GameCreator/actions/runs/41702943279) falhou antes dessa correção. A execução automática seguinte decide se o problema está resolvido.

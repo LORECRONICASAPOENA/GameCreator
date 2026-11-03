@@ -189,3 +189,11 @@
 - No head da PR #14, commit `37e026a8da5bd55aa823e49fa36fe81f16f20647`, o Actions #41632223425 falhou no teste funcional “Gravar no Creator”. O mesmo timeout foi reproduzido no run #41663786861, SHA `1775d77f447e9e245c7a71a35327d935ebaf6bc1`, sem mudanças no runtime ou no teste.
 - Causa-raiz ainda não confirmada. O registro individual está em [relatório do run #41632223425](relatorios-actions/2026-11-03-run-41632223425-character-bridge-timeout.md).
 - Estado da PR #14: **EM INVESTIGAÇÃO / NÃO VALIDADA NO HEAD ATUAL**. PR #13 permanece aberta com escopo sobreposto; não declarar integração concluída nem mesclar até reconciliar as PRs e validar o fluxo do bridge.
+
+
+### Retomada do Criador Modular — 03/11/2026
+
+- Run [#41702943279](https://github.com/apoenalore/GameCreator/actions/runs/41702943279) reproduziu o timeout no step 11, mas o log de diagnóstico mostrou `GLOBAL_RECEIVED=true` e `stored=true:keys=manifest,png`; o callback do host havia armazenado o payload.
+- Causa provável: espera do harness curta/condição final sem rechecagem; o evento chegou após o polling deixar de observar a variável.
+- Correção enviada: espera ampliada para 30 s somente em “Gravar no Creator” e checagem final; assertions de conteúdo mantidas.
+- Estado da PR #14: aguarda nova execução canônica. PR #13 segue sobreposta e ainda requer reconciliação; não mesclar até CI completo.

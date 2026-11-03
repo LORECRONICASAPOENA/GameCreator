@@ -95,3 +95,14 @@
 - Artefato: ID 13246616489, SHA-256 `30212e9183e8e9cfa83ad6190b215942a4cb7e13c9cfbc31c32228521c4b252e`.
 - Próxima coleta acrescenta sinal explícito de armazenamento e compara os globais da janela host e do iframe no erro. Assertions de manifesto (12 frames) e PNG permanecem intactas.
 - Estado: **FALHA REPRODUZIDA; ORIGEM DA MENSAGEM CONFIRMADA; VISIBILIDADE DO PAYLOAD E CAUSA-RAIZ PENDENTES**.
+
+
+### Diagnóstico provável do run #41702943279
+
+- Ocorrência: 2026-11-03 16:32:37–16:33:52 BRT (19:32:37–19:33:52Z), job 126150679613, step 11, SHA `7cfcdf6f670bb6c86ff72aac9a5d0f9c72388bd5`.
+- Build, smoke test, sintaxe JS e modelo passaram; o teste do navegador expirou no passo que aguarda `window.__creatorReceived`.
+- O log do catch mostra `GLOBAL_RECEIVED=true`, `FRAME_RECEIVED=false`, `stored=true:keys=manifest,png`; o trace confirma que o listener pai recebeu `saveAsset` de `sourceIsApp=true` e guardou o payload. O host terminou as operações sem erro.
+- **Causa provável:** a janela host recebe e armazena o payload, mas o harness encerra sua espera curta (nove segundos) antes de observar a condição; a captura tardia coincide com o fim do limite/último intervalo de polling. A interface informou a gravação concluída. Não há evidência de payload ausente ou inválido.
+- **Correção escolhida:** aumentar somente a espera dessa chamada para 30 segundos e reavaliar a condição uma vez depois do último intervalo. Preservar assertions de 12 frames, PNG e todos os demais testes.
+- Artefato `v41-ci-diagnostics`: ID 13247763001; SHA-256 `f811e1431fd95ff0b701f5ca8c65cdbb63c7bb95437b7997a1e1da061a5049df`.
+- Estado: correção de timing aplicada no commit seguinte; aguarda CI canônico para confirmação. Causa classificada como **PROVÁVEL**, não confirmada até a nova execução passar.
