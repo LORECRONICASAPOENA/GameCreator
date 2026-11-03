@@ -84,3 +84,14 @@
 - Artefato `v41-ci-diagnostics`: ID 13246855533, SHA-256 `07b2a2c6f9908978bccccee87ca96da0864098293036840e44b4ecca118f046f`. Mensagem/host trace repetem o sintoma anterior.
 - Próxima coleta: registrar mensagens do bridge (origin, source, action e presença do payload) no harness; preservar a assertion dos 12 frames e do PNG.
 - Classificação e estado permanecem: falha de teste confirmada; causa-raiz ainda não confirmada; aguardando nova validação após instrumentação.
+
+
+### Evidência do run #41665578502 e instrumentação adicional
+
+- Ocorrência: 2026-11-03 12:36:12–12:39:00 BRT (15:36:12–15:39:00Z), run [#41665578502](https://github.com/apoenalore/GameCreator/actions/runs/41665578502), job 126019855852, PR #14, commit de teste `2a9736e87d09fe37436ee885562b1f0fe22739d9`.
+- Build nativo, smoke test de DOM, sintaxe JavaScript e teste de modelo passaram; o step 11 falhou aguardando o payload após o texto de sucesso da interface.
+- Traço: `message:request:sourceIsApp=true:origin=http://127.0.0.1:4173:action=saveAsset|listener:saveAsset:sourceIsApp=true:origin=http://127.0.0.1:4173`. O host concluiu `saveProject`, `listProjects`, `saveAsset`, `saveProject` e `listAssets` sem erro.
+- Isso comprova que a solicitação chegou ao listener no contexto e origem esperados. Ainda não comprova se `window.__creatorReceived` ficou visível à condição de espera; causa-raiz não confirmada.
+- Artefato: ID 13246616489, SHA-256 `30212e9183e8e9cfa83ad6190b215942a4cb7e13c9cfbc31c32228521c4b252e`.
+- Próxima coleta acrescenta sinal explícito de armazenamento e compara os globais da janela host e do iframe no erro. Assertions de manifesto (12 frames) e PNG permanecem intactas.
+- Estado: **FALHA REPRODUZIDA; ORIGEM DA MENSAGEM CONFIRMADA; VISIBILIDADE DO PAYLOAD E CAUSA-RAIZ PENDENTES**.

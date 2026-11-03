@@ -17,7 +17,7 @@ default:throw Error('Ação de biblioteca não permitida: '+action);
 }}
 window.addEventListener('message', async e=>{const m=e.data;if(e.source!==app.contentWindow||m?.channel!==ApoenaLibrary.schema||m.type!=='request')return;hostTrace.push('start:'+m.action);try{const value=await testLibraryDispatch(m.action,m.payload||{});hostTrace.push('done:'+m.action);e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:true,value},'*');}catch(error){hostTrace.push('error:'+m.action+':'+error.message);e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:false,error:{message:error.message}},'*');}});
 window.addEventListener('message',e=>{const m=e.data;if(m?.channel===ApoenaCreatorBridge.channel)bridgeTrace.push('message:'+m.type+':sourceIsApp='+(e.source===app.contentWindow)+':origin='+e.origin+':action='+(m.action||''));});
-ApoenaCreatorBridge.listen((action,payload,event)=>{bridgeTrace.push('listener:'+action+':sourceIsApp='+(event.source===app.contentWindow)+':origin='+event.origin);if(action!=='saveAsset')throw Error('Wrong bridge action');window.__creatorReceived=payload;return {id:'test-character'};});
+ApoenaCreatorBridge.listen((action,payload,event)=>{bridgeTrace.push('listener:'+action+':sourceIsApp='+(event.source===app.contentWindow)+':origin='+event.origin);if(action!=='saveAsset')throw Error('Wrong bridge action');window.__creatorReceived=payload;bridgeTrace.push('stored='+Boolean(window.__creatorReceived)+':keys='+Object.keys(payload||{}).join(','));return {id:'test-character'};});
 async function runCharacterBrowserTest(){if(started)return;started=true;bootStage='browser-test-started';document.getElementById('result').textContent='RUNNING_TEST';
 const w=document.getElementById('app').contentWindow,d=w.document,$=id=>d.getElementById(id),assert=(ok,m)=>{if(!ok)throw Error(m)},pause=()=>new Promise(r=>setTimeout(r,50));
 async function until(fn){for(let i=0;i<180;i++){if(fn())return;await pause();}throw Error('Timeout: '+$('status').textContent);}
@@ -46,7 +46,7 @@ window.confirm=()=>true;w.confirm=()=>true;await click('new');assert($('layers')
 d.querySelector('[data-view="library"]').click();await until(()=>$('projects').children.length>0);$('projects').querySelector('button').click();await until(()=>$('layers').children.length===1);await click('editLayer');assert(alpha()===0,'Reopened edit mask');await click('resetFrame');assert(alpha()===255,'Restored original after reopen');
 await w.ApoenaLibrary.deleteAsset(saved.id+'-sheet');await w.ApoenaLibrary.deleteProject(saved.id);
 document.getElementById('result').textContent='CHARACTER BROWSER OK';
-}catch(e){document.getElementById('result').textContent='FAIL: '+(e&&e.stack||e)+' HOSTTRACE='+hostTrace.join('|')+' BRIDGETRACE='+bridgeTrace.join('|');}
+}catch(e){document.getElementById('result').textContent='FAIL: '+(e&&e.stack||e)+' HOSTTRACE='+hostTrace.join('|')+' BRIDGETRACE='+bridgeTrace.join('|')+' GLOBAL_RECEIVED='+Boolean(window.__creatorReceived)+':FRAME_RECEIVED='+Boolean(w.__creatorReceived);}
 }
 app.addEventListener('load',runCharacterBrowserTest,{once:true});
 const startProbe=setInterval(()=>{try{if(app.contentDocument?.readyState==='complete'&&app.contentDocument.getElementById('status')){clearInterval(startProbe);runCharacterBrowserTest();}}catch(error){clearInterval(startProbe);document.getElementById('result').textContent='FAIL: '+(error&&error.stack||error);}},50);
