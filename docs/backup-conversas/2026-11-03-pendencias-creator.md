@@ -54,3 +54,15 @@
 - A espera de 30 s ainda expirou. O log confirmou que o callback do host recebeu e armazenou `manifest` e `png`, mas a condição de polling não percebeu o valor.
 - Commit seguinte substitui o polling por Promise resolvida no callback, mantendo 30 s de timeout e todas as assertions.
 - Run [#41704904027](https://github.com/apoenalore/GameCreator/actions/runs/41704904027) falhou antes dessa mudança; a correção ainda precisa passar no workflow canônico.
+
+
+## Retomada após o acesso à organização — 03/11/2026
+
+- O usuário forneceu a página de repositórios de `LORECRONICASAPOENA`. A conexão GitHub `apoena` listou o GameCreator com permissão administrativa, incluindo leitura e escrita.
+- Estado observado da [PR #14](https://github.com/LORECRONICASAPOENA/GameCreator/pull/14): aberta, draft, sem merge, base `feat/apoena-personagem-estudio-main`; head em `68b849ecd12afbf600b970bc91b0a37c2c22555f).
+- O run [#41705785826](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41705785826), no head anterior `7e5bdb0`, falhou no step 11 do teste de navegador. O log registrou `GLOBAL_RECEIVED=true`, com manifesto e PNG recebidos pelo host, enquanto a etapa aguardava a fila ociosa do iframe.
+- Foi enviado o commit [`7a6b717`](https://github.com/LORECRONICASAPOENA/GameCreator/commit/7a6b717ffcccfa52fcb32c4d2d4a197d9354efc6), que faz o teste do botão “Gravar no Creator” aguardar o payload e a mensagem de conclusão da interface, preservando as assertions de 12 frames e PNG.
+- Um commit subsequente, [`68b849e`](https://github.com/LORECRONICASAPOENA/GameCreator/commit/68b849ecd12afbf600b970bc91b0a37c2c22555f), ajustou o teste para aguardar diretamente a fila de operações do personagem.
+- O run [#41726951760](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41726951760), para `7a6b717`, foi cancelado quando o novo commit chegou. O run [#41727053903](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41727053903), no head `68b849e`, estava em andamento na etapa de diagnóstico do runner no momento deste registro; ainda não há resultado da validação do Criador Modular.
+- A conversa também inclui a imagem enviada do sprite da personagem Blin, identificada como `image(1).png` no histórico de arquivos da conversa.
+- As PRs #13 e #14 permanecem com escopo sobreposto. Nenhuma delas foi mesclada e a integração não deve ser declarada concluída até a CI do head atual passar e a sobreposição ser reconciliada.
