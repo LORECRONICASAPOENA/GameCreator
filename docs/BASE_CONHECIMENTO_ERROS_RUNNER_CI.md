@@ -541,3 +541,14 @@ No run [#41702943279](https://github.com/apoenalore/GameCreator/actions/runs/417
 ### Atualização GC-CI-015 — polling ainda falha, callback captura payload (run #41704904027)
 
 O run [#41704904027](https://github.com/apoenalore/GameCreator/actions/runs/41704904027), SHA `8756adc6df548042cc26cf95b69a35e3a1fd9d48`, ainda expirou no step 11 mesmo com espera de 30 s. O catch mostra `GLOBAL_RECEIVED=true`, `FRAME_RECEIVED=false` e `stored=true:keys=manifest,png`. Assim, o payload chegou e foi salvo no host; o polling continua sem observar a variável. A alteração de 30 s não foi suficiente. Nova correção troca polling por Promise resolvida no callback que recebe `saveAsset`, preservando assertions de 12 frames e PNG. Aguardando novo Actions para confirmar.
+
+
+### Atualização GC-CI-016 — timeout após captura de payload do bridge (run #41728611799)
+
+- **Ocorrência:** 2026-11-03 19:22:10 BRT (22:22:10Z), PR #14, branch feat/apoena-modular-character-creator-integration, HEAD 37e7395013e6423c61fe4beb487265b97d0031b0, merge commit testado 1a3a07fca60e6a1f789dc7736c356362c4b54494, job 126240154897, step 11.
+- **Mensagem literal:** “Timeout: Personagem gravado no projeto atual do Creator. Salve o projeto principal para guardar essa alteração.”
+- **Evidência:** o HTML de diagnóstico e os logs mostram pedido saveAsset recebido pelo listener do host e payload armazenado com manifest,png. A espera do teste por status de sucesso expirou. O estado FRAME_RECEIVED=false é apenas uma variável de captura no documento de teste e não prova perda da resposta no iframe.
+- **Causa-raiz:** não confirmada. O teste aguardava por polling de status; faltavam evidências do momento em que a fila do editor terminava. Não há evidência de que o runtime tenha perdido o recurso.
+- **Correção escolhida:** substituir a espera temporal do status pela espera do hook whenIdle() da fila assíncrona do editor e manter a assertion de mensagem de sucesso e as assertions do manifesto/PNG. Nenhuma alteração de produção do bridge.
+- **Relatório individual:** [run #41728611799](relatorios-actions/2026-11-03-run-41728611799-character-bridge-timeout.md).
+- **Estado:** correção do harness aplicada; aguarda CI automático no novo commit. Resolver somente após a execução canônica passar.

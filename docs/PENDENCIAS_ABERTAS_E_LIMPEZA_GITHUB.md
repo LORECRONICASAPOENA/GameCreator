@@ -303,3 +303,13 @@ Em 02/11/2026, o autor enviou captura da anotação expandida do GitHub Actions.
 - **PR #14:** aberta em draft, base na branch da PR #11 (`feat/apoena-personagem-estudio-main`), HEAD consultado `98c46503ed1ec567422b947d2fec88d470a25b39`. O run automático [#41728100712](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41728100712) estava `in_progress` na consulta de 03/11/2026. A validação anterior [#41565001752](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41565001752) passou no SHA `03382b02e74e2b39da0924bd0ff72ddacdf27e5a`, que não é o HEAD consultado agora.
 - **Bloqueio de integração:** PRs #13 e #14 cobrem a mesma integração do Criador Modular; a #14 também depende da branch ainda draft da #11. Não declarar concluído nem mesclar enquanto o run do HEAD atual não terminar e as diferenças entre as PRs não forem reconciliadas.
 - **Próxima ação:** acompanhar o run #41728100712 sem iniciar execução duplicada. Depois, comparar os arquivos/commits das PRs #11, #13 e #14 e definir uma única rota de integração. Se houver falha, coletar logs e seguir o procedimento individual de incidente antes de alterar código.
+
+
+### Atualização — falha do Criador Modular no run #41728611799 (03/11/2026)
+
+- O run #41728100712 foi cancelado quando uma execução mais nova assumiu o mesmo grupo de concorrência; o substituto automático foi [#41728611799](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41728611799), no HEAD 37e7395013e6423c61fe4beb487265b97d0031b0.
+- A execução substituta falhou no step 11, “Testar Criador Modular no navegador”, com timeout aguardando a mensagem de sucesso de “Gravar no Creator”. Build, DOM, sintaxe e modelo passaram; etapas seguintes foram puladas.
+- O trace comprovou que o host recebeu a requisição saveAsset e armazenou manifest e png. A resposta de volta ao iframe e a conclusão da fila do editor não foram comprovadas naquele run.
+- **Estado:** integração ainda não validada; causa-raiz do atraso não confirmada. Relatório: [2026-11-03-run-41728611799-character-bridge-timeout.md](relatorios-actions/2026-11-03-run-41728611799-character-bridge-timeout.md).
+- **Correção aplicada no harness:** após capturar o payload, o teste espera a fila assíncrona real do editor via hook de inatividade e mantém as verificações de mensagem de sucesso, manifesto com 12 quadros e PNG. O código de produção do bridge não foi alterado.
+- Aguardar somente a execução canônica automática do novo commit; não iniciar workflow duplicado nem marcar a tarefa como concluída antes de todos os steps obrigatórios passarem.
