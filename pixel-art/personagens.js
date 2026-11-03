@@ -4,7 +4,7 @@ const C=ApoenaCharacter,$=id=>document.getElementById(id),clone=v=>JSON.parse(JS
 let project=C.fresh(),selected=-1,action=0,tick=0,playing=false,editIndex=0,tool='erase',suggestion=null,undo=[],redo=[],cache=new Map(),dirty=false,busy=false;
 let operationQueue=Promise.resolve(),pendingOperations=0;
 const testing=new URLSearchParams(location.search).has('test');
-if(testing)Object.defineProperty(window,'__apoenaTestHooks',{value:{whenIdle:()=>pendingOperations?new Promise(resolve=>window.addEventListener('apoena:character-idle',resolve,{once:true})):Promise.resolve(),pending:()=>pendingOperations},configurable:false});
+if(testing)Object.defineProperty(window,'__apoenaTestHooks',{value:{whenIdle:()=>operationQueue,pending:()=>pendingOperations},configurable:false});
 const canvas=(w,h)=>Object.assign(document.createElement('canvas'),{width:w,height:h});
 function msg(s){$('status').textContent=s;}
 function layer(){return project.layers[selected];}
