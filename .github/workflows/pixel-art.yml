@@ -255,7 +255,7 @@ jobs:
             }
             $uri = "http://127.0.0.1:$port/tests/personagens-browser.html"
             $profile = Join-Path $env:RUNNER_TEMP ("apoena-character-" + $env:GITHUB_RUN_ID)
-            $args = '--headless --disable-gpu --no-first-run --no-default-browser-check --disable-extensions --window-size=1500,1200 --timeout=90000 --user-data-dir="' + $profile + '" --dump-dom "' + $uri + '"'
+            $args = '--headless --disable-gpu --no-first-run --no-default-browser-check --disable-extensions --window-size=1500,1200 --virtual-time-budget=60000 --timeout=90000 --user-data-dir="' + $profile + '" --dump-dom "' + $uri + '"'
             $output = Join-Path $env:GITHUB_WORKSPACE ".ci-results/characters-browser.html"
             $log = Join-Path $env:GITHUB_WORKSPACE ".ci-results/characters-browser.log"
             $proc = Start-Process -FilePath $browser -ArgumentList $args -RedirectStandardOutput $output -RedirectStandardError $log -Wait -PassThru
