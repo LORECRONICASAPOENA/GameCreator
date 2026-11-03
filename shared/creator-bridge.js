@@ -5,8 +5,10 @@
 
   function targetWindow(){
     try {
-      if (root.opener && !root.opener.closed) return root.opener;
+      // Embedded editors must talk to their immediate Creator host.
+      // Standalone popup tools fall back to the window that opened them.
       if (root.parent && root.parent !== root) return root.parent;
+      if (root.opener && !root.opener.closed) return root.opener;
     } catch (_) {}
     return null;
   }
