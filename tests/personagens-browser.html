@@ -1,7 +1,7 @@
 <!doctype html><meta charset="utf-8"><title>Character integration test</title><pre id="result">RUNNING</pre><iframe id="app" style="width:1280px;height:1100px"></iframe><script src="../shared/asset-library.js"></script><script src="../shared/creator-bridge.js"></script><script>
 document.getElementById('result').textContent='BOOTSTRAP';
 window.addEventListener('error',e=>{document.getElementById('result').textContent='FAIL: '+e.message;});
-let received;const hostTrace=[];const app=document.getElementById('app');let started=false;
+let received;const hostTrace=[];window.__apoenaLibraryTrace=(stage,detail)=>hostTrace.push(stage+(detail?':'+detail:''));const app=document.getElementById('app');let started=false;
 window.addEventListener('message', async e=>{const m=e.data;if(e.source!==document.getElementById('app').contentWindow||m?.channel!==ApoenaLibrary.schema||m.type!=='request')return;hostTrace.push('start:'+m.action);try{const value=await ApoenaLibrary.dispatch(m.action,m.payload);hostTrace.push('done:'+m.action);e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:true,value},'*');}catch(error){hostTrace.push('error:'+m.action+':'+error.message);e.source.postMessage({channel:m.channel,type:'response',id:m.id,ok:false,error:{message:error.message}},'*');}});
 ApoenaCreatorBridge.listen((action,payload)=>{if(action!=='saveAsset')throw Error('Wrong bridge action');received=payload;return {id:'test-character'};});
 async function runCharacterBrowserTest(){if(started)return;started=true;document.getElementById('result').textContent='RUNNING_TEST';
