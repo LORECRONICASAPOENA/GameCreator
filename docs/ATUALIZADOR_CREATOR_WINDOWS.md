@@ -6,16 +6,20 @@ Estado: implementacao em branch de trabalho; NAO VALIDADO em Windows do autor.
 
 1. Na instalacao antiga, abra Biblioteca e exporte o backup antes de migrar. Ela utiliza IndexedDB do navegador; esses dados nao ficam automaticamente no GitHub e podem depender da origem/caminho do arquivo.
 2. Baixe somente ATUALIZAR_CREATOR.cmd e integracao/atualizar-creator.ps1 para uma pasta temporaria, mantendo a estrutura. Execute o CMD; nao baixe nem extraia o ZIP completo.
-3. Escolha a pasta definitiva quando solicitado. Sugestao: C:\ApoenaHub\GAME CREATOR\APP. Nao escolha C:\ApoenaHub\GAME CREATOR\RUNNER nem a pasta que contem o runner.
-4. E necessario ter Git for Windows e fazer login com a conta que possui acesso ao repositorio privado. Nao inserir credenciais nos scripts.
-5. Depois de instalar, abra o editor com ABRIR_GAME_CREATOR.cmd na pasta definitiva. Verifique sua biblioteca/backup antes de apagar a instalacao antiga. Depois da verificacao, a pasta temporaria de bootstrap pode ser descartada.
+3. Para testar a PR #7 antes do merge, use uma pasta separada e a branch de desenvolvimento:
+   `ATUALIZAR_CREATOR.cmd -Branch feat/atualizador-local-incremental -Destino "C:\ApoenaHub\GAME CREATOR\APP-TESTE" -ConfigDir "%LOCALAPPDATA%\Apoena\GameCreator-Teste"`
+   Isso instala e atualiza a branch da PR em APP-TESTE. Nao use a pasta APP existente nem RUNNER durante o teste.
+4. Para uma instalacao definitiva apos o merge, execute sem `-Branch` e use a pasta APP. O padrao continua sendo a branch `main`. Nunca escolha C:\ApoenaHub\GAME CREATOR\RUNNER nem a pasta que contem o runner.
+5. E necessario ter Git for Windows 2.41.0 ou superior e fazer login com a conta que possui acesso ao repositorio. Nao inserir credenciais nos scripts.
+6. Depois de instalar, abra o editor com ABRIR_GAME_CREATOR.cmd na pasta de teste. Verifique a inicializacao e a biblioteca/backup. Mantenha a instalacao antiga intacta; so apos o merge e a validacao completa instale a branch main na pasta APP definitiva.
 
 O atualizador nao sobrescreve uma instalacao ZIP antiga: se o destino ja existir mas nao for um clone Git, ele interrompe. A migracao de dados pessoais exige conferencia separada.
 
 ## Atualizacoes seguintes
 
 - Execute ATUALIZAR_CREATOR.cmd na propria pasta permanente. Nao baixe outro ZIP.
-- O script verifica o repositorio de origem, branch main, alteracoes locais e arquivos essenciais.
+- O script verifica o repositorio de origem, a branch selecionada (main por padrao), alteracoes locais e arquivos essenciais.
+- Em uma instalacao criada com `-Branch`, execute as atualizacoes seguintes com a mesma branch; nao altere de branch em uma pasta existente.
 - Faz git fetch seguido de git merge --ff-only; nunca usa reset --hard, git clean ou exclusao de pastas.
 - Exibe a revisao anterior e a atual e grava um log em %LOCALAPPDATA%\Apoena\GameCreator\atualizacao.log.
 - Preserva referencia Git pequena refs/apoena/anterior para apoiar eventual recuperacao, sem criar copia integral.

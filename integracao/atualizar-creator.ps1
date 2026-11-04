@@ -4,6 +4,7 @@
 param(
     [string]$Destino = "",
     [string]$RepoUrl = "https://github.com/apoenalore/GameCreator.git",
+    [string]$Branch = "main",
     [string]$ConfigDir = ""
 )
 
@@ -144,6 +145,18 @@ try {
         throw "Git 2.41 ou superior e necessario para o checkout enxuto. Versao encontrada: $versaoTexto"
     }
 
+    $branchDesejada = [string]$Branch
+    if ([string]::IsNullOrWhiteSpace($branchDesejada)) {
+        throw 'Informe uma branch Git valida.'
+    }
+    $branchDesejada = $branchDesejada.Trim()
+    $branchValidada = (& $git.Source check-ref-format --branch $branchDesejada 2>&1 | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0 -or $branchValidada -cne $branchDesejada) {
+        throw "Nome de branch invalido: $branchDesejada"
+    }
+    $refRemoto = "refs/remotes/origin/$branchDesejada"
+    $refSpec = "+refs/heads/${branchDesejada}:$refRemoto"
+
     if ([string]::IsNullOrWhiteSpace($Destino)) {
         if (Test-Path -LiteralPath $arquivoClonePendente) {
             $Destino = (Get-Content -LiteralPath $arquivoClonePendente -Raw).Trim()
@@ -208,7 +221,7 @@ try {
     if ($novoClone) {
         Registrar 'Primeira instalacao: clone parcial sem checkout inicial; documentos e blobs fora do runtime nao serao baixados.'
         Set-Content -LiteralPath $arquivoClonePendente -Value $Destino -Encoding UTF8
-        & $git.Source clone --filter=blob:none --depth 1 --single-branch --branch main --no-checkout $repositorio $Destino
+        & $git.Source clone --filter=blob:none --depth 1 --single-branch --branch $branchDesejada --no-checkout $repositorio $Destino
         if ($LASTEXITCODE -ne 0) {
             throw 'Clone parcial falhou. O marcador foi preservado para diagnostico/retomada; confira conexao e autenticacao GitHub.'
         }
@@ -229,9 +242,9 @@ try {
         throw 'O remote origin nao e o GameCreator oficial. Atualizacao bloqueada.'
     }
 
-    $branch = (& $git.Source -C $Destino symbolic-ref --quiet --short HEAD 2>$null)
-    if ($LASTEXITCODE -ne 0 -or $branch.Trim() -cne 'main') {
-        throw 'Instalacao fora da branch main. Atualizacao bloqueada para nao substituir trabalho de desenvolvimento.'
+    $branchAtual = (& $git.Source -C $Destino symbolic-ref --quiet --short HEAD 2>$null)
+    if ($LASTEXITCODE -ne 0 -or $branchAtual.Trim() -cne $branchDesejada) {
+        throw "Instalacao fora da branch '$branchDesejada'. Atualizacao bloqueada para nao substituir trabalho de desenvolvimento."
     }
 
     if ($retomarClonePendente) {
@@ -308,31 +321,31 @@ try {
     Registrar "Versao instalada antes: $anterior"
     Registrar 'Checkout enxuto ativo: docs, testes, workflows, legado e documentos de desenvolvimento ficam fora da pasta APP.'
 
-    Registrar 'Buscando somente blobs necessarios ao runtime...'
-    & $git.Source -C $Destino fetch --no-tags --filter=blob:none origin '+refs/heads/main:refs/remotes/origin/main'
+    Registrar "Buscando somente blobs necessarios ao runtime da branch $branchDesejada..."
+    & $git.Source -C $Destino fetch --no-tags --filter=blob:none origin $refSpec
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao buscar alteracoes. Versao local mantida.' }
 
-    $arquivosRemotos = @(& $git.Source -C $Destino -c core.quotePath=false ls-tree -r --name-only refs/remotes/origin/main)
+    $arquivosRemotos = @(& $git.Source -C $Destino -c core.quotePath=false ls-tree -r --name-only $refRemoto)
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel verificar o manifesto remoto.' }
     $faltantes = @($arquivosEssenciais | Where-Object { $arquivosRemotos -notcontains $_ })
     if ($faltantes.Count -gt 0) {
         throw ('Versao remota sem arquivo(s) essencial(is): ' + ($faltantes -join ', ') + '. Nenhuma atualizacao foi aplicada.')
     }
 
-    VerificarConflitosLocais 'refs/remotes/origin/main'
+    VerificarConflitosLocais $refRemoto
 
-    $remoto = (& $git.Source -C $Destino rev-parse refs/remotes/origin/main).Trim()
+    $remoto = (& $git.Source -C $Destino rev-parse $refRemoto).Trim()
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel identificar a versao remota.' }
 
     if ($remoto -eq $anterior) {
         Registrar "SEM MUDANCAS: ja esta na versao $anterior. Referencia anterior preservada."
     } else {
-        & $git.Source -C $Destino merge-base --is-ancestor HEAD refs/remotes/origin/main
+        & $git.Source -C $Destino merge-base --is-ancestor HEAD $refRemoto
         if ($LASTEXITCODE -ne 0) {
-            throw 'A instalacao divergiu da main. Atualizacao bloqueada; nenhum reset, rebase ou descarte foi executado.'
+            throw "A instalacao divergiu da branch '$branchDesejada'. Atualizacao bloqueada; nenhum reset, rebase ou descarte foi executado."
         }
 
-        & $git.Source -C $Destino merge --no-overwrite-ignore --ff-only refs/remotes/origin/main
+        & $git.Source -C $Destino merge --no-overwrite-ignore --ff-only $refRemoto
         if ($LASTEXITCODE -ne 0) {
             throw 'Nao foi possivel aplicar atualizacao fast-forward. Verifique conflitos; arquivos ignorados nao serao sobrescritos.'
         }

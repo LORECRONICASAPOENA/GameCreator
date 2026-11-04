@@ -167,7 +167,7 @@ assert.match(updater, /read-tree -mu HEAD/,
   "Clone iniciado com --no-checkout precisa materializar o runtime após validar conflitos.");
 const initialGuardPosition = updater.indexOf("VerificarConflitosLocais 'HEAD'");
 const materializePosition = updater.indexOf("read-tree -mu HEAD");
-const remoteGuardPosition = updater.indexOf("VerificarConflitosLocais 'refs/remotes/origin/main'");
+const remoteGuardPosition = updater.indexOf("VerificarConflitosLocais $refRemoto");
 const mergePosition = updater.indexOf("merge --no-overwrite-ignore --ff-only");
 const previousRefUpdatePosition = updater.indexOf("update-ref refs/apoena/anterior");
 assert.ok(initialGuardPosition >= 0 && initialGuardPosition < materializePosition,
@@ -186,6 +186,14 @@ assert.match(updater, /status --porcelain --untracked-files=no/,
   "Alterações rastreadas locais precisam bloquear a atualização.");
 assert.match(updater, /refs\/apoena\/anterior/,
   "A referência da versão anterior precisa ser preservada.");
+assert.ok(updater.includes('[string]$Branch = "main"'),
+  "A branch main deve continuar sendo o padrão seguro do instalador.");
+assert.ok(updater.includes("check-ref-format --branch $branchDesejada"),
+  "A branch informada precisa ser validada pelo Git antes do clone/fetch.");
+assert.ok(updater.includes("--branch $branchDesejada"),
+  "A primeira instalação deve clonar a branch selecionada.");
+assert.ok(updater.includes('$refRemoto = "refs/remotes/origin/$branchDesejada"'),
+  "O atualizador precisa acompanhar a referência remota da branch selecionada.");
 assert.match(updater, /RUNNER/i, "O destino precisa proteger a pasta do Runner.");
 assert.doesNotMatch(updater, /reset\s+--hard|git\s+clean\s+-f|Remove-Item[^\r\n]*-Recurse/i,
   "O atualizador não pode apagar alterações/histórico com comandos destrutivos.");
@@ -225,13 +233,14 @@ function commitAll(repoPath, message) {
   git(repoPath, ["commit", "-m", message]);
 }
 
-function runUpdater(install, configDir, repoUrl, allowFailure = false) {
+function runUpdater(install, configDir, repoUrl, allowFailure = false, branch = "main") {
   const result = spawnSync("powershell.exe", [
     "-NoProfile",
     "-ExecutionPolicy", "Bypass",
     "-File", path.join(root, "integracao", "atualizar-creator.ps1"),
     "-Destino", install,
     "-RepoUrl", repoUrl,
+    "-Branch", branch,
     "-ConfigDir", configDir
   ], {
     cwd: root,
@@ -357,6 +366,35 @@ function testSparseCheckoutAndUpdate() {
     assert.equal(path.resolve(savedPath), path.resolve(install),
       "O atualizador precisa salvar o destino permanente escolhido.");
 
+    // A inicializacao da PR precisa funcionar a partir da branch de desenvolvimento,
+    // sem depender de os arquivos do atualizador ja existirem na main.
+    const bootstrapBranch = "test/bootstrap-branch";
+    git(source, ["branch", bootstrapBranch]);
+    git(source, ["push", "origin", bootstrapBranch]);
+    const branchInstall = path.join(temp, "APP-BOOTSTRAP");
+    const branchConfig = path.join(temp, "config-bootstrap");
+    const branchInitialRun = runUpdater(branchInstall, branchConfig, repoUrl, false, bootstrapBranch);
+    assert.equal(branchInitialRun.status, 0, "Primeira instalacao precisa aceitar a branch explicitamente selecionada.");
+    assert.equal(git(branchInstall, ["branch", "--show-current"]).stdout.trim(), bootstrapBranch,
+      "A instalacao inicial precisa permanecer na branch selecionada.");
+    const branchInitialHead = git(branchInstall, ["rev-parse", "HEAD"]).stdout.trim();
+    assert.equal(git(branchInstall, ["rev-parse", "refs/remotes/origin/" + bootstrapBranch]).stdout.trim(), branchInitialHead,
+      "A referencia remota inicial precisa acompanhar a branch selecionada.");
+
+    git(source, ["checkout", bootstrapBranch]);
+    writeFile(source, "index.html", "bootstrap branch updated");
+    commitAll(source, "fixture bootstrap branch update");
+    git(source, ["push", "origin", bootstrapBranch]);
+    const branchUpdateRun = runUpdater(branchInstall, branchConfig, repoUrl, false, bootstrapBranch);
+    assert.equal(branchUpdateRun.status, 0, "Atualizacao fast-forward precisa acompanhar a branch selecionada.");
+    assert.equal(fs.readFileSync(path.join(branchInstall, "index.html"), "utf8"), "bootstrap branch updated",
+      "A atualizacao precisa materializar a nova versao da branch selecionada.");
+    const branchInstalledHead = git(branchInstall, ["rev-parse", "HEAD"]).stdout.trim();
+    const branchRemoteHead = git(branchInstall, ["rev-parse", "refs/remotes/origin/" + bootstrapBranch]).stdout.trim();
+    assert.equal(branchInstalledHead, branchRemoteHead,
+      "A instalacao precisa acompanhar a referencia remota da branch selecionada.");
+    git(source, ["checkout", "main"]);
+
     // Simula interrupcao apos clone --no-checkout e antes de read-tree.
     const resumeInstall = path.join(temp, "APP-RESUME");
     const resumeConfig = path.join(temp, "config-resume");
@@ -473,5 +511,5 @@ testSparseCheckoutAndUpdate();
 console.log("PASSOU: manifesto positivo e arquivos essenciais do Creator, Godot, biblioteca e Pixel Art.");
 console.log("PASSOU: o atualizador PowerShell real fez a primeira instalação enxuta e excluiu documentos/testes/CI.");
 console.log("PASSOU: arquivos locais fora da allowlist bloquearam a atualização sem serem alterados.");
-console.log("PASSOU: atualização fast-forward, referência anterior e execução sem mudanças.");
+console.log("PASSOU: bootstrap e atualização fast-forward em branch selecionada, além da referência anterior e execução sem mudanças.");
 console.log("PASSOU: colisões locais ignoradas, não ignoradas e com acentos bloquearam o merge sem alterar dados.");
