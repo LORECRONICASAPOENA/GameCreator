@@ -56,13 +56,26 @@
 
   function readSessionToken(){
     if (sessionToken) return sessionToken;
+    let candidate = "";
     try {
-      sessionToken = String(root.name || "");
-      root.name = "";
-    } catch (_) {
-      sessionToken = "";
+      const hash = String(root.location && root.location.hash || "").replace(/^#/, "");
+      const match = hash.match(/(?:^|&)apoenaBridgeToken=([a-f0-9]{64})(?:&|$)/);
+      if (match) candidate = match[1];
+    } catch (_) {}
+    if (!candidate) {
+      try { candidate = String(root.name || ""); } catch (_) { candidate = ""; }
     }
-    if (!/^[a-f0-9]{64}$/.test(sessionToken)) sessionToken = "";
+    try { root.name = ""; } catch (_) {}
+    if (!/^[a-f0-9]{64}$/.test(candidate)) return "";
+    sessionToken = candidate;
+    // O fragment não é enviado ao servidor nem ao Referer; removê-lo da barra após capturar o nonce.
+    try {
+      const params = new root.URLSearchParams(String(root.location.hash || "").replace(/^#/, ""));
+      params.delete("apoenaBridgeToken");
+      const hash = params.toString();
+      const cleanUrl = String(root.location.pathname || "") + String(root.location.search || "") + (hash ? "#" + hash : "");
+      root.history.replaceState(null, "", cleanUrl);
+    } catch (_) {}
     return sessionToken;
   }
 
