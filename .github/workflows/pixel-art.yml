@@ -18,7 +18,7 @@ on:
       - "ORGANIZACAO_EDITOR.md"
       - ".github/workflows/**"
   pull_request:
-    branches: [main]
+    branches: [main, feat/apoena-personagem-estudio-main]
     paths:
       - "index.html"
       - "bundle-v4/**"
