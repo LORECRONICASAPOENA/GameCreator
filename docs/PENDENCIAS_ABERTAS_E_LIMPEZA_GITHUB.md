@@ -297,16 +297,17 @@ Em 02/11/2026, o autor enviou captura da anotação expandida do GitHub Actions.
 
 ## Atualização de manutenção — 04/11/2026 — PRs #11, #13 e #14
 
-- **WIP = 1:** a validação da Pixel Art PR #7 está formalmente BLOQUEADA pelo runner Windows sem atribuição (`runner_id=0`) no run #27; issue [#9](https://github.com/LORECRONICASAPOENA/Apoena-pixel-art-html/issues/9). A única implementação ativa passa a ser a correção/validação da PR #14 do GameCreator.
-- **PR #11:** continua a branch-base `feat/apoena-personagem-estudio-main`; a PR permanece aberta/draft e deve ser tratada antes da integração final da #14.
-- **PR #13:** continua aberta, base `main`, HEAD `34a0a722444448e384c91286affecf0f50217038`; contém findings do CodeRabbit e histórico divergente. Não fechar nem mesclar automaticamente.
-- **PR #14:** aberta/draft, base `feat/apoena-personagem-estudio-main`, HEAD `dca28d0065a4cc24f38d6ebff759346575b49428`. O run #395 foi disparado automaticamente para esse SHA; o run #393 (SHA intermediário) foi cancelado durante o smoke test e o #394 foi cancelado após novo commit.
-- **Reconciliação:** a comparação entre PR #13 e o HEAD da #14 indicou 61 commits à frente e 47 atrás; não é seguro assumir que uma PR contém integralmente a outra. Revisar commits/arquivos exclusivos antes de fechar PR #13, retargetear ou mesclar qualquer PR.
-- **CodeRabbit:** revisão manual solicitada na PR #14; resultado ainda pendente.
-- **Correção aplicada na #14:** condição de corrida no carregamento de presets corrigida com `pixel-art/preset-request-guard.js`; apenas o callback da solicitação mais recente pode alterar o estado do Estúdio. Teste `tests/preset-request-guard.test.cjs` cobre a semântica e a ligação HTML/JS; workflow agora executa esse teste e verifica a sintaxe do Estúdio.
-- **Backups:** pré-correção `backup/pr14-before-preset-race-fix-20261104` no SHA `4f90fc8739b4af351c929a97d8ed73c094477c36`; pós-correção `backup/pr14-after-preset-race-fix-20261104` no SHA `dca28d0065a4cc24f38d6ebff759346575b49428`.
-- **CI:** run #395 [41840382239](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41840382239) ainda precisa concluir com success no SHA final antes de declarar a correção validada.
-- **Proteção de branches:** issue [#15](https://github.com/LORECRONICASAPOENA/GameCreator/issues/15) acompanha o reforço do ruleset da `main` para exigir checks e revisão independente.
+- **WIP = 1:** a validação da Pixel Art PR #7 permanece BLOQUEADA pelo runner Windows sem atribuição (`runner_id=0`) no run #27; issue [#9](https://github.com/LORECRONICASAPOENA/Apoena-pixel-art-html/issues/9). A linha de implementação ativa do Criador Modular é a PR #14; suas correções de código passaram no CI do SHA atual, mas a PR segue draft aguardando revisão e reconciliação.
+- **PR #11:** continua como branch-base `feat/apoena-personagem-estudio-main`; deve ser resolvida antes da integração final da #14.
+- **PR #13:** aberta, base `main`, HEAD `34a0a722444448e384c91286affecf0f50217038`; contém findings de revisão e histórico divergente. Não fechar nem mesclar automaticamente.
+- **PR #14:** aberta/draft, base `feat/apoena-personagem-estudio-main`, HEAD `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`.
+- **Reconciliação:** a comparação entre PR #13 e o HEAD da #14 indicou 61 commits à frente e 47 atrás; revisar commits/arquivos exclusivos antes de fechar PR #13, retargetear ou mesclar qualquer PR. Acompanhar issue [#16](https://github.com/LORECRONICASAPOENA/GameCreator/issues/16).
+- **CodeRabbit:** revisão manual solicitada na PR #14; nenhuma review formal foi recebida até esta atualização.
+- **Correção de concorrência:** `pixel-art/preset-request-guard.js` invalida solicitações antigas de presets; somente a mais recente pode alterar o estado do Estúdio. `tests/preset-request-guard.test.cjs` verifica a semântica e a ligação HTML/JS.
+- **Ajuste do teste:** run #395 falhou porque o teste exigia espaços inexistentes no JS minificado. Os regexes foram ajustados para whitespace opcional no commit `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`.
+- **CI final:** run #398 [41840891930](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41840891930) concluiu `success` no SHA `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`; testes de sintaxe, Criador Modular, concorrência dos presets, browser, exportação, IndexedDB, backup/restauração, contratos e runtime Godot passaram. Etapas opcionais de empacotamento/entrega foram `skipped`.
+- **Backups:** pré-correção `backup/pr14-before-preset-race-fix-20261104` no SHA `4f90fc8739b4af351c929a97d8ed73c094477c36`; pós-correção `backup/pr14-after-preset-race-fix-20261104` no SHA `dca28d0065a4cc24f38d6ebff759346575b49428`; checkpoint final validado `backup/pr14-after-test-regex-fix-20261104` no SHA `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`.
+- **Proteção de branches:** issue [#15](https://github.com/LORECRONICASAPOENA/GameCreator/issues/15) acompanha a exigência de checks e revisão independente na `main`.
 
 ## Ponto de situação — Criador Modular / GC-CHAR-001 (03/11/2026)
 
