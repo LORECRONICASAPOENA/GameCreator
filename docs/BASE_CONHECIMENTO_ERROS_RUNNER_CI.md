@@ -556,7 +556,8 @@ O run [#41704904027](https://github.com/apoenalore/GameCreator/actions/runs/4170
 - **Causa-raiz:** não confirmada. O teste aguardava por polling de status; faltavam evidências do momento em que a fila do editor terminava. Não há evidência de que o runtime tenha perdido o recurso.
 - **Correção escolhida:** substituir a espera temporal do status pela espera do hook whenIdle() da fila assíncrona do editor e manter a assertion de mensagem de sucesso e as assertions do manifesto/PNG. Nenhuma alteração de produção do bridge.
 - **Relatório individual:** [run #41728611799](relatorios-actions/2026-11-03-run-41728611799-character-bridge-timeout.md).
-- **Estado:** correção do harness aplicada; aguarda CI automático no novo commit. Resolver somente após a execução canônica passar.
+- **Validação posterior:** run [#41840891930](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41840891930) passou no SHA `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`; o step funcional do navegador, IndexedDB e backup/restauração passaram.
+- **Estado:** RESOLVIDO E VALIDADO NO CI posterior; a falha original permanece no histórico.
 
 
 ### Atualização GC-CI-017 — run terminal com step 6 ainda em andamento (run #41731726616)
@@ -566,4 +567,26 @@ O run [#41704904027](https://github.com/apoenalore/GameCreator/actions/runs/4170
 - **Coleta:** consulta dos logs do job retornou HTTP 404 BlobNotFound; listagem de artefatos vazia; check run indicou uma annotation, mas o conteúdo não pôde ser lido pelo conector. Horário para investigar nos logs locais do runner: 19:39:56–19:50:16 BRT.
 - **Causa-raiz:** NÃO CONFIRMADA. Travamento do navegador headless e perda de comunicação do runner são hipóteses, não fatos.
 - **Ação:** nenhuma alteração de código em resposta a este run. Não repetir cegamente o mesmo SHA. Coletar _diag e estado do processo do navegador antes de nova execução manual.
+- **Validação posterior:** o run [#41840891930](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41840891930), no SHA `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`, passou pelo smoke test DOM e concluiu o job em `success`.
+- **Estado atual:** encerrado como bloqueio atual; a causa histórica específica continua NÃO CONFIRMADA.
 - **Relatório:** [run #41731726616](relatorios-actions/2026-11-03-run-41731726616-step6-runner-diagnostics.md).
+
+
+### GC-CI-018 — timeout de avanço de animação no Chrome headless (run #41743357325)
+
+- **Repositório/PR:** `LORECRONICASAPOENA/GameCreator`, PR #14, branch `feat/apoena-modular-character-creator-integration`.
+- **Data/hora da ocorrência:** 2026-11-03 21:00:37 BRT (log UTC: 2026-11-04T00:00:37Z).
+- **Cadastro:** 2026-11-04; hora exata do cadastro não preservada.
+- **Run/job/step:** [#41743357325](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41743357325), job `validar` 126290129740, step 11 “Testar Criador Modular no navegador”.
+- **Commit SHA:** `2c656cfea31f8782299e2e0372d196ddaf3bf31b`.
+- **Mensagem literal:** `Timeout: Personagem gravado no projeto atual do Creator. Salve o projeto principal para guardar essa alteração.`
+- **Classificação:** falha do teste CONFIRMADA; hipótese de documento oculto no headless PROVÁVEL, não comprovada.
+- **Causa raiz comprovada:** o teste expirou aguardando mudança em `frameInfo` após iniciar a animação. A hipótese de falha do bridge foi descartada para esta ocorrência: o host já havia recebido e armazenado `manifest` e `png`.
+- **Correção aplicada:** hook `advanceFrame()` somente em modo `?test=1`, com avanço controlado do quadro; teste define o iframe como visível e não depende do agendamento RAF do Chrome headless. O loop de produção não foi alterado.
+- **Arquivos alterados:** `pixel-art/personagens.js` e `tests/personagens-browser.html`.
+- **Teste específico:** transição do contador de quadros no harness do Criador Modular.
+- **Validação canônica:** run [#41840891930](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41840891930), SHA `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`, job completo `success`; step funcional do navegador passou.
+- **Prevenção:** não depender de RAF real para asserções temporais determinísticas no headless; preservar a distinção entre teste do avanço de estado e teste do agendador real.
+- **Limitação residual:** esse hook não comprova o agendamento RAF em navegador visível ou dispositivo real.
+- **Estado:** RESOLVIDO COMO FALHA DO CI / LIMITAÇÃO DE COBERTURA DOCUMENTADA.
+- **Relatório individual:** [INCIDENT-2026-11-03-character-animation-timeout.md](ci/INCIDENT-2026-11-03-character-animation-timeout.md).
