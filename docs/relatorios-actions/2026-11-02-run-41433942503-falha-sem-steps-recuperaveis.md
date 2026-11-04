@@ -56,7 +56,7 @@ Nenhuma correção de produto ou infraestrutura foi aplicada. Foi criado este re
 - GC-ANIM-006: **EM VALIDAÇÃO / BLOQUEADA PELA DISPONIBILIDADE DO RUNNER**.
 - CodeRabbit: **AGUARDANDO REVISÃO**; não há review formal localizada nesta consulta.
 - Integração na `main`: **NÃO INTEGRADO**.
-- Commit deste relatório: a ser confirmado após publicação.
+- Commit de criação do relatório: `a93289b308ef92bada6ff2fbea1508bcc6a815f1`; última atualização do conteúdo: `5d034606de3fea6ec54663a30dee29fb2e771ff9` (evidência de runner reconectado, 02/11/2026).
 
 
 ## 9. Pesquisa externa — documentação oficial e relatos da comunidade (02/11/2026)
