@@ -59,12 +59,22 @@ function fakeWindow(origin = "null") {
 function pairWindows(origin = "null") {
   const host = fakeWindow(origin);
   const child = fakeWindow(origin);
+  child.location.pathname = "/pixel-art/personagens.html";
+  child.location.search = "";
+  child.location.hash = "";
+  child.history = {replaceState(_state, _title, url) {
+    const parsed = new URL(url, "http://apoena.test");
+    child.location.pathname = parsed.pathname;
+    child.location.search = parsed.search;
+    child.location.hash = parsed.hash;
+  }};
   child.parent = host;
-  child.postMessage = (data, targetOrigin, transfer) => host.emit("message", {
-    source: child, origin, data, ports: transfer || []
-  });
-  host.postMessage = (data, targetOrigin, transfer) => child.emit("message", {
+  // postMessage is invoked on the target window; the event is delivered to that target with the sender as source.
+  child.postMessage = (data, targetOrigin, transfer) => child.emit("message", {
     source: host, origin, data, ports: transfer || []
+  });
+  host.postMessage = (data, targetOrigin, transfer) => host.emit("message", {
+    source: child, origin, data, ports: transfer || []
   });
   return {host, child};
 }
@@ -79,7 +89,7 @@ async function flush() { await new Promise(resolve => setImmediate(resolve)); }
 (async () => {
   const {host, child} = pairWindows("null");
   const token = "a".repeat(64);
-  child.name = token;
+  child.location.hash = "#apoenaBridgeToken=" + token;
   loadBridge(host);
   loadBridge(child);
   host.ApoenaCreatorBridge.authorizeSource(child, token);
@@ -132,7 +142,8 @@ async function flush() { await new Promise(resolve => setImmediate(resolve)); }
   await assert.rejects(standalone.ApoenaCreatorBridge.request("saveAsset", {}), /Creator V4.0 não está aberto|sessão autorizada/);
 
   assert.equal(host.ApoenaCreatorBridge.channel, "apoena.creator.v4.bridge.v1");
-  assert.equal(child.name, "", "o nonce deve ser retirado de window.name após leitura");
+  assert.equal(child.name, "", "o nonce não deve permanecer em window.name");
+  assert.equal(child.location.hash, "", "o nonce deve ser removido do fragmento após a leitura");
   assert.ok(pixelModuleSource.includes('rel="opener"') || pixelModuleSource.includes('rel=\\\"opener\\\"'), "links locais preservam opener");
   assert.ok(pixelModuleSource.includes("authorizeSource") && pixelModuleSource.includes("createToken"), "ferramentas são abertas com source+nonce autorizados");
   assert.ok(nativeBridgeSource.includes("ApoenaCreatorBridge?.listen"), "Creator V4.0 registra o listener da ponte");
