@@ -39,13 +39,15 @@
 | Aumentar novamente o polling por tempo fixo | Descartada; não sincroniza com a conclusão real da operação |
 | Aguardar a Promise de inatividade da fila do editor e manter a assertion de sucesso e as assertions do payload | Escolhida; usa o hook de teste já existente e verifica a conclusão real |
 
-## 6. Alteração planejada
-- Alterar somente tests/personagens-browser.html: após capturar o payload, aguardar w.__apoenaTestHooks.whenIdle() por meio do helper idle já usado nos demais fluxos; em seguida verificar o texto de sucesso e manter as assertions de 12 quadros e PNG.
-- Não alterar o protocolo ou a implementação de produção do bridge sem evidência de defeito no runtime.
-- A alteração ainda não está validada; não declarar resolvida antes de novo workflow canônico aprovado.
+## 6. Correção aplicada posteriormente
 
-## 7. Validação
-- Critério: o run automático deve passar no step 11, capturar manifesto e PNG, aguardar a fila real e confirmar a mensagem de sucesso; os demais steps obrigatórios devem concluir.
-- Execução deste incidente: [#41728611799](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41728611799), falha no step 11.
-- Próxima validação: workflow existente .github/workflows/pixel-art.yml, acionado pelo próximo commit da PR #14.
-- Estado: ABERTO — AJUSTE DO HARNESS E NOVA VALIDAÇÃO PENDENTES.
+- `tests/personagens-browser.html` passou a capturar a Promise resolvida pelo callback do host quando recebe o payload e, em seguida, aguardar a fila real do editor pelo helper `idle('gravar no Creator')`.
+- O teste mantém a verificação da mensagem de sucesso, do manifesto com 12 quadros e do PNG.
+- O hook de inatividade fica disponível somente no modo de teste; a implementação de produção do bridge não foi alterada.
+- A mudança foi incluída no conjunto de código validado no SHA `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`.
+
+## 7. Validação posterior
+
+- A execução original [#41728611799](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41728611799) permanece `failure` no histórico.
+- A validação posterior [#41840891930](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41840891930) terminou `success` no SHA `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`; o teste funcional do navegador passou com as verificações de gravação, manifesto e PNG.
+- **Estado:** RESOLVIDO E VALIDADO NO CI posterior. A falha original não foi apagada nem reclassificada retroativamente; PR #14 continua aberta em draft e sem merge.
