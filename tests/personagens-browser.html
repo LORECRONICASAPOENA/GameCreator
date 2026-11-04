@@ -58,5 +58,9 @@ bootStage='iframe-src-assigned';
 const bridgeToken=ApoenaCreatorBridge.createToken();
 app.name=bridgeToken;
 ApoenaCreatorBridge.authorizeSource(app.contentWindow,bridgeToken);
-app.src='../pixel-art/personagens.html?test=1';
+const testUrl=new URL('../pixel-art/personagens.html?test=1',location.href);
+const testHash=new URLSearchParams(testUrl.hash.replace(/^#/,""));
+testHash.set("apoenaBridgeToken",bridgeToken);
+testUrl.hash=testHash.toString();
+app.src=testUrl.href;
 </script>
