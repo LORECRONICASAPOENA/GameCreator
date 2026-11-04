@@ -17,7 +17,11 @@ window.ApoenaPixelIntegrado={mount(container){
      if(!popup)throw Error("O navegador bloqueou a abertura da ferramenta.");
      popup.name=token;
      bridge.authorizeSource(popup,token);
-     popup.location.href=link.href;
+     const targetUrl=new URL(link.href);
+     const hashParams=new URLSearchParams(targetUrl.hash.replace(/^#/,""));
+     hashParams.set("apoenaBridgeToken",token);
+     targetUrl.hash=hashParams.toString();
+     popup.location.href=targetUrl.href;
     }catch(error){
      try{popup?.close()}catch(_){}
      console.warn("Não foi possível abrir a ferramenta com sessão segura:",error);
@@ -466,7 +470,11 @@ modularFrame.title="Criador Modular de Personagens Apoena";
 const modularToken=bridge.createToken();
 modularFrame.name=modularToken;
 bridge.authorizeSource(modularFrame.contentWindow,modularToken);
-modularFrame.src=new URL("pixel-art/personagens.html",location.href).href;
+const modularUrl=new URL("pixel-art/personagens.html",location.href);
+const modularHash=new URLSearchParams(modularUrl.hash.replace(/^#/,""));
+modularHash.set("apoenaBridgeToken",modularToken);
+modularUrl.hash=modularHash.toString();
+modularFrame.src=modularUrl.href;
 modularFrame.loading="eager";
 modularFrame.style.cssText="display:block;width:100%;height:calc(100vh - 190px);min-height:850px;border:0;background:#050d1c";
 modularContainer.append(modularFrame);
