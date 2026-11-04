@@ -36,3 +36,7 @@
 ## Limites
 
 PR #14 continua draft e não foi mesclada. O backup preserva código Git, não dados locais, IndexedDB nem pacote Android.
+
+## Aditivo — resultado posterior do run #395
+
+O run #395 terminou `failure` na etapa `Testar concorrência dos presets Apoena` porque o teste exigia espaços que não existem no JavaScript minificado. A implementação do guard não foi apontada como falha. Os padrões do teste foram ajustados no SHA `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`; o run #398 desse SHA concluiu `success`.
