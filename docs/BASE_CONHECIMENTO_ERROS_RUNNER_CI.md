@@ -590,3 +590,17 @@ O run [#41704904027](https://github.com/apoenalore/GameCreator/actions/runs/4170
 - **Limitação residual:** esse hook não comprova o agendamento RAF em navegador visível ou dispositivo real.
 - **Estado:** RESOLVIDO COMO FALHA DO CI / LIMITAÇÃO DE COBERTURA DOCUMENTADA.
 - **Relatório individual:** [INCIDENT-2026-11-03-character-animation-timeout.md](ci/INCIDENT-2026-11-03-character-animation-timeout.md).
+
+
+### GC-CI-019 — gatilho de CI da PR #14 e reconciliação de deltas da PR #13
+
+- **Ocorrência:** 2026-11-04; hora exata da identificação não preservada.
+- **Repositório/PR:** `LORECRONICASAPOENA/GameCreator`, PR #14 (base branch PR #11).
+- **Branch-base:** `feat/apoena-personagem-estudio-main`; o filtro `pull_request.branches` aceitava apenas `main`, embora a PR #14 tivesse essa branch como base.
+- **Correção do gatilho:** commit `a60ef6ea0549f3d30c9fd62ba1a7f716fd454142` incluiu a branch-base no filtro de pull request. A validação da PR #11 passou no run [#41902283423](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41902283423).
+- **Reconciliação:** na PR #14, foram portados os checks de build PowerShell/Python para os arquivos do Criador Modular, o fixture `integracao/godot/character-test.tres`, o teste Godot `SpriteFrames` e o redirect de compatibilidade `character-creator/index.html`.
+- **Arquivos alterados:** `integracao/build_unificado.ps1`, `integracao/build_unificado.py`, `integracao/godot/character-test.tres`, `integracao/godot/tests/test_catalogo.gd`, `character-creator/index.html`.
+- **Validação:** run [#41902995635](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41902995635), commit `0e1c170a8eb4f4b4c7cd32196a8f57cb199f96df`, job 126830089627, concluído em `success`; todos os testes obrigatórios passaram, incluindo Godot 4. As etapas opcionais de empacotamento/entrega/anexação de logs foram `skipped`.
+- **Aviso não bloqueante:** actions `checkout@v4` e `setup-node@v4` registraram aviso de depreciação do Node.js 20 e execução forçada em Node.js 24.
+- **Estado:** gatilho e validação automatizada RESOLVIDOS. PR #14 continua draft; CodeRabbit e segurança do bridge permanecem pendentes; PR #13 permanece aberta até reconciliação completa.
+- **Relatório:** [run #41902995635](relatorios-actions/2026-11-04-run-41902995635-pr13-delta-reconciliation.md).
