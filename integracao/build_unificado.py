@@ -7,6 +7,8 @@ import re
 root=Path(__file__).resolve().parent.parent
 src=root/'APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html'
 out=root/'index.html'
+for asset in ('personagens.html','personagens.css','personagens-core.js','personagens.js'):
+    assert (root/'pixel-art'/asset).is_file(), f'Criador modular ausente: {asset}'
 assert src.is_file(), 'A fonte completa v4.0 não está no GitHub'
 html=src.read_text(encoding='utf-8-sig')
 if not html.strip():
