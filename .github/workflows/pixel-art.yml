@@ -216,6 +216,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Sintaxe de personagens-core.js inválida." }
           node tests/personagens.test.cjs
           if ($LASTEXITCODE -ne 0) { throw "Teste de modelo do Criador Modular falhou." }
+      - name: Testar concorrência dos presets Apoena
+        run: |
+          node --check pixel-art/estudio.js
+          if ($LASTEXITCODE -ne 0) { throw "Sintaxe do Estúdio inválida." }
+          node --check pixel-art/preset-request-guard.js
+          if ($LASTEXITCODE -ne 0) { throw "Sintaxe do guard de presets inválida." }
+          node tests/preset-request-guard.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw "Teste de concorrência dos presets falhou." }
       - name: Testar Criador Modular no navegador
         run: |
           $ErrorActionPreference = "Stop"
@@ -244,6 +252,7 @@ jobs:
               "pixel-art/personagens.css",
               "pixel-art/personagens.js",
               "pixel-art/personagens-core.js",
+              "pixel-art/preset-request-guard.js",
               "pixel-art/corte-inteligente.js",
               "shared/asset-library.js",
               "shared/creator-bridge.js"
