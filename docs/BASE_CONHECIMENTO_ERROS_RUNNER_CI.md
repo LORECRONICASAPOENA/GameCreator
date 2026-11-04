@@ -462,6 +462,10 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - Solução aplicada: relatório individual criado em [docs/relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md](relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md). Nenhum código do produto foi alterado para mascarar o erro.
 - Próxima ação: recuperar logs/annotations ou logs locais do runner Windows no intervalo acima; identificar a primeira etapa causal antes de corrigir ou repetir.
 - Estado: **NÃO RESOLVIDO / AGUARDANDO EVIDÊNCIA**.
+- Registro: 02/11/2026; hora exata do registro não preservada.
+- Erro literal: não preservado. A API não retornou logs/annotations; o endpoint de logs retornou `BlobNotFound`/conteúdo vazio.
+- Validação documental: 04/11/2026; hora exata não preservada. Validação técnica do commit não executada nesta atualização, pois a evidência causal continua indisponível.
+- Prevenção: preservar `_diag` e logs/annotations antes de repetir; registrar a primeira etapa causal; não classificar como falha de código nem remover testes; verificar a disponibilidade do runner e a comunicação com GitHub antes de uma nova execução.
 
 
 ### GC-CI-014 — Run 41433942503 terminou em failure sem steps/logs recuperáveis
@@ -491,6 +495,7 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - **Próxima ação quando o computador estiver disponível:** consultar logs locais do runner no diretório _diag no intervalo do run; verificar estado de energia/suspensão/reinicialização do Windows, rede estável, DNS, HTTPS para GitHub, proxy/firewall e recursos CPU/memória.
 - Relatório individual atualizado: [2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
 - **Estado:** ABERTO / CATEGORIA IDENTIFICADA / CAUSA OPERACIONAL PENDENTE.
+- **Validação documental:** 04/11/2026; hora exata não preservada. A classificação foi conferida com a anotação visual recebida e o histórico do GitHub Actions; nenhum novo run foi executado para este incidente.
 
 
 ### Atualização GC-CI-014 — conflito de sessão duplicada (capturas do autor + pesquisa)
