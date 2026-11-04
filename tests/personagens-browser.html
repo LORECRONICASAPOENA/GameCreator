@@ -55,5 +55,8 @@ const startProbe=setInterval(()=>{try{if(app.contentDocument?.readyState==='comp
 setTimeout(()=>{if(!started&&document.getElementById('result').textContent==='BOOTSTRAP'){clearInterval(startProbe);let frameState='unavailable';try{frameState='readyState='+app.contentDocument.readyState+', href='+app.contentWindow.location.href+', status='+Boolean(app.contentDocument.getElementById('status'));}catch(e){frameState='frame access error: '+e.message;}document.getElementById('result').textContent='FAIL: iframe did not finish loading the modular editor within 15 seconds. stage='+bootStage+' src='+app.src+' '+frameState;}},15000);
 // This browser integration test uses an in-memory Creator host. IndexedDB persistence is covered by tests/asset-library.test.cjs.
 bootStage='iframe-src-assigned';
+const bridgeToken=ApoenaCreatorBridge.createToken();
+app.name=bridgeToken;
+ApoenaCreatorBridge.authorizeSource(app.contentWindow,bridgeToken);
 app.src='../pixel-art/personagens.html?test=1';
 </script>
