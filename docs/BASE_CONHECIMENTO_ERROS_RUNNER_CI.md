@@ -604,3 +604,18 @@ O run [#41704904027](https://github.com/apoenalore/GameCreator/actions/runs/4170
 - **Aviso não bloqueante:** actions `checkout@v4` e `setup-node@v4` registraram aviso de depreciação do Node.js 20 e execução forçada em Node.js 24.
 - **Estado:** gatilho e validação automatizada RESOLVIDOS. PR #14 continua draft; CodeRabbit e segurança do bridge permanecem pendentes; PR #13 permanece aberta até reconciliação completa.
 - **Relatório:** [run #41902995635](relatorios-actions/2026-11-04-run-41902995635-pr13-delta-reconciliation.md).
+
+
+### GC-CI-020 — hardening seguro da ponte V4.0/V4.1 (run #41906361151)
+
+- **Ocorrência:** 2026-11-04 17:25:36–17:27:21 BRT (logs UTC 20:25:36.816–20:27:21.345Z).
+- **Repositório/PR:** `LORECRONICASAPOENA/GameCreator`, PR #14, branch `feat/apoena-modular-character-creator-integration`.
+- **Commit validado:** `d5bea2b3c7905f00bcff2645e1b2e8b3f49a8df6`; job 126842370143.
+- **Falha intermediária:** run #41905233755 falhou no teste de navegador com `BRIDGETRACE` vazio; os fluxos de biblioteca passaram. A evidência apontou ausência do handshake `ready`; não foi classificada como perda de payload.
+- **Correção:** nonce criptográfico de 256 bits, allowlist de `WindowProxy`, validação de origem exata quando disponível, handshake mínimo e payloads/respostas por `MessageChannel`. Para `file://`, source+nonce são obrigatórios; nonce também é passado no fragmento e removido após leitura.
+- **Wildcard residual:** `postMessage("*")` é usado somente na transferência inicial do `MessagePort` quando a origem é opaca. O payload não trafega no canal global.
+- **Arquivos principais:** `shared/creator-bridge.js`, `pixel-art/modulo-integrado.js`, `tests/personagens-browser.html`, `tests/creator-bridge.test.cjs`, `README.md`.
+- **Validação:** run [#41906361151](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41906361151) concluiu `success`; browser, protocolo, testes negativos de autorização, contratos, Godot 4 e preservação do Creator passaram.
+- **Avisos não bloqueantes:** depreciação Node.js 20 em actions v4 e `punycode`.
+- **Estado:** hardening automatizado RESOLVIDO E VALIDADO. Revisão CodeRabbit e teste manual offline `file://` ainda pendentes; PR #14 continua draft, sem merge.
+- **Relatório:** [run #41906361151](relatorios-actions/2026-11-04-run-41906361151-bridge-hardening.md).
