@@ -35,3 +35,11 @@
 - Não repetir manualmente a mesma execução sem identificar a causa ou confirmar que a comunicação do runner foi restabelecida.
 - Após a coleta, usar somente o workflow canônico automático da PR #14 e registrar o resultado.
 - Estado: **ABERTO — CAUSA NÃO CONFIRMADA / EVIDÊNCIA LOCAL DO RUNNER PENDENTE**.
+
+
+## Encerramento operacional posterior — 04/11/2026
+
+- A falha deste run permanece histórica: o job terminou em failure, os logs retornaram `BlobNotFound` e a causa operacional específica não foi comprovada.
+- A validação posterior [#41840891930](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41840891930), no SHA `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`, passou pelo smoke test DOM e concluiu o job completo em `success`.
+- Assim, #41731726616 deixa de ser bloqueio atual da PR #14. O resultado posterior não prova qual processo causou a falha antiga e não altera seu estado histórico.
+- **Estado:** ENCERRADO COMO BLOQUEIO ATUAL / CAUSA HISTÓRICA NÃO CONFIRMADA. A coleta dos logs locais pode continuar como melhoria de observabilidade, mas não é pré-requisito para considerar validado o SHA posterior.
