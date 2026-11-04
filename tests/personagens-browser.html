@@ -20,6 +20,8 @@ window.addEventListener('message',e=>{const m=e.data;if(m?.channel===ApoenaCreat
 ApoenaCreatorBridge.listen((action,payload,event)=>{bridgeTrace.push('listener:'+action+':sourceIsApp='+(event.source===app.contentWindow)+':origin='+event.origin);if(action!=='saveAsset')throw Error('Wrong bridge action');window.__creatorReceived=payload;bridgeTrace.push('stored='+Boolean(window.__creatorReceived)+':keys='+Object.keys(payload||{}).join(','));creatorReceivedResolve(payload);return {id:'test-character'};});
 async function runCharacterBrowserTest(){if(started)return;started=true;bootStage='browser-test-started';document.getElementById('result').textContent='RUNNING_TEST';
 const w=document.getElementById('app').contentWindow,d=w.document,$=id=>d.getElementById(id),assert=(ok,m)=>{if(!ok)throw Error(m)},pause=()=>new Promise(r=>setTimeout(r,50));
+// O Chrome headless pode marcar o iframe como oculto; o runtime pausa a animação nesse estado. Simule uma aba visível sem alterar o produto.
+const originalDocumentHidden=d.hidden;Object.defineProperty(d,'hidden',{configurable:true,get:()=>false});assert(d.hidden===false,'Test iframe must be visible for animation playback');
 async function until(fn,attempts=180){for(let i=0;i<attempts;i++){if(fn())return;await pause();}if(fn())return;throw Error('Timeout: '+$('status').textContent);}
 async function idle(label){const result=document.getElementById('result');result.textContent='WAITING: '+label;const timeout=new Promise((_,reject)=>setTimeout(()=>reject(Error('Timeout aguardando fila após '+label+'. Status: '+$('status').textContent)),20000));await Promise.race([w.__apoenaTestHooks.whenIdle(),timeout]);result.textContent='DONE: '+label;}
 async function click(id){$(id).click();await idle('clique '+id);}
