@@ -21,8 +21,8 @@ assert.ok(guardScript >= 0 && studioScript > guardScript, 'O helper deve carrega
 
 const studio = fs.readFileSync(path.join(__dirname, '../pixel-art/estudio.js'), 'utf8');
 assert.match(studio, /const presetRequestGuard = ApoenaPresetRequestGuard\(\)/, 'O Estúdio deve criar o guard.');
-assert.match(studio, /const requestId = presetRequestGuard\.begin\(\)/, 'Cada carregamento deve receber um identificador.');
-assert.match(studio, /if \(!presetRequestGuard\.isCurrent\(requestId\)\) return;/, 'onload deve ignorar uma solicitação antiga.');
-assert.match(studio, /if \(presetRequestGuard\.isCurrent\(requestId\)\) msg\(/, 'onerror antigo não deve sobrescrever o status atual.');
+assert.match(studio, /const requestId\s*=\s*presetRequestGuard\.begin\(\)/, 'Cada carregamento deve receber um identificador.');
+assert.match(studio, /if\s*\(!presetRequestGuard\.isCurrent\(requestId\)\)\s*return;/, 'onload deve ignorar uma solicitação antiga.');
+assert.match(studio, /if\s*\(presetRequestGuard\.isCurrent\(requestId\)\)\s*msg\(/, 'onerror antigo não deve sobrescrever o status atual.');
 
 console.log('PASSOU: guard de concorrência dos presets e integração do Estúdio.');
