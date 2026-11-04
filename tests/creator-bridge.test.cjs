@@ -44,6 +44,7 @@ function fakeWindow(origin = "null") {
     opener: null,
     parent: null,
     location: {origin},
+    URLSearchParams,
     MessageChannel: FakeMessageChannel,
     crypto: {getRandomValues(bytes) { bytes.fill(7); return bytes; }},
     addEventListener(type, fn) {
