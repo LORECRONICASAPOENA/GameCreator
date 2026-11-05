@@ -14,7 +14,7 @@ const pixelBridge = read("pixel-art/modulo-integrado.js");
 const legacyPage = read("legacy/abrir-editor-v3.9.html");
 const packageWorkflow = read(".github/workflows/pixel-art.yml");
 
-const officialRemoteRule = updater.match(/^\\$origemOficial = \\$origem\\.Trim\\(\\) -match '([^']+)'$/m);
+const officialRemoteRule = updater.match(/^\s*\$origemOficial = \$origem\.Trim\(\) -match '([^']+)'$/m);
 assert.ok(officialRemoteRule, "A validação do remote oficial precisa permanecer explícita.");
 const officialRemotePattern = new RegExp(officialRemoteRule[1], "i");
 for (const remote of [
