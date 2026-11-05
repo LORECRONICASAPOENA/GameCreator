@@ -259,21 +259,21 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 2. Manter GC-UPDATE-009 como única tarefa de implementação ativa; não iniciar UX, sessão online ou novas funcionalidades até fechar os critérios do atualizador.
 3. Preservar os protótipos de hidrologia até consolidar as funções exclusivas e validar o fluxo Creator → runtime.
 ### Próximos passos, mantendo WIP = 1
-1. Confirmar o resultado do run #41079295445 e verificar que o ZIP não contém documentação, testes ou CI, mas contém launcher, fonte V4.0, bundle e módulos de runtime.
-2. Atualizar o registro GC-CI-012 e GC-PACK-001 com o resultado final.
-3. Resolver a divergência/merge conflict da PR #6 ambiental e obter CI no head atual; não fazer merge automático.
-4. Manter GC-UPDATE-009 como única tarefa de implementação ativa; não iniciar UX, sessão online ou novas funcionalidades até fechar os critérios do atualizador.
+1. O CI do atualizador está aprovado no SHA `43fcf2af`; não repetir o mesmo job sem nova evidência.
+2. O proprietário deve executar o atualizador em uma instalação de teste no Windows e conferir que arquivos locais, módulos e dados não são removidos nem sobrescritos.
+3. Exportar a Biblioteca IndexedDB antes da atualização, restaurá-la em perfil de teste e confirmar personagens, sprites, mapas e catálogo.
+4. Manter GC-UPDATE-009 como única tarefa ativa até receber evidência desses testes manuais. Somente depois liberar WIP=1 para a próxima implementação, incluindo a PR #5 de clima/hidrologia do Pixel Art.
 
 
 ## GC-UPDATE-009 — Atualizador enxuto do Game Creator (30/10/2026)
 
-- **Estado:** WIP 1 / EM VALIDAÇÃO; não iniciar novas funcionalidades até fechar esta tarefa.
+- **Estado:** WIP 1 / CI WINDOWS APROVADA / ACEITE MANUAL PENDENTE; não iniciar novas funcionalidades até fechar esta tarefa.
 - **Objetivo:** manter documentação, auditorias, histórico, testes e workflows no repositório privado, mas materializar somente os arquivos necessários ao runtime na pasta APP.
 - **Implementação:** clone parcial com --filter=blob:none, sparse-checkout por lista positiva, manifesto de arquivos essenciais, fetch explícito de origin/main, fast-forward e proteção de arquivos ignorados.
 - **Preservação:** não usar reset/clean; não apagar runner, biblioteca IndexedDB, arquivos pessoais ou histórico local.
 - **Revisão/sincronização:** a branch de trabalho da PR #7 foi reaplicada sobre a `main` atual; o backup `backup/gc-update-009-before-main-sync-20261030` preserva a branch anterior.
 - **Testes automatizados:** o workflow Windows executa parser PowerShell 5.1 e o contrato/end-to-end do atualizador contra repositório Git temporário, cobrindo sparse-checkout, exclusão de documentos, fast-forward, referência anterior, retomada e bloqueio de conflitos.
-- **Validação automatizada:** CI canônica aprovada no commit de código `2546c1b79964c0e46b95b6de0791aad765d3fe8c`, run [41490114161](https://github.com/apoenalore/GameCreator/actions/runs/41490114161); manifesto, Godot, preservação e job completo passaram. O head posterior contém apenas atualização documental.
+- **Validação automatizada atual:** CI Windows aprovada no SHA `43fcf2afdbf669b4c79f0139fa73d27eb8d21fec`, run [#41950469672](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41950469672), tentativa 2, job `validar` (`127008498341`). Passaram parser PowerShell 5.1, manifesto, runtime Godot 4, persistência IndexedDB, backup/restauração, sincronização, preservação do Creator e todas as etapas do job. A tentativa 1 não forneceu etapas nem logs; não foi tratada como erro de código.
 - **Revisão CodeRabbit:** achados sobre allowlist e atualização de `refs/apoena/anterior` corrigidos; comentários registrados como resolvidos após validação.
 - **Pendências de aceite:** teste real de instalação/atualização no Windows do autor; exportação e restauração da Biblioteca IndexedDB antes de abandonar a instalação antiga.
 - **Regra:** não integrar a PR nem declarar concluído até todos os critérios acima terem evidência.
@@ -321,3 +321,8 @@ O clone --no-checkout deixa o índice vazio; o status pode apresentar remoções
 ## GC-UPDATE-TEST-002 — Parser PowerShell
 
 A CI 41114836257 falhou no step 17 com Token '}' inesperado. A causa foi um segundo bloco de código duplicado após o catch, deixado por uma substituição anterior do trecho de validação do remote. O bloco duplicado foi removido no commit d90541bd642f17aa681ea7e623b49dba12ca2b36. Nova CI pendente; o teste end-to-end PowerShell ainda não foi considerado aprovado.
+
+
+## Atualização de estado — 05/11/2026
+
+O run [#41950469672](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41950469672), tentativa 2, passou integralmente no SHA `43fcf2afdbf669b4c79f0139fa73d27eb8d21fec`. A PR #7 continua draft. O aceite automatizado de backup/restauração IndexedDB passou; falta apenas o teste manual do proprietário em instalação Windows real e perfil de dados de teste. Não fazer merge até essa confirmação.

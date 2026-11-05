@@ -512,3 +512,16 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - **Correção:** restaurar o conteúdo-base de 666 linhas do commit anterior e aplicar somente a âncora `$` antes da aspa de fechamento. Commit final `b483bff226e5488175b6c776f4cfd24da5f30fae`.
 - **Validação:** run canônico [41488368286](https://github.com/apoenalore/GameCreator/actions/runs/41488368286), job 125425257046, sucesso integral; arquivo final conferido com 666 linhas.
 - **Prevenção:** para correção pontual, editar o arquivo completo a partir de um blob-base conhecido, verificar contagem estrutural e diff antes de considerar a alteração pronta.
+
+
+### GC-UPDATE-009 — CI Windows aprovada após reexecução do job sem logs (05/11/2026)
+
+- **Repositório/PR:** `LORECRONICASAPOENA/GameCreator`, PR #7, branch `feat/atualizador-local-incremental`.
+- **Run de confirmação:** [#41950469672](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41950469672), tentativa 2, SHA `43fcf2afdbf669b4c79f0139fa73d27eb8d21fec`.
+- **Job:** `validar`, ID `127008498341`, conclusão `success`.
+- **Etapas aprovadas:** PowerShell 5.1; compilação Creator V4.0; DOM; sintaxe JavaScript; Corte Inteligente; tilesets; persistência IndexedDB; backup/restauração da biblioteca; exportação e contrato Godot; sincronização V4.0/V4.1; manifesto do atualizador; hidrologia/erosão; runtime Godot 4; preservação do Creator original e dos módulos.
+- **Tentativa 1 do mesmo run:** job `126994711511` terminou sem etapas registradas e sem logs recuperáveis (`BlobNotFound`). A causa não foi confirmada; não classificar como falha de código.
+- **Falha anterior de código:** run [#41949644099](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41949644099) em SHA anterior reportou token `}` inesperado no PowerShell. O commit `43fcf2af` removeu o bloco duplicado no final de `integracao/atualizar-creator.ps1`; a tentativa 2 do run #419504 validou o parser e os testes end-to-end.
+- **Resultado:** CI Windows aprovada no SHA atual. A PR permanece draft.
+- **Aceite ainda pendente:** teste manual do atualizador na máquina do proprietário, usando instalação de teste; verificar preservação de arquivos locais e exportar/restaurar a Biblioteca IndexedDB em perfil de teste.
+- **Próxima ação:** aguardar evidência manual do proprietário. Não mesclar nem iniciar nova implementação no eixo GameCreator/Pixel Art antes de fechar GC-UPDATE-009.
