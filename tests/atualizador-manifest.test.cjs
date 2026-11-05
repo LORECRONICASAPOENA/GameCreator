@@ -14,6 +14,25 @@ const pixelBridge = read("pixel-art/modulo-integrado.js");
 const legacyPage = read("legacy/abrir-editor-v3.9.html");
 const packageWorkflow = read(".github/workflows/pixel-art.yml");
 
+function workflowEventSection(event) {
+  const match = packageWorkflow.match(new RegExp("^  " + event + ":\\n([\\s\\S]*?)(?=^  [a-z_]+:|^permissions:)", "m"));
+  assert.ok(match, "O workflow precisa declarar o evento " + event + ".");
+  return match[1];
+}
+
+for (const event of ["push", "pull_request"]) {
+  assert.ok(workflowEventSection(event).includes('"ATUALIZAR_CREATOR.cmd"'),
+    "Alterações no launcher do atualizador precisam acionar a CI em " + event + ".");
+}
+assert.ok(packageWorkflow.includes("if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')"),
+  "A entrega deve ser gerada somente após sucesso em push ou workflow_dispatch.");
+assert.ok(packageWorkflow.includes("_delivery/Apoena-GameCreator-V4.1.zip"),
+  "O artefato precisa publicar o ZIP do runtime, não apenas a pasta intermediária.");
+assert.ok(packageWorkflow.includes("if-no-files-found: error"),
+  "A CI deve falhar se o ZIP obrigatório não for produzido.");
+assert.ok(!packageWorkflow.includes("ChatGPT trabalho") && !packageWorkflow.includes("$deliveryRoot"),
+  "O empacotador não pode copiar para nem substituir pastas externas do runner.");
+
 function quotedValues(block) {
   return [...block.matchAll(/'([^']+)'/g)].map((match) => match[1]);
 }

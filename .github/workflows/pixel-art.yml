@@ -3,7 +3,7 @@ on:
     paths:
       - "index.html"
       - "bundle-v4/**"
-      - "ABRIR_GAME_CREATOR.cmd"
+      - "ATUALIZAR_CREATOR.cmd"
       - "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
       - "pixel-art/**"
       - "shared/**"
@@ -22,7 +22,7 @@ on:
     paths:
       - "index.html"
       - "bundle-v4/**"
-      - "ABRIR_GAME_CREATOR.cmd"
+      - "ATUALIZAR_CREATOR.cmd"
       - "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
       - "pixel-art/**"
       - "shared/**"
@@ -36,8 +36,6 @@ on:
       - "README.md"
       - "ORGANIZACAO_EDITOR.md"
       - ".github/workflows/**"
-  schedule:
-    - cron: "0 * * * *"
   workflow_dispatch:
 permissions:
   contents: read
@@ -474,10 +472,11 @@ jobs:
               "ENTREGA MAIS RECENTE - APOENA GAME CREATOR V4.1",
               "Commit: $env:GITHUB_SHA",
               "Run: https://github.com/apoenalore/GameCreator/actions/runs/$env:GITHUB_RUN_ID",
-              "Pasta: _delivery/GameCreator-V4.1",
-              "Arquivo ZIP: _delivery/Apoena-GameCreator-V4.1.zip",
-              "Manifesto: _delivery/MANIFESTO-ARQUIVOS.txt",
-              "O pacote sera publicado como artefato do GitHub Actions apos validacao bem-sucedida.",
+              "Pasta: GameCreator-V4.1",
+              "Arquivo ZIP: Apoena-GameCreator-V4.1.zip",
+              "Baixe o artefato Apoena-GameCreator-V4.1 e extraia apenas uma vez.",
+              "Manifesto: MANIFESTO-ARQUIVOS.txt",
+              "A pasta contém somente arquivos necessários para executar o Creator; documentos internos, testes e CI ficam fora.",
               "Criado em: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')"
             )
             $latest | Set-Content -Encoding UTF8 (Join-Path $stage "LEIA-ME-ENTREGA.txt")
@@ -507,5 +506,5 @@ jobs:
           name: v41-ci-diagnostics
           path: .ci-results/
           include-hidden-files: true
-          retention-days: 14
+          retention-days: 3
           if-no-files-found: warn
