@@ -14,6 +14,27 @@ const pixelBridge = read("pixel-art/modulo-integrado.js");
 const legacyPage = read("legacy/abrir-editor-v3.9.html");
 const packageWorkflow = read(".github/workflows/pixel-art.yml");
 
+const officialRemoteRule = updater.match(/^\\$origemOficial = \\$origem\\.Trim\\(\\) -match '([^']+)'$/m);
+assert.ok(officialRemoteRule, "A validação do remote oficial precisa permanecer explícita.");
+const officialRemotePattern = new RegExp(officialRemoteRule[1], "i");
+for (const remote of [
+  "https://github.com/apoenalore/GameCreator.git",
+  "https://github.com/LORECRONICASAPOENA/GameCreator.git",
+  "https://github.com/lorecronicasapoena/GameCreator",
+  "git@github.com:LORECRONICASAPOENA/GameCreator.git"
+]) {
+  assert.equal(officialRemotePattern.test(remote), true,
+    "O atualizador precisa aceitar o endereço oficial/canônico: " + remote);
+}
+for (const remote of [
+  "https://github.com/apoenalore/OtherRepository.git",
+  "https://github.com/attacker/GameCreator.git",
+  "https://github.com/LORECRONICASAPOENA/GameCreator-evil.git"
+]) {
+  assert.equal(officialRemotePattern.test(remote), false,
+    "O atualizador não pode aceitar repositório ou proprietário diferente: " + remote);
+}
+
 function workflowEventSection(event) {
   const match = packageWorkflow.match(new RegExp("^  " + event + ":\\n([\\s\\S]*?)(?=^  [a-z_]+:|^permissions:)", "m"));
   assert.ok(match, "O workflow precisa declarar o evento " + event + ".");
