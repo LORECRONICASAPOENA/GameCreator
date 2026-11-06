@@ -333,7 +333,7 @@ O run [#41950469672](https://github.com/LORECRONICASAPOENA/GameCreator/actions/r
 
 ### GC-UPDATE-009 — concluído e integrado
 - PR [#7](https://github.com/LORECRONICASAPOENA/GameCreator/pull/7) foi mesclada em **2026-11-06 18:28:31 UTC**.
-- Merge commit: `b23900f578be096fb731e822796fc2266e58e551`; a `main` aponta para o mesmo SHA.
+- Merge commit: `b23900f578be096fb731e822796fc2266e58e551`; ele permanece incorporado na `main`. Head atual da `main`: `b5996ce557e25d59987b836bff2515a4078a9833` (dois commits posteriores apenas documentais).
 - Validação canônica pós-merge: [Actions #420](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42271036648), job `validar`, **completed/success**.
 - O proprietário confirmou os testes manuais Windows, incluindo instalação isolada e exportação/restauração da Biblioteca IndexedDB. A confirmação está registrada na conversa da PR #7; não foram anexados logs locais.
 - GC-UPDATE-009 deixa de ocupar WIP=1.
@@ -358,4 +358,41 @@ O run [#41950469672](https://github.com/LORECRONICASAPOENA/GameCreator/actions/r
 6. GC-ANIM-005 / issue #17 continua bloqueada até concluir a integração do Criador Modular; não iniciar outra implementação em paralelo.
 
 **Estado desta atualização:** documentação e análise de histórico; nenhum código, branch de trabalho, workflow ou PR foi alterado nesta etapa.
+
+## Histórico da PR #11 preservado durante a sincronização — 06/11/2026
+
+Os trechos a seguir são snapshots históricos de 02/11/2026, preservados para não perder o diagnóstico original. Não substituem o estado canônico atualizado abaixo.
+
+### Tarefa ativa — WIP 1
+**GC-ANIM-006 — Predefinições editáveis de animação para Apoena no Estúdio Pixel Art**
+- Branch: `feat/apoena-personagem-estudio-main`; implementação no GameCreator, usando os assets já preservados em `pixel-art/references/apoena/`.
+- Escopo: carregar corrida multidirecional e ataques laterais como quadros editáveis; preencher ação/direção; pré-visualizar cada sequência; manter edição manual das divisórias e preservar os PNGs originais.
+- A opção de “andar” é uma prévia identificada que reutiliza poses de corrida. Uma animação de caminhada fiel depende de quadros próprios.
+- Critérios: testar os três imports; confirmar 16 quadros de movimento e 12 por ataque com ação/direção corretas; revisar manualmente efeitos que cruzam células; confirmar prévia, salvamento e exportação sem alterar os originais; tratar revisão CodeRabbit e CI canônica no SHA atual.
+- Estado: **EM EXECUÇÃO / NÃO VALIDADA**. O CI canônico [run 41357977741](https://github.com/apoenalore/GameCreator/actions/runs/41357977741), tentativa 4 no SHA `a9c7148f01504f7be142dd0d852056dd5a9a5114`, terminou em `failure`; a API confirmou runner atribuído, mas não retornou steps e os logs ficaram inacessíveis (404). Incidente registrado em [GC-CI-013](BASE_CONHECIMENTO_ERROS_RUNNER_CI.md) e [relatório individual](relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md). Causa não confirmada; não repetir nem corrigir às cegas. Os commits documentais posteriores não alteram o código e não substituem validação no SHA de código.
+
+## Atualização de continuidade — 02/11/2026 — GC-ANIM-006 / CI 41433942503
+
+- **Tarefa ativa:** GC-ANIM-006, PR [#11](https://github.com/apoenalore/GameCreator/pull/11), branch `feat/apoena-personagem-estudio-main`, HEAD consultado `70a4e09e7243d56f0f0313a7791a849218514055`; draft, não integrada na `main`.
+- **CI:** workflow canônico [run #41433942503](https://github.com/apoenalore/GameCreator/actions/runs/41433942503), evento `pull_request`, concluído em failure no SHA acima. A API retornou o job `validar` em failure, sem etapas individuais, logs, annotations ou mensagem causal.
+- **Diagnóstico:** causa NÃO CONFIRMADA. Não alterar código/workflow nem repetir a execução até obter a primeira falha causal.
+- **CodeRabbit:** nenhuma revisão formal ou comentário foi localizado na consulta de 02/11/2026; estado aguardando revisão, sem presumir que o bot analisou o código.
+- **Relatório individual:** [2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
+- **Próxima ação:** recuperar logs pelo GitHub Actions; se indisponíveis, obter logs locais do runner Windows no intervalo 11:05:16Z–11:17:48Z. Depois classificar, corrigir pontualmente, testar e aguardar CI automática no novo SHA.
+- **WIP:** permanece 1; não iniciar A2, GC-UPDATE-009 ou outra implementação enquanto GC-ANIM-006 não for encerrada ou formalmente bloqueada conforme protocolo.
+
+## Evidência recebida — GC-ANIM-006 / run 41433942503
+
+Em 02/11/2026, o autor enviou captura da anotação expandida do GitHub Actions. A mensagem confirma que o executor auto-hospedado perdeu comunicação com o servidor. A categoria da falha é infraestrutura/conectividade do runner; a causa específica (rede, suspensão/desligamento, processo encerrado, CPU/memória ou bloqueio de acesso) continua pendente. Não há evidência de erro de código do Estúdio nesta anotação. Não alterar código de produto para tentar resolver a desconexão. Quando o computador estiver disponível, consultar os logs locais do runner no diretório _diag e verificar energia, rede, DNS, proxy/firewall e recursos do runner. Relatório atualizado: [GC-CI-014](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
+
+## Atualização canônica — 06/11/2026 após integração de GC-UPDATE-009
+
+- **GC-UPDATE-009 / PR #7:** integrada em 18:28:31 UTC, merge commit `b23900f578be096fb731e822796fc2266e58e551`; main foi comparada com o merge commit e retornou `identical`. O proprietário confirmou os testes no Windows e a exportação/restauração da Biblioteca IndexedDB.
+- **WIP=1 atual:** reconciliação controlada das PRs #11/#13/#14; não iniciar outra implementação em GameCreator/Pixel Art em paralelo.
+- **PR #11:** draft, base `main`, head `a60ef6ea0549f3d30c9fd62ba1a7f716fd454142`; 27 commits à frente / 82 atrás de main; CI antiga #41902283423 success, mas precisa nova sincronização, CI e revisão.
+- **PR #13:** aberta, base `main`, head `34a0a722444448e384c91286affecf0f50217038`; 31 commits à frente / 41 atrás; run #41528996973 falhou no teste de navegador do protótipo anterior; 9 threads CodeRabbit não resolvidas. O comentário de 05/11 afirma que os deltas funcionais foram portados para #14; verificar antes de fechar como supersedida.
+- **PR #14:** draft, base na branch da PR #11; head `4a5082c1db17946b03cf9a1eabf57aaa26b00261`; 130 commits à frente / 82 atrás de main. Código validado no SHA `d5bea2b3c7905f00bcff2645e1b2e8b3f49a8df6` pelo run #41906361151; quatro commits posteriores são apenas documentação/relatórios. Nova revisão independente foi solicitada.
+- **PR #18:** sincronização auxiliar de `main` para a base da #11, ainda draft e não mergeable. A resolução manual está isolada nesta branch e deve passar pela CI antes de integrar à base.
+- **Backups:** `backup/gc-pr11-pre-reconcile-20261106` → `a60ef6ea0549f3d30c9fd62ba1a7f716fd454142`; `backup/gc-pr13-pre-reconcile-20261106` → `34a0a722444448e384c91286affecf0f50217038`; `backup/gc-pr14-pre-reconcile-20261106` → `4a5082c1db17946b03cf9a1eabf57aaa26b00261`.
+- **Rota:** resolver a sincronização da base #11; executar CI e revisão; integrar #11 somente após aprovação; atualizar/retargetear #14 para main e validar; comprovar preservação dos commits úteis de #13 antes de encerrá-la.
 
