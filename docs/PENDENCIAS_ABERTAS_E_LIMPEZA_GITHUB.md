@@ -333,7 +333,7 @@ O run [#41950469672](https://github.com/LORECRONICASAPOENA/GameCreator/actions/r
 
 ### GC-UPDATE-009 — concluído e integrado
 - PR [#7](https://github.com/LORECRONICASAPOENA/GameCreator/pull/7) foi mesclada em **2026-11-06 18:28:31 UTC**.
-- Merge commit: `b23900f578be096fb731e822796fc2266e58e551`; a `main` aponta para o mesmo SHA.
+- Merge commit: `b23900f578be096fb731e822796fc2266e58e551`; ele permanece incorporado na `main`. Head atual da `main`: `b5996ce557e25d59987b836bff2515a4078a9833` (dois commits posteriores apenas documentais).
 - Validação canônica pós-merge: [Actions #420](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42271036648), job `validar`, **completed/success**.
 - O proprietário confirmou os testes manuais Windows, incluindo instalação isolada e exportação/restauração da Biblioteca IndexedDB. A confirmação está registrada na conversa da PR #7; não foram anexados logs locais.
 - GC-UPDATE-009 deixa de ocupar WIP=1.
