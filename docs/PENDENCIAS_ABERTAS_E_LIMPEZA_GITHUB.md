@@ -182,15 +182,6 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - Estado: **AGUARDANDO VALIDAÇÃO / PAUSADA** em 01/11/2026 para priorizar a solicitação do Estúdio/Apoena. A tarefa não está concluída nem integrada.
 - Última evidência conhecida: [run 41116194279](https://github.com/apoenalore/GameCreator/actions/runs/41116194279) — `completed/success` no head citado.
 - Permanecem pendentes a revisão dos achados CodeRabbit e as validações reais no Windows do autor, incluindo cópia de segurança e restauração da biblioteca IndexedDB. Não alterar a instalação existente.
-
-### Tarefa ativa — WIP 1
-**GC-ANIM-006 — Predefinições editáveis de animação para Apoena no Estúdio Pixel Art**
-- Branch: `feat/apoena-personagem-estudio-main`; implementação no GameCreator, usando os assets já preservados em `pixel-art/references/apoena/`.
-- Escopo: carregar corrida multidirecional e ataques laterais como quadros editáveis; preencher ação/direção; pré-visualizar cada sequência; manter edição manual das divisórias e preservar os PNGs originais.
-- A opção de “andar” é uma prévia identificada que reutiliza poses de corrida. Uma animação de caminhada fiel depende de quadros próprios.
-- Critérios: testar os três imports; confirmar 16 quadros de movimento e 12 por ataque com ação/direção corretas; revisar manualmente efeitos que cruzam células; confirmar prévia, salvamento e exportação sem alterar os originais; tratar revisão CodeRabbit e CI canônica no SHA atual.
-- Estado: **EM EXECUÇÃO / NÃO VALIDADA**. O CI canônico [run 41357977741](https://github.com/apoenalore/GameCreator/actions/runs/41357977741), tentativa 4 no SHA `a9c7148f01504f7be142dd0d852056dd5a9a5114`, terminou em `failure`; a API confirmou runner atribuído, mas não retornou steps e os logs ficaram inacessíveis (404). Incidente registrado em [GC-CI-013](BASE_CONHECIMENTO_ERROS_RUNNER_CI.md) e [relatório individual](relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md). Causa não confirmada; não repetir nem corrigir às cegas. Os commits documentais posteriores não alteram o código e não substituem validação no SHA de código.
-
 ### Tamanho atual do quadro
 - **8 PRs abertas:** 4 no GameCreator e 4 no Apoena Pixel Art HTML.
 - **2 issues abertas de planejamento:** GameCreator #3 e Pixel Art #1. São registros guarda-chuva de decisões/aceite, não duas tarefas extras a implementar separadamente.
@@ -265,11 +256,117 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 2. Manter GC-UPDATE-009 como única tarefa de implementação ativa; não iniciar UX, sessão online ou novas funcionalidades até fechar os critérios do atualizador.
 3. Preservar os protótipos de hidrologia até consolidar as funções exclusivas e validar o fluxo Creator → runtime.
 ### Próximos passos, mantendo WIP = 1
-1. Confirmar o resultado do run #41079295445 e verificar que o ZIP não contém documentação, testes ou CI, mas contém launcher, fonte V4.0, bundle e módulos de runtime.
-2. Atualizar o registro GC-CI-012 e GC-PACK-001 com o resultado final.
-3. Resolver a divergência/merge conflict da PR #6 ambiental e obter CI no head atual; não fazer merge automático.
-4. Manter GC-UPDATE-009 como única tarefa de implementação ativa; não iniciar UX, sessão online ou novas funcionalidades até fechar os critérios do atualizador.
+1. O CI do atualizador está aprovado no SHA `43fcf2af`; não repetir o mesmo job sem nova evidência.
+2. O proprietário deve executar o atualizador em uma instalação de teste no Windows e conferir que arquivos locais, módulos e dados não são removidos nem sobrescritos.
+3. Exportar a Biblioteca IndexedDB antes da atualização, restaurá-la em perfil de teste e confirmar personagens, sprites, mapas e catálogo.
+4. Manter GC-UPDATE-009 como única tarefa ativa até receber evidência desses testes manuais. Somente depois liberar WIP=1 para a próxima implementação, incluindo a PR #5 de clima/hidrologia do Pixel Art.
 
+
+## GC-UPDATE-009 — Atualizador enxuto do Game Creator (30/10/2026)
+
+- **Estado:** WIP 1 / CI WINDOWS APROVADA / ACEITE MANUAL PENDENTE; não iniciar novas funcionalidades até fechar esta tarefa.
+- **Objetivo:** manter documentação, auditorias, histórico, testes e workflows no repositório privado, mas materializar somente os arquivos necessários ao runtime na pasta APP.
+- **Implementação:** clone parcial com --filter=blob:none, sparse-checkout por lista positiva, manifesto de arquivos essenciais, fetch explícito de origin/main, fast-forward e proteção de arquivos ignorados.
+- **Preservação:** não usar reset/clean; não apagar runner, biblioteca IndexedDB, arquivos pessoais ou histórico local.
+- **Revisão/sincronização:** a branch de trabalho da PR #7 foi reaplicada sobre a `main` atual; o backup `backup/gc-update-009-before-main-sync-20261030` preserva a branch anterior.
+- **Testes automatizados:** o workflow Windows executa parser PowerShell 5.1 e o contrato/end-to-end do atualizador contra repositório Git temporário, cobrindo sparse-checkout, exclusão de documentos, fast-forward, referência anterior, retomada e bloqueio de conflitos.
+- **Validação automatizada atual:** CI Windows aprovada no SHA `43fcf2afdbf669b4c79f0139fa73d27eb8d21fec`, run [#41950469672](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41950469672), tentativa 2, job `validar` (`127008498341`). Passaram parser PowerShell 5.1, manifesto, runtime Godot 4, persistência IndexedDB, backup/restauração, sincronização, preservação do Creator e todas as etapas do job. A tentativa 1 não forneceu etapas nem logs; não foi tratada como erro de código.
+- **Revisão CodeRabbit:** achados sobre allowlist e atualização de `refs/apoena/anterior` corrigidos; comentários registrados como resolvidos após validação.
+- **Pendências de aceite:** teste real de instalação/atualização no Windows do autor; exportação e restauração da Biblioteca IndexedDB antes de abandonar a instalação antiga.
+- **Regra:** não integrar a PR nem declarar concluído até todos os critérios acima terem evidência.
+
+
+## Descoberta de segurança — checkout inicial e conflitos locais (30/10/2026)
+
+A simulação Git local identificou que sparse-checkout set --no-cone não materializa por si só um clone iniciado com --no-checkout. Foi adicionado git read-tree -mu HEAD após a verificação do manifesto.
+
+Também foi comprovado que, em sparse-checkout, git merge --no-overwrite-ignore sozinho não é proteção suficiente contra todo arquivo local conflitante. O atualizador agora detecta tanto arquivos ignorados quanto não ignorados antes da materialização e antes do merge; qualquer colisão com o runtime remoto bloqueia a operação.
+
+A simulação foi executada com Git 2.47.3 em Linux. O novo teste de contrato repete esses cenários na CI Windows. Nenhuma pasta do computador do autor foi alterada.
+
+
+- **Proteção adicional:** antes de reduzir o worktree, o atualizador interrompe se encontrar arquivos ignorados fora da allowlist de runtime. O operador deverá fazer backup ou movê-los manualmente; o atualizador não apaga nem move dados pessoais.
+
+
+## Bloqueio de arquivos locais fora do runtime
+
+Antes de aplicar o sparse-checkout, o atualizador verifica arquivos locais ignorados e não ignorados. Se encontrar qualquer arquivo fora da allowlist de runtime, interrompe e solicita backup ou movimentação manual. Não tenta apagar, mover ou incorporar esses arquivos. Dados locais dentro de caminhos de runtime também bloqueiam a atualização se colidirem com um arquivo que venha do repositório.
+
+
+## Caminhos Unicode
+
+A leitura de árvores e arquivos locais usa core.quotePath=false para que nomes com acentos, como árvore.js, sejam comparados como caminhos reais e não como sequências octais escapadas. O teste PowerShell cria uma colisão com nome Unicode e exige que o atualizador bloqueie sem sobrescrever o arquivo local.
+
+
+## Execução do atualizador PowerShell real na CI
+
+O teste tests/atualizador-manifest.test.cjs não fica apenas na simulação de comandos Git. Ele executa integracao/atualizar-creator.ps1 com Windows PowerShell 5.1, usando um repositório bare local temporário e diretório de configuração isolado. O modo de teste permite a URL local somente quando APOENA_UPDATER_TEST_MODE=1 e a URL do remote corresponde exatamente ao parâmetro RepoUrl; a instalação normal continua limitada ao GameCreator oficial.
+
+O teste executa primeira instalação, verifica arquivos presentes/ausentes, bloqueio de arquivos locais fora da allowlist, atualização fast-forward, preservação de refs/apoena/anterior, execução sem mudanças e bloqueio de conflitos ignorados/não ignorados, inclusive um caminho com acento. Nenhuma pasta permanente do autor é usada.
+
+
+
+
+## GC-UPDATE-TEST-001 — CRLF no teste de contrato
+
+A falha do run 41113920551 foi causada por CRLF no arquivo PowerShell lido pelo teste Node, não por ausência do guard. O teste agora normaliza CRLF para LF antes de usar indexOf e procura a linha executável completa. Correções do teste: 65c65521b0fb1595215bd70da03c4ef7b898032d e 8bbe3d7379b43da5c98c18bd1165e2d8d114a267. A nova CI do head atual ainda está pendente.
+
+## GC-UPDATE-RECOVERY-001 — Retomada de clone interrompido
+
+O clone --no-checkout deixa o índice vazio; o status pode apresentar remoções na primeira coluna (D ). O atualizador agora usa o marcador clone-pendente.txt e verifica git ls-files + árvore HEAD para reconhecer esse estado. Se o índice já estiver populado, somente ausências de worktree sem outras alterações são retomáveis. Modificações rastreadas bloqueiam. O teste cria esse estado e executa o PowerShell real. CI pendente.
+
+## GC-UPDATE-TEST-002 — Parser PowerShell
+
+A CI 41114836257 falhou no step 17 com Token '}' inesperado. A causa foi um segundo bloco de código duplicado após o catch, deixado por uma substituição anterior do trecho de validação do remote. O bloco duplicado foi removido no commit d90541bd642f17aa681ea7e623b49dba12ca2b36. Nova CI pendente; o teste end-to-end PowerShell ainda não foi considerado aprovado.
+
+
+## Atualização de estado — 05/11/2026
+
+O run [#41950469672](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41950469672), tentativa 2, passou integralmente no SHA `43fcf2afdbf669b4c79f0139fa73d27eb8d21fec`. A PR #7 continua draft. O aceite automatizado de backup/restauração IndexedDB passou; falta apenas o teste manual do proprietário em instalação Windows real e perfil de dados de teste. Não fazer merge até essa confirmação.
+
+---
+
+## Checkpoint atual — 06/11/2026 — GC-UPDATE-009 integrado; GC-CHAR-001 em reconciliação
+
+### GC-UPDATE-009 — concluído e integrado
+- PR [#7](https://github.com/LORECRONICASAPOENA/GameCreator/pull/7) foi mesclada em **2026-11-06 18:28:31 UTC**.
+- Merge commit: `b23900f578be096fb731e822796fc2266e58e551`; ele permanece incorporado na `main`. Head atual da `main`: `b5996ce557e25d59987b836bff2515a4078a9833` (dois commits posteriores apenas documentais).
+- Validação canônica pós-merge: [Actions #420](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42271036648), job `validar`, **completed/success**.
+- O proprietário confirmou os testes manuais Windows, incluindo instalação isolada e exportação/restauração da Biblioteca IndexedDB. A confirmação está registrada na conversa da PR #7; não foram anexados logs locais.
+- GC-UPDATE-009 deixa de ocupar WIP=1.
+
+### WIP = 1 — GC-CHAR-001 / PR #14
+- PR [#14](https://github.com/LORECRONICASAPOENA/GameCreator/pull/14): aberta, draft, base `feat/apoena-personagem-estudio-main`, head `4a5082c1db17946b03cf9a1eabf57aaa26b00261`, mergeable=true.
+- Código validado no SHA `d5bea2b3c7905f00bcff2645e1b2e8b3f49a8df6`, pelo [Actions #404](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41906361151), completed/success. A comparação entre `d5bea2b` e o head atual `4a5082c` encontrou quatro commits e somente arquivos documentais/relatórios; nenhum código foi alterado depois do SHA validado.
+- PR [#11](https://github.com/LORECRONICASAPOENA/GameCreator/pull/11) permanece aberta/draft, base main, head `a60ef6ea0549f3d30c9fd62ba1a7f716fd454142`. PR #14 está empilhada sobre essa branch e está 105 commits à frente e 2 atrás dela. Os dois commits exclusivos da base são um checkpoint documental e a alteração do gatilho do workflow; a versão atual do workflow na PR #14 já contém o filtro para a branch-base.
+- PR [#13](https://github.com/LORECRONICASAPOENA/GameCreator/pull/13) permanece aberta, base main, head `34a0a722444448e384c91286affecf0f50217038`. A comparação PR #14 ↔ PR #13 mostra divergência real (105 commits à frente e 47 atrás); não mesclar nem fechar automaticamente.
+- Comparação dos arquivos funcionais: PR #13 e #14 têm blobs idênticos em `personagens.html`, `personagens-core.js`, `personagens.css`, `tests/personagens.test.cjs`, `character-creator/index.html`, `integracao/build_unificado.ps1`, `integracao/build_unificado.py` e `integracao/godot/tests/test_catalogo.gd`. Nas versões divergentes, a PR #14 contém a ponte segura com nonce criptográfico de 256 bits, allowlist de WindowProxy e MessageChannel; limite do manifesto de 256 KB; guard de concorrência dos presets; fila serializada de operações do editor; e teste de navegador ampliado.
+- **Lacuna de validação identificada:** o teste de navegador atual da PR #14 usa um host de biblioteca em memória (`Map`) para `saveProject/saveAsset/listProjects/listAssets`. Os testes separados de biblioteca usam `fake-indexeddb` em Node. A PR #13 usava `ApoenaLibrary.dispatch` no host do navegador. Portanto, a cobertura atual da PR #14 não comprova, por si só, a persistência end-to-end do Criador Modular no IndexedDB real do navegador. O fluxo offline `file://` também permanece sem aceite manual específico da PR #14.
+- **Documentação exclusiva da PR #13 a preservar/classificar antes de encerrar a branch:** `docs/AUDITORIA_ORGANIZACAO_E_LIMPEZA_2026-11-02.md`, `docs/PESQUISA_ANTI_CHEAT_SQL_TLS_JOGOS.md`, `docs/PLANO_JOGO_ONLINE_APOENA.md`, `docs/POLITICA_INTEGRIDADE_E_EXPERIENCIA_JOGADOR.md`, `docs/REGISTRO_CONVERSAS_E_BACKUPS.md`, `docs/SEGURANCA_APOENA_500_CONTROLES.md`, `docs/registros-conversas/2026-11-02-apoena-verso-coleta-auditoria-transferencia-ia.md`, além de relatórios/checkpoints históricos em `docs/relatorios-actions/` e `docs/relatorios-conversas/`. Esses arquivos ainda não foram portados para main/PR #14; preservar ou arquivar conscientemente antes de fechar/excluir a PR #13.
+- **CodeRabbit:** PR #14 ainda sem review formal e sem threads de revisão. A solicitação anterior via comentário não produziu resposta do bot. Nesta sessão o CLI não está instalado e o ambiente não conseguiu resolver o host de instalação; nenhuma revisão CodeRabbit foi executada nem substituída por revisão manual.
+- Backups conferidos: main `backup/full-project-post-gc-update-009-2026-11-06` → `b23900f`; PR #14 `backup/snapshot-2026-11-05-0729-pr14` → `4a5082c`; PR #13 `backup/snapshot-2026-11-05-0729-pr13` → `34a0a72`.
+
+### Próximas ações — manter WIP = 1
+1. Obter aceite manual do fluxo PR #14 em navegador Windows/offline `file://`: abrir o Creator pela branch da PR, acessar Pixel Art → Criador Modular, importar peça, editar, salvar, atualizar a biblioteca, reabrir o projeto e gravar no Creator; salvar o projeto principal, fechar/reabrir e confirmar a persistência.
+2. Executar CodeRabbit autenticado no head atual da PR #14; analisar findings sem autofix automático.
+3. Preservar/classificar a documentação exclusiva da PR #13 antes de encerrar essa PR.
+4. Reconciliar a base da PR #11 com main e, depois, atualizar a PR #14 sem reescrever histórico. Executar CI canônico no SHA atualizado.
+5. Definir uma única rota de integração para #11/#14. Não mesclar PR draft, não fechar #13 e não excluir branches enquanto os itens exclusivos não estiverem preservados.
+6. GC-ANIM-005 / issue #17 continua bloqueada até concluir a integração do Criador Modular; não iniciar outra implementação em paralelo.
+
+**Estado desta atualização:** documentação e análise de histórico; nenhum código, branch de trabalho, workflow ou PR foi alterado nesta etapa.
+
+## Histórico da PR #11 preservado durante a sincronização — 06/11/2026
+
+Os trechos abaixo são snapshots históricos de 02/11/2026. Foram preservados sem sobrescrever o estado mais recente da main.
+
+### Tarefa ativa — WIP 1
+**GC-ANIM-006 — Predefinições editáveis de animação para Apoena no Estúdio Pixel Art**
+- Branch: `feat/apoena-personagem-estudio-main`; implementação no GameCreator, usando os assets já preservados em `pixel-art/references/apoena/`.
+- Escopo: carregar corrida multidirecional e ataques laterais como quadros editáveis; preencher ação/direção; pré-visualizar cada sequência; manter edição manual das divisórias e preservar os PNGs originais.
+- A opção de “andar” é uma prévia identificada que reutiliza poses de corrida. Uma animação de caminhada fiel depende de quadros próprios.
+- Critérios: testar os três imports; confirmar 16 quadros de movimento e 12 por ataque com ação/direção corretas; revisar manualmente efeitos que cruzam células; confirmar prévia, salvamento e exportação sem alterar os originais; tratar revisão CodeRabbit e CI canônica no SHA atual.
+- Estado: **EM EXECUÇÃO / NÃO VALIDADA**. O CI canônico [run 41357977741](https://github.com/apoenalore/GameCreator/actions/runs/41357977741), tentativa 4 no SHA `a9c7148f01504f7be142dd0d852056dd5a9a5114`, terminou em `failure`; a API confirmou runner atribuído, mas não retornou steps e os logs ficaram inacessíveis (404). Incidente registrado em [GC-CI-013](BASE_CONHECIMENTO_ERROS_RUNNER_CI.md) e [relatório individual](relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md). Causa não confirmada; não repetir nem corrigir às cegas. Os commits documentais posteriores não alteram o código e não substituem validação no SHA de código.
 
 ## Atualização de continuidade — 02/11/2026 — GC-ANIM-006 / CI 41433942503
 
@@ -281,7 +378,33 @@ A ausência de logs nas execuções hospedadas não substitui a investigação d
 - **Próxima ação:** recuperar logs pelo GitHub Actions; se indisponíveis, obter logs locais do runner Windows no intervalo 11:05:16Z–11:17:48Z. Depois classificar, corrigir pontualmente, testar e aguardar CI automática no novo SHA.
 - **WIP:** permanece 1; não iniciar A2, GC-UPDATE-009 ou outra implementação enquanto GC-ANIM-006 não for encerrada ou formalmente bloqueada conforme protocolo.
 
-
 ## Evidência recebida — GC-ANIM-006 / run 41433942503
 
 Em 02/11/2026, o autor enviou captura da anotação expandida do GitHub Actions. A mensagem confirma que o executor auto-hospedado perdeu comunicação com o servidor. A categoria da falha é infraestrutura/conectividade do runner; a causa específica (rede, suspensão/desligamento, processo encerrado, CPU/memória ou bloqueio de acesso) continua pendente. Não há evidência de erro de código do Estúdio nesta anotação. Não alterar código de produto para tentar resolver a desconexão. Quando o computador estiver disponível, consultar os logs locais do runner no diretório _diag e verificar energia, rede, DNS, proxy/firewall e recursos do runner. Relatório atualizado: [GC-CI-014](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
+
+## Atualização canônica — 06/11/2026 após GC-UPDATE-009
+
+- **Main atual:** `90879c3099ca4cce2a229d745a08f8d1c9e5bb29`. Desde o merge de GC-UPDATE-009, a main avançou três commits somente documentais; o merge commit `b23900f578be096fb731e822796fc2266e58e551` permanece ancestral.
+- **GC-UPDATE-009 / PR #7:** integrada em 18:28:31 UTC, merge commit `b23900f578be096fb731e822796fc2266e58e551`; o proprietário confirmou os testes no Windows e a exportação/restauração da Biblioteca IndexedDB.
+- **WIP=1 atual:** reconciliação controlada das PRs #11/#13/#14. Não iniciar outra implementação em GameCreator/Pixel Art em paralelo.
+- **PR #11:** draft, base `main`, head `a60ef6ea0549f3d30c9fd62ba1a7f716fd454142`; 27 commits à frente / 83 atrás da main; CI antiga #41902283423 success, mas requer sincronização, CI nova e revisão.
+- **PR #13:** aberta, base `main`, head `34a0a722444448e384c91286affecf0f50217038`; 31 commits à frente / 42 atrás; run #41528996973 falhou no teste de navegador do protótipo anterior; 9 threads CodeRabbit não resolvidas. O comentário de 05/11 informa que os deltas funcionais foram portados para #14; comprovar antes de fechar como supersedida.
+- **PR #14:** draft, base exatamente igual ao head atual da #11; head `4a5082c1db17946b03cf9a1eabf57aaa26b00261`; 130 commits à frente / 83 atrás da main. Código validado no SHA `d5bea2b3c7905f00bcff2645e1b2e8b3f49a8df6` pelo run #41906361151; quatro commits posteriores são apenas documentação/relatórios. Revisão independente solicitada e aguardando resposta.
+- **PR #18:** preview anterior de sincronização, baseado no main antigo `b5996ce`; permanece Draft/não mergeable e não deve ser integrada.
+- **Backups:** `backup/gc-pr11-pre-reconcile-20261106` → `a60ef6ea0549f3d30c9fd62ba1a7f716fd454142`; `backup/gc-pr13-pre-reconcile-20261106` → `34a0a722444448e384c91286affecf0f50217038`; `backup/gc-pr14-pre-reconcile-20261106` → `4a5082c1db17946b03cf9a1eabf57aaa26b00261`.
+- **Rota:** sincronizar a base #11 com a main atual sem reescrever histórico; executar CI e revisão; integrar #11 somente após aprovação; atualizar/retargetear #14 para main e validar; comprovar preservação dos commits úteis da #13 antes de encerrá-la.
+
+---
+
+## Reconciliação da cadeia PR #11 → PR #18/#19 → PR #14 — 06/11/2026
+
+- **PR #18:** fechada sem merge. Não reabrir nem reutilizar seu head antigo.
+- **PR #19:** sucessora técnica da #18, base `feat/apoena-personagem-estudio-main`, head `e16fe832adde4ab7606594b45a8395a4df6d2438`. O head contém a resolução de sincronização com a main e preserva a árvore da #11; GitHub confirma `mergeable=true`, `mergeable_state=clean`.
+- **Backup pré-resolução:** `backup/gc-pr19-pre-resolution-20261106` → `bdbd6cb9cbb5901561135f70c70ce2e83147e4a8`.
+- **CI:** [run 42281994131](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42281994131) concluiu `success` no SHA `e16fe832adde4ab7606594b45a8395a4df6d2438`. Passaram exportação pixel-perfect, IndexedDB, backup/restauração, integração, atualizador, Godot 4 e preservação do Creator.
+- **Incidente da primeira tentativa:** run [42276102355](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42276102355) falhou porque o workflow chamava `tests/pixel-art-export.test.cjs`, ausente naquele tree. O teste foi preservado na resolução; a nova CI passou. Relatório: `docs/relatorios-actions/2026-11-06-run-42276102355-pixel-art-export-test-ausente.md`.
+- **PR #11:** continua aberta/draft, head `a60ef6ea0549f3d30c9fd62ba1a7f716fd454142`; aguarda a integração da sincronização #19 à branch-base e uma nova CI no head resultante.
+- **PR #14:** continua sendo a implementação escolhida do Criador Modular. Mantém sua branch/head `4a5082c1db17946b03cf9a1eabf57aaa26b00261` e sua base atual na #11 até a #11 ser integrada. Depois, retarget para `main` e validar novamente.
+- **PR #13:** não será mesclada sobre a #14. Manter sua branch e os comentários de revisão como referência; preservar documentos úteis sem incorporar sua implementação concorrente.
+- **Próximas ações:** (1) revisão e integração da PR #19 na branch-base #11; (2) aguardar CI canônico da PR #11 no novo SHA; (3) revisar/validar a #11 antes de sua integração à main; (4) retarget da #14 para main; (5) CodeRabbit e CI atualizados na #14; (6) teste manual offline/file:// e persistência IndexedDB real antes do merge final da #14.
+- **Governança:** WIP=1 permanece na tarefa ALB-GC-CHAR-001. Nenhum merge na main foi realizado nesta etapa; nenhuma PR #13 foi mesclada ou fechada.

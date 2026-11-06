@@ -3,7 +3,7 @@ on:
     paths:
       - "index.html"
       - "bundle-v4/**"
-      - "ABRIR_GAME_CREATOR.cmd"
+      - "ATUALIZAR_CREATOR.cmd"
       - "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
       - "pixel-art/**"
       - "shared/**"
@@ -22,7 +22,7 @@ on:
     paths:
       - "index.html"
       - "bundle-v4/**"
-      - "ABRIR_GAME_CREATOR.cmd"
+      - "ATUALIZAR_CREATOR.cmd"
       - "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
       - "pixel-art/**"
       - "shared/**"
@@ -395,8 +395,8 @@ jobs:
           $map = Get-Content -Raw map-editor/index.html
           if ($map -notmatch 'asset-library.js') { throw "O editor de mapas nao carrega a biblioteca central." }
           "Contratos de preservacao e integracao passaram." | Tee-Object -FilePath .ci-results/contracts.log
-      - name: Preparar entrega na pasta ChatGPT trabalho do runner
-        if: github.event_name == 'workflow_dispatch' && success()
+      - name: Preparar pacote de runtime para download
+        if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: |
           $ErrorActionPreference = "Stop"
           $source = $env:GITHUB_WORKSPACE
@@ -404,26 +404,6 @@ jobs:
           $stage = Join-Path $source "_delivery"
           $project = Join-Path $stage "GameCreator-V4.1"
           New-Item -ItemType Directory -Force -Path $stage | Out-Null
-          $deliveryRoot = $null
-          $starts = @($env:RUNNER_WORKSPACE, $env:RUNNER_TEMP, $source) | Where-Object { $_ }
-          foreach ($startPath in $starts) {
-            $probe = $startPath
-            for ($i = 0; $i -lt 10 -and $probe; $i++) {
-              if ((Test-Path -LiteralPath (Join-Path $probe "run.cmd")) -or (Test-Path -LiteralPath (Join-Path $probe "config.cmd"))) {
-                $deliveryRoot = Join-Path $probe "ChatGPT trabalho"
-                break
-              }
-              $parent = Split-Path -Parent $probe
-              if (-not $parent -or $parent -eq $probe) { break }
-              $probe = $parent
-            }
-            if ($deliveryRoot) { break }
-          }
-          if (-not $deliveryRoot) {
-            Write-Warning "Nao localizei run.cmd/config.cmd nos diretorios ancestrais. A copia local sera guardada em RUNNER_TEMP."
-            $deliveryRoot = Join-Path $env:RUNNER_TEMP "ChatGPT trabalho"
-          }
-          New-Item -ItemType Directory -Force -Path $deliveryRoot | Out-Null
           try {
             if (Test-Path -LiteralPath $project) { Remove-Item -LiteralPath $project -Recurse -Force }
             New-Item -ItemType Directory -Force -Path $project | Out-Null
@@ -488,42 +468,41 @@ jobs:
               "{0}{1}{2} bytes" -f $relative, [char]9, $file.Length
             }
             @("Commit: $env:GITHUB_SHA", "Arquivos de runtime: $($files.Count)", "Documentação interna incluída: não", "", $lines) | Set-Content -Encoding UTF8 $manifestPath
+            $zipPath = Join-Path $stage "Apoena-GameCreator-V4.1.zip"
+            if (Test-Path -LiteralPath $zipPath) { Remove-Item -LiteralPath $zipPath -Force }
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            [System.IO.Compression.ZipFile]::CreateFromDirectory($project, $zipPath, [System.IO.Compression.CompressionLevel]::Optimal, $true)
             $latest = @(
               "ENTREGA MAIS RECENTE - APOENA GAME CREATOR V4.1",
               "Commit: $env:GITHUB_SHA",
               "Run: https://github.com/apoenalore/GameCreator/actions/runs/$env:GITHUB_RUN_ID",
               "Pasta: GameCreator-V4.1",
+              "Arquivo ZIP: Apoena-GameCreator-V4.1.zip",
               "Baixe o artefato Apoena-GameCreator-V4.1 e extraia apenas uma vez.",
               "Manifesto: MANIFESTO-ARQUIVOS.txt",
               "A pasta contém somente arquivos necessários para executar o Creator; documentos internos, testes e CI ficam fora.",
               "Criado em: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')"
             )
             $latest | Set-Content -Encoding UTF8 (Join-Path $stage "LEIA-ME-ENTREGA.txt")
-            $runnerZipPath = Join-Path $deliveryRoot "Apoena-GameCreator-V4.1.zip"
-            if (Test-Path -LiteralPath $runnerZipPath) { Remove-Item -LiteralPath $runnerZipPath -Force }
-            Add-Type -AssemblyName System.IO.Compression.FileSystem
-            [System.IO.Compression.ZipFile]::CreateFromDirectory($project, $runnerZipPath, [System.IO.Compression.CompressionLevel]::Optimal, $true)
-            Copy-Item -LiteralPath (Join-Path $stage "LEIA-ME-ENTREGA.txt") -Destination (Join-Path $deliveryRoot "LEIA-ME-ENTREGA.txt") -Force
-            Copy-Item -LiteralPath $manifestPath -Destination (Join-Path $deliveryRoot "MANIFESTO-ARQUIVOS.txt") -Force
-            Write-Output "Entrega preparada em: $deliveryRoot"
+            Write-Output "Pacote preparado no workspace do Actions."
             Write-Output "Arquivos de runtime no ZIP: $($files.Count)"
-            Write-Output "ZIP: $(Join-Path $deliveryRoot 'Apoena-GameCreator-V4.1.zip')"
+            Write-Output "ZIP: $zipPath"
           } catch {
             $errorText = "Falha ao preparar entrega: $($_.Exception.Message)"
             $errorText | Set-Content -Encoding UTF8 (Join-Path $stage "ERRO-ENTREGA.txt")
             Write-Error $errorText
           }
       - name: Disponibilizar pacote de codigo para download
-        if: github.event_name == 'workflow_dispatch' && success()
+        if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: actions/upload-artifact@v4
         with:
           name: Apoena-GameCreator-V4.1
           path: |
-            _delivery/GameCreator-V4.1/
+            _delivery/Apoena-GameCreator-V4.1.zip
             _delivery/LEIA-ME-ENTREGA.txt
             _delivery/MANIFESTO-ARQUIVOS.txt
-          retention-days: 3
-          if-no-files-found: warn
+          retention-days: 14
+          if-no-files-found: error
       - name: Anexar logs de diagnostico
         if: failure()
         uses: actions/upload-artifact@v4
