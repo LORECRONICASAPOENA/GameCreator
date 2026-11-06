@@ -488,9 +488,23 @@ Em 02/11/2026, o autor enviou captura da anotação expandida do GitHub Actions.
 
 - **PR #19:** fechada com merge em 2026-11-06T19:56:11Z; merge commit `8acf515c6be8f097b05b4231608894f06740ab17`. A branch-base da PR #11 recebeu a sincronização validada.
 - **PR #11 / GC-ANIM-006:** aberta, draft, base `main`, head `8acf515c6be8f097b05b4231608894f06740ab17`; GitHub informa `mergeable=true`. O Actions [#42283992136](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42283992136) concluiu success nesse SHA.
-- **PR #14 / GC-CHAR-001:** permanece a implementação escolhida, aberta/draft e empilhada sobre a branch da #11. Seu head original `4a5082c1db17946b03cf9a1eabf57aaa26b00261` foi preservado no backup `backup/gc-pr14-pre-base-sync-20261106`. A atualização da branch #14 deve incorporar o head novo da #11 por merge commit, mantendo a base da PR como `feat/apoena-personagem-estudio-main`.
+- **PR #14 / GC-CHAR-001:** permanece a implementação escolhida, aberta/draft e empilhada sobre a branch da #11. Seu head original `4a5082c1db17946b03cf9a1eabf57aaa26b00261` foi preservado no backup `backup/gc-pr14-pre-base-sync-20261106`. A sincronização da base foi concluída no head `fbc7aad8c6ef2de0255de5479a1f2b4c83b279c1`, com base `8acf515c6be8f097b05b4231608894f06740ab17`; GitHub confirma `mergeable=true`.
 - **PR #13:** permanece aberta e não será mesclada sobre a #14. Preservar branch, comentários e documentos exclusivos até a integração final.
 - **Backups:** `backup/gc-pr11-pre-sync-20261106` → `a60ef6ea0549f3d30c9fd62ba1a7f716fd454142`; `backup/gc-pr14-pre-base-sync-20261106` → `4a5082c1db17946b03cf9a1eabf57aaa26b00261`; `backup/gc-pr19-pre-resolution-20261106` → `bdbd6cb9cbb5901561135f70c70ce2e83147e4a8`.
 - **Validação pendente:** CI no futuro merge SHA da #14, revisão CodeRabbit no head atualizado, inspeção visual das grades de animação e teste manual offline/file:// com persistência real no IndexedDB.
 - **Limites desta sessão:** CodeRabbit CLI não está instalado e o terminal não resolve github.com; os PNGs binários não foram renderizados pelo conector GitHub. Não declarar essas revisões executadas.
 - **Governança:** WIP=1 permanece na reconciliação da cadeia. Não alterar main, não fechar #13 e não iniciar outra implementação paralela.
+
+
+---
+
+## Validação da PR #14 após sincronização da base — 06/11/2026
+
+- **Head:** `fbc7aad8c6ef2de0255de5479a1f2b4c83b279c1`; base branch `feat/apoena-personagem-estudio-main`, base SHA `8acf515c6be8f097b05b4231608894f06740ab17`.
+- **Mergeabilidade:** GitHub informa `mergeable=true`; a comparação da PR #14 com a base atualizada mostra 106 commits à frente, zero atrás e 46 arquivos no diff. A #14 continua contendo a implementação escolhida do Criador Modular.
+- **CI:** [run #42290101577](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42290101577) concluiu `completed/success` no head exato. Passaram as etapas 1–24, incluindo navegador, concorrência de presets, exportação pixel-perfect, IndexedDB, backup/restauração, manifesto do atualizador, hidrologia, runtime Godot 4 e preservação do Creator. Etapas 25–27 foram skipped pela condição do workflow; não são falhas.
+- **Backup pós-sincronização:** `backup/gc-pr14-post-base-sync-20261106` → `fbc7aad8c6ef2de0255de5479a1f2b4c83b279c1`.
+- **CodeRabbit:** solicitações registradas nos comentários [#6694982589](https://github.com/LORECRONICASAPOENA/GameCreator/pull/11#issuecomment-6694982589) e [#6694983194](https://github.com/LORECRONICASAPOENA/GameCreator/pull/14#issuecomment-6694983194); nenhuma nova review do bot observada até este checkpoint. O CLI não pôde ser executado porque não está instalado e o terminal não resolve `github.com`.
+- **Aceite manual pendente:** revisão visual das três spritesheets no Estúdio e teste offline/file:// com persistência real no IndexedDB. Não marcar PR #14 ready nem mesclar na #11 até concluir as verificações.
+- **PR #13:** permanece aberta e fora da cadeia; não foi mesclada sobre a #14.
+- **Main:** não foi alterada nesta operação.

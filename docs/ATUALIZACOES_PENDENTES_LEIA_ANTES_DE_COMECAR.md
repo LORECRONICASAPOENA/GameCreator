@@ -266,6 +266,15 @@ A CI 41114836257 falhou no step 17 com Token '}' inesperado. A causa foi um segu
 
 - A PR #19 resolveu a sincronização da branch-base da PR #11 com a main e foi integrada em 2026-11-06T19:56:11Z, merge commit `8acf515c6be8f097b05b4231608894f06740ab17`.
 - A PR #11 permanece aberta/draft, base `main`, head `8acf515c6be8f097b05b4231608894f06740ab17`; a CI [#42283992136](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42283992136) passou no SHA exato.
-- A PR #14 permanece a implementação escolhida e continua empilhada sobre a branch da #11. A atualização da branch #14 deve incorporar o head novo da #11 por merge commit, sem force-push e sem retarget prematuro para main.
+- A PR #14 permanece a implementação escolhida e continua empilhada sobre a branch da #11. A sincronização foi concluída por merge commit `fbc7aad8c6ef2de0255de5479a1f2b4c83b279c1`, com base `8acf515c6be8f097b05b4231608894f06740ab17`, sem force-push e sem retarget para main.
 - A PR #13 permanece fora da cadeia e não será mesclada sobre a #14.
 - Próximas validações: CI no novo head da #14, CodeRabbit no head atualizado, inspeção visual das grades de animação e teste manual offline/file:// com persistência real do IndexedDB.
+
+
+### Resultado da sincronização #14 — 06/11/2026
+
+- Novo head: `fbc7aad8c6ef2de0255de5479a1f2b4c83b279c1`; primeiro pai é o head anterior da #14 e segundo pai é o head atualizado da #11.
+- CI [#42290101577](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42290101577) concluiu success no SHA exato. Passaram Criador Modular no navegador, presets, exportação pixel-perfect, IndexedDB, backup/restauração, contratos, manifesto do atualizador, hidrologia, runtime Godot 4 e preservação do Creator. Os passos de empacotamento e anexação de logs foram skipped por condição do workflow.
+- Backup pós-sincronização: `backup/gc-pr14-post-base-sync-20261106` → `fbc7aad8c6ef2de0255de5479a1f2b4c83b279c1`.
+- CodeRabbit foi solicitado nos comentários #6694982589 (PR #11) e #6694983194 (PR #14); nenhuma resposta nova foi observada. A revisão CLI permanece indisponível nesta sessão.
+- Inspeção visual das grades de animação e teste manual offline/file:// com IndexedDB real permanecem pendentes; manter as PRs em draft até fechar esses itens.
