@@ -326,3 +326,36 @@ A CI 41114836257 falhou no step 17 com Token '}' inesperado. A causa foi um segu
 ## Atualização de estado — 05/11/2026
 
 O run [#41950469672](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41950469672), tentativa 2, passou integralmente no SHA `43fcf2afdbf669b4c79f0139fa73d27eb8d21fec`. A PR #7 continua draft. O aceite automatizado de backup/restauração IndexedDB passou; falta apenas o teste manual do proprietário em instalação Windows real e perfil de dados de teste. Não fazer merge até essa confirmação.
+
+---
+
+## Checkpoint atual — 06/11/2026 — GC-UPDATE-009 integrado; GC-CHAR-001 em reconciliação
+
+### GC-UPDATE-009 — concluído e integrado
+- PR [#7](https://github.com/LORECRONICASAPOENA/GameCreator/pull/7) foi mesclada em **2026-11-06 18:28:31 UTC**.
+- Merge commit: `b23900f578be096fb731e822796fc2266e58e551`; a `main` aponta para o mesmo SHA.
+- Validação canônica pós-merge: [Actions #420](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42271036648), job `validar`, **completed/success**.
+- O proprietário confirmou os testes manuais Windows, incluindo instalação isolada e exportação/restauração da Biblioteca IndexedDB. A confirmação está registrada na conversa da PR #7; não foram anexados logs locais.
+- GC-UPDATE-009 deixa de ocupar WIP=1.
+
+### WIP = 1 — GC-CHAR-001 / PR #14
+- PR [#14](https://github.com/LORECRONICASAPOENA/GameCreator/pull/14): aberta, draft, base `feat/apoena-personagem-estudio-main`, head `4a5082c1db17946b03cf9a1eabf57aaa26b00261`, mergeable=true.
+- Código validado no SHA `d5bea2b3c7905f00bcff2645e1b2e8b3f49a8df6), pelo [Actions #404](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41906361151), completed/success. A comparação entre `d5bea2b` e o head atual `4a5082c` encontrou quatro commits e somente arquivos documentais/relatórios; nenhum código foi alterado depois do SHA validado.
+- PR [#11](https://github.com/LORECRONICASAPOENA/GameCreator/pull/11) permanece aberta/draft, base main, head `a60ef6ea0549f3d30c9fd62ba1a7f716fd454142`. PR #14 está empilhada sobre essa branch e está 105 commits à frente e 2 atrás dela. Os dois commits exclusivos da base são um checkpoint documental e a alteração do gatilho do workflow; a versão atual do workflow na PR #14 já contém o filtro para a branch-base.
+- PR [#13](https://github.com/LORECRONICASAPOENA/GameCreator/pull/13) permanece aberta, base main, head `34a0a722444448e384c91286affecf0f50217038`. A comparação PR #14 ↔ PR #13 mostra divergência real (105 commits à frente e 47 atrás); não mesclar nem fechar automaticamente.
+- Comparação dos arquivos funcionais: PR #13 e #14 têm blobs idênticos em `personagens.html`, `personagens-core.js`, `personagens.css`, `tests/personagens.test.cjs`, `character-creator/index.html`, `integracao/build_unificado.ps1`, `integracao/build_unificado.py` e `integracao/godot/tests/test_catalogo.gd`. Nas versões divergentes, a PR #14 contém a ponte segura com nonce criptográfico de 256 bits, allowlist de WindowProxy e MessageChannel; limite do manifesto de 256 KB; guard de concorrência dos presets; fila serializada de operações do editor; e teste de navegador ampliado.
+- **Lacuna de validação identificada:** o teste de navegador atual da PR #14 usa um host de biblioteca em memória (`Map`) para `saveProject/saveAsset/listProjects/listAssets`. Os testes separados de biblioteca usam `fake-indexeddb` em Node. A PR #13 usava `ApoenaLibrary.dispatch` no host do navegador. Portanto, a cobertura atual da PR #14 não comprova, por si só, a persistência end-to-end do Criador Modular no IndexedDB real do navegador. O fluxo offline `file://` também permanece sem aceite manual específico da PR #14.
+- **Documentação exclusiva da PR #13 a preservar/classificar antes de encerrar a branch:** `docs/AUDITORIA_ORGANIZACAO_E_LIMPEZA_2026-11-02.md`, `docs/PESQUISA_ANTI_CHEAT_SQL_TLS_JOGOS.md`, `docs/PLANO_JOGO_ONLINE_APOENA.md`, `docs/POLITICA_INTEGRIDADE_E_EXPERIENCIA_JOGADOR.md`, `docs/REGISTRO_CONVERSAS_E_BACKUPS.md`, `docs/SEGURANCA_APOENA_500_CONTROLES.md`, `docs/registros-conversas/2026-11-02-apoena-verso-coleta-auditoria-transferencia-ia.md`, além de relatórios/checkpoints históricos em `docs/relatorios-actions/` e `docs/relatorios-conversas/`. Esses arquivos ainda não foram portados para main/PR #14; preservar ou arquivar conscientemente antes de fechar/excluir a PR #13.
+- **CodeRabbit:** PR #14 ainda sem review formal e sem threads de revisão. A solicitação anterior via comentário não produziu resposta do bot. Nesta sessão o CLI não está instalado e o ambiente não conseguiu resolver o host de instalação; nenhuma revisão CodeRabbit foi executada nem substituída por revisão manual.
+- Backups conferidos: main `backup/full-project-post-gc-update-009-2026-11-06` → `b23900f`; PR #14 `backup/snapshot-2026-11-05-0729-pr14` → `4a5082c`; PR #13 `backup/snapshot-2026-11-05-0729-pr13` → `34a0a72`.
+
+### Próximas ações — manter WIP = 1
+1. Obter aceite manual do fluxo PR #14 em navegador Windows/offline `file://`: abrir o Creator pela branch da PR, acessar Pixel Art → Criador Modular, importar peça, editar, salvar, atualizar a biblioteca, reabrir o projeto e gravar no Creator; salvar o projeto principal, fechar/reabrir e confirmar a persistência.
+2. Executar CodeRabbit autenticado no head atual da PR #14; analisar findings sem autofix automático.
+3. Preservar/classificar a documentação exclusiva da PR #13 antes de encerrar essa PR.
+4. Reconciliar a base da PR #11 com main e, depois, atualizar a PR #14 sem reescrever histórico. Executar CI canônico no SHA atualizado.
+5. Definir uma única rota de integração para #11/#14. Não mesclar PR draft, não fechar #13 e não excluir branches enquanto os itens exclusivos não estiverem preservados.
+6. GC-ANIM-005 / issue #17 continua bloqueada até concluir a integração do Criador Modular; não iniciar outra implementação em paralelo.
+
+**Estado desta atualização:** documentação e análise de histórico; nenhum código, branch de trabalho, workflow ou PR foi alterado nesta etapa.
+
