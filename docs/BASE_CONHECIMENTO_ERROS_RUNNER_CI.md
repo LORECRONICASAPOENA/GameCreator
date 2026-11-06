@@ -443,3 +443,85 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - **Testes adicionados:** \`tests/atualizador-manifest.test.cjs\` valida o contrato do sparse-checkout, regex de runtime, os 23 scripts referenciados, a ligação da interface e o empacotador.
 - **Commits:** packager main \`1561a0d08b26177596fafbf21102b739aa4a2b76\`; manifesto \`184102a9317c687485da55bc34ef0f50d5352601\`; teste \`c155207db4a61ce2766ebcbd5dc1a59604c5afee\`; workflow canônico \`65db2b62cc9750f50a3cc595c80466b6344fbc94\`.
 - **Validação do atualizador:** o step 17 do run [#41082083233](https://github.com/apoenalore/GameCreator/actions/runs/41082083233) passou (parser PowerShell e teste estático do manifesto); o job ainda está no step 22 de publicação do artefato. O teste real de clone/fast-forward e preservação local continua pendente.
+
+
+
+
+### GC-UPDATE-TEST-001 — CRLF não normalizado no teste de contrato
+
+- **Projeto/repositório:** Game Creator — apoenalore/GameCreator.
+- **Data/hora da ocorrência:** 2026-10-30T16:18:02-03:00 (2026-10-30T19:18:02Z).
+- **Data/hora do registro/correção:** 2026-10-30T16:27-03:00.
+- **Run/job:** [41113920551](https://github.com/apoenalore/GameCreator/actions/runs/41113920551) / 124263385696.
+- **Commit testado:** df105063a13536c0b3e56296c94e405cd7ce5a04.
+- **Workflow/step:** pixel-art.yml — step 17, “Validar manifesto do atualizador Windows quando presente”.
+- **Erro literal:** AssertionError: Arquivos locais fora do runtime precisam ser verificados antes de alterar o sparse-checkout.
+- **Causa raiz comprovada:** o checkout Windows entregou o arquivo PowerShell com CRLF, mas o teste Node procurava sequências com LF usando indexOf. A busca retornou -1 e a assertion falhou. A hipótese anterior de que a primeira ocorrência era um comentário estava incompleta; a causa que explica o comportamento no runner é a diferença de quebras de linha.
+- **Correção aplicada:** a função read do teste normaliza CRLF para LF antes das buscas; a posição do sparse-checkout também aponta para a linha executável completa. Commits de correção do teste: 65c65521b0fb1595215bd70da03c4ef7b898032d e 8bbe3d7379b43da5c98c18bd1165e2d8d114a267.
+- **Evidência adicional:** o teste foi ampliado para executar o PowerShell real contra repositório Git temporário. A CI do commit 68c63b0b16b434a3482d9e44aa9824f8a27676dc ainda estava em andamento no momento deste registro; o resultado do teste end-to-end não foi presumido.
+- **Resultado:** CORREÇÃO DE TESTE APLICADA / NOVA CI PENDENTE.
+- **Prevenção:** normalizar CRLF/LF em testes Node que inspecionam scripts PowerShell e localizar linhas executáveis completas, não substrings ambíguas.
+
+
+### GC-UPDATE-RECOVERY-001 — Retomada de clone inicial interrompido antes do checkout
+
+- **Projeto/repositório:** Game Creator — apoenalore/GameCreator.
+- **Data/hora do achado:** 2026-10-30T16:26-03:00.
+- **Fonte:** revisão CodeRabbit da PR #7 e reprodução de clone com --no-checkout.
+- **Condição:** se a primeira execução parar após o clone sem checkout e antes de read-tree, uma nova execução encontra .git e $novoClone=false. Em um clone --no-checkout, git ls-files retorna índice vazio e git status --porcelain pode apresentar remoções no índice (D ), não o estado de worktree-only ( D). Tratar esse estado como edição local bloquearia a recuperação.
+- **Correção aplicada:** marcador clone-pendente.txt em ConfigDir, gravado antes do clone e associado ao destino absoluto. Na retomada, o script verifica git ls-files: índice vazio + árvore HEAD válida identifica clone ainda não materializado. Se o índice já tiver entradas, somente ausências de worktree (status “ D”) são aceitas; alterações rastreadas reais bloqueiam. Se o worktree estiver limpo, o marcador antigo é removido e a execução segue como atualização normal. Após checkout concluído, o marcador é removido.
+- **Teste previsto/aplicado:** o teste Node cria clone temporário com --no-checkout, confirma índice vazio e status “D ”, grava o marcador e executa o atualizador PowerShell real para materializar os arquivos e remover o marcador.
+- **Branch testada:** `feat/atualizador-local-incremental`, PR #7.
+- **CI de confirmação:** [run #41116194279](https://github.com/apoenalore/GameCreator/actions/runs/41116194279), job `validar`, step 17 executou o teste PowerShell real e passou; merge commit testado: `c6562464c96e9bfaaff70b68a1d8a2ce624ae6d2`, head da branch na execução: `ae085d57c3245fb1c5d4956f0b0cd0399e4067c5`.
+- **Estado:** IMPLEMENTADO NA BRANCH / CI WINDOWS AUTOMATIZADA APROVADA / TESTE MANUAL NO COMPUTADOR DO AUTOR PENDENTE.
+
+### GC-UPDATE-TEST-002 — Bloco duplicado após catch causou erro de parser PowerShell
+
+- **Projeto/repositório:** Game Creator — apoenalore/GameCreator.
+- **Data/hora da ocorrência:** 2026-10-30T16:25:31-03:00 (2026-10-30T19:25:31Z).
+- **Data/hora do registro/correção:** 2026-10-30T16:31-03:00.
+- **Run/job:** [41114836257](https://github.com/apoenalore/GameCreator/actions/runs/41114836257) / 124266943540.
+- **Commit testado:** 68c63b0b16b434a3482d9e44aa9824f8a27676dc.
+- **Branch testada:** `feat/atualizador-local-incremental`, PR #7.
+- **Workflow/step:** `pixel-art.yml` — step 17, “Validar manifesto do atualizador Windows quando presente”.
+- **Classificação:** falha de sintaxe/parse do PowerShell; defeito de código bloqueante antes da execução do teste Node.
+- **Erro literal:** `Token '}' inesperado na expressão ou instrução.`
+- **Causa raiz comprovada:** uma edição anterior da validação do remote deixou um segundo bloco de código duplicado após o primeiro bloco try/catch. O parser encontrou uma chave de fechamento extra e interrompeu a validação antes do teste Node/PowerShell.
+- **Causas descartadas:** nenhuma causa alternativa foi comprovadamente descartada no run que falhou; o log mostra que a falha ocorreu no parser antes do teste Node. Não atribuir a Git, rede ou runner sem evidência.
+- **Correção aplicada:** removido o trecho duplicado após o primeiro catch, preservando o bloco completo e único de validação. Commit de correção: `d90541bd642f17aa681ea7e623b49dba12ca2b36`.
+- **Evidência de correção:** [run #41116194279](https://github.com/apoenalore/GameCreator/actions/runs/41116194279), step 17 — parser PowerShell 5.1, `node --check` e execução de `tests/atualizador-manifest.test.cjs` concluídos; teste end-to-end reportou aprovação, inclusive colisão com nome acentuado. Merge commit testado: `c6562464c96e9bfaaff70b68a1d8a2ce624ae6d2`; head da branch na execução: `ae085d57c3245fb1c5d4956f0b0cd0399e4067c5`.
+- **Resultado:** CORREÇÃO APLICADA / PARSER E TESTE END-TO-END WINDOWS APROVADOS NO RUN CITADO.
+- **Prevenção:** após substituições por trecho, verificar arquivo completo, contagem de blocos e executar o parser PowerShell no runner antes de considerar o teste end-to-end alcançado.
+
+
+
+### GC-UPDATE-PS-001 — Aspa ausente e regex sem âncora no manifesto do atualizador
+
+- **Projeto/repositório:** Game Creator — apoenalore/GameCreator.
+- **Ocorrências:** [run 41464182794](https://github.com/apoenalore/GameCreator/actions/runs/41464182794), job 125340620373, SHA `78a162e76b49a7862cb96bec87d5795c1c797ff2`; e [run 41486755080](https://github.com/apoenalore/GameCreator/actions/runs/41486755080), job 125419616782, SHA `1eb2119e3fa0f285e6278d51d0d5eec5ab48399c`.
+- **Causas comprovadas:** a atribuição de `$regexRuntime` estava sem aspa simples final, causando erro de parsing PowerShell. Após fechar a string, a assertion encontrou que a regex sem âncora aceitava por prefixo caminhos como `map-editor/cache.json`.
+- **Correção:** fechar a string e exigir correspondência do caminho completo com `$`, sem afrouxar os testes. Correção final na PR #7: commit `b483bff226e5488175b6c776f4cfd24da5f30fae`.
+- **Validação:** o run canônico [41488368286](https://github.com/apoenalore/GameCreator/actions/runs/41488368286), job 125425257046, passou integralmente no SHA corrigido; o step do manifesto passou.
+- **Prevenção:** após editar linha PowerShell via API, conferir os caracteres finais e o diff completo, manter o teste de caminho completo e aguardar somente a CI automática do head mais recente.
+
+### GC-UPDATE-PS-002 — Edição remota truncou a linha e repetiu código do atualizador
+
+- **Projeto/repositório:** Game Creator — apoenalore/GameCreator.
+- **Ocorrência:** [run 41487673698](https://github.com/apoenalore/GameCreator/actions/runs/41487673698), job 125422177253, branch `feat/atualizador-local-incremental`, SHA `b29adee6023f225f88275eb2be397c40cdb5f1af`.
+- **Erro:** parser PowerShell reportou `Token '{' inesperado na expressão ou instrução.` A linha `$regexRuntime` terminava sem âncora e sem aspa final; a edição remota também repetiu o final do script.
+- **Correção:** restaurar o conteúdo-base de 666 linhas do commit anterior e aplicar somente a âncora `$` antes da aspa de fechamento. Commit final `b483bff226e5488175b6c776f4cfd24da5f30fae`.
+- **Validação:** run canônico [41488368286](https://github.com/apoenalore/GameCreator/actions/runs/41488368286), job 125425257046, sucesso integral; arquivo final conferido com 666 linhas.
+- **Prevenção:** para correção pontual, editar o arquivo completo a partir de um blob-base conhecido, verificar contagem estrutural e diff antes de considerar a alteração pronta.
+
+
+### GC-UPDATE-009 — CI Windows aprovada após reexecução do job sem logs (05/11/2026)
+
+- **Repositório/PR:** `LORECRONICASAPOENA/GameCreator`, PR #7, branch `feat/atualizador-local-incremental`.
+- **Run de confirmação:** [#41950469672](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41950469672), tentativa 2, SHA `43fcf2afdbf669b4c79f0139fa73d27eb8d21fec`.
+- **Job:** `validar`, ID `127008498341`, conclusão `success`.
+- **Etapas aprovadas:** PowerShell 5.1; compilação Creator V4.0; DOM; sintaxe JavaScript; Corte Inteligente; tilesets; persistência IndexedDB; backup/restauração da biblioteca; exportação e contrato Godot; sincronização V4.0/V4.1; manifesto do atualizador; hidrologia/erosão; runtime Godot 4; preservação do Creator original e dos módulos.
+- **Tentativa 1 do mesmo run:** job `126994711511` terminou sem etapas registradas e sem logs recuperáveis (`BlobNotFound`). A causa não foi confirmada; não classificar como falha de código.
+- **Falha anterior de código:** run [#41949644099](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41949644099) em SHA anterior reportou token `}` inesperado no PowerShell. O commit `43fcf2af` removeu o bloco duplicado no final de `integracao/atualizar-creator.ps1`; a tentativa 2 do run #419504 validou o parser e os testes end-to-end.
+- **Resultado:** CI Windows aprovada no SHA atual. A PR permanece draft.
+- **Aceite ainda pendente:** teste manual do atualizador na máquina do proprietário, usando instalação de teste; verificar preservação de arquivos locais e exportar/restaurar a Biblioteca IndexedDB em perfil de teste.
+- **Próxima ação:** aguardar evidência manual do proprietário. Não mesclar nem iniciar nova implementação no eixo GameCreator/Pixel Art antes de fechar GC-UPDATE-009.
