@@ -594,3 +594,14 @@ Os registros abaixo preservam evidências históricas dos runs de 02/11/2026; n�
 ### Atualização GC-CI-014 — runner reconectado (captura 02/11/2026)
 
 Nova captura mostra `Runner reconnected`, versão `2.338.0` e `Listening for Jobs` às 13:12:43Z. Isso confirma que o processo exibido recuperou comunicação e voltou a escutar tarefas. Não prova que a causa do conflito de sessão foi corrigida nem que só exista uma instância. A imagem inclui outra janela de terminal ao fundo, mas não permite identificá-la. Não iniciar outro `run.cmd`/serviço em paralelo. Conferir Settings → Actions → Runners (Online/Idle), identificar processos/serviço e preservar `_diag`; só então reexecutar uma vez o workflow da PR #11. Código do Creator permanece inalterado.
+
+### GC-CI-015 — PR #19: teste de exportação pixel-perfect ausente na árvore sincronizada (06/11/2026)
+
+- **Ocorrência:** [run 42276102355](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42276102355), job `validar` ID `128092695456`, step 11, branch `sync/main-into-gc-anim-006-20261106-v2`, SHA `301eadd3aadb3d59aafaf9dae9fa92197e6ca191`.
+- **Erro literal recuperado:** `node:internal/modules/cjs/loader:1210`; PowerShell registrou `NativeCommandError`, exit code 1. A mensagem completa da exceção Node não foi preservada.
+- **Causa comprovada:** o workflow executava `node tests/pixel-art-export.test.cjs`, mas o arquivo não existia no tree do SHA 301eadd (consulta de conteúdo retornou 404). O teste existia na branch da PR #11.
+- **Correção:** a reconciliação da PR #19 incorporou o teste, o Estúdio e os assets da PR #11, mantendo a etapa e as assertions.
+- **Validação:** [run 42281994131](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42281994131), job `validar`, success no SHA `e16fe832adde4ab7606594b45a8395a4df6d2438`; step 11 e todos os steps funcionais seguintes passaram.
+- **Prevenção:** conferir no mesmo tree/commit a existência de cada teste, script e asset referenciado pelo workflow antes de iniciar a sincronização. Não remover cobertura para obter CI verde.
+- **Relatório:** `docs/relatorios-actions/2026-11-06-run-42276102355-pixel-art-export-test-ausente.md`.
+

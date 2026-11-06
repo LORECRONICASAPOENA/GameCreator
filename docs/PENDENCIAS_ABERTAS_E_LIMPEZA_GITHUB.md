@@ -394,3 +394,17 @@ Em 02/11/2026, o autor enviou captura da anotação expandida do GitHub Actions.
 - **Backups:** `backup/gc-pr11-pre-reconcile-20261106` → `a60ef6ea0549f3d30c9fd62ba1a7f716fd454142`; `backup/gc-pr13-pre-reconcile-20261106` → `34a0a722444448e384c91286affecf0f50217038`; `backup/gc-pr14-pre-reconcile-20261106` → `4a5082c1db17946b03cf9a1eabf57aaa26b00261`.
 - **Rota:** sincronizar a base #11 com a main atual sem reescrever histórico; executar CI e revisão; integrar #11 somente após aprovação; atualizar/retargetear #14 para main e validar; comprovar preservação dos commits úteis da #13 antes de encerrá-la.
 
+---
+
+## Reconciliação da cadeia PR #11 → PR #18/#19 → PR #14 — 06/11/2026
+
+- **PR #18:** fechada sem merge. Não reabrir nem reutilizar seu head antigo.
+- **PR #19:** sucessora técnica da #18, base `feat/apoena-personagem-estudio-main`, head `e16fe832adde4ab7606594b45a8395a4df6d2438`. O head contém a resolução de sincronização com a main e preserva a árvore da #11; GitHub confirma `mergeable=true`, `mergeable_state=clean`.
+- **Backup pré-resolução:** `backup/gc-pr19-pre-resolution-20261106` → `bdbd6cb9cbb5901561135f70c70ce2e83147e4a8`.
+- **CI:** [run 42281994131](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42281994131) concluiu `success` no SHA `e16fe832adde4ab7606594b45a8395a4df6d2438`. Passaram exportação pixel-perfect, IndexedDB, backup/restauração, integração, atualizador, Godot 4 e preservação do Creator.
+- **Incidente da primeira tentativa:** run [42276102355](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42276102355) falhou porque o workflow chamava `tests/pixel-art-export.test.cjs`, ausente naquele tree. O teste foi preservado na resolução; a nova CI passou. Relatório: `docs/relatorios-actions/2026-11-06-run-42276102355-pixel-art-export-test-ausente.md`.
+- **PR #11:** continua aberta/draft, head `a60ef6ea0549f3d30c9fd62ba1a7f716fd454142`; aguarda a integração da sincronização #19 à branch-base e uma nova CI no head resultante.
+- **PR #14:** continua sendo a implementação escolhida do Criador Modular. Mantém sua branch/head `4a5082c1db17946b03cf9a1eabf57aaa26b00261` e sua base atual na #11 até a #11 ser integrada. Depois, retarget para `main` e validar novamente.
+- **PR #13:** não será mesclada sobre a #14. Manter sua branch e os comentários de revisão como referência; preservar documentos úteis sem incorporar sua implementação concorrente.
+- **Próximas ações:** (1) revisão e integração da PR #19 na branch-base #11; (2) aguardar CI canônico da PR #11 no novo SHA; (3) revisar/validar a #11 antes de sua integração à main; (4) retarget da #14 para main; (5) CodeRabbit e CI atualizados na #14; (6) teste manual offline/file:// e persistência IndexedDB real antes do merge final da #14.
+- **Governança:** WIP=1 permanece na tarefa ALB-GC-CHAR-001. Nenhum merge na main foi realizado nesta etapa; nenhuma PR #13 foi mesclada ou fechada.
