@@ -11,13 +11,8 @@ const host=document.getElementById("gc40PixelRoot");
 if(!root||!host){console.error("Aba Pixel Art não encontrada no editor.");return}
 const nav=document.querySelector('nav.tabs');
 const nativeButton=nav?.querySelector('[data-page="pixelart"]');
-const quick=document.createElement("button");
-quick.id="apoenaQuickPixel";
-quick.type="button";quick.textContent="▧ Pixel Art";
-quick.className="v37-quick-pixel";
-quick.style.cssText="background:#8cdbe0;color:#112436;border:1px solid #acdce8;border-radius:8px;padding:9px 14px;font-weight:800;min-height:43px;cursor:pointer;white-space:nowrap";
-const quickNav=document.getElementById("v37Nav");
-if(quickNav)quickNav.append(quick);
+// A navegação principal já registra a aba Pixel Art; não criar um segundo atalho concorrente.
+if(!nativeButton)console.warn("Aba Pixel Art não encontrada na navegação principal; confira o build unificado.");
 let ready=false;
 function mount(){
  if(ready)return;
@@ -34,7 +29,6 @@ function open(){
  try{location.hash="pixelart"}catch(_){}
  if(document.getElementById("v37AdvancedNav")?.open)document.getElementById("v37AdvancedNav").open=false;
 }
-quick.addEventListener("click",open);
 if(nativeButton)nativeButton.addEventListener("click",()=>mount());
 const refresh=()=>{
  for(const fn of ["renderItems","renderRecipes","renderDatabase","refreshAssetLists","creatorRenderHome"]){

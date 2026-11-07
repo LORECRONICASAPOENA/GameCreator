@@ -59,3 +59,19 @@ O plano consolidado de História, Exploração Livre, MOBA, ecossistema, NPCs, e
 
 A primeira fatia foi integrada à main pela PR #2. Ela adiciona catálogo de terreno, propriedades ambientais e autotile, metadados de interação para objetos, perfis de plantas/animais/montarias, profissão e rotina de NPCs, papel econômico, perfis de mapa e validação. O editor inicia com a Cidade Capital de Agar no perfil História e mantém o preset de MOBA. Esses dados são a fundação de autoria/exportação; a simulação ecológica, as transações, as rotinas autônomas e o comportamento no jogo ainda exigem implementação e testes no runtime.
 
+
+## Contratos de modos, sessões e sistemas de mundo
+
+Os módulos integracao/modos-partida.js e integracao/sistemas-mundo.js definem contratos versionados e testáveis para a próxima camada de jogo:
+
+- História: sessão individual e offline.
+- Exploração Livre: solo offline e cooperação com autoridade e persistência do anfitrião.
+- MOBA: duas equipes de cinco por padrão, seleção de campeões, limite de vagas e preenchimento opcional com bots de teste.
+- Elenco: mantém Apoena, Serena, Órion, Birará (alias Agan), Aqua, Rufy, Blim e Kael; nomes de lore ainda incertos continuam pendentes e não são inventados.
+- Sistemas de mundo: coleta, crafting atômico e construção reutilizam state.items, state.recipes e state.assets, sem criar um segundo inventário.
+- Persistência cooperativa: o anfitrião é a autoridade; o mundo cooperativo não deve continuar simulando quando ele estiver fechado.
+
+Os testes integracao/testes/modos-partida.test.cjs e integracao/testes/sistemas-mundo.test.cjs são executados condicionalmente pelo workflow canônico .github/workflows/pixel-art.yml quando os módulos estão presentes.
+
+**Limite desta entrega:** são contratos de dados e uma simulação determinística de lobby em JavaScript. Os rótulos solo, lan e internet descrevem opções permitidas; não implementam transporte de rede, descoberta de salas, relay, voz ou sincronização real. Também não substituem integração de gameplay no HTML/Godot, UI final, teste em Android ou persistência de partidas no runtime. Esses itens permanecem no escopo incremental da issue #3.
+
