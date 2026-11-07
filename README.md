@@ -20,6 +20,20 @@
 - **Mapas 2.5D e tilesets:** edição de grade, salvamento/reabertura pela biblioteca, verificação de bordas transparentes, repetição de tiles e compatibilidade das dimensões com a grade.
 - **Itens, receitas e Godot:** `integracao/index.html` valida/exporta um catálogo portátil; `integracao/godot/ApoenaCatalogo.gd` implementa carga de catálogo, inventário, coleta, fabricação temporizada, efeitos e salvamento/restauração de sessão.
 
+## Uso rápido — Criador Modular de Personagens
+
+1. Abra **Pixel Art → Criador Modular** e escolha **Montar personagem**.
+2. Importe as peças do personagem em PNG, WebP ou JPEG. Cada arquivo pode ter até 18 MB; cada camada aceita imagem de até 1024 × 1024 px. Cada peça entra como uma camada independente.
+3. Selecione uma camada para ajustar posição, escala, opacidade, visibilidade, ordem e espelhamento. Use a prévia e a linha do tempo para conferir ações e quadros.
+4. Em **Malha e limpeza**, defina colunas, linhas, origem, tamanho das células e espaçamentos da spritesheet. A malha precisa caber na imagem; cada camada aceita até 160 células.
+5. Para corrigir um quadro, selecione-o e use a borracha, restauração ou corte inteligente. O corte inteligente mostra uma prévia antes de aplicar; **Desfazer/Refazer** preserva a possibilidade de recuperar a edição.
+6. Use **Salvar projeto** para guardar a montagem editável na Biblioteca central (IndexedDB). Em **Biblioteca**, atualize a lista e reabra projetos ou importe assets salvos como novas camadas.
+7. **Baixar JSON** exporta o projeto portátil com as imagens incorporadas. **Exportar PNG** gera a spritesheet: linhas representam ações e colunas representam quadros.
+8. **Exportar Godot .tres** gera um recurso SpriteFrames do Godot 4 com textura incorporada. **Adicionar à biblioteca** grava a spritesheet e o projeto editável.
+9. **Gravar no Creator** envia o personagem para a sessão do projeto principal que está aberta. Depois, use **Salvar projeto editável** no Creator para persistir a alteração no projeto principal.
+
+**Limites atuais:** até 32 camadas e 32 ações; até 24 quadros por ação; 160 células por camada; projeto editável até 48 MB; spritesheet PNG até 16 milhões de pixels; exportação Godot .tres até 4 milhões de pixels. O criador monta peças importadas; não gera automaticamente partes de personagem a partir de uma única imagem. O gerador clássico continua disponível em **Personagens clássico**.
+
 ## Validação automatizada
 
 - `tests/personagens.test.cjs` e `tests/personagens-browser.html`: modelo, malha, quadros, persistência, exportação Godot, borracha, histórico, biblioteca e sincronização com o Creator.
