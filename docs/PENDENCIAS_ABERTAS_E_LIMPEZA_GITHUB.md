@@ -461,4 +461,15 @@ Esta seção é o estado mais recente e prevalece sobre os snapshots históricos
 - Steps 1–10 passaram; steps 12–26 foram skipped; step 27 anexou artefato `v41-ci-diagnostics` ID `13576454021` com sucesso.
 - Relatório individual: [2026-11-07-run-42378776734-regex-duplamente-escapada.md](relatorios-actions/2026-11-07-run-42378776734-regex-duplamente-escapada.md).
 - Backup antes da correção: `backup/gc-pr14-pre-regex-test-fix-20261107` → `74614a6c97e86f6e0be7519ddb30b7e4138cc8df`.
-- Próxima ação: corrigir somente o escape das assertions, preservar cobertura e aguardar a CI canônica no novo SHA. Não retargetear/mesclar a PR #14 até a validação passar.
+- Correção aplicada em `3285d888cb5c203b8a6ff94e4694818e1e085a5c`; [run #42379244625](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42379244625) concluiu `success` no SHA exato, com steps funcionais 1–24 aprovados. O incidente GC-CI-022 está resolvido. A PR #14 foi retargetada para `main`, mergeable/clean; permanece Draft e sem merge.
+
+
+### Estado após retarget da PR #14 para main — 07/11/2026
+
+- **PR #14:** base `main` (`e9335b9527fc20c1ee6bf95c7729f8a82e68339c`); HEAD de código validado `3285d888cb5c203b8a6ff94e4694818e1e085a5c`; `mergeable=true`, `mergeable_state=clean`; comparação com main: 114 commits à frente, zero atrás, 44 arquivos no diff.
+- **Sincronização:** merge commit `74614a6c97e86f6e0be7519ddb30b7e4138cc8df` tem pais `115aa65b` (head anterior da PR #14) e `e9335b95` (main). A main não foi alterada durante a reconciliação.
+- **CI:** [run #42379244625](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42379244625) concluiu success no SHA `3285d888`; steps funcionais 1–24 passaram. O erro de teste no run #42378776734 foi corrigido e documentado como GC-CI-022.
+- **Backups:** `backup/gc-pr14-pre-main-reconcile-20261107` → `115aa65b`; `backup/gc-main-pre-pr14-reconcile-20261107` → `e9335b95`; `backup/gc-pr14-base-pre-reconcile-20261107` → `f648b1bd`; `backup/gc-pr14-pre-regex-test-fix-20261107` → `74614a6c`; `backup/gc-pr14-post-ci-20261107` → `3285d888`.
+- **Estado:** PR #14 continua Draft, não mesclada. Pendem revisão independente CodeRabbit, inspeção visual das spritesheets/grades e aceite manual offline `file://` com IndexedDB real (salvar, fechar/reabrir, reabrir pela Biblioteca, gravar no Creator e confirmar persistência do projeto principal).
+- **Próxima etapa:** obter revisão e aceite manual; depois, com autorização do proprietário, avaliar sair de Draft e mesclar. Não fazer merge enquanto esses aceites não forem concluídos.
+

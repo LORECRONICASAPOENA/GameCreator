@@ -723,6 +723,7 @@ O run [#41704904027](https://github.com/apoenalore/GameCreator/actions/runs/4170
 - **Causa comprovada:** quatro assertions foram compostas em uma template string com duas barras invertidas no código-fonte do literal RegExp. O parser recebeu `\\s`/`\\(` e rejeitou a expressão antes de executar a suíte. Não é falha do runner nem do código de produção.
 - **Impacto:** steps 1–10 passaram; step 11 falhou antes das assertions; steps 12–26 foram skipped; step 27 anexou o artefato de diagnóstico com sucesso. O teste de concorrência e os testes posteriores não foram validados nessa tentativa.
 - **Correção escolhida:** corrigir somente o escape das assertions em `tests/preset-request-guard.test.cjs`, preservando toda a cobertura. Não remover assertions nem alterar o Estúdio.
-- **Validação:** pendente no próximo run canônico, que deve testar o novo SHA. Não marcar como resolvido até `success`.
+- **Correção:** commit `3285d888cb5c203b8a6ff94e4694818e1e085a5c` corrigiu os quatro literais RegExp sem remover assertions.
+- **Validação:** [run #42379244625](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42379244625) concluiu `completed/success` no SHA exato; steps funcionais 1–24 passaram e steps 25–27 foram skipped pelas condições do evento PR. **Incidente resolvido e validado.**
 - **Prevenção:** ao gerar código JavaScript em template strings, conferir o texto final gravado e validar sintaxe/teste focado antes do commit quando disponível.
 - **Relatório:** [2026-11-07-run-42378776734-regex-duplamente-escapada.md](relatorios-actions/2026-11-07-run-42378776734-regex-duplamente-escapada.md).

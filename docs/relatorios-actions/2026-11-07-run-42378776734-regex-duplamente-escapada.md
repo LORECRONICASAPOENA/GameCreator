@@ -75,3 +75,16 @@
 - Solução escolhida: corrigir somente os literais RegExp, mantendo a cobertura.
 - Resultado da validação: run 42378776734 falhou no step 11; steps 1–10 passaram, steps 12–26 foram skipped e o upload de diagnóstico passou. Nova validação pendente.
 - Próxima ação: corrigir o teste e aguardar o Actions automático no novo SHA.
+
+
+## Adendo — correção aplicada e CI canônica verde (07/11/2026)
+
+- **Correção aplicada:** commit `3285d888cb5c203b8a6ff94e4694818e1e085a5c`, alteração restrita a `tests/preset-request-guard.test.cjs`. Os quatro literais RegExp agora usam escapes corretos (uma barra invertida no arquivo); as assertions foram mantidas.
+- **Validação canônica:** [run #42379244625](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42379244625), tentativa 1, `completed/success` no SHA exato `3285d888cb5c203b8a6ff94e4694818e1e085a5c`.
+- **Resultado:** steps funcionais 1–24 passaram, incluindo teste de concorrência, navegador do Criador Modular, Corte Inteligente, exportação pixel-perfect, biblioteca/IndexedDB, backup/restauração, contratos de integração e runtime Godot 4. Steps 25–27 foram `skipped` pelas condições normais do evento `pull_request`; o job terminou `success`.
+- **Evidência de resolução:** o step 11 que falhou no run #42378776734 passou no novo run. A falha anterior era exclusivamente sintaxe do teste, sem alteração no código de produção para contorná-la.
+- **Estado da PR:** PR #14 foi retargetada para `main`; base SHA `e9335b9527fc20c1ee6bf95c7729f8a82e68339c`, HEAD validado `3285d888`, `mergeable=true`, `mergeable_state=clean`, comparação `114` commits à frente / `0` atrás, `44` arquivos no diff. A PR permanece Draft e não foi mesclada.
+- **Backup do código validado:** `backup/gc-pr14-post-ci-20261107` → `3285d888cb5c203b8a6ff94e4694818e1e085a5c`.
+- **Pendências fora do CI:** revisão independente CodeRabbit e aceite manual offline `file://` com IndexedDB real, além da inspeção visual das spritesheets/grades. O sucesso automatizado não substitui esses aceites.
+- **Estado final do incidente:** **RESOLVIDO E VALIDADO**.
+
