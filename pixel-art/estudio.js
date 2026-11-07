@@ -1,4 +1,5 @@
 (()=>{'use strict';
+const presetRequestGuard = ApoenaPresetRequestGuard();
 const $=id=>document.getElementById(id),num=(id,def=0)=>Number.isFinite(Number($(id).value))?Number($(id).value):def,clamp=(n,a,b)=>Math.max(a,Math.min(n,b));let image=null,imageUrl='',frames=[],current=-1,kind='personagem',tool='erase',undo=[],grid=false,dragStart=null,drawing=false,lastPreview=0,mesh={x:[],y:[]},meshMode=false,meshDrag=null,smartPending=null,smartBusy=false,batchBackup=null,detectedSprites=[];
 const source=$('sourceCanvas'),sc=source.getContext('2d'),edit=$('editCanvas'),ec=edit.getContext('2d',{willReadFrequently:true}),preview=$('preview'),pc=preview.getContext('2d');
 const msg=s=>{$('status').textContent=s},selected=()=>frames[current]||null;
@@ -319,8 +320,10 @@ const apoenaPresets={andar_ref:{file:'references/apoena/apoena-corrida-multidire
 $('loadApoenaPreset').onclick=()=>{
  const preset=apoenaPresets[$('apoenaPreset').value];if(!preset)return;
  if((image||frames.length)&&!confirm('Carregar esta referência vai substituir os quadros atualmente abertos. Os arquivos originais permanecem intactos. Continuar?'))return;
+ const requestId=presetRequestGuard.begin();
  const im=new Image();
  im.onload=()=>{
+  if(!presetRequestGuard.isCurrent(requestId))return;
   if(im.width*im.height>32000000)return msg('A referência excede o limite de imagem do editor.');
   if(imageUrl){URL.revokeObjectURL(imageUrl);imageUrl=''}
   image=im;frames=[];current=-1;undo=[];detectedSprites=[];batchBackup=null;smartPending=null;
@@ -338,7 +341,7 @@ $('loadApoenaPreset').onclick=()=>{
   $('sourceInfo').textContent='Referência Apoena · '+preset.label+' · '+im.width+'×'+im.height+' px · '+frames.length+' quadros iniciais';
   pick(0);drawSource();msg('Quadros do Apoena carregados para edição. Confira os recortes e as direções antes de exportar.');
  };
- im.onerror=()=>msg('Não foi possível abrir a referência. Mantenha a pasta references/apoena junto ao Estúdio ou importe a imagem manualmente.');
+ im.onerror=()=>{if(presetRequestGuard.isCurrent(requestId))msg('Não foi possível abrir a referência. Mantenha a pasta references/apoena junto ao Estúdio ou importe a imagem manualmente.');};
  im.src=new URL(preset.file,document.baseURI).href;
 };
 $('categories').querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{kind=b.dataset.kind;$('categories').querySelectorAll('[data-kind]').forEach(v=>v.classList.toggle('selected',v===b));msg('Categoria: '+kind)});const kindQuery=new URLSearchParams(location.search).get('tipo');if(kindQuery){const btn=$('categories').querySelector('[data-kind="'+kindQuery+'"]');if(btn)btn.click()}requestAnimationFrame(animate);
