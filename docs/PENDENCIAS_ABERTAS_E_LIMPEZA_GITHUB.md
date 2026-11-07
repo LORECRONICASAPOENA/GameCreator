@@ -508,3 +508,39 @@ Em 02/11/2026, o autor enviou captura da anotação expandida do GitHub Actions.
 - **Aceite manual pendente:** revisão visual das três spritesheets no Estúdio e teste offline/file:// com persistência real no IndexedDB. Não marcar PR #14 ready nem mesclar na #11 até concluir as verificações.
 - **PR #13:** permanece aberta e fora da cadeia; não foi mesclada sobre a #14.
 - **Main:** não foi alterada nesta operação.
+
+---
+
+## Atualização 07/11/2026 — PR #13 encerrada como supersedida; PR #14 continua WIP=1
+
+Esta atualização substitui as instruções históricas anteriores que diziam para não fechar a PR #13 antes de preservar seus arquivos.
+
+### GC-CHAR-001 — decisão sobre a PR #13
+- PR [#13](https://github.com/LORECRONICASAPOENA/GameCreator/pull/13) foi **fechada sem merge**, como supersedida pela implementação escolhida da PR [#14](https://github.com/LORECRONICASAPOENA/GameCreator/pull/14). A branch original foi mantida.
+- HEAD fechado: `34a0a722444448e384c91286affecf0f50217038`.
+- Inventário dos 26 caminhos alterados na PR #13: nenhum arquivo exclusivo da PR está ausente simultaneamente da `main` e da branch da PR #14. Os arquivos funcionais compartilhados foram preservados com blobs idênticos; as versões divergentes de workflow, Estúdio, módulo integrado, editor de personagens e teste de navegador são substituídas pelas versões posteriores da PR #14.
+- As três spritesheets de referência já estão preservadas na `main` e na PR #14 com os mesmos blobs. Os documentos históricos (ideia, registro inicial e relatório GC-CI-013) também estão na `main`/PR #14. O relatório GC-CI-014 da PR #14 contém proveniência de commits e agora documenta os controles de PAT.
+- O trecho de protótipo do README da #13 continha limites já superados; seu conteúdo útil de operação foi reescrito como **Uso rápido — Criador Modular de Personagens** no README da PR #14. Os snapshots antigos da fila continuam preservados como histórico; esta seção registra o estado atual.
+- Backups confirmados: `backup/gc-pr13-pre-closeout-20261107` → `34a0a722444448e384c91286affecf0f50217038`; `backup/gc-pr14-pre-pr13-closeout-20261107` → `ce4e7a26a611f7e941ce36f2ac15837391776583`; backups anteriores também permanecem.
+- Os nove threads históricos do CodeRabbit continuam preservados na PR fechada. Não foram apagados nem convertidos em aprovação da PR #14.
+
+### Findings históricos da revisão da PR #13
+- Workflow: ambos os testes de navegador incluem candidatos em Program Files e Program Files (x86).
+- Corrida de presets: a PR #14 usa guard de solicitação e teste para descartar carregamentos obsoletos.
+- Limite acumulado: a nova camada é aplicada a um candidato validado por `C.validate` antes de criar snapshot/confirmar a importação; o limite de 48 MB rejeita a montagem antes de alterar o projeto.
+- Manifesto: a ponte valida limite de 256 KB antes de gravar no Creator.
+- README: os limites obsoletos do protótipo foram substituídos por descrição e guia compatíveis com a implementação atual.
+- Incidentes: a versão da PR #14 preenche a proveniência do relatório GC-CI-014 e os campos de GC-CI-013/014 com valores preservados ou limitações explícitas.
+- PAT: o relatório GC-CI-014 agora exige token dedicado, curta duração, privilégio mínimo, proteção de histórico/logs e revogação após o diagnóstico. Nenhum PAT foi criado ou utilizado nesta atualização.
+- Esses itens reconciliam findings antigos; **não equivalem a uma nova revisão independente do HEAD atual da PR #14**.
+
+### PR #14 — estado atual e validação
+- Continua **aberta e em Draft**, não mesclada. A branch da PR #14 continua sendo a linha única de integração do Criador Modular; a PR #13 não deve ser reaberta nem mesclada sobre ela.
+- Código validado no HEAD `ce4e7a26a611f7e941ce36f2ac15837391776583`, pelo [run #42290749610](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42290749610), `completed/success`. As etapas funcionais 1–24 passaram; as etapas de empacotamento/logs 25–27 foram skipped pelas condições do evento PR. Os commits posteriores desta atualização são exclusivamente documentais.
+- README atualizado com guia operacional; relatório GC-CI-014 atualizado com controles de PAT; este checkpoint atualiza o estado de PRs e pendências.
+- **Aceite manual ainda pendente:** executar no Windows o fluxo offline `file://` com IndexedDB real do navegador: importar peça, editar, salvar, fechar/reabrir, reabrir pela Biblioteca, gravar no Creator, salvar o projeto principal e confirmar persistência após nova abertura.
+- **Revisão independente ainda pendente:** solicitar/obter review formal do CodeRabbit ou de outro revisor no HEAD atualizado da PR #14. Os findings antigos da #13 foram reconciliados, mas não substituem uma revisão nova.
+- A PR #11 já foi integrada na `main` pelo merge `e9335b9527fc20c1ee6bf95c7729f8a82e68339c`; CI pós-merge [#42374165197](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42374165197) terminou `completed/success`.
+- **Próximas ações:** concluir aceite manual offline/IndexedDB e revisão independente; depois retargetear a #14 para `main`, confirmar o diff, executar CI canônica no novo SHA e somente então avaliar sair de Draft/merge. Não mesclar a #14 antes desses critérios.
+- **WIP=1 permanece ativo** em GC-CHAR-001 / PR #14. Não iniciar outro eixo de implementação em GameCreator/Pixel Art em paralelo.
+
