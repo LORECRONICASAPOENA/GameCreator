@@ -146,3 +146,17 @@ Em 02/11/2026, o autor enviou nova captura do console `run.cmd - game creator`. 
 5. Não alterar o código do GameCreator por causa do conflito de sessão.
 
 **Estado atualizado:** runner recuperado e escutando trabalhos na captura; estabilidade e causa-raiz ainda pendentes; PR #11 ainda sem validação aprovada no CI.
+
+## 12. Controles de segurança para diagnóstico com PAT — 07/11/2026
+
+Esta atualização fecha uma lacuna documental identificada na revisão: a orientação anterior dizia para fornecer o PAT apenas localmente, mas não detalhava como reduzir sua exposição. Ela não altera o diagnóstico histórico nem afirma que um PAT foi usado nesta sessão. Nenhum valor de token é armazenado neste relatório.
+
+Para uma eventual execução futura de config.cmd --check:
+
+- Criar um PAT dedicado e de curta duração, com acesso somente ao repositório necessário e o menor conjunto de permissões exigido pela documentação oficial vigente. Preferir token fine-grained quando compatível.
+- Executar o diagnóstico apenas em sessão local confiável do Windows. Não inserir o PAT em scripts, arquivos .ps1/.cmd, variáveis persistentes, tickets, commits, conversas ou transcrições.
+- Como o argumento de linha de comando pode ficar visível a processos locais e ao histórico do shell, desativar temporariamente a gravação do histórico do PSReadLine e não iniciar transcript/log de terminal durante a passagem do segredo. Se a ferramenta exigir o PAT em argumento, manter a sessão privada e encerrar os processos de diagnóstico assim que terminar.
+- Verificar os logs gerados antes de compartilhá-los; remover qualquer ocorrência do token sem apagar evidências não sensíveis do incidente.
+- Revogar o PAT imediatamente após o diagnóstico e confirmar que não permanece em scripts, histórico, arquivos temporários ou logs.
+
+**Estado desta correção documental:** controles de menor privilégio, curta duração, proteção de histórico/logs e revogação foram documentados. Nenhum token foi criado, solicitado, exibido ou utilizado nesta atualização.
