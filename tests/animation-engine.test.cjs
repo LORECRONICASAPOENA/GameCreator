@@ -53,6 +53,10 @@ assert.equal(engine.SCHEMA, 'apoena.animation.v1');
 assert.equal(clip.version, 1);
 assert.equal(engine.validateClip(clip).valid, true);
 
+const fractionalClip = engine.createClip({ id: 'fractional-fps', name: 'FPS fracionário', fps: 12.5, durationFrames: 2 });
+assert.equal(fractionalClip.fps, 12.5, 'o contrato preserva FPS fracionário');
+assert.equal(engine.getPlaybackPosition({ durationFrames: 4, fps: 12.5, loopMode: 'loop', elapsedMs: 80 }).frame, 1, 'playback preserva FPS fracionário');
+
 const sample = engine.sampleClip(clip, 125);
 assert.equal(sample.frame, 1.5, 'a amostragem preserva a posição fracionária da timeline');
 assert.equal(sample.frameIndex, 1);

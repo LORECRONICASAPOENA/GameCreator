@@ -72,8 +72,8 @@
     var durationFrames = input.durationFrames;
     var loopMode = input.loopMode;
 
-    if (!Number.isInteger(fps) || fps < 1 || fps > MAX_FPS) {
-      errors.push('fps deve ser inteiro entre 1 e ' + MAX_FPS + '.');
+    if (typeof fps !== 'number' || !Number.isFinite(fps) || fps < 1 || fps > MAX_FPS) {
+      errors.push('fps deve ser um número entre 1 e ' + MAX_FPS + '.');
     }
     if (!Number.isInteger(durationFrames) || durationFrames < 1 || durationFrames > MAX_DURATION_FRAMES) {
       errors.push('durationFrames deve ser inteiro entre 1 e ' + MAX_DURATION_FRAMES + '.');
@@ -300,7 +300,7 @@
     if (!Number.isInteger(durationFrames) || durationFrames < 1 || durationFrames > MAX_DURATION_FRAMES) {
       throw new RangeError('durationFrames inválido para playback.');
     }
-    if (!Number.isInteger(fps) || fps < 1 || fps > MAX_FPS) {
+    if (typeof fps !== 'number' || !Number.isFinite(fps) || fps < 1 || fps > MAX_FPS) {
       throw new RangeError('fps inválido para playback.');
     }
     if (LOOP_MODES.indexOf(loopMode) === -1) throw new RangeError('loopMode inválido para playback.');

@@ -36,7 +36,7 @@ O motor é um serviço de domínio independente da interface. O Estúdio Pixel A
 
 ## Limites e segurança
 
-- FPS: 1–60.
+- FPS: 1–60, inclusive valores fracionários.
 - Duração: 1–6.000 frames.
 - Até 256 tracks, 10.000 keyframes por track e 50.000 no clip.
 - IDs e propriedades são declarativos; nenhum código externo, eval ou script importado é executado.
