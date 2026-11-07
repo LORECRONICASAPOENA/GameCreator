@@ -454,3 +454,11 @@ Esta seção é o estado mais recente e prevalece sobre os snapshots históricos
 - A PR #14 não foi mesclada nem retirada de Draft. Permanecem pendentes: revisão independente do novo diff e aceite manual offline `file://` com IndexedDB real (importar, editar, salvar, fechar/reabrir, reabrir pela Biblioteca, gravar no Creator e confirmar persistência do projeto principal).
 - Próximo passo: confirmar CI no SHA de sincronização, retargetear a PR #14 para `main`, confirmar o diff de 46 arquivos e executar/observar CI da PR #14 contra a base final. Não mesclar a PR #14 antes da revisão independente e do aceite manual.
 
+### Incidente de CI — run #42378776734: escape duplo no teste de concorrência (07/11/2026)
+
+- Run [#42378776734](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42378776734), tentativa 1, SHA `74614a6c97e86f6e0be7519ddb30b7e4138cc8df`, concluiu `completed/failure` no step 11 (`Testar concorrência dos presets Apoena`).
+- **Causa comprovada:** `tests/preset-request-guard.test.cjs:26` recebeu barras invertidas duplicadas ao gerar quatro RegExp; Node lançou `SyntaxError: Invalid regular expression ... Unterminated group`. Erro no teste, não no produto nem no runner.
+- Steps 1–10 passaram; steps 12–26 foram skipped; step 27 anexou artefato `v41-ci-diagnostics` ID `13576454021` com sucesso.
+- Relatório individual: [2026-11-07-run-42378776734-regex-duplamente-escapada.md](relatorios-actions/2026-11-07-run-42378776734-regex-duplamente-escapada.md).
+- Backup antes da correção: `backup/gc-pr14-pre-regex-test-fix-20261107` → `74614a6c97e86f6e0be7519ddb30b7e4138cc8df`.
+- Próxima ação: corrigir somente o escape das assertions, preservar cobertura e aguardar a CI canônica no novo SHA. Não retargetear/mesclar a PR #14 até a validação passar.

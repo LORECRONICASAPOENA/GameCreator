@@ -716,3 +716,13 @@ O run [#41704904027](https://github.com/apoenalore/GameCreator/actions/runs/4170
 - **Relatório:** `docs/relatorios-actions/2026-11-06-run-42276102355-pixel-art-export-test-ausente.md`.
 - **Follow-up:** a PR #19 foi mesclada na branch-base #11 em 2026-11-06T19:56:11Z (merge commit `8acf515c6be8f097b05b4231608894f06740ab17`); a CI da PR #11 [run 42283992136](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42283992136) terminou success no mesmo SHA.
 
+### GC-CI-022 — literal RegExp duplamente escapado no teste de concorrência (07/11/2026)
+
+- **Ocorrência:** [run 42378776734](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42378776734), tentativa 1; job `validar` ID `128421776860`, step 11, branch `feat/apoena-modular-character-creator-integration`, SHA `74614a6c97e86f6e0be7519ddb30b7e4138cc8df`.
+- **Erro literal:** `SyntaxError: Invalid regular expression: /if\\s*\\(presetRequestGuard\\.isCurrent\\(requestId\\)\\)\\s*msg\\(/: Unterminated group`; stack trace aponta `tests/preset-request-guard.test.cjs:26`.
+- **Causa comprovada:** quatro assertions foram compostas em uma template string com duas barras invertidas no código-fonte do literal RegExp. O parser recebeu `\\s`/`\\(` e rejeitou a expressão antes de executar a suíte. Não é falha do runner nem do código de produção.
+- **Impacto:** steps 1–10 passaram; step 11 falhou antes das assertions; steps 12–26 foram skipped; step 27 anexou o artefato de diagnóstico com sucesso. O teste de concorrência e os testes posteriores não foram validados nessa tentativa.
+- **Correção escolhida:** corrigir somente o escape das assertions em `tests/preset-request-guard.test.cjs`, preservando toda a cobertura. Não remover assertions nem alterar o Estúdio.
+- **Validação:** pendente no próximo run canônico, que deve testar o novo SHA. Não marcar como resolvido até `success`.
+- **Prevenção:** ao gerar código JavaScript em template strings, conferir o texto final gravado e validar sintaxe/teste focado antes do commit quando disponível.
+- **Relatório:** [2026-11-07-run-42378776734-regex-duplamente-escapada.md](relatorios-actions/2026-11-07-run-42378776734-regex-duplamente-escapada.md).
