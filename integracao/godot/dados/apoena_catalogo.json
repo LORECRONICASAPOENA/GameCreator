@@ -1,0 +1,77 @@
+{
+  "schema": "apoena.gamecreator.catalogo.v1",
+  "version": 1,
+  "project": "Fixture de testes",
+  "game_id": "apoena-test",
+  "items": [
+    {
+      "id": "madeira",
+      "name": "Madeira",
+      "consumable": false,
+      "effect": {
+        "type": "nenhum",
+        "value": 0,
+        "duration": 0
+      }
+    },
+    {
+      "id": "tabua",
+      "name": "Tábua",
+      "consumable": false,
+      "effect": {
+        "type": "nenhum",
+        "value": 0,
+        "duration": 0
+      }
+    },
+    {
+      "id": "tijolo",
+      "name": "Tijolo",
+      "consumable": false,
+      "effect": {
+        "type": "nenhum",
+        "value": 0,
+        "duration": 0
+      }
+    },
+    {
+      "id": "pocao",
+      "name": "Poção",
+      "consumable": true,
+      "effect": {
+        "type": "restaurar_hp_fixo",
+        "value": 15,
+        "duration": 0
+      }
+    }
+  ],
+  "recipes": [
+    {
+      "id": "fazer-tabua",
+      "resultId": "tabua",
+      "quantity": 2,
+      "ingredients": [
+        {
+          "id": "madeira",
+          "qty": 2
+        }
+      ],
+      "gold": 1,
+      "seconds": 0
+    },
+    {
+      "id": "fazer-tijolo",
+      "resultId": "tijolo",
+      "quantity": 1,
+      "ingredients": [
+        {
+          "id": "madeira",
+          "qty": 1
+        }
+      ],
+      "gold": 0,
+      "seconds": 2
+    }
+  ],
+  "assets": []
+}

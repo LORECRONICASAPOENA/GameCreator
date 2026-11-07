@@ -1,0 +1,522 @@
+on:
+  push:
+    paths:
+      - "index.html"
+      - "bundle-v4/**"
+      - "ATUALIZAR_CREATOR.cmd"
+      - "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
+      - "pixel-art/**"
+      - "shared/**"
+      - "biblioteca/**"
+      - "map-editor/**"
+      - "integracao/**"
+      - "legacy/**"
+      - "**/*.gd"
+      - "tests/**"
+      - "package.json"
+      - "README.md"
+      - "ORGANIZACAO_EDITOR.md"
+      - ".github/workflows/**"
+  pull_request:
+    branches: [main, feat/apoena-personagem-estudio-main]
+    paths:
+      - "index.html"
+      - "bundle-v4/**"
+      - "ATUALIZAR_CREATOR.cmd"
+      - "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
+      - "pixel-art/**"
+      - "shared/**"
+      - "biblioteca/**"
+      - "map-editor/**"
+      - "integracao/**"
+      - "legacy/**"
+      - "**/*.gd"
+      - "tests/**"
+      - "package.json"
+      - "README.md"
+      - "ORGANIZACAO_EDITOR.md"
+      - ".github/workflows/**"
+  workflow_dispatch:
+permissions:
+  contents: read
+
+concurrency:
+  # Push e pull_request da mesma branch compartilham um único grupo.
+  # Uma execução mais recente substitui a anterior, evitando fila duplicada.
+  group: apoena-creator-validation-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  validar:
+    runs-on: [self-hosted, Windows, X64]
+    defaults:
+      run:
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Preparar diagnosticos do runner Windows
+        run: |
+          $ErrorActionPreference = "Stop"
+          $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
+          New-Item -ItemType Directory -Force -Path $diagDir | Out-Null
+          $log = Join-Path $diagDir "runner.log"
+          "Runner OS: $env:RUNNER_OS" | Out-File -FilePath $log -Encoding utf8
+          "Runner name: $env:RUNNER_NAME" | Out-File -FilePath $log -Append -Encoding utf8
+          $nodeOutput = & node --version 2>&1
+          $nodeCode = $LASTEXITCODE
+          $nodeOutput | Out-File -FilePath $log -Append -Encoding utf8
+          if ($nodeCode -ne 0) { throw "node --version falhou com codigo $nodeCode." }
+          $npmOutput = & npm --version 2>&1
+          $npmCode = $LASTEXITCODE
+          $npmOutput | Out-File -FilePath $log -Append -Encoding utf8
+          if ($npmCode -ne 0) { throw "npm --version falhou com codigo $npmCode." }
+
+      - name: Preservar loader e compilar Creator nativo V4.0
+        run: |
+          $ErrorActionPreference = "Stop"
+          $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
+          New-Item -ItemType Directory -Force -Path $diagDir | Out-Null
+          Copy-Item -LiteralPath (Join-Path $env:GITHUB_WORKSPACE "index.html") -Destination (Join-Path $diagDir "index-loader.html") -Force
+          $tokens = $null
+          $parseErrors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path "integracao/build_unificado.ps1"), [ref]$tokens, [ref]$parseErrors) | Out-Null
+          if ($parseErrors.Count -gt 0) { throw ("Sintaxe PowerShell inválida: " + (($parseErrors | ForEach-Object { $_.Message }) -join "; ")) }
+          & (Join-Path $env:GITHUB_WORKSPACE "integracao/build_unificado.ps1") 2>&1 | Tee-Object -FilePath (Join-Path $diagDir "build.log")
+          $built = Get-Content -Raw (Join-Path $env:GITHUB_WORKSPACE "index.html")
+          foreach ($required in @('id="page-pixelart"', 'shared/asset-library.js', 'shared/creator-bridge.js', 'pixel-art/natureza.js', 'pixel-art/modulo-integrado.js', 'pixel-art/ponte-creator.js')) {
+            if (-not $built.Contains($required)) { throw "Build nativo incompleto: $required" }
+          }
+          if ($built.Contains("<iframe")) { throw "A entrada nativa nao pode substituir o Creator por iframe." }
+          $hash = Get-FileHash -LiteralPath (Join-Path $env:GITHUB_WORKSPACE "index.html") -Algorithm SHA256
+          "Build nativo OK; bytes=$((Get-Item index.html).Length); SHA256=$($hash.Hash)" | Tee-Object -FilePath (Join-Path $diagDir "build.log") -Append
+      - name: Verificar DOM responsivo do Estudio, Mapas e Biblioteca no navegador
+        run: |
+          $ErrorActionPreference = "Stop"
+          $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
+          $programFilesX86 = [Environment]::GetEnvironmentVariable("ProgramFiles(x86)")
+          $candidates = @(
+            (Join-Path $env:ProgramFiles "Microsoft/Edge/Application/msedge.exe"),
+            (Join-Path $programFilesX86 "Microsoft/Edge/Application/msedge.exe"),
+            (Join-Path $env:ProgramFiles "Google/Chrome/Application/chrome.exe"),
+            (Join-Path $programFilesX86 "Google/Chrome/Application/chrome.exe")
+          )
+          $browser = $candidates | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1
+          if (-not $browser) { throw "Edge/Chrome nao encontrado: o smoke test do navegador nao pode ser considerado aprovado." }
+          $logPath = Join-Path $diagDir "browser-loader.log"
+          "Browser: $browser | Viewport mobile: 390x844" | Set-Content -Encoding UTF8 $logPath
+          $targets = @(
+            @{
+              Name = "studio"
+              RelativePath = "pixel-art/estudio.html"
+              Required = @('id="file"', 'id="librarySave"', 'id="detectSprites"', 'id="exportSheet"', 'corte-inteligente.js')
+            },
+            @{
+              Name = "map-editor"
+              RelativePath = "map-editor/index.html"
+              Required = @('id="stage"', 'id="saveMapLibrary"', 'id="checkTilesetFit"', 'shared/asset-library.js')
+            },
+            @{
+              Name = "library"
+              RelativePath = "biblioteca/index.html"
+              Required = @('id="exportBackup"', 'id="importBackup"', 'id="projects"', 'shared/library-backup.js')
+            }
+          )
+          foreach ($target in $targets) {
+            $entryPath = Join-Path $env:GITHUB_WORKSPACE $target.RelativePath
+            if (-not (Test-Path -LiteralPath $entryPath)) { throw "Pagina ausente para smoke test: $($target.RelativePath)" }
+            $entryUri = ([System.Uri]$entryPath).AbsoluteUri
+            $domPath = Join-Path $env:RUNNER_TEMP ("apoena-" + $target.Name + "-" + $env:GITHUB_RUN_ID + ".html")
+            $stderrPath = Join-Path $env:RUNNER_TEMP ("apoena-" + $target.Name + "-" + $env:GITHUB_RUN_ID + ".stderr.log")
+            $profile = Join-Path $env:RUNNER_TEMP ("apoena-browser-" + $target.Name + "-" + $env:GITHUB_RUN_ID)
+            if (Test-Path -LiteralPath $profile) { Remove-Item -LiteralPath $profile -Recurse -Force }
+            $arguments = '--headless --disable-gpu --no-first-run --no-default-browser-check --disable-extensions --disable-javascript --allow-file-access-from-files --window-size=390,844 --virtual-time-budget=1000 --user-data-dir="' + $profile + '" --dump-dom "' + $entryUri + '"'
+            $process = Start-Process -FilePath $browser -ArgumentList $arguments -RedirectStandardOutput $domPath -RedirectStandardError $stderrPath -Wait -PassThru
+            if (Test-Path -LiteralPath $stderrPath) { Get-Content -LiteralPath $stderrPath | Add-Content -Encoding UTF8 $logPath }
+            if ($process.ExitCode -ne 0) { throw "Navegador encerrou com codigo $($process.ExitCode) ao abrir $($target.RelativePath)." }
+            if (-not (Test-Path -LiteralPath $domPath) -or (Get-Item -LiteralPath $domPath).Length -lt 500) {
+              throw "DOM vazio ou incompleto em $($target.RelativePath)."
+            }
+            $dom = Get-Content -Raw $domPath
+            foreach ($required in $target.Required) {
+              if (-not $dom.Contains($required)) { throw "Smoke test mobile falhou em $($target.RelativePath); marcador ausente: $required" }
+            }
+            if ($dom.Contains("Nao foi possivel abrir a versao unificada")) { throw "O Creator exibiu tela de erro no navegador." }
+            "BROWSER_MOBILE_DOM_OK: $($target.Name)" | Add-Content -Encoding UTF8 $logPath
+            Remove-Item -LiteralPath $domPath -Force -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $profile -Recurse -Force -ErrorAction SilentlyContinue
+          }
+      - name: Verificar sintaxe do build Python quando disponivel
+        run: |
+          $ErrorActionPreference = "Stop"
+          $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
+          $logPath = Join-Path $diagDir "python-build.log"
+          $python = Get-Command python.exe -ErrorAction SilentlyContinue
+          if (-not $python -or $python.Source -match '\\Microsoft\\WindowsApps\\python(?:3)?\.exe$') {
+            "PYTHON_NOT_INSTALLED: build_unificado.py nao foi compilado neste runner." | Set-Content -Encoding UTF8 $logPath
+            Write-Warning "Python nao instalado (ou somente alias da Microsoft Store); teste opcional ignorado. Build principal PowerShell continua validado."
+            return
+          }
+          $pythonPath = $python.Source
+          $oldPreference = $ErrorActionPreference
+          $ErrorActionPreference = "Continue"
+          $versionOutput = & $pythonPath --version 2>&1
+          $versionExitCode = $LASTEXITCODE
+          $ErrorActionPreference = $oldPreference
+          $versionOutput | Set-Content -Encoding UTF8 $logPath
+          if ($versionExitCode -ne 0) {
+            "PYTHON_NOT_EXECUTABLE: verificacao de sintaxe Python nao executada." | Add-Content -Encoding UTF8 $logPath
+            Write-Warning "Python nao executavel; teste opcional ignorado. Build principal PowerShell continua validado."
+            return
+          }
+          $pythonCode = 'import ast, pathlib; ast.parse(pathlib.Path("integracao/build_unificado.py").read_text(encoding="utf-8")); print("Python build syntax OK")'
+          $ErrorActionPreference = "Continue"
+          $syntaxOutput = & $pythonPath -c $pythonCode 2>&1
+          $syntaxExitCode = $LASTEXITCODE
+          $ErrorActionPreference = $oldPreference
+          $syntaxOutput | Add-Content -Encoding UTF8 $logPath
+          if ($syntaxExitCode -ne 0) { throw "Sintaxe do build Python invalida. Consulte .ci-results/python-build.log." }
+      - name: Instalar dependencias de teste
+        run: |
+          npm install --no-package-lock --ignore-scripts --no-audit --no-fund 2>&1 | Tee-Object -FilePath .ci-results/install.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Validar sintaxe JavaScript
+        run: |
+          node --check pixel-art/estudio.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check pixel-art/corte-inteligente.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check shared/asset-library.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check shared/tileset-check.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check shared/library-backup.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check shared/creator-bridge.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check pixel-art/ponte-creator.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check pixel-art/modulo-integrado.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check pixel-art/natureza.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check map-editor/modulo-integrado.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check integracao/catalogo.js 2>&1 | Tee-Object -FilePath .ci-results/syntax.log -Append
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Testar Corte Inteligente e contratos da interface
+        run: |
+          node tests/corte-inteligente.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/corte.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Testar concorrência dos presets Apoena
+        run: |
+          node --check pixel-art/estudio.js
+          if ($LASTEXITCODE -ne 0) { throw "Sintaxe do Estúdio inválida." }
+          node --check pixel-art/preset-request-guard.js
+          if ($LASTEXITCODE -ne 0) { throw "Sintaxe do guard de presets inválida." }
+          node tests/preset-request-guard.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw "Teste de concorrência dos presets falhou." }
+      - name: Testar exportação pixel-perfect do Estúdio
+        run: |
+          node tests/pixel-art-export.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/pixel-art-export.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Testar verificador de encaixe dos tilesets
+        run: |
+          node tests/tileset-check.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/tileset.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Testar biblioteca e persistencia IndexedDB
+        run: |
+          node tests/asset-library.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/library.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Testar backup e restauracao da biblioteca
+        run: |
+          cmd /c "node tests/library-backup.test.cjs > .ci-results\library-backup.log 2>&1"
+          $testCode = $LASTEXITCODE
+          Get-Content .ci-results/library-backup.log
+          if ($testCode -ne 0) { exit $testCode }
+      - name: Testar exportacao de catalogo e contrato Godot
+        run: |
+          node tests/catalogo.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/catalogo.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Testar protocolo de sincronizacao entre V4.0 e V4.1
+        run: |
+          node tests/creator-bridge.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/creator-bridge.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Validar contratos de integração do Creator
+        run: |
+          $ErrorActionPreference = "Continue"
+          $required = @(
+            @{ Name = "integration-catalog"; Command = "node --check integracao/catalogo.js" },
+            @{ Name = "integration-terrain"; Command = "node --check map-editor/terrain-system.js" },
+            @{ Name = "integration-world"; Command = "node --check map-editor/world-object-system.js" },
+            @{ Name = "integration-nature"; Command = "node --check pixel-art/natureza.js" },
+            @{ Name = "integration-test-catalog"; Command = "node integracao/testes/catalogo.test.js" },
+            @{ Name = "integration-test-terrain"; Command = "node integracao/testes/terrain-system.test.cjs" },
+            @{ Name = "integration-test-world"; Command = "node integracao/testes/world-object-system.test.cjs" },
+            @{ Name = "integration-test-nature"; Command = "node integracao/testes/natureza.test.cjs" }
+          )
+          $optional = @()
+          if (Test-Path -LiteralPath "integracao/modos-partida.js") {
+            $optional += @{ Name = "integration-mode"; Command = "node --check integracao/modos-partida.js" }
+            $optional += @{ Name = "integration-test-modes"; Command = "node integracao/testes/modos-partida.test.cjs" }
+          } else {
+            Write-Output "SKIP: contratos de modos ainda não estão neste branch."
+          }
+          if (Test-Path -LiteralPath "integracao/sistemas-mundo.js") {
+            $optional += @{ Name = "integration-systems"; Command = "node --check integracao/sistemas-mundo.js" }
+            $optional += @{ Name = "integration-test-systems"; Command = "node integracao/testes/sistemas-mundo.test.cjs" }
+          } else {
+            Write-Output "SKIP: contratos de sistemas de mundo ainda não estão neste branch."
+          }
+          $failed = $false
+          foreach ($item in @($required) + @($optional)) {
+            $logPath = ".ci-results/$($item.Name).log"
+            cmd /c "$($item.Command) > $logPath 2>&1"
+            $testCode = $LASTEXITCODE
+            Write-Output "$($item.Name) (exit $testCode)"
+            if (Test-Path $logPath) { Get-Content $logPath }
+            if ($testCode -ne 0) { $failed = $true }
+          }
+          if ($failed) { exit 1 }
+      - name: Validar manifesto do atualizador Windows quando presente
+        run: |
+          $ErrorActionPreference = "Stop"
+          $updater = "integracao/atualizar-creator.ps1"
+          $test = "tests/atualizador-manifest.test.cjs"
+          if ((Test-Path -LiteralPath $updater) -and (Test-Path -LiteralPath $test)) {
+            $tokens = $null
+            $parseErrors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path -LiteralPath $updater).Path, [ref]$tokens, [ref]$parseErrors) | Out-Null
+            if ($parseErrors.Count -gt 0) {
+              $parseErrors | ForEach-Object { Write-Error $_.Message }
+              throw "Sintaxe do atualizador PowerShell inválida."
+            }
+            node --check $test
+            if ($LASTEXITCODE -ne 0) { throw "Sintaxe do teste de manifesto falhou." }
+            node $test
+            if ($LASTEXITCODE -ne 0) { throw "Contrato do manifesto do atualizador falhou." }
+          } else {
+            Write-Output "SKIP: atualizador Windows ainda não está presente neste branch."
+          }
+
+      - name: Testar hidrologia e erosao quando presente
+        run: |
+          $ErrorActionPreference = "Stop"
+          $corePath = "map-editor/hidrologia-core.js"
+          $testPath = "tests/hidrologia.test.cjs"
+          $hasCore = Test-Path -LiteralPath $corePath
+          $hasTest = Test-Path -LiteralPath $testPath
+          if ($hasCore -ne $hasTest) {
+            throw "Implementacao hidrologica incompleta: motor e teste precisam existir juntos."
+          }
+          if (-not $hasCore) {
+            Write-Output "SKIP: hidrologia ainda nao existe nesta branch."
+            return
+          }
+          node --check $corePath
+          if ($LASTEXITCODE -ne 0) { throw "Sintaxe do motor hidrologico falhou." }
+          node --check $testPath
+          if ($LASTEXITCODE -ne 0) { throw "Sintaxe do teste hidrologico falhou." }
+          node $testPath
+          if ($LASTEXITCODE -ne 0) { throw "Testes de chuva, bacias, erosao e persistencia falharam." }
+
+      - name: Testar runtime Godot 4 (instalacao portatil verificada)
+        run: |
+          $ErrorActionPreference = "Stop"
+          $diagDir = Join-Path $env:GITHUB_WORKSPACE ".ci-results"
+          $logPath = Join-Path $diagDir "godot-runtime.log"
+          $godotExe = $null
+          foreach ($commandName in @("godot", "godot4")) {
+            $candidate = Get-Command $commandName -ErrorAction SilentlyContinue
+            if ($candidate) {
+              $candidateVersion = (& $candidate.Source --version 2>&1 | Out-String).Trim()
+              if ($candidateVersion -match '^4\.') { $godotExe = $candidate.Source; break }
+            }
+          }
+          if (-not $godotExe) {
+            $version = "4.7.2-stable"
+            $archiveName = "Godot_v4.7.2-stable_win64.exe.zip"
+            $archivePath = Join-Path $env:RUNNER_TEMP $archiveName
+            $installDir = Join-Path $env:RUNNER_TEMP "apoena-godot-4.7.2"
+            $url = "https://github.com/godotengine/godot/releases/download/4.7.2-stable/$archiveName"
+            $expectedHash = "731980f9608d61333e5baf54a2ef17210acc7a538446c0cb9969f002aca1e953"
+            $ProgressPreference = "SilentlyContinue"
+            Invoke-WebRequest -Uri $url -OutFile $archivePath -UseBasicParsing
+            $actualHash = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actualHash -ne $expectedHash) { throw "SHA256 do pacote Godot nao confere. Esperado: $expectedHash; recebido: $actualHash" }
+            if (Test-Path -LiteralPath $installDir) { Remove-Item -LiteralPath $installDir -Recurse -Force }
+            Expand-Archive -LiteralPath $archivePath -DestinationPath $installDir -Force
+            $godotExe = Join-Path $installDir "Godot_v4.7.2-stable_win64.exe"
+            if (-not (Test-Path -LiteralPath $godotExe)) { throw "Executavel Godot nao encontrado apos extracao: $godotExe" }
+            "Godot baixado da origem oficial; versao=$version; SHA256=$actualHash" | Set-Content -Encoding UTF8 $logPath
+          }
+          $versionOutput = (& $godotExe --version 2>&1 | Out-String).Trim()
+          if ($versionOutput -notmatch '^4\.') { throw "Godot 4 necessario; encontrado: $versionOutput" }
+          "Runtime: $godotExe | Versao: $versionOutput" | Add-Content -Encoding UTF8 $logPath
+          $projectPath = Join-Path $env:GITHUB_WORKSPACE "integracao/godot"
+          $testPath = Join-Path $projectPath "tests/test_catalogo.gd"
+          if (-not (Test-Path -LiteralPath $testPath)) { throw "Teste GDScript ausente: $testPath" }
+          $stdoutPath = Join-Path $env:RUNNER_TEMP ("apoena-godot-stdout-" + $env:GITHUB_RUN_ID + ".log")
+          $stderrPath = Join-Path $env:RUNNER_TEMP ("apoena-godot-stderr-" + $env:GITHUB_RUN_ID + ".log")
+          $arguments = '--headless --path "' + $projectPath + '" --script "res://tests/test_catalogo.gd"'
+          $process = Start-Process -FilePath $godotExe -ArgumentList $arguments -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath -Wait -PassThru
+          if (Test-Path -LiteralPath $stdoutPath) { Get-Content -LiteralPath $stdoutPath | Add-Content -Encoding UTF8 $logPath }
+          if (Test-Path -LiteralPath $stderrPath) { Get-Content -LiteralPath $stderrPath | Add-Content -Encoding UTF8 $logPath }
+          $godotCode = $process.ExitCode
+          if ($godotCode -ne 0) { throw "Teste de runtime Godot falhou com codigo $godotCode. Consulte .ci-results/godot-runtime.log." }
+          $godotLog = Get-Content -Raw $logPath
+          if (-not $godotLog.Contains("GODOT CATALOG TEST OK")) { throw "Godot terminou sem confirmar a suite de catalogo." }
+          "GODOT_RUNTIME_TEST_OK" | Add-Content -Encoding UTF8 $logPath
+      - name: Garantir preservacao do Creator original e dos modulos
+        run: |
+          $required = @(
+            "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html",
+            "pixel-art/index.html",
+            "pixel-art/estudio.html",
+            "map-editor/index.html",
+            "integracao/index.html",
+            "legacy/iniciador-anterior.html"
+          )
+          foreach ($path in $required) {
+            if (-not (Test-Path $path)) { throw "Arquivo essencial ausente: $path" }
+          }
+          $index = Get-Content -Raw index.html
+          if (-not $index.Contains('id="page-pixelart"') -or -not $index.Contains('data-page="pixelart"')) {
+            throw "A aba nativa Pixel Art nao foi adicionada pelo build."
+          }
+          # Cada step do Actions tem um processo PowerShell separado; rele a fonte original.
+          $originalPath = "APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html"
+          $original = Get-Content -Raw $originalPath
+          if (-not $original.Contains("</main>")) { throw "Fonte V4.0 incompleta durante a verificacao de navegacao." }
+          # Confere todos os valores de navegacao que existiam na fonte V4.0.
+          # Isso protege a bancada original sem presumir nomes de abas inexistentes.
+          $originalPages = @([regex]::Matches($original, 'data-page="([^"]+)"') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+          if ($originalPages.Count -lt 1) { throw "Nenhuma aba original foi encontrada na fonte V4.0." }
+          foreach ($pageName in $originalPages) {
+            $marker = 'data-page="' + $pageName + '"'
+            if (-not $index.Contains($marker)) { throw "A navegacao original foi perdida: $pageName" }
+          }
+          $map = Get-Content -Raw map-editor/index.html
+          if ($map -notmatch 'asset-library.js') { throw "O editor de mapas nao carrega a biblioteca central." }
+          "Contratos de preservacao e integracao passaram." | Tee-Object -FilePath .ci-results/contracts.log
+      - name: Preparar pacote de runtime para download
+        if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        run: |
+          $ErrorActionPreference = "Stop"
+          $source = $env:GITHUB_WORKSPACE
+          if (-not $source -or -not (Test-Path -LiteralPath $source)) { throw "GITHUB_WORKSPACE invalido: $source" }
+          $stage = Join-Path $source "_delivery"
+          $project = Join-Path $stage "GameCreator-V4.1"
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          try {
+            if (Test-Path -LiteralPath $project) { Remove-Item -LiteralPath $project -Recurse -Force }
+            New-Item -ItemType Directory -Force -Path $project | Out-Null
+            $skipDirectoryNames = @(".git", "node_modules", ".ci-results", "_delivery", ".godot", "__pycache__", ".github", "docs", "historico", "legacy", "tests", "testes")
+            $skipFileNames = @("package.json", "package-lock.json", "npm-shrinkwrap.json", ".gitignore", ".gitattributes", "PUBLICAR_NO_GITHUB.cmd", "PUBLICAR_NO_GITHUB.ps1", "APOENA_GAME_CREATOR_v3_9_2_PROJETOS_SEGUROS_COMPLETO.html", "ORGANIZACAO_EDITOR.html")
+            $skipExtensions = @(".md", ".txt")
+            function Copy-RuntimeTree {
+              param([string]$SourceDirectory, [string]$DestinationDirectory)
+              New-Item -ItemType Directory -Force -Path $DestinationDirectory | Out-Null
+              foreach ($entry in Get-ChildItem -LiteralPath $SourceDirectory -Force) {
+                if ($entry.Attributes -band [System.IO.FileAttributes]::ReparsePoint) { continue }
+                if ($entry.PSIsContainer) {
+                  if ($entry.Name -eq "legacy") {
+                    $legacyTarget = Join-Path $DestinationDirectory "legacy"
+                    New-Item -ItemType Directory -Force -Path $legacyTarget | Out-Null
+                    $legacyHtml = Join-Path $entry.FullName "abrir-editor-v3.9.html"
+                    $legacyPartsSource = Join-Path $entry.FullName "v3_9_parts"
+                    if (-not (Test-Path -LiteralPath $legacyHtml)) { throw "Fábrica original ausente: legacy/abrir-editor-v3.9.html" }
+                    if (-not (Test-Path -LiteralPath $legacyPartsSource)) { throw "Partes da fábrica original ausentes: legacy/v3_9_parts" }
+                    Copy-Item -LiteralPath $legacyHtml -Destination $legacyTarget -Force
+                    $expectedLegacyParts = @(0..22 | ForEach-Object { "parte_{0:D3}.js" -f $_ })
+                    $legacyParts = @(Get-ChildItem -LiteralPath $legacyPartsSource -File -Filter "parte_*.js")
+                    $actualLegacyParts = @($legacyParts | ForEach-Object { $_.Name })
+                    $missingLegacyParts = @($expectedLegacyParts | Where-Object { $_ -notin $actualLegacyParts })
+                    $extraLegacyParts = @($actualLegacyParts | Where-Object { $_ -notin $expectedLegacyParts })
+                    if ($missingLegacyParts.Count -gt 0 -or $extraLegacyParts.Count -gt 0) { throw "Manifesto da fábrica original incompleto ou com arquivos extras." }
+                    $legacyPartsTarget = Join-Path $legacyTarget "v3_9_parts"
+                    New-Item -ItemType Directory -Force -Path $legacyPartsTarget | Out-Null
+                    foreach ($part in $legacyParts) { Copy-Item -LiteralPath $part.FullName -Destination $legacyPartsTarget -Force }
+                    continue
+                  }
+                  if ($entry.Name -in $skipDirectoryNames) { continue }
+                  Copy-RuntimeTree -SourceDirectory $entry.FullName -DestinationDirectory (Join-Path $DestinationDirectory $entry.Name)
+                  continue
+                }
+                if ($entry.Name -in $skipFileNames -or $entry.Extension.ToLowerInvariant() -in $skipExtensions) { continue }
+                Copy-Item -LiteralPath $entry.FullName -Destination $DestinationDirectory -Force
+              }
+            }
+            Copy-RuntimeTree -SourceDirectory $source -DestinationDirectory $project
+            $forbiddenPaths = @(".github", "docs", "historico", "tests", "testes", "package.json", "AGENTS.md", "README.md", "PLANO_GERAL_APOENA.md", "ORGANIZACAO_EDITOR.html", "legacy/iniciador-anterior.html")
+            foreach ($relativePath in $forbiddenPaths) {
+              if (Test-Path -LiteralPath (Join-Path $project $relativePath)) { throw "Conteúdo interno indevido no pacote: $relativePath" }
+            }
+            $forbiddenDocs = @(Get-ChildItem -LiteralPath $project -File -Recurse -Force | Where-Object { $_.Extension.ToLowerInvariant() -in @(".md", ".txt") })
+            if ($forbiddenDocs.Count -gt 0) { throw "O pacote ainda contém documentos internos: $($forbiddenDocs[0].FullName)" }
+            $requiredRuntimeFiles = @("integracao/index.html", "integracao/catalogo.js", "legacy/abrir-editor-v3.9.html")
+            foreach ($relativePath in $requiredRuntimeFiles) {
+              if (-not (Test-Path -LiteralPath (Join-Path $project $relativePath))) { throw "Arquivo de runtime obrigatório ausente: $relativePath" }
+            }
+            $legacyRoot = Join-Path $project "legacy"
+            $expectedLegacyFiles = @("abrir-editor-v3.9.html") + @(0..22 | ForEach-Object { "v3_9_parts\parte_{0:D3}.js" -f $_ })
+            $actualLegacyFiles = @(Get-ChildItem -LiteralPath $legacyRoot -File -Recurse -Force | ForEach-Object { $_.FullName.Substring($legacyRoot.Length).TrimStart([char[]]@([char]92,[char]47)) })
+            $missingLegacyFiles = @($expectedLegacyFiles | Where-Object { $_ -notin $actualLegacyFiles })
+            $extraLegacyFiles = @($actualLegacyFiles | Where-Object { $_ -notin $expectedLegacyFiles })
+            if ($missingLegacyFiles.Count -gt 0 -or $extraLegacyFiles.Count -gt 0) { throw "O pacote da fábrica original não corresponde ao manifesto mínimo." }
+            Write-Output "Documentação interna, histórico, testes e CI excluídos; somente a fábrica original necessária foi preservada."
+            $files = @(Get-ChildItem -LiteralPath $project -File -Recurse -Force | Sort-Object FullName)
+            $manifestPath = Join-Path $stage "MANIFESTO-ARQUIVOS.txt"
+            $lines = foreach ($file in $files) {
+              $relative = $file.FullName.Substring($project.Length).TrimStart([char[]]@([char]92,[char]47))
+              "{0}{1}{2} bytes" -f $relative, [char]9, $file.Length
+            }
+            @("Commit: $env:GITHUB_SHA", "Arquivos de runtime: $($files.Count)", "Documentação interna incluída: não", "", $lines) | Set-Content -Encoding UTF8 $manifestPath
+            $zipPath = Join-Path $stage "Apoena-GameCreator-V4.1.zip"
+            if (Test-Path -LiteralPath $zipPath) { Remove-Item -LiteralPath $zipPath -Force }
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            [System.IO.Compression.ZipFile]::CreateFromDirectory($project, $zipPath, [System.IO.Compression.CompressionLevel]::Optimal, $true)
+            $latest = @(
+              "ENTREGA MAIS RECENTE - APOENA GAME CREATOR V4.1",
+              "Commit: $env:GITHUB_SHA",
+              "Run: https://github.com/apoenalore/GameCreator/actions/runs/$env:GITHUB_RUN_ID",
+              "Pasta: GameCreator-V4.1",
+              "Arquivo ZIP: Apoena-GameCreator-V4.1.zip",
+              "Baixe o artefato Apoena-GameCreator-V4.1 e extraia apenas uma vez.",
+              "Manifesto: MANIFESTO-ARQUIVOS.txt",
+              "A pasta contém somente arquivos necessários para executar o Creator; documentos internos, testes e CI ficam fora.",
+              "Criado em: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')"
+            )
+            $latest | Set-Content -Encoding UTF8 (Join-Path $stage "LEIA-ME-ENTREGA.txt")
+            Write-Output "Pacote preparado no workspace do Actions."
+            Write-Output "Arquivos de runtime no ZIP: $($files.Count)"
+            Write-Output "ZIP: $zipPath"
+          } catch {
+            $errorText = "Falha ao preparar entrega: $($_.Exception.Message)"
+            $errorText | Set-Content -Encoding UTF8 (Join-Path $stage "ERRO-ENTREGA.txt")
+            Write-Error $errorText
+          }
+      - name: Disponibilizar pacote de codigo para download
+        if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-artifact@v4
+        with:
+          name: Apoena-GameCreator-V4.1
+          path: |
+            _delivery/Apoena-GameCreator-V4.1.zip
+            _delivery/LEIA-ME-ENTREGA.txt
+            _delivery/MANIFESTO-ARQUIVOS.txt
+          retention-days: 14
+          if-no-files-found: error
+      - name: Anexar logs de diagnostico
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v41-ci-diagnostics
+          path: .ci-results/
+          include-hidden-files: true
+          retention-days: 3
+          if-no-files-found: warn

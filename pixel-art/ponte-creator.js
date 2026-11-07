@@ -9,10 +9,9 @@ if(typeof state==="undefined"||typeof switchPage!=="function"){
 const root=document.getElementById("page-pixelart");
 const host=document.getElementById("gc40PixelRoot");
 if(!root||!host){console.error("Aba Pixel Art não encontrada no editor.");return}
-// O build unificado já registra a aba Pixel Art na navegação oficial.
-// Não adicionar outro atalho ao menu legado: isso produzia dois acessos concorrentes.
 const nav=document.querySelector('nav.tabs');
 const nativeButton=nav?.querySelector('[data-page="pixelart"]');
+// A navegação principal já registra a aba Pixel Art; não criar um segundo atalho concorrente.
 if(!nativeButton)console.warn("Aba Pixel Art não encontrada na navegação principal; confira o build unificado.");
 let ready=false;
 function mount(){
@@ -70,23 +69,51 @@ function savePixelCharacter(manifest,png){
 function saveMap(map){
  if(!map||map.schema!=="apoena.map2d.v1"||!Array.isArray(map.tiles)||!Number.isInteger(map.width)||!Number.isInteger(map.height))
   throw Error("Mapa Pixel Art incompatível.");
- if(map.width*map.height!==map.tiles.length)throw Error("Grade do mapa não corresponde ao tamanho.");
+ if(map.width<1||map.height<1||map.width>512||map.height>512||map.width*map.height!==map.tiles.length||map.tiles.length>262144)
+  throw Error("Grade do mapa fora dos limites seguros.");
  if(!Array.isArray(state.pixelArtMaps))state.pixelArtMaps=[];
- const name=String(map.name||"Mapa Pixel Art").trim(),id=slug(name);
+ const name=String(map.name||"Mapa Pixel Art").trim().slice(0,120)||"Mapa Pixel Art",id=slug(name)||"mapa_pixel_art";
  const idx=state.pixelArtMaps.findIndex(x=>x.id===id);
  const item={id,name,schema:"apoena.map2d.v1",project:deepCopy(map)};
  if(idx>=0)state.pixelArtMaps[idx]=item;else state.pixelArtMaps.push(item);
+ refresh();
  return item;
 }
+function savePixelAsset(manifest,png){
+ if(!manifest||manifest.schema!=="apoena.pixelart.v1"||typeof manifest.name!=="string")throw Error("Manifesto Pixel Art inválido.");
+ if(typeof png!=="string"||!png.startsWith("data:image/png;base64,"))throw Error("Spritesheet PNG inválido.");
+ if(JSON.stringify(manifest).length>50000)throw Error("Metadados Pixel Art acima de 50 KB.");
+ const name=String(manifest.name||"apoena_asset").trim().slice(0,80)||"apoena_asset";
+ const category=["personagem","animal","cenario","efeito","objeto"].includes(manifest.kind)?manifest.kind:"personagem";
+ if(category==="personagem"){
+  const resource=manifest.resource&&typeof manifest.resource==="object"?deepCopy(manifest.resource):{};
+  const native={schema:"apoena-pixel-v1",character:{nome:name,categoria:category,habitat:String(resource.habitat||""),behavior:String(resource.behavior||"")},spritesheet:deepCopy(manifest),resource};
+  const record=savePixelCharacter(native,png);
+  return {id:record.id,name:record.name,assetId:record.spriteAssetId,category};
+ }
+ const id="pixel_asset_"+slug(name);
+ addOrUpdateAsset({id,name,file:id+".png",category,source:"pixel-art-v41",data:png,metadata:deepCopy(manifest),tags:[category,"pixel-art-v41"]});
+ refresh();
+ return {id,name,category};
+}
 window.ApoenaCreatorIntegrated=Object.freeze({
- version:"4.0.pixel-art.1",
+ version:"4.1.integrated",
  getProject:()=>state,
  refresh,
  savePixelCharacter,
+ savePixelAsset,
  saveMap,
  open,
  getItem:id=>state.items?.find(x=>x.id===id)||null
 });
+if(window.ApoenaCreatorBridge?.listen){
+ window.ApoenaCreatorBridge.listen((action,payload)=>{
+  if(action==="saveAsset")return savePixelAsset(payload.manifest,payload.png);
+  if(action==="saveMap"){const saved=saveMap(payload.map);return {id:saved.id,name:saved.name}}
+  if(action==="listItems")return (Array.isArray(state.items)?state.items:[]).map(item=>({id:item.id,name:item.name}));
+  throw Error("Ação de integração não reconhecida: "+String(action||""));
+ });
+}
 // Um link contextual dentro do painel central; não cria uma segunda página inicial.
 const panel=document.getElementById("page-creator");
 if(panel&&!panel.querySelector("#gc40GoPixel")){

@@ -5,7 +5,7 @@ $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $orig = Join-Path $repo 'APOENA_GAME_CREATOR_V4_0_BANCADA_INTEGRADA.html'
 $index = Join-Path $repo 'index.html'
 if (-not (Test-Path $orig)) { throw "Falta a v4.0 original: $orig" }
-foreach($mod in @('pixel-art\natureza.js','pixel-art\modulo-integrado.js','pixel-art\ponte-creator.js','map-editor\terrain-system.js','map-editor\world-object-system.js','map-editor\modulo-integrado.js')) {
+foreach($mod in @('shared\asset-library.js','shared\creator-bridge.js','pixel-art\natureza.js','pixel-art\modulo-integrado.js','pixel-art\ponte-creator.js','map-editor\terrain-system.js','map-editor\world-object-system.js','map-editor\modulo-integrado.js')) {
   if(-not (Test-Path (Join-Path $repo $mod))) {throw "Modulo Pixel Art ausente: $mod"}
 }
 $s=[System.IO.File]::ReadAllText($orig,[System.Text.Encoding]::UTF8)
@@ -22,17 +22,30 @@ if ([string]::IsNullOrWhiteSpace($s)) {
   Write-Host "Fonte monolítica vazia; bundle-v4 validado. O index.html não foi sobrescrito."
   return
 }
-$nav=[regex]::Match($s,'(?is)<nav\b[^>]*>.*?data-page="controles".*?</nav>')
-if(-not $nav.Success) {throw "Menu principal com a aba Controles nao foi encontrado"}
+$s=[regex]::Replace($s,'<title>[^<]*</title>','<title>Apoena Game Creator v4.0 - Editor Integrado</title>',1)
+$s=$s.Replace('v3.9.2','v4.0')
+if(-not $s.Contains('</main>') -or ([regex]::Matches($s,'</body>')).Count -ne 1) {throw "Fonte V4.0 incompleta: tags de fechamento inesperadas"}
+$menuPattern='(?s)<button\b[^>]*data-page="controles"[^>]*>.*?</button>\s*</nav>'
+$menuMatches=[regex]::Matches($s,$menuPattern)
+if($menuMatches.Count -ne 1) {throw "Nao foi possivel identificar de forma inequivoca o fim do menu original"}
+$menuMatch=$menuMatches[0]
 if($s.Contains('data-page="pixelart"')) {throw "A fonte ja contem Pixel Art"}
-$s=$s.Replace('Game Creator v3.9.2 — Editor Visual Livre','Game Creator v4.0 — Editor Integrado')
-$s=$s.Replace('— Game Creator v3.9.2','— Game Creator v4.0')
-$navHtml=$nav.Value
-$navNew=$navHtml.Replace('</nav>','<button class="tab" data-page="pixelart">▧ Pixel Art • Personagens / Objetos / Mapas</button></nav>')
-$s=$s.Replace($navHtml,$navNew)
+$menuOriginal=$menuMatch.Value
+$pixelArtLabel=([char]0x25A7).ToString()+' Pixel Art '+([char]0x2022).ToString()+' Personagens / Objetos / Mapas'
+$pixelArtButton='<button class="tab" data-page="pixelart">'+$pixelArtLabel+'</button>'
+$menuNovo=$menuOriginal.Replace('</nav>',$pixelArtButton+'</nav>')
+$s=$s.Substring(0,$menuMatch.Index)+$menuNovo+$s.Substring($menuMatch.Index+$menuMatch.Length)
+$finalMenuPattern='(?s)<button\b[^>]*data-page="controles"[^>]*>.*?</button>\s*<button\b[^>]*data-page="pixelart"[^>]*>.*?</button>\s*</nav>'
+if([regex]::Matches($s,$finalMenuPattern).Count -ne 1 -or ([regex]::Matches($s,'data-page="pixelart"')).Count -ne 1) {throw "Navegacao de Controles/Pixel Art invalida apos build"}
+$navStart=$s.LastIndexOf('<nav',$menuMatch.Index)
+$navEnd=$s.IndexOf('</nav>',$menuMatch.Index)+6
+if($navStart -lt 0 -or $navEnd -lt 6) {throw "Menu principal ausente apos build"}
+$menuText=$s.Substring($navStart,$navEnd-$navStart)
+$expectedPixelLabel=([char]0x25A7).ToString()+' Pixel Art '+([char]0x2022).ToString()+' Personagens / Objetos / Mapas'
+if(-not $s.Contains('<title>Apoena Game Creator v4.0 - Editor Integrado</title>') -or -not $menuText.Contains($expectedPixelLabel)) {throw "Titulo ou rotulo Pixel Art invalido por codificacao."}
 $pg='<section class="page" id="page-pixelart"><div id="gc40PixelRoot"><div class="panel"><h2>Pixel Art</h2><p>Carregando personagens, objetos e mapas...</p></div></div></section>'
 $s=[regex]::new('</main>').Replace($s,$pg+"</main>",1)
-$tags='<script src="map-editor/terrain-system.js"></script>' + [Environment]::NewLine + '<script src="map-editor/world-object-system.js"></script>' + [Environment]::NewLine + '<script src="map-editor/modulo-integrado.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/natureza.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/modulo-integrado.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/ponte-creator.js"></script>' + [Environment]::NewLine
+$tags='<script src="shared/asset-library.js"></script>' + [Environment]::NewLine + '<script src="shared/creator-bridge.js"></script>' + [Environment]::NewLine + '<script src="map-editor/terrain-system.js"></script>' + [Environment]::NewLine + '<script src="map-editor/world-object-system.js"></script>' + [Environment]::NewLine + '<script src="map-editor/modulo-integrado.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/natureza.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/modulo-integrado.js"></script>' + [Environment]::NewLine + '<script src="pixel-art/ponte-creator.js"></script>' + [Environment]::NewLine
 $s=[regex]::new('</body>').Replace($s,$tags+'</body>',1)
 if(-not $s.Contains('id="page-pixelart"') -or $s.Contains('<iframe')) {throw "Falha na integracao"}
 [System.IO.File]::WriteAllText($index,$s,(New-Object System.Text.UTF8Encoding($false)))
