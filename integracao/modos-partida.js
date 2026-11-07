@@ -145,6 +145,8 @@
   }
   function assertLobby(lobby){
     if(!isRecord(lobby)||lobby.schema!==SESSION_SCHEMA)throw new TypeError("Sala incompatível.");
+    if(!text(lobby.id)||lobby.mode!=="moba"||lobby.authority!=="host")
+      throw new TypeError("Sala MOBA precisa ter ID e autoridade do anfitrião.");
     if(!LOOP_STATUSES.includes(lobby.status))throw new TypeError("Estado da sala inválido.");
     if(!Number.isInteger(lobby.teamCount)||lobby.teamCount<2||lobby.teamCount>4)
       throw new TypeError("Quantidade de equipes inválida.");
@@ -155,16 +157,17 @@
     if(typeof lobby.botsEnabled!=="boolean")throw new TypeError("Configuração de bots inválida.");
     if(!Array.isArray(lobby.rosterIds)||lobby.rosterIds.length===0)
       throw new TypeError("Elenco de campeões inválido.");
-    const roster=new Set();
+    const roster=new Set(),rosterKeys=new Set();
     for(const id of lobby.rosterIds){
-      if(!text(id)||canonicalId(id)!==id||roster.has(canonicalId(id)))
+      if(!text(id)||text(id)!==id||rosterKeys.has(canonicalId(id)))
         throw new TypeError("Elenco de campeões contém ID inválido ou duplicado.");
-      roster.add(canonicalId(id));
+      roster.add(id);
+      rosterKeys.add(canonicalId(id));
     }
     if(!Array.isArray(lobby.teams)||lobby.teams.length!==lobby.teamCount)
       throw new TypeError("Estrutura de equipes inválida.");
     const teamIds=new Set(),playerIds=new Set();
-    let hostFound=false;
+    let hostFound=false,hostIsBot=false;
     for(const team of lobby.teams){
       if(!isRecord(team)||!text(team.id)||!text(team.name)||!Array.isArray(team.players))
         throw new TypeError("Equipe inválida.");
@@ -180,12 +183,16 @@
         const playerKey=canonicalId(player.id);
         if(playerIds.has(playerKey))throw new TypeError("Jogador duplicado: "+player.id);
         playerIds.add(playerKey);
-        if(player.id===lobby.hostId)hostFound=true;
-        if(player.championId!==null&&player.championId!==undefined&&!roster.has(canonicalId(player.championId)))
+        if(player.id===lobby.hostId){
+          hostFound=true;
+          if(player.isBot)hostIsBot=true;
+        }
+        if(player.championId!==null&&player.championId!==undefined&&!roster.has(player.championId))
           throw new TypeError("Campeão inexistente: "+String(player.championId));
       }
     }
-    if(!text(lobby.hostId)||!hostFound)throw new TypeError("Anfitrião não encontrado na sala.");
+    if(!text(lobby.hostId)||!hostFound||hostIsBot)
+      throw new TypeError("Anfitrião humano não encontrado na sala.");
     if(!CONNECTION_TYPES.includes(lobby.connectionType))throw new TypeError("Tipo de conexão da sala inválido.");
     return true;
   }

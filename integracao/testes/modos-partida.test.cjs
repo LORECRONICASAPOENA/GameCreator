@@ -43,6 +43,22 @@ test("rejeita config sem conexões porque o lobby depende delas",()=>{
   assert.equal(M.validateConfig(config).valid,false);
   assert.throws(()=>M.createLobby({hostId:"j1",config}),/conexão/);
 });
+test("aceita IDs de campeões em caixa mista sem quebrar o lobby",()=>{
+  const config=M.createDefaultConfig();
+  config.roster=[{id:"Apoena",name:"Apoena"}];
+  const lobby=M.createLobby({hostId:"j1",config});
+  M.selectChampion(lobby,"j1","Apoena");
+  M.startLobby(lobby);
+  assert.equal(lobby.status,"in_progress");
+});
+test("rejeita sala sem autoridade do anfitrião ou com anfitrião marcado como bot",()=>{
+  const wrongAuthority=M.createLobby({hostId:"j1"});
+  wrongAuthority.authority="client";
+  assert.throws(()=>M.listPlayers(wrongAuthority),/autoridade do anfitrião/);
+  const botHost=M.createLobby({hostId:"j1"});
+  botHost.teams[0].players[0].isBot=true;
+  assert.throws(()=>M.listPlayers(botHost),/Anfitrião humano/);
+});
 test("cria lobby 5v5 com anfitrião e opção LAN",()=>{
   const lobby=M.createLobby({hostId:"jogador_1",hostName:"Anfitrião",lobbyId:"teste_1"});
   assert.equal(lobby.maxPlayers,10);assert.equal(lobby.teams.length,2);
