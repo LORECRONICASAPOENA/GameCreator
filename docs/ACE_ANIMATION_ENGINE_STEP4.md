@@ -1,6 +1,6 @@
 # ACE — Etapa 4: Animation Engine
 
-**Estado desta entrega:** núcleo de animação implementado em branch isolada; aguardando CI no SHA da implementação. Não integrado à main.
+**Estado desta entrega:** núcleo de animação implementado em branch isolada. GitHub Actions push #42388023382 e pull_request #42388215067 concluíram com success no SHA de implementação 5ac5d06fa3acf3054b467a499df09e14a5482d8c. Não integrado à main.
 
 ## Objetivo
 
@@ -64,4 +64,4 @@ O motor é um serviço de domínio independente da interface. O Estúdio Pixel A
 
 tests/animation-engine.test.cjs cobre schema, limites, tracks de sprite/rig, interpolação, timeline, loop/once/pingpong, amostragem, round-trip JSON e ordem de carregamento no Estúdio. O teste é encadeado pela suíte existente tests/pixel-art-export.test.cjs, sem criar workflow redundante.
 
-A validação final desta etapa depende do GitHub Actions automático no commit da branch. CI verde não substitui teste visual/manual do proprietário nem prova exportação Godot.
+Os runs push #42388023382 e pull_request #42388215067 passaram no SHA 5ac5d06fa3acf3054b467a499df09e14a5482d8c. Um commit posterior apenas registra esta evidência documental; o CI da PR continuará sendo acompanhado no novo HEAD. CI verde não substitui teste visual/manual do proprietário nem prova exportação Godot.
