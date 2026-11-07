@@ -1,8 +1,19 @@
 (()=>{'use strict';
-const $=id=>document.getElementById(id),num=(id,def=0)=>Number.isFinite(Number($(id).value))?Number($(id).value):def,clamp=(n,a,b)=>Math.max(a,Math.min(n,b));let image=null,imageUrl='',frames=[],current=-1,kind='personagem',tool='erase',undo=[],grid=false,dragStart=null,drawing=false,lastPreview=0,mesh={x:[],y:[]},meshMode=false,meshDrag=null,smartPending=null,smartBusy=false,batchBackup=null,detectedSprites=[];
+const presetRequestGuard = ApoenaPresetRequestGuard();
+const $=id=>document.getElementById(id),num=(id,def=0)=>Number.isFinite(Number($(id).value))?Number($(id).value):def,clamp=(n,a,b)=>Math.max(a,Math.min(n,b));let image=null,imageUrl='',frames=[],current=-1,kind='personagem',tool='erase',undo=[],grid=false,dragStart=null,drawing=false,lastPreview=0,mesh={x:[],y:[]},meshMode=false,meshDrag=null,smartPending=null,smartBusy=false,smartRunId=0,batchBackup=null,detectedSprites=[];
 const source=$('sourceCanvas'),sc=source.getContext('2d'),edit=$('editCanvas'),ec=edit.getContext('2d',{willReadFrequently:true}),preview=$('preview'),pc=preview.getContext('2d');
 const msg=s=>{$('status').textContent=s},selected=()=>frames[current]||null;
 function canvasCopy(c){const o=document.createElement('canvas');o.width=c.width;o.height=c.height;o.getContext('2d').drawImage(c,0,0);return o}
+function resetEditorContentState(){
+  // Invalida carregamentos e limpezas em lote que ainda estejam aguardando callbacks.
+  smartRunId++;
+  smartBusy=false;
+  frames=[];current=-1;undo=[];dragStart=null;meshDrag=null;drawing=false;
+  detectedSprites=[];batchBackup=null;smartPending=null;
+  $('smartUndoBatch').disabled=true;
+  $('autoDetectPanel').hidden=true;
+  $('smartPanel').hidden=true;
+}
 function crop(){if(!image)return null;const x=clamp(Math.round(num('cropX')),0,image.width-1),y=clamp(Math.round(num('cropY')),0,image.height-1);return {x,y,w:clamp(Math.round(num('cropW')),1,image.width-x),h:clamp(Math.round(num('cropH')),1,image.height-y)}}
 function resetMesh(){if(!image)return;if(num('cols')>image.width||num('rows')>image.height){msg('A imagem tem menos pixels que as divisões solicitadas.');return}mesh=ApoenaCorte.grid(image.width,image.height,clamp(num('cols'),1,24),clamp(num('rows'),1,24),num('meshOffsetX'),num('meshOffsetY'),num('meshGapX'),num('meshGapY'))}
 function setCrop(r){for(const [id,val] of [['cropX',r.x],['cropY',r.y],['cropW',r.w],['cropH',r.h]])$(id).value=val;drawSource()}
@@ -75,9 +86,11 @@ function applySmart(){
   }
   const bytes=frames.reduce((n,f)=>n+f.canvas.width*f.canvas.height*4,0);
   if(bytes>32000000){msg('Lote muito grande para memória do celular. Use Corte Inteligente • quadro em grupos menores.');return}
+  const runId=++smartRunId;
   batchBackup=frames.map(f=>canvasCopy(f.canvas));$('smartUndoBatch').disabled=true;
   smartBusy=true;let i=0,cleaned=0,skipped=0,removed=0;
   function chunk(){
+    if(runId!==smartRunId)return;
     const stop=Math.min(frames.length,i+2);
     for(;i<stop;i++){
       try{
@@ -88,14 +101,16 @@ function applySmart(){
     }
     msg('Corte inteligente: '+i+'/'+frames.length+' quadros analisados...');
     if(i<frames.length)setTimeout(chunk,5);
-    else{smartBusy=false;$('smartUndoBatch').disabled=false;drawEdit();list();
+    else{
+      if(runId!==smartRunId)return;
+      smartBusy=false;$('smartUndoBatch').disabled=false;drawEdit();list();
       msg('Limpeza concluída: '+cleaned+' quadros, '+removed+' pixels removidos, '+skipped+' quadros incertos preservados. Confira cada quadro antes de exportar.');
     }
   }
   chunk();
 }
 function safeName(){return ($('name').value||'apoena_sprite').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9_-]/g,'_').slice(0,48)}
-function sheet(){const cell=clamp(num('cell'),128,512),cols=clamp(num('cols'),1,24),rows=Math.ceil(frames.length/cols),out=document.createElement('canvas');out.width=cols*cell;out.height=Math.max(1,rows)*cell;const ctx=out.getContext('2d');frames.forEach((f,i)=>{const c=f.canvas,scale=Math.min((cell-8)/c.width,(cell-8)/c.height),w=c.width*scale,h=c.height*scale;ctx.drawImage(c,(i%cols)*cell+(cell-w)/2,Math.floor(i/cols)*cell+cell-h-4,w,h)});return{out,cell,cols,rows}}
+function sheet(){const cell=clamp(num('cell'),128,512),cols=clamp(num('cols'),1,24),rows=Math.ceil(frames.length/cols),out=document.createElement('canvas');out.width=cols*cell;out.height=Math.max(1,rows)*cell;const ctx=out.getContext('2d');ctx.imageSmoothingEnabled=false;frames.forEach((f,i)=>{const c=f.canvas,scale=Math.min((cell-8)/c.width,(cell-8)/c.height),w=c.width*scale,h=c.height*scale;ctx.drawImage(c,(i%cols)*cell+(cell-w)/2,Math.floor(i/cols)*cell+cell-h-4,w,h)});return{out,cell,cols,rows}}
 function readResourceMetadata(){const raw=$('resourceMetadata').value.trim();if(!raw)return {};const value=JSON.parse(raw);if(!value||Array.isArray(value)||typeof value!=='object')throw Error('Metadados específicos devem ser um objeto JSON.');if(JSON.stringify(value).length>50000)throw Error('Metadados específicos acima de 50 KB.');return value}
 function manifest(){const s=sheet();return{schema:'apoena.pixelart.v1',version:1,name:safeName(),kind,resource:{habitat:String($('habitat').value||'').trim().slice(0,120),behavior:String($('behavior').value||'').trim().slice(0,120),metadata:readResourceMetadata()},texture:safeName()+'.png',transparent:true,anchor:{x:.5,y:1},cell_px:s.cell,columns:s.cols,rows:s.rows,fps:clamp(num('fps'),1,30),frames:frames.map((f,i)=>({index:i,action:f.action,direction:f.direction,source:f.rect,atlas:{x:(i%s.cols)*s.cell,y:Math.floor(i/s.cols)*s.cell,w:s.cell,h:s.cell}}))}}
 function download(obj,name){const url=typeof obj==='string'?URL.createObjectURL(new Blob([obj],{type:'application/json'})):obj.toDataURL('image/png'),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();if(typeof obj==='string')setTimeout(()=>URL.revokeObjectURL(url),1000)}
@@ -126,11 +141,13 @@ function projectData(){
   data.frames=frames.map((f,i)=>({...data.frames[i],dataUrl:f.canvas.toDataURL('image/png')}));
   return data;
 }
-async function loadProjectData(data){
+async function loadProjectData(data,requestId){
+  if(!presetRequestGuard.isCurrent(requestId))return false;
   if(!data||data.schema!=='apoena.pixelart.v1'||!Array.isArray(data.frames)||data.frames.length<1||data.frames.length>160)
     throw Error('Projeto editável incompatível. Use o JSON de projeto exportado pelo Estúdio Pixel Art.');
   const loaded=[];let totalPixels=0;
   for(const item of data.frames){
+    if(!presetRequestGuard.isCurrent(requestId))return false;
     if(!item||typeof item.dataUrl!=='string'||!/^data:image\/(png|webp);base64,/.test(item.dataUrl))
       throw Error('O projeto não contém as imagens dos quadros. Exporte como Projeto JSON editável.');
     const canvas=await new Promise((resolve,reject)=>{
@@ -146,13 +163,16 @@ async function loadProjectData(data){
       im.onerror=()=>reject(Error('Não foi possível decodificar um quadro do projeto.'));
       im.src=item.dataUrl;
     });
+    if(!presetRequestGuard.isCurrent(requestId))return false;
     const source=item.source||{};
     const rect=[source.x,source.y,source.w,source.h].every(Number.isFinite)
       ?{x:source.x,y:source.y,w:source.w,h:source.h}:{x:0,y:0,w:canvas.width,h:canvas.height};
     loaded.push({canvas,original:canvasCopy(canvas),rect,action:String(item.action||'parado').trim().slice(0,40)||'parado',direction:String(item.direction||'nenhuma').trim().slice(0,20)||'nenhuma'});
   }
+  if(!presetRequestGuard.isCurrent(requestId))return false;
+  resetEditorContentState();
   if(imageUrl)URL.revokeObjectURL(imageUrl);
-  imageUrl='';image=null;frames=loaded;current=-1;undo=[];batchBackup=null;smartPending=null;detectedSprites=[];$('autoDetectPanel').hidden=true;
+  imageUrl='';image=null;frames=loaded;current=-1;
   mesh={x:[],y:[]};grid=false;meshMode=false;
   $('smartUndoBatch').disabled=true;$('smartPanel').hidden=true;
   $('meshMode').classList.remove('selected');$('meshMode').setAttribute('aria-pressed','false');
@@ -172,6 +192,7 @@ async function loadProjectData(data){
   $('cropStatus').textContent='Quadros restaurados do projeto editável.';
   pick(0);
   msg('Projeto editável importado: '+loaded.length+' quadros. Selecione um quadro para revisar ação e direção.');
+  return true;
 }
 $('libraryRefresh').onclick=refreshLibrary;
 $('libraryProjectRefresh').onclick=refreshLibraryProjects;
@@ -190,26 +211,39 @@ $('libraryProjectSave').onclick=async()=>{
 };
 $('libraryProjectOpen').onclick=async()=>{
   const id=$('libraryProjects').value;if(!id)return msg('Selecione um projeto editável salvo.');
-  try{const project=await ApoenaLibrary.getProject(id);if(!project)throw Error('Projeto não encontrado.');await loadProjectData(project.data);$('libraryProjects').value=project.id}
-  catch(error){msg('Falha ao abrir projeto: '+error.message)}
+  const requestId=presetRequestGuard.begin();
+  try{
+    const project=await ApoenaLibrary.getProject(id);
+    if(!presetRequestGuard.isCurrent(requestId))return;
+    if(!project)throw Error('Projeto não encontrado.');
+    const loaded=await loadProjectData(project.data,requestId);
+    if(!loaded||!presetRequestGuard.isCurrent(requestId))return;
+    $('libraryProjects').value=project.id;
+  }catch(error){if(presetRequestGuard.isCurrent(requestId))msg('Falha ao abrir projeto: '+error.message)}
 };
 $('librarySave').onclick=async()=>{
   if(!ready())return;
   const button=$('librarySave');button.disabled=true;
   try{
-    const output=sheet().out,blob=await canvasBlob(output);
-    const sourceBlob=image?await new Promise((resolve,reject)=>{const c=document.createElement('canvas');c.width=image.width;c.height=image.height;const ctx=c.getContext('2d');ctx.drawImage(image,0,0);c.toBlob(b=>b?resolve(b):reject(new Error('Falha ao preservar o original.')),'image/png')}):null;
+    const output=sheet().out;
+    const snapshotManifest=JSON.parse(JSON.stringify(manifest()));
+    const snapshotFrames=frames.map((f,i)=>({index:i,action:f.action,direction:f.direction,rect:f.rect?{...f.rect}:null}));
+    const snapshotKind=kind,snapshotName=safeName();
+    const sourceSnapshot=image?canvasCopy(image):null;
+    const sourceWidth=sourceSnapshot?sourceSnapshot.width:0,sourceHeight=sourceSnapshot?sourceSnapshot.height:0;
+    const blob=await canvasBlob(output);
+    const sourceBlob=sourceSnapshot?await canvasBlob(sourceSnapshot):null;
     const item=await ApoenaLibrary.saveAsset({
-      name:safeName(),category:kind==='cenario'?'cenario':kind==='personagem'?'personagem':kind,
+      name:snapshotName,category:snapshotKind==='cenario'?'cenario':snapshotKind==='personagem'?'personagem':snapshotKind,
       type:'spritesheet',blob:blob,originalBlob:sourceBlob,width:output.width,height:output.height,
-      sourceWidth:image?image.width:0,sourceHeight:image?image.height:0,
-      tags:[kind,'pixel-art'],metadata:{manifest:manifest(),frames:frames.map((f,i)=>({index:i,action:f.action,direction:f.direction,rect:f.rect}))},
+      sourceWidth,sourceHeight,
+      tags:[snapshotKind,'pixel-art'],metadata:{manifest:snapshotManifest,frames:snapshotFrames},
       replaceExisting:true
     });
     let syncMessage='';
     if(window.opener&&!window.opener.closed&&blob.size<=10*1024*1024&&window.ApoenaCreatorBridge){
       try{
-        const synced=await ApoenaCreatorBridge.request('saveAsset',{manifest:manifest(),png:output.toDataURL('image/png')});
+        const synced=await ApoenaCreatorBridge.request('saveAsset',{manifest:snapshotManifest,png:output.toDataURL('image/png')});
         syncMessage=' Também sincronizada com a sessão V4.0 ('+synced.name+'). Use "Salvar projeto editável" para guardar o projeto completo.';
       }catch(error){syncMessage=' A biblioteca central foi salva, mas a sessão V4.0 não foi sincronizada: '+error.message}
     }else if(blob.size>10*1024*1024){
@@ -223,29 +257,60 @@ $('librarySave').onclick=async()=>{
 };
 $('libraryAssets').onchange=async()=>{
   const id=$('libraryAssets').value;if(!id)return;
+  const requestId=presetRequestGuard.begin();
   try{
-    const item=await ApoenaLibrary.getAsset(id);if(!item)throw new Error('Recurso não encontrado.');
+    const item=await ApoenaLibrary.getAsset(id);
+    if(!presetRequestGuard.isCurrent(requestId))return;
+    if(!item)throw new Error('Recurso não encontrado.');
     const url=URL.createObjectURL(item.blob),im=new Image();
     im.onload=()=>{
-      if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=url;image=im;frames=[];current=-1;batchBackup=null;detectedSprites=[];$('autoDetectPanel').hidden=true;
-      $('smartUndoBatch').disabled=true;
+      if(!presetRequestGuard.isCurrent(requestId)){URL.revokeObjectURL(url);return;}
+      if(im.width*im.height>32000000){URL.revokeObjectURL(url);msg('Imagem muito grande para celular.');return;}
+      if(imageUrl)URL.revokeObjectURL(imageUrl);
+      imageUrl=url;image=im;resetEditorContentState();
       resetMesh();setCrop({x:0,y:0,w:im.width,h:im.height});
       list();drawEdit();$('sourceInfo').textContent=item.name+' · biblioteca central · '+im.width+'×'+im.height+' px';
       msg('Recurso carregado. Se for uma spritesheet, ajuste linhas e colunas antes de separar os quadros.');
     };
-    im.onerror=()=>{URL.revokeObjectURL(url);msg('Não foi possível abrir a imagem salva.')};im.src=url;
-  }catch(error){msg('Falha ao carregar recurso: '+error.message)}
+    im.onerror=()=>{URL.revokeObjectURL(url);if(presetRequestGuard.isCurrent(requestId))msg('Não foi possível abrir a imagem salva.')};
+    im.src=url;
+  }catch(error){if(presetRequestGuard.isCurrent(requestId))msg('Falha ao carregar recurso: '+error.message)}
 };
 if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(()=>{refreshLibrary();refreshLibraryProjects()});
 refreshLibrary();refreshLibraryProjects();
 function ready(){if(frames.length)return true;msg('Adicione quadros antes de exportar.');return false}
 function animate(t){if(t-lastPreview>1000/clamp(num('fps'),1,30)){pc.clearRect(0,0,preview.width,preview.height);const action=$('action').value,direction=$('direction').value;const matching=frames.filter(f=>f.action===action&&f.direction===direction);const sequence=matching.length?matching:frames;const index=$('playing').checked?Math.floor(t/(1000/clamp(num('fps'),1,30)))%Math.max(1,sequence.length):Math.max(0,current);const f=$('playing').checked?sequence[index]:frames[index];if(f){const c=f.canvas,k=Math.min(178/c.width,178/c.height);pc.imageSmoothingEnabled=false;pc.drawImage(c,(192-c.width*k)/2,185-c.height*k,c.width*k,c.height*k)}lastPreview=t}requestAnimationFrame(animate)}
-$('file').onchange=ev=>{const f=ev.target.files?.[0];if(!f)return;detectedSprites=[];$('autoDetectPanel').hidden=true;if(!/^image\/(png|webp|jpeg)$/.test(f.type)||f.size>22*1024*1024)return msg('Use PNG, WebP ou JPG com até 22MB.');if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(f);const im=new Image();im.onload=()=>{if(im.width*im.height>32000000)return msg('Imagem muito grande para celular.');image=im;frames=[];current=-1;batchBackup=null;$('smartUndoBatch').disabled=true;const cols=clamp(num('cols'),1,24),rows=clamp(num('rows'),1,24);resetMesh();setCrop({x:0,y:0,w:Math.floor(im.width/cols),h:Math.floor(im.height/rows)});list();drawEdit();$('sourceInfo').textContent=f.name+' • '+im.width+'×'+im.height+' px';msg('Importado. Ajuste recortes e limpe antes de exportar.')};im.src=imageUrl};
+$('file').onchange=ev=>{
+  const f=ev.target.files?.[0];if(!f)return;
+  const requestId=presetRequestGuard.begin();
+  if(!/^image\/(png|webp|jpeg)$/.test(f.type)||f.size>22*1024*1024){msg('Use PNG, WebP ou JPG com até 22MB.');ev.target.value='';return;}
+  const url=URL.createObjectURL(f),im=new Image();
+  im.onload=()=>{
+    if(!presetRequestGuard.isCurrent(requestId)){URL.revokeObjectURL(url);return;}
+    if(im.width*im.height>32000000){URL.revokeObjectURL(url);ev.target.value='';msg('Imagem muito grande para celular.');return;}
+    if(imageUrl)URL.revokeObjectURL(imageUrl);
+    imageUrl=url;image=im;resetEditorContentState();
+    const cols=clamp(num('cols'),1,24),rows=clamp(num('rows'),1,24);
+    resetMesh();setCrop({x:0,y:0,w:Math.floor(im.width/cols),h:Math.floor(im.height/rows)});
+    list();drawEdit();$('sourceInfo').textContent=f.name+' • '+im.width+'×'+im.height+' px';
+    msg('Importado. Ajuste recortes e limpe antes de exportar.');
+    ev.target.value='';
+  };
+  im.onerror=()=>{URL.revokeObjectURL(url);if(presetRequestGuard.isCurrent(requestId)){ev.target.value='';msg('Não foi possível abrir a imagem importada.')}};
+  im.src=url;
+};
 $('projectFile').onchange=async ev=>{
- const file=ev.target.files?.[0];if(!file)return;
- try{if(file.size>18000000)throw Error('Arquivo acima de 18 MB.');const data=JSON.parse(await file.text());await loadProjectData(data)}
- catch(error){msg('Falha ao importar projeto editável: '+error.message)}
- ev.target.value='';
+  const file=ev.target.files?.[0];if(!file)return;
+  const requestId=presetRequestGuard.begin();
+  try{
+    if(file.size>18000000)throw Error('Arquivo acima de 18 MB.');
+    const content=await file.text();
+    if(presetRequestGuard.isCurrent(requestId)){
+      const data=JSON.parse(content);
+      await loadProjectData(data,requestId);
+    }
+  }catch(error){if(presetRequestGuard.isCurrent(requestId))msg('Falha ao importar projeto editável: '+error.message)}
+  ev.target.value='';
 };
 $('action').addEventListener('change',()=>{const f=selected();if(!f)return;f.action=String($('action').value||'parado').trim().slice(0,40)||'parado';list();drawEdit();msg('Ação do quadro atual atualizada.')});
 $('direction').addEventListener('change',()=>{const f=selected();if(!f)return;f.direction=String($('direction').value||'nenhuma').trim().slice(0,20)||'nenhuma';list();drawEdit();msg('Direção do quadro atual atualizada.')});
@@ -315,5 +380,33 @@ edit.onpointerdown=ev=>{if(!selected())return;ev.preventDefault();edit.setPointe
 $('undo').onclick=()=>{const f=selected();if(!f||!undo.length)return;f.canvas=undo.pop();drawEdit();list()};$('applyAlpha').onclick=alpha;$('trim').onclick=trim;$('resetFrame').onclick=()=>{const f=selected();if(!f)return;saveUndo();f.canvas=canvasCopy(f.original);drawEdit();list()};
 $('previous').onclick=()=>{if(frames.length)pick((current+frames.length-1)%frames.length)};$('next').onclick=()=>{if(frames.length)pick((current+1)%frames.length)};$('duplicate').onclick=()=>{const f=selected();if(f){frames.splice(current+1,0,{...f,canvas:canvasCopy(f.canvas),original:canvasCopy(f.original)});pick(current+1)}};$('deleteFrame').onclick=()=>{if(current<0)return;frames.splice(current,1);pick(frames.length?Math.min(current,frames.length-1):-1)};$('moveLeft').onclick=()=>{if(current>0){[frames[current-1],frames[current]]=[frames[current],frames[current-1]];pick(current-1)}};$('moveRight').onclick=()=>{if(current<frames.length-1&&current>=0){[frames[current],frames[current+1]]=[frames[current+1],frames[current]];pick(current+1)}};
 $('exportFrame').onclick=()=>{if(selected())download(selected().canvas,safeName()+'_'+(current+1)+'.png')};$('exportSheet').onclick=()=>{if(ready()){download(sheet().out,safeName()+'.png');msg('Spritesheet transparente exportada.')}};$('exportManifest').onclick=()=>{if(ready())download(JSON.stringify(manifest(),null,2),safeName()+'.godot.json')};$('exportProject').onclick=()=>{if(!ready())return;try{const serialized=JSON.stringify(projectData());if(serialized.length>18000000)throw Error('Projeto acima de 18 MB. Exporte em partes menores.');download(serialized,safeName()+'.projeto.json');msg('Projeto editável JSON exportado.')}catch(error){msg('Falha ao exportar projeto: '+error.message)}};
+const apoenaPresets={andar_ref:{file:'references/apoena/apoena-corrida-multidirecional.png',name:'apoena_movimento_andar_previa',cols:4,rows:4,action:'andar',directions:['frente','costas','esquerda','direita'],label:'prévia de andar com poses de corrida'},corrida:{file:'references/apoena/apoena-corrida-multidirecional.png',name:'apoena_corrida',cols:4,rows:4,action:'correr',directions:['frente','costas','esquerda','direita'],label:'corrida multidirecional'},ataque_direita:{file:'references/apoena/apoena-ataque-lateral-direita.png',name:'apoena_ataque_direita',cols:6,rows:2,action:'atacar',directions:['direita','esquerda'],label:'ataque lateral para a direita'},ataque_esquerda:{file:'references/apoena/apoena-ataque-lateral-esquerda.png',name:'apoena_ataque_lateral_esquerda',cols:6,rows:2,action:'atacar',directions:['esquerda','direita'],label:'ataque lateral para a esquerda'}};
+$('loadApoenaPreset').onclick=()=>{
+ const preset=apoenaPresets[$('apoenaPreset').value];if(!preset)return;
+ if((image||frames.length)&&!confirm('Carregar esta referência vai substituir os quadros atualmente abertos. Os arquivos originais permanecem intactos. Continuar?'))return;
+ const requestId=presetRequestGuard.begin();
+ const im=new Image();
+ im.onload=()=>{
+  if(!presetRequestGuard.isCurrent(requestId))return;
+  if(im.width*im.height>32000000)return msg('A referência excede o limite de imagem do editor.');
+  if(imageUrl){URL.revokeObjectURL(imageUrl);imageUrl=''}
+  resetEditorContentState();image=im;
+  $('smartUndoBatch').disabled=true;$('autoDetectPanel').hidden=true;$('smartPanel').hidden=true;
+  $('cols').value=preset.cols;$('rows').value=preset.rows;$('fps').value=8;
+  $('meshOffsetX').value=0;$('meshOffsetY').value=0;$('meshGapX').value=0;$('meshGapY').value=0;
+  resetMesh();
+  for(let y=0;y<preset.rows;y++)for(let x=0;x<preset.cols;x++){
+   $('action').value=preset.action;$('direction').value=preset.directions[y]||'nenhuma';
+   add({x:mesh.x[x],y:mesh.y[y],w:mesh.x[x+1]-mesh.x[x],h:mesh.y[y+1]-mesh.y[y]},true);
+  }
+  $('name').value=preset.name;$('cell').value='384';
+  setCrop({x:mesh.x[0],y:mesh.y[0],w:mesh.x[1]-mesh.x[0],h:mesh.y[1]-mesh.y[0]});
+  const category=$('categories').querySelector('[data-kind="personagem"]');if(category)category.click();
+  $('sourceInfo').textContent='Referência Apoena · '+preset.label+' · '+im.width+'×'+im.height+' px · '+frames.length+' quadros iniciais';
+  pick(0);drawSource();msg('Quadros do Apoena carregados para edição. Confira os recortes e as direções antes de exportar.');
+ };
+ im.onerror=()=>{if(presetRequestGuard.isCurrent(requestId))msg('Não foi possível abrir a referência. Mantenha a pasta references/apoena junto ao Estúdio ou importe a imagem manualmente.');};
+ im.src=new URL(preset.file,document.baseURI).href;
+};
 $('categories').querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{kind=b.dataset.kind;$('categories').querySelectorAll('[data-kind]').forEach(v=>v.classList.toggle('selected',v===b));msg('Categoria: '+kind)});const kindQuery=new URLSearchParams(location.search).get('tipo');if(kindQuery){const btn=$('categories').querySelector('[data-kind="'+kindQuery+'"]');if(btn)btn.click()}requestAnimationFrame(animate);
 })();

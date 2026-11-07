@@ -18,7 +18,7 @@ on:
       - "ORGANIZACAO_EDITOR.md"
       - ".github/workflows/**"
   pull_request:
-    branches: [main]
+    branches: [main, feat/apoena-personagem-estudio-main]
     paths:
       - "index.html"
       - "bundle-v4/**"
@@ -210,6 +210,18 @@ jobs:
       - name: Testar Corte Inteligente e contratos da interface
         run: |
           node tests/corte-inteligente.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/corte.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Testar concorrência dos presets Apoena
+        run: |
+          node --check pixel-art/estudio.js
+          if ($LASTEXITCODE -ne 0) { throw "Sintaxe do Estúdio inválida." }
+          node --check pixel-art/preset-request-guard.js
+          if ($LASTEXITCODE -ne 0) { throw "Sintaxe do guard de presets inválida." }
+          node tests/preset-request-guard.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw "Teste de concorrência dos presets falhou." }
+      - name: Testar exportação pixel-perfect do Estúdio
+        run: |
+          node tests/pixel-art-export.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/pixel-art-export.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Testar verificador de encaixe dos tilesets
         run: |

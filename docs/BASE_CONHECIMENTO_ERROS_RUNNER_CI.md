@@ -525,3 +525,83 @@ Cada ocorrência nova deve conter todos os campos abaixo. Usar ISO 8601 com fuso
 - **Resultado:** CI Windows aprovada no SHA atual. A PR permanece draft.
 - **Aceite ainda pendente:** teste manual do atualizador na máquina do proprietário, usando instalação de teste; verificar preservação de arquivos locais e exportar/restaurar a Biblioteca IndexedDB em perfil de teste.
 - **Próxima ação:** aguardar evidência manual do proprietário. Não mesclar nem iniciar nova implementação no eixo GameCreator/Pixel Art antes de fechar GC-UPDATE-009.
+
+## Registros históricos de GC-ANIM-006 preservados da PR #11 — 06/11/2026
+
+Os registros abaixo preservam evidências históricas dos runs de 02/11/2026; não representam o estado atual das PRs. Consulte a atualização canônica no final deste arquivo.
+
+### GC-CI-013 — Run 41357977741 terminou em failure sem logs recuperáveis
+
+**Classificação:** NÃO DIAGNOSTICADO. Falha do run/job CONFIRMADA; causa-raiz NÃO CONFIRMADA.
+
+- Repositório: `apoenalore/GameCreator`.
+- PR: [#11 — GC-ANIM-006](https://github.com/apoenalore/GameCreator/pull/11).
+- Workflow: `.github/workflows/pixel-art.yml`, execução [41357977741](https://github.com/apoenalore/GameCreator/actions/runs/41357977741), tentativa 4.
+- Branch: `feat/apoena-personagem-estudio-main`.
+- Commit: `a9c7148f01504f7be142dd0d852056dd5a9a5114`.
+- Job: `validar`, ID `125207251095`, estado `completed/failure`.
+- Horário da tentativa: início 2026-11-02T06:53:49-03:00; última atualização 2026-11-02T07:03:54-03:00.
+- Evidência disponível: API do GitHub confirma failure no run e no job; runner ID `2` (`APOENA-GAMECREATOR-RUNNER`), grupo `Default`, labels `self-hosted`, `Windows`, `X64`, foi atribuído. O job iniciou em `2026-11-02T09:53:53Z` e concluiu em `2026-11-02T10:03:54Z`; a resposta da tentativa 4 retornou `steps=[]`.
+- Limitação: a tentativa de baixar os logs do job retornou HTTP 404 / `BlobNotFound`; o endpoint de logs da tentativa retornou conteúdo vazio; annotations e primeira mensagem causal não estão disponíveis. O runner atribuído elimina a hipótese de job nunca agendado, mas não prova se a falha foi do runner ou do código.
+- Causa raiz: **CAUSA NÃO CONFIRMADA**. Não afirmar falha de código, teste ou runner sem os logs.
+- Solução aplicada: relatório individual criado em [docs/relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md](relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md). Nenhum código do produto foi alterado para mascarar o erro.
+- Próxima ação: recuperar logs/annotations ou logs locais do runner Windows no intervalo acima; identificar a primeira etapa causal antes de corrigir ou repetir.
+- Estado: **NÃO RESOLVIDO / AGUARDANDO EVIDÊNCIA**.
+
+
+### GC-CI-014 — Run 41433942503 terminou em failure sem steps/logs recuperáveis
+
+- **Classificação:** falha confirmada; causa-raiz NÃO CONFIRMADA.
+- **Registro:** 02/11/2026; hora exata do cadastro não preservada nesta sessão.
+- **Repositório/PR:** `apoenalore/GameCreator`, [PR #11 — GC-ANIM-006](https://github.com/apoenalore/GameCreator/pull/11).
+- **Run:** [41433942503](https://github.com/apoenalore/GameCreator/actions/runs/41433942503), workflow `.github/workflows/pixel-art.yml`, evento `pull_request`, tentativa 1.
+- **Branch/SHA:** `feat/apoena-personagem-estudio-main` / `70a4e09e7243d56f0f0313a7791a849218514055`.
+- **Horários UTC:** criado/iniciado 2026-11-02T11:05:16Z; concluído/atualizado 2026-11-02T11:17:48Z.
+- **Evidência:** API confirma run `completed/failure` e job `validar` `completed/failure`; a resposta não contém steps individuais. Consulta de reviews e comentários da PR não encontrou revisão formal nem comentários de CodeRabbit.
+- **Erro literal/log causal:** indisponível; não foi retornado pela API consultada. Não inferir a etapa nem atribuir ao código/runner.
+- **Causa comprovada:** apenas o estado failure do job. **Causa-raiz: NÃO CONFIRMADA.**
+- **Solução efetivamente utilizada:** nenhuma correção técnica. Relatório individual publicado em [2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
+- **Próxima ação:** coletar logs/annotations do GitHub Actions ou logs locais do runner Windows; localizar primeira etapa causal. Não repetir o mesmo commit sem evidência de falha transitória e recuperação.
+- **Prevenção:** preservar relatório individual antes de qualquer correção/reexecução; não remover steps, assertions ou testes para obter CI verde.
+- **Estado:** ABERTO / AGUARDANDO EVIDÊNCIA.
+
+
+### Atualização GC-CI-014 — evidência visual recebida em 02/11/2026
+
+- O autor forneceu captura da anotação expandida do GitHub Actions para o run [41433942503](https://github.com/apoenalore/GameCreator/actions/runs/41433942503).
+- Texto exibido: **“0 executor auto-hospedado perdeu a comunicação com o servidor. Verifique se a máquina está em execução e possui uma conexão de rede estável. Qualquer fator no seu fluxo de trabalho que encerre o processo do executor, consuma toda a CPU/memória necessária ou bloqueie seu acesso à rede pode causar esse erro.”**
+- **Categoria confirmada:** perda de comunicação do runner auto-hospedado com o servidor GitHub.
+- **Causa operacional específica ainda não confirmada:** rede/DNS/proxy/firewall, suspensão/desligamento do Windows, encerramento do processo/serviço do runner, saturação de CPU/memória ou outro bloqueio. A anotação enumera possibilidades; não prova qual ocorreu.
+- **Implicação:** não há evidência nesta anotação de defeito no código de animação nem de falha em teste funcional. Priorizar diagnóstico de runner/ambiente. Não alterar o código do Estúdio para corrigir esta falha de comunicação.
+- **Próxima ação quando o computador estiver disponível:** consultar logs locais do runner no diretório _diag no intervalo do run; verificar estado de energia/suspensão/reinicialização do Windows, rede estável, DNS, HTTPS para GitHub, proxy/firewall e recursos CPU/memória.
+- Relatório individual atualizado: [2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
+- **Estado:** ABERTO / CATEGORIA IDENTIFICADA / CAUSA OPERACIONAL PENDENTE.
+
+
+### Atualização GC-CI-014 — conflito de sessão duplicada (capturas do autor + pesquisa)
+
+- Capturas do console Windows mostram `Connected to GitHub`, `A session for this runner already exists` e `Runner connect error: Error: Conflict. Retrying until reconnected`, repetidamente.
+- Erro imediato: tentativa de criar sessão enquanto o GitHub considera que já existe sessão ativa para a identidade do runner.
+- Hipótese A: duas instâncias/listeners ou serviço Windows e execução manual `run.cmd` simultâneos usando a mesma configuração.
+- Hipótese B: processo anterior encerrado abruptamente/reboot e sessão anterior ainda ativa. Hipótese adicional: OOM/pressão de recursos, ainda sem evidência local.
+- Referências comunitárias: [actions/runner #4312](https://github.com/actions/runner/issues/4312) (mesma mensagem e padrão); [#3441](https://github.com/actions/runner/issues/3441) (mantenedor identificou duas solicitações de sessão em 11 segundos e questionou chamadas duplicadas de run.sh; comentário cita OOM como hipótese); [#3677](https://github.com/actions/runner/issues/3677) (sessão após reboot Windows).
+- Documentação: [configurar runner Windows como serviço](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/configure-the-application?platform=windows).
+- **Ainda não comprovado:** qual processo ou evento causou a sessão conflitante neste computador.
+- **Próxima ação:** não iniciar outra instância; quando disponível, verificar serviço em `services.msc`, processos `Runner.Listener`/`Runner.Worker`/`run.cmd`, caminho/PID, Agendador de Tarefas e Inicialização; preservar `_diag` e Event Viewer antes de parar/reiniciar. Escolher um único modo de inicialização; não apagar `.runner` nem reconfigurar primeiro.
+- Relatório detalhado: [GC-CI-014](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
+
+
+### Atualização GC-CI-014 — runner reconectado (captura 02/11/2026)
+
+Nova captura mostra `Runner reconnected`, versão `2.338.0` e `Listening for Jobs` às 13:12:43Z. Isso confirma que o processo exibido recuperou comunicação e voltou a escutar tarefas. Não prova que a causa do conflito de sessão foi corrigida nem que só exista uma instância. A imagem inclui outra janela de terminal ao fundo, mas não permite identificá-la. Não iniciar outro `run.cmd`/serviço em paralelo. Conferir Settings → Actions → Runners (Online/Idle), identificar processos/serviço e preservar `_diag`; só então reexecutar uma vez o workflow da PR #11. Código do Creator permanece inalterado.
+
+### GC-CI-015 — PR #19: teste de exportação pixel-perfect ausente na árvore sincronizada (06/11/2026)
+
+- **Ocorrência:** [run 42276102355](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42276102355), job `validar` ID `128092695456`, step 11, branch `sync/main-into-gc-anim-006-20261106-v2`, SHA `301eadd3aadb3d59aafaf9dae9fa92197e6ca191`.
+- **Erro literal recuperado:** `node:internal/modules/cjs/loader:1210`; PowerShell registrou `NativeCommandError`, exit code 1. A mensagem completa da exceção Node não foi preservada.
+- **Causa comprovada:** o workflow executava `node tests/pixel-art-export.test.cjs`, mas o arquivo não existia no tree do SHA 301eadd (consulta de conteúdo retornou 404). O teste existia na branch da PR #11.
+- **Correção:** a reconciliação da PR #19 incorporou o teste, o Estúdio e os assets da PR #11, mantendo a etapa e as assertions.
+- **Validação:** [run 42281994131](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42281994131), job `validar`, success no SHA `e16fe832adde4ab7606594b45a8395a4df6d2438`; step 11 e todos os steps funcionais seguintes passaram.
+- **Prevenção:** conferir no mesmo tree/commit a existência de cada teste, script e asset referenciado pelo workflow antes de iniciar a sincronização. Não remover cobertura para obter CI verde.
+- **Relatório:** `docs/relatorios-actions/2026-11-06-run-42276102355-pixel-art-export-test-ausente.md`.
+
