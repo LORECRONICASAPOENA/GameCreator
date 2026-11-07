@@ -91,6 +91,7 @@ const TILE=32,MAX=160,stage=$('stage'),ctx=stage.getContext('2d'),mini=$('minima
 ctx.imageSmoothingEnabled=false;mx.imageSmoothingEnabled=false;sx.imageSmoothingEnabled=false;
 let mapName='Mapa 01 — Desfiladeiro de Agar',currentLibraryMapId='';
 let width=80,height=80,cells=[],heights=[],objects=[],assets=[],markers=[],sheetSrc='',sheetImg=null,selectedTile=0,sheetCols=6,sheetRows=4,sheetProfile='agar24',smartTile=true,showHeights=true,assetImages={};
+const SHEET_PROFILES=['agar24','grass16','manual'];function safeProfile(p){return SHEET_PROFILES.includes(p)?p:'manual'}
 let movingObject=null,tool='paint',terrain=0,mode='terrain',selectedAsset='',objectScale=1,showGrid=true,showMarkers=true,zoom=.72,cam={x:0,y:0},dragging=false,panStart=null,lastCell=-1,history=[],redo=[],dirty=false,renderPending=false;
 const colors=['#52794b','#b29763','#8c8e86','#4687aa'];
 const sheetLabels=['Grama florida','Grama com variações','Pedra com musgo','Água azul','Água turquesa','Terra batida','Margem: grama acima','Margem: grama à direita','Margem: grama abaixo','Margem: grama à esquerda','Ponte horizontal sobre rio','Ponte vertical sobre rio','Curva de rio 1','Curva de rio 2','Curva de rio 3','Curva de rio 4','Ponte com margens (esquerda)','Ponte com margens (direita)','Curva de margem 5','Curva de margem 6','Curva de margem 7','Curva de margem 8','Penhasco rochoso 1','Penhasco rochoso 2'];
@@ -296,7 +297,7 @@ $('loadTileset').onclick=async()=>{
  const id=$('libraryTilesets').value;if(!id)return say('Selecione um tileset salvo.');
  try{
   const item=await ApoenaLibrary.getAsset(id);if(!item)throw new Error('Tileset não encontrado.');
-  sheetSrc=await ApoenaLibrary.blobToDataURL(item.blob);sheetProfile='manual';$('sheetProfile').value='manual';
+  sheetSrc=await ApoenaLibrary.blobToDataURL(item.blob);sheetProfile=safeProfile(item.metadata&&item.metadata.profile);$('sheetProfile').value=sheetProfile;
   const im=new Image();im.onload=()=>{sheetImg=im;sheetCols=Math.max(1,Math.min(32,Number(item.metadata&&item.metadata.columns)||6));sheetRows=Math.max(1,Math.min(32,Number(item.metadata&&item.metadata.rows)||4));$('sheetCols').value=sheetCols;$('sheetRows').value=sheetRows;selectedTile=0;showSheet();drawSoon();scheduleSave();say('Tileset carregado da biblioteca central: '+item.name)};im.onerror=()=>say('Falha ao abrir o tileset salvo.');im.src=sheetSrc;
  }catch(error){say('Falha ao carregar tileset: '+error.message)}
 };
@@ -386,7 +387,7 @@ async function applyMapData(d){
  cells=d.tiles.map(n=>Number.isInteger(n)&&n>=0&&n<10000?n:0);
  heights=Array.isArray(d.heights)&&d.heights.length===width*height?d.heights.map(h=>Math.max(0,Math.min(4,Number(h)||0))):Array(width*height).fill(0);
  sheetCols=Math.max(1,Math.min(32,Number(d.tilesetCols)||4));sheetRows=Math.max(1,Math.min(32,Number(d.tilesetRows)||4));
- smartTile=d.smartTile!==false;sheetProfile=d.sheetProfile||'manual';$('sheetProfile').value=sheetProfile;$('sheetCols').value=sheetCols;$('sheetRows').value=sheetRows;$('smartTile').checked=smartTile;
+ smartTile=d.smartTile!==false;sheetProfile=safeProfile(d.sheetProfile);$('sheetProfile').value=sheetProfile;$('sheetCols').value=sheetCols;$('sheetRows').value=sheetRows;$('smartTile').checked=smartTile;
  objects=Array.isArray(d.objects)?d.objects.slice(0,2000):[];markers=Array.isArray(d.markers)?d.markers.slice(0,300):[];
  assets=Array.isArray(d.assets)?d.assets.filter(a=>a&&typeof a.src==='string'&&/^data:image\/(png|webp);base64,/.test(a.src)).slice(0,50):[];
  assetImages={};for(const a of assets)imageFrom(a.src,a.id);
@@ -411,7 +412,7 @@ $('png').onclick=()=>{
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redoStep():undoStep()}});
 function autosave(){if(!dirty)return;dirty=false;try{const text=JSON.stringify(packageData());if(text.length<3.5e6)localStorage.setItem('apoena-map-editor-v1',text)}catch(_){}}
 window.addEventListener('pagehide',autosave);setInterval(autosave,12000);
-try{const raw=localStorage.getItem('apoena-map-editor-v1');if(raw){const d=JSON.parse(raw);if(d.schema==='apoena.map2d.v1'&&Array.isArray(d.tiles)&&d.tiles.length===d.width*d.height&&d.width<=MAX&&d.height<=MAX){mapName=String(d.name||mapName).slice(0,120);width=d.width;height=d.height;cells=d.tiles;heights=Array.isArray(d.heights)&&d.heights.length===cells.length?d.heights:Array(width*height).fill(0);sheetCols=Math.max(1,Math.min(32,Number(d.tilesetCols)||4));sheetRows=Math.max(1,Math.min(32,Number(d.tilesetRows)||4));smartTile=d.smartTile!==false;sheetProfile=d.sheetProfile||'manual';$('sheetProfile').value=sheetProfile;$('sheetCols').value=sheetCols;$('sheetRows').value=sheetRows;$('smartTile').checked=smartTile;objects=d.objects||[];markers=d.markers||[];assets=d.assets||[];sheetSrc=d.tileset||'';for(const a of assets)if(/^data:image\/(png|webp);base64,/.test(a.src))imageFrom(a.src,a.id);if(sheetSrc)imageFrom(sheetSrc,'sheet');$('width').value=width;$('height').value=height;cam={x:width*TILE/2,y:height*TILE/2};showAssets();say('Rascunho local restaurado. Salve um JSON para ter seu backup.')}}}catch(_){}
+try{const raw=localStorage.getItem('apoena-map-editor-v1');if(raw){const d=JSON.parse(raw);if(d.schema==='apoena.map2d.v1'&&Array.isArray(d.tiles)&&d.tiles.length===d.width*d.height&&d.width<=MAX&&d.height<=MAX){mapName=String(d.name||mapName).slice(0,120);width=d.width;height=d.height;cells=d.tiles;heights=Array.isArray(d.heights)&&d.heights.length===cells.length?d.heights:Array(width*height).fill(0);sheetCols=Math.max(1,Math.min(32,Number(d.tilesetCols)||4));sheetRows=Math.max(1,Math.min(32,Number(d.tilesetRows)||4));smartTile=d.smartTile!==false;sheetProfile=safeProfile(d.sheetProfile);$('sheetProfile').value=sheetProfile;$('sheetCols').value=sheetCols;$('sheetRows').value=sheetRows;$('smartTile').checked=smartTile;objects=d.objects||[];markers=d.markers||[];assets=d.assets||[];sheetSrc=d.tileset||'';for(const a of assets)if(/^data:image\/(png|webp);base64,/.test(a.src))imageFrom(a.src,a.id);if(sheetSrc)imageFrom(sheetSrc,'sheet');$('width').value=width;$('height').value=height;cam={x:width*TILE/2,y:height*TILE/2};showAssets();say('Rascunho local restaurado. Salve um JSON para ter seu backup.')}}}catch(_){}
 if(!cells.length){makeBlank(80,80);makePreset();history=[]}
 drawSoon();
 })();

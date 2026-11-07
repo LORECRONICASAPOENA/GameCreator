@@ -350,10 +350,14 @@ pixelRoot.querySelectorAll(".dpad [data-dir]").forEach(btn=>{
  const end=e=>{e.preventDefault();setHeld(key,false);btn.classList.remove("active")};
  btn.addEventListener("pointerup",end);btn.addEventListener("pointercancel",end);btn.addEventListener("lostpointercapture",()=>{setHeld(key,false);btn.classList.remove("active")});
 });
-const mapping={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",s:"down",a:"left",d:"right"};
-function typing(t){return t&&["INPUT","SELECT","TEXTAREA"].includes(t.tagName)}
-document.addEventListener("keydown",e=>{if(!pixelRoot.host.closest(".page")?.classList.contains("active")||pixelRoot.querySelector(".apo-objects-main")?.hidden===false||typing(e.target))return;const k=mapping[e.key];if(k){e.preventDefault();setHeld(k,true)}});
-document.addEventListener("keyup",e=>{if(!pixelRoot.host.closest(".page")?.classList.contains("active"))return;const k=mapping[e.key];if(k)setHeld(k,false)});
+const mapping={arrowup:"up",arrowdown:"down",arrowleft:"left",arrowright:"right",w:"up",s:"down",a:"left",d:"right"};
+// Campos editáveis dentro de Shadow DOM aparecem como o host em e.target no document; composedPath() expõe o elemento real.
+function isEditableEl(t){return !!t&&t.nodeType===1&&(["INPUT","SELECT","TEXTAREA"].includes(t.tagName)||t.isContentEditable===true)}
+function typing(e){const path=typeof e.composedPath==="function"?e.composedPath():[];return path.some(isEditableEl)||isEditableEl(e.target)}
+function movementKey(e){if(e.ctrlKey||e.metaKey||e.altKey||typeof e.key!=="string")return undefined;return mapping[e.key.toLowerCase()]}
+document.addEventListener("keydown",e=>{if(!pixelRoot.host.closest(".page")?.classList.contains("active")||pixelRoot.querySelector(".apo-objects-main")?.hidden===false||typing(e))return;const k=movementKey(e);if(k){e.preventDefault();setHeld(k,true)}});
+// keyup nunca intercepta a digitação; apenas solta a direção para não deixar tecla presa.
+document.addEventListener("keyup",e=>{const k=typeof e.key==="string"?mapping[e.key.toLowerCase()]:undefined;if(k)setHeld(k,false)});
 window.addEventListener("blur",()=>held.clear());
 function arenaGround(){
  ac.fillStyle="#44684a";ac.fillRect(0,0,320,216);

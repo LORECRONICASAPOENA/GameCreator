@@ -233,6 +233,10 @@ jobs:
         run: |
           node tests/creator-bridge.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/creator-bridge.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Testar digitacao em formularios e perfil de tileset
+        run: |
+          node tests/teclado-e-perfil.test.cjs 2>&1 | Tee-Object -FilePath .ci-results/teclado-perfil.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Validar contratos de integração do Creator
         run: |
