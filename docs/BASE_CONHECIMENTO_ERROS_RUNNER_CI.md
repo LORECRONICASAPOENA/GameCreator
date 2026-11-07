@@ -547,6 +547,10 @@ Os registros abaixo preservam evidências históricas dos runs de 02/11/2026; n�
 - Solução aplicada: relatório individual criado em [docs/relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md](relatorios-actions/2026-11-02-run-41357977741-nao-diagnosticado.md). Nenhum código do produto foi alterado para mascarar o erro.
 - Próxima ação: recuperar logs/annotations ou logs locais do runner Windows no intervalo acima; identificar a primeira etapa causal antes de corrigir ou repetir.
 - Estado: **NÃO RESOLVIDO / AGUARDANDO EVIDÊNCIA**.
+- Registro: 02/11/2026; hora exata do registro não preservada.
+- Erro literal: não preservado. A API não retornou logs/annotations; o endpoint de logs retornou `BlobNotFound`/conteúdo vazio.
+- Validação documental: 04/11/2026; hora exata não preservada. Validação técnica do commit não executada nesta atualização, pois a evidência causal continua indisponível.
+- Prevenção: preservar `_diag` e logs/annotations antes de repetir; registrar a primeira etapa causal; não classificar como falha de código nem remover testes; verificar a disponibilidade do runner e a comunicação com GitHub antes de uma nova execução.
 
 
 ### GC-CI-014 — Run 41433942503 terminou em failure sem steps/logs recuperáveis
@@ -576,6 +580,7 @@ Os registros abaixo preservam evidências históricas dos runs de 02/11/2026; n�
 - **Próxima ação quando o computador estiver disponível:** consultar logs locais do runner no diretório _diag no intervalo do run; verificar estado de energia/suspensão/reinicialização do Windows, rede estável, DNS, HTTPS para GitHub, proxy/firewall e recursos CPU/memória.
 - Relatório individual atualizado: [2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
 - **Estado:** ABERTO / CATEGORIA IDENTIFICADA / CAUSA OPERACIONAL PENDENTE.
+- **Validação documental:** 04/11/2026; hora exata não preservada. A classificação foi conferida com a anotação visual recebida e o histórico do GitHub Actions; nenhum novo run foi executado para este incidente.
 
 
 ### Atualização GC-CI-014 — conflito de sessão duplicada (capturas do autor + pesquisa)
@@ -595,7 +600,112 @@ Os registros abaixo preservam evidências históricas dos runs de 02/11/2026; n�
 
 Nova captura mostra `Runner reconnected`, versão `2.338.0` e `Listening for Jobs` às 13:12:43Z. Isso confirma que o processo exibido recuperou comunicação e voltou a escutar tarefas. Não prova que a causa do conflito de sessão foi corrigida nem que só exista uma instância. A imagem inclui outra janela de terminal ao fundo, mas não permite identificá-la. Não iniciar outro `run.cmd`/serviço em paralelo. Conferir Settings → Actions → Runners (Online/Idle), identificar processos/serviço e preservar `_diag`; só então reexecutar uma vez o workflow da PR #11. Código do Creator permanece inalterado.
 
-### GC-CI-015 — PR #19: teste de exportação pixel-perfect ausente na árvore sincronizada (06/11/2026)
+
+### GC-CI-015 — PR #14: gatilhos duplicados e sincronização do teste funcional
+
+- **Classificação:** cancelamentos por concorrência CONFIRMADOS; falha de teste CONFIRMADA; correção VALIDADA no head `03382b02e74e2b39da0924bd0ff72ddacdf27e5a`.
+- **Contexto:** PR [#14](https://github.com/apoenalore/GameCreator/pull/14), branch `feat/apoena-modular-character-creator-integration`. O workflow `.github/workflows/pixel-art.yml` disparava tanto em `push` quanto em `pull_request` para o mesmo branch e ambos usavam o mesmo grupo com `cancel-in-progress: true`. Os runs [41564160778](https://github.com/apoenalore/GameCreator/actions/runs/41564160778) (push) e [41564165759](https://github.com/apoenalore/GameCreator/actions/runs/41564165759) (pull_request), no mesmo SHA `264c605b5118e357ec60100fa1ad583498ec2de3`, terminaram cancelados.
+- **Correção do gatilho:** limitar `push` a `main`; branches em revisão seguem validadas pelo evento `pull_request`, evitando dois eventos concorrentes para o mesmo commit.
+- **Erro funcional observado:** o run [41564711737](https://github.com/apoenalore/GameCreator/actions/runs/41564711737), SHA `03d0ad2d5de0aad47a92c88ad51d132aaae34e38`, passou build, smoke test, sintaxe e teste de modelo, mas falhou no teste funcional do navegador com timeout aguardando o estado do editor. O log preservou o host trace das operações de biblioteca; não apontou falha na persistência do IndexedDB (validada em etapa própria posteriormente).
+- **Ajuste do teste:** o commit `03382b02e74e2b39da0924bd0ff72ddacdf27e5a` adicionou contagem explícita de operações em andamento e sinal `apoena:character-idle` ao hook do teste, que passa a esperar o término real das ações enfileiradas.
+- **Validação:** run [41565001752](https://github.com/apoenalore/GameCreator/actions/runs/41565001752) terminou `completed/success` no SHA `03382b02e74e2b39da0924bd0ff72ddacdf27e5a`. Passaram build nativo, smoke test do navegador, sintaxe JS, teste de modelo/personagens, teste funcional no navegador, exportação pixel-perfect, tileset, IndexedDB, backup/restauração da biblioteca, catálogo/Godot, integração, manifesto do atualizador, hidrologia/erosão, runtime Godot 4 e preservação dos módulos. O teste de sintaxe Python foi pulado como opcional porque Python não estava instalado no runner.
+- **Estado:** **RESOLVIDO E VALIDADO NO PR**; PR continua draft e não foi integrada à `main`.
+
+
+### Atualização GC-CI-015 — timeout de bridge reproduzido no run #41663786861
+
+- Ocorrência: 2026-11-03 12:33:11 BRT (15:33:11Z), PR #14, job 126013580379, step 11 “Testar Criador Modular no navegador”, commit `1775d77f447e9e245c7a71a35327d935ebaf6bc1`.
+- Mensagem: `Timeout: Personagem gravado no projeto atual do Creator. Salve o projeto principal para guardar essa alteração.`
+- O run anterior #41632223425 apresentou a mesma mensagem. Entre os heads não houve mudança de runtime/teste; foi adicionado somente o relatório de incidente. Portanto a falha é reproduzível e não foi resolvida pela validação anterior no SHA `03382b0...` para o novo head atual.
+- Runner 2 `APOENA-GAMECREATOR-RUNNER` executou a suíte; build, smoke, sintaxe e modelo passaram. A integração funcional permanece sem validação.
+- Artefato #13246855533, digest SHA-256 `07b2a2c6f9908978bccccee87ca96da0864098293036840e44b4ecca118f046f`.
+- Causa-raiz permanece **NÃO CONFIRMADA**: o status da UI muda para sucesso, mas o harness não observa o payload. A próxima mudança registra origin/source/action e payload recebido sem remover assertions.
+- Estado: **ABERTO / REPRODUZÍVEL / AGUARDANDO INSTRUMENTAÇÃO E VALIDAÇÃO**.
+
+
+### Atualização GC-CI-015 — payload capturado após timeout (run #41702943279)
+
+No run [#41702943279](https://github.com/apoenalore/GameCreator/actions/runs/41702943279), SHA `7cfcdf6f670bb6c86ff72aac9a5d0f9c72388bd5`, o step 11 ainda expirou. O log do catch mostrou `GLOBAL_RECEIVED=true`, `stored=true:keys=manifest,png` e `FRAME_RECEIVED=false`: o listener da janela host recebeu e armazenou o payload válido antes de o catch montar o erro, apesar de a espera de nove segundos ter expirado. Build, DOM, sintaxe e teste de modelo passaram. Causa **PROVÁVEL**: o limite/último polling da espera era curto para este fluxo. Correção aplicada no commit seguinte: limite de 30 segundos somente para a captura do bridge, com uma checagem final; assertions de manifesto/PNG intactas. Run 41702943279 falhou antes da correção; aguarda validação canônica da nova versão.
+
+
+### Atualização GC-CI-015 — polling ainda falha, callback captura payload (run #41704904027)
+
+O run [#41704904027](https://github.com/apoenalore/GameCreator/actions/runs/41704904027), SHA `8756adc6df548042cc26cf95b69a35e3a1fd9d48`, ainda expirou no step 11 mesmo com espera de 30 s. O catch mostra `GLOBAL_RECEIVED=true`, `FRAME_RECEIVED=false` e `stored=true:keys=manifest,png`. Assim, o payload chegou e foi salvo no host; o polling continua sem observar a variável. A alteração de 30 s não foi suficiente. Nova correção troca polling por Promise resolvida no callback que recebe `saveAsset`, preservando assertions de 12 frames e PNG. Aguardando novo Actions para confirmar.
+
+
+### Atualização GC-CI-016 — timeout após captura de payload do bridge (run #41728611799)
+
+- **Ocorrência:** 2026-11-03 19:22:10 BRT (22:22:10Z), PR #14, branch feat/apoena-modular-character-creator-integration, HEAD 37e7395013e6423c61fe4beb487265b97d0031b0, merge commit testado 1a3a07fca60e6a1f789dc7736c356362c4b54494, job 126240154897, step 11.
+- **Mensagem literal:** “Timeout: Personagem gravado no projeto atual do Creator. Salve o projeto principal para guardar essa alteração.”
+- **Evidência:** o HTML de diagnóstico e os logs mostram pedido saveAsset recebido pelo listener do host e payload armazenado com manifest,png. A espera do teste por status de sucesso expirou. O estado FRAME_RECEIVED=false é apenas uma variável de captura no documento de teste e não prova perda da resposta no iframe.
+- **Causa-raiz:** não confirmada. O teste aguardava por polling de status; faltavam evidências do momento em que a fila do editor terminava. Não há evidência de que o runtime tenha perdido o recurso.
+- **Correção escolhida:** substituir a espera temporal do status pela espera do hook whenIdle() da fila assíncrona do editor e manter a assertion de mensagem de sucesso e as assertions do manifesto/PNG. Nenhuma alteração de produção do bridge.
+- **Relatório individual:** [run #41728611799](relatorios-actions/2026-11-03-run-41728611799-character-bridge-timeout.md).
+- **Validação posterior:** run [#41840891930](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41840891930) passou no SHA `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`; o step funcional do navegador, IndexedDB e backup/restauração passaram.
+- **Estado:** RESOLVIDO E VALIDADO NO CI posterior; a falha original permanece no histórico.
+
+
+### Atualização GC-CI-017 — run terminal com step 6 ainda em andamento (run #41731726616)
+
+- **Ocorrência:** 2026-11-03, 19:32:46–19:50:16 BRT, PR #14, HEAD 71c142bc4371c1f7b1a4ca047b6c61fb1f5be0f1, job 126251213495.
+- **Resultado:** run/job completed failure; step 5 compilação passou; step 6 smoke test DOM permaneceu in_progress no payload da API sem completed_at; steps 7–26 ficaram pending.
+- **Coleta:** consulta dos logs do job retornou HTTP 404 BlobNotFound; listagem de artefatos vazia; check run indicou uma annotation, mas o conteúdo não pôde ser lido pelo conector. Horário para investigar nos logs locais do runner: 19:39:56–19:50:16 BRT.
+- **Causa-raiz:** NÃO CONFIRMADA. Travamento do navegador headless e perda de comunicação do runner são hipóteses, não fatos.
+- **Ação:** nenhuma alteração de código em resposta a este run. Não repetir cegamente o mesmo SHA. Coletar _diag e estado do processo do navegador antes de nova execução manual.
+- **Validação posterior:** o run [#41840891930](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41840891930), no SHA `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`, passou pelo smoke test DOM e concluiu o job em `success`.
+- **Estado atual:** encerrado como bloqueio atual; a causa histórica específica continua NÃO CONFIRMADA.
+- **Relatório:** [run #41731726616](relatorios-actions/2026-11-03-run-41731726616-step6-runner-diagnostics.md).
+
+
+### GC-CI-018 — timeout de avanço de animação no Chrome headless (run #41743357325)
+
+- **Repositório/PR:** `LORECRONICASAPOENA/GameCreator`, PR #14, branch `feat/apoena-modular-character-creator-integration`.
+- **Data/hora da ocorrência:** 2026-11-03 21:00:37 BRT (log UTC: 2026-11-04T00:00:37Z).
+- **Cadastro:** 2026-11-04; hora exata do cadastro não preservada.
+- **Run/job/step:** [#41743357325](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41743357325), job `validar` 126290129740, step 11 “Testar Criador Modular no navegador”.
+- **Commit SHA:** `2c656cfea31f8782299e2e0372d196ddaf3bf31b`.
+- **Mensagem literal:** `Timeout: Personagem gravado no projeto atual do Creator. Salve o projeto principal para guardar essa alteração.`
+- **Classificação:** falha do teste CONFIRMADA; hipótese de documento oculto no headless PROVÁVEL, não comprovada.
+- **Causa raiz comprovada:** o teste expirou aguardando mudança em `frameInfo` após iniciar a animação. A hipótese de falha do bridge foi descartada para esta ocorrência: o host já havia recebido e armazenado `manifest` e `png`.
+- **Correção aplicada:** hook `advanceFrame()` somente em modo `?test=1`, com avanço controlado do quadro; teste define o iframe como visível e não depende do agendamento RAF do Chrome headless. O loop de produção não foi alterado.
+- **Arquivos alterados:** `pixel-art/personagens.js` e `tests/personagens-browser.html`.
+- **Teste específico:** transição do contador de quadros no harness do Criador Modular.
+- **Validação canônica:** run [#41840891930](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41840891930), SHA `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`, job completo `success`; step funcional do navegador passou.
+- **Prevenção:** não depender de RAF real para asserções temporais determinísticas no headless; preservar a distinção entre teste do avanço de estado e teste do agendador real.
+- **Limitação residual:** esse hook não comprova o agendamento RAF em navegador visível ou dispositivo real.
+- **Estado:** RESOLVIDO COMO FALHA DO CI / LIMITAÇÃO DE COBERTURA DOCUMENTADA.
+- **Relatório individual:** [INCIDENT-2026-11-03-character-animation-timeout.md](ci/INCIDENT-2026-11-03-character-animation-timeout.md).
+
+
+### GC-CI-019 — gatilho de CI da PR #14 e reconciliação de deltas da PR #13
+
+- **Ocorrência:** 2026-11-04; hora exata da identificação não preservada.
+- **Repositório/PR:** `LORECRONICASAPOENA/GameCreator`, PR #14 (base branch PR #11).
+- **Branch-base:** `feat/apoena-personagem-estudio-main`; o filtro `pull_request.branches` aceitava apenas `main`, embora a PR #14 tivesse essa branch como base.
+- **Correção do gatilho:** commit `a60ef6ea0549f3d30c9fd62ba1a7f716fd454142` incluiu a branch-base no filtro de pull request. A validação da PR #11 passou no run [#41902283423](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41902283423).
+- **Reconciliação:** na PR #14, foram portados os checks de build PowerShell/Python para os arquivos do Criador Modular, o fixture `integracao/godot/character-test.tres`, o teste Godot `SpriteFrames` e o redirect de compatibilidade `character-creator/index.html`.
+- **Arquivos alterados:** `integracao/build_unificado.ps1`, `integracao/build_unificado.py`, `integracao/godot/character-test.tres`, `integracao/godot/tests/test_catalogo.gd`, `character-creator/index.html`.
+- **Validação:** run [#41902995635](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41902995635), commit `0e1c170a8eb4f4b4c7cd32196a8f57cb199f96df`, job 126830089627, concluído em `success`; todos os testes obrigatórios passaram, incluindo Godot 4. As etapas opcionais de empacotamento/entrega/anexação de logs foram `skipped`.
+- **Aviso não bloqueante:** actions `checkout@v4` e `setup-node@v4` registraram aviso de depreciação do Node.js 20 e execução forçada em Node.js 24.
+- **Estado:** gatilho e validação automatizada RESOLVIDOS. PR #14 continua draft; CodeRabbit e segurança do bridge permanecem pendentes; PR #13 permanece aberta até reconciliação completa.
+- **Relatório:** [run #41902995635](relatorios-actions/2026-11-04-run-41902995635-pr13-delta-reconciliation.md).
+
+
+### GC-CI-020 — hardening seguro da ponte V4.0/V4.1 (run #41906361151)
+
+- **Ocorrência:** 2026-11-04 17:25:36–17:27:21 BRT (logs UTC 20:25:36.816–20:27:21.345Z).
+- **Repositório/PR:** `LORECRONICASAPOENA/GameCreator`, PR #14, branch `feat/apoena-modular-character-creator-integration`.
+- **Commit validado:** `d5bea2b3c7905f00bcff2645e1b2e8b3f49a8df6`; job 126842370143.
+- **Falha intermediária:** run #41905233755 falhou no teste de navegador com `BRIDGETRACE` vazio; os fluxos de biblioteca passaram. A evidência apontou ausência do handshake `ready`; não foi classificada como perda de payload.
+- **Correção:** nonce criptográfico de 256 bits, allowlist de `WindowProxy`, validação de origem exata quando disponível, handshake mínimo e payloads/respostas por `MessageChannel`. Para `file://`, source+nonce são obrigatórios; nonce também é passado no fragmento e removido após leitura.
+- **Wildcard residual:** `postMessage("*")` é usado somente na transferência inicial do `MessagePort` quando a origem é opaca. O payload não trafega no canal global.
+- **Arquivos principais:** `shared/creator-bridge.js`, `pixel-art/modulo-integrado.js`, `tests/personagens-browser.html`, `tests/creator-bridge.test.cjs`, `README.md`.
+- **Validação:** run [#41906361151](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41906361151) concluiu `success`; browser, protocolo, testes negativos de autorização, contratos, Godot 4 e preservação do Creator passaram.
+- **Avisos não bloqueantes:** depreciação Node.js 20 em actions v4 e `punycode`.
+- **Estado:** hardening automatizado RESOLVIDO E VALIDADO. Revisão CodeRabbit e teste manual offline `file://` ainda pendentes; PR #14 continua draft, sem merge.
+- **Relatório:** [run #41906361151](relatorios-actions/2026-11-04-run-41906361151-bridge-hardening.md).
+
+### GC-CI-021 — PR #19: teste de exportação pixel-perfect ausente na árvore sincronizada (06/11/2026)
 
 - **Ocorrência:** [run 42276102355](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42276102355), job `validar` ID `128092695456`, step 11, branch `sync/main-into-gc-anim-006-20261106-v2`, SHA `301eadd3aadb3d59aafaf9dae9fa92197e6ca191`.
 - **Erro literal recuperado:** `node:internal/modules/cjs/loader:1210`; PowerShell registrou `NativeCommandError`, exit code 1. A mensagem completa da exceção Node não foi preservada.
@@ -604,4 +714,16 @@ Nova captura mostra `Runner reconnected`, versão `2.338.0` e `Listening for Job
 - **Validação:** [run 42281994131](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42281994131), job `validar`, success no SHA `e16fe832adde4ab7606594b45a8395a4df6d2438`; step 11 e todos os steps funcionais seguintes passaram.
 - **Prevenção:** conferir no mesmo tree/commit a existência de cada teste, script e asset referenciado pelo workflow antes de iniciar a sincronização. Não remover cobertura para obter CI verde.
 - **Relatório:** `docs/relatorios-actions/2026-11-06-run-42276102355-pixel-art-export-test-ausente.md`.
+- **Follow-up:** a PR #19 foi mesclada na branch-base #11 em 2026-11-06T19:56:11Z (merge commit `8acf515c6be8f097b05b4231608894f06740ab17`); a CI da PR #11 [run 42283992136](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42283992136) terminou success no mesmo SHA.
 
+### GC-CI-022 — literal RegExp duplamente escapado no teste de concorrência (07/11/2026)
+
+- **Ocorrência:** [run 42378776734](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42378776734), tentativa 1; job `validar` ID `128421776860`, step 11, branch `feat/apoena-modular-character-creator-integration`, SHA `74614a6c97e86f6e0be7519ddb30b7e4138cc8df`.
+- **Erro literal:** `SyntaxError: Invalid regular expression: /if\\s*\\(presetRequestGuard\\.isCurrent\\(requestId\\)\\)\\s*msg\\(/: Unterminated group`; stack trace aponta `tests/preset-request-guard.test.cjs:26`.
+- **Causa comprovada:** quatro assertions foram compostas em uma template string com duas barras invertidas no código-fonte do literal RegExp. O parser recebeu `\\s`/`\\(` e rejeitou a expressão antes de executar a suíte. Não é falha do runner nem do código de produção.
+- **Impacto:** steps 1–10 passaram; step 11 falhou antes das assertions; steps 12–26 foram skipped; step 27 anexou o artefato de diagnóstico com sucesso. O teste de concorrência e os testes posteriores não foram validados nessa tentativa.
+- **Correção escolhida:** corrigir somente o escape das assertions em `tests/preset-request-guard.test.cjs`, preservando toda a cobertura. Não remover assertions nem alterar o Estúdio.
+- **Correção:** commit `3285d888cb5c203b8a6ff94e4694818e1e085a5c` corrigiu os quatro literais RegExp sem remover assertions.
+- **Validação:** [run #42379244625](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42379244625) concluiu `completed/success` no SHA exato; steps funcionais 1–24 passaram e steps 25–27 foram skipped pelas condições do evento PR. **Incidente resolvido e validado.**
+- **Prevenção:** ao gerar código JavaScript em template strings, conferir o texto final gravado e validar sintaxe/teste focado antes do commit quando disponível.
+- **Relatório:** [2026-11-07-run-42378776734-regex-duplamente-escapada.md](relatorios-actions/2026-11-07-run-42378776734-regex-duplamente-escapada.md).

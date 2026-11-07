@@ -70,5 +70,16 @@ func _run_tests() -> void:
     bad_session.close()
     if not _expect(not restaurado.carregar_sessao("user://apoena_catalogo_sessao_outro_jogo.json"), "sessão de outro jogo deve ser rejeitada"):
         return
+    var character = load("res://character-test.tres") as SpriteFrames
+    if not _expect(character != null, "SpriteFrames exportado deve carregar"):
+        return
+    var action = 'andar "sul"'
+    if not _expect(character.has_animation(action) and character.get_frame_count(action) == 2, "ações e quadros do personagem"):
+        return
+    var texture = character.get_frame_texture(action, 1) as AtlasTexture
+    if not _expect(texture != null and texture.region == Rect2(8, 0, 8, 8), "região do segundo quadro"):
+        return
+    if not _expect(texture.atlas.get_width() == 16 and texture.atlas.get_height() == 8, "textura incorporada do personagem"):
+        return
     print("GODOT CATALOG TEST OK: carga, crafting, efeitos, persistência e rejeição de dados inválidos")
     quit(0)

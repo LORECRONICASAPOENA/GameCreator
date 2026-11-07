@@ -426,3 +426,50 @@ Esta seção é o estado mais recente e prevalece sobre os snapshots históricos
 - Run [`42324621995`](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42324621995), SHA `1754348c244f41df820f3525cd523cf9e7aacdb5`: a tentativa 1 falhou sem etapas e sem logs (22:33–22:43 BRT de 06/11); a **tentativa 2, sem alteração de código, passou** (09:16:55–09:19:10 BRT, runner `Game-Creator-Runerr`). Causa da falha inicial: **NÃO CONFIRMADA** (runner/infraestrutura). Relatório: `docs/relatorios-actions/2026-11-07-run-42324621995-falha-sem-steps-recuperada-na-tentativa-2.md`.
 - O teste `tests/preset-request-guard.test.cjs` e o de exportação pixel-perfect executaram nesse SHA pela validação canônica. As suítes locais que dependem de `fake-indexeddb`/PowerShell não rodaram no ambiente de revisão e dependem do runner.
 - Continua pendente: inspeção visual das imagens no Estúdio e revisão do CodeRabbit. A integração na `main` depende de aprovação do autor; a PR #14 está empilhada sobre esta branch.
+
+---
+
+## Atualização 07/11/2026 — Integração da PR #11 concluída; reconciliação da PR #14
+
+### Estado confirmado da cadeia
+- PR [#11](https://github.com/LORECRONICASAPOENA/GameCreator/pull/11) foi integrada à `main` em 2026-11-07T12:49:19Z pelo merge `e9335b9527fc20c1ee6bf95c7729f8a82e68339c`. O HEAD da PR #11 era `f648b1bdb0c1f0c17251755c166c397f517666d8`.
+- O CI pós-merge [#42374165197](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42374165197) concluiu `completed/success` no SHA da `main` `e9335b95`. O CI da PR #11 [#42324621995](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42324621995) passou no SHA `1754348c244f41df820f3525cd523cf9e7aacdb5`; o commit posterior da PR #11 foi documental.
+- A correção da PR #11 que precisa permanecer na linha integrada inclui token de geração compartilhado para preset/importação manual/assets/projetos, cancelamento de lotes de limpeza obsoletos, snapshot consistente de salvamento e validação de limite de pixels. Os limites criativos continuam: `andar_ref` é uma prévia com poses de corrida, não uma caminhada fiel; grades de ataque ainda exigem inspeção visual.
+
+### Diagnóstico da PR #14 antes da reconciliação
+- PR [#14](https://github.com/LORECRONICASAPOENA/GameCreator/pull/14) continua aberta em Draft; branch `feat/apoena-modular-character-creator-integration`, HEAD anterior `115aa65b093daa66f38baebfe52988f681c4a85f`.
+- A branch-base `feat/apoena-personagem-estudio-main` avançou de `8acf515c6be8f097b05b4231608894f06740ab17` para `f648b1bdb0c1f0c17251755c166c397f517666d8`; a `main` atual está em `e9335b9527fc20c1ee6bf95c7729f8a82e68339c`. A comparação da PR #14 com a base antiga mostrava 111 commits à frente/3 atrás; contra a main, 111 à frente/4 atrás, com `mergeable_state=dirty`.
+- O merge-base comum das três árvores é `8acf515c6be8f097b05b4231608894f06740ab17`. A auditoria árvore-a-árvore identificou 48 caminhos alterados, quatro conflitos reais e dois relatórios de CI presentes somente na main.
+
+### Resolução de três vias preparada
+- `.github/workflows/pixel-art.yml`: preservada a versão da PR #14, que contém todas as linhas da versão da main e acrescenta as etapas de teste do Criador Modular no modelo e no navegador; mantém `pull_request` para `main` e para a branch-base.
+- `pixel-art/estudio.js`: escolhida a versão atual da main, que contém as correções mais completas de concorrência da PR #11; a implementação da PR #14 não continha o cancelamento entre fontes, o cancelamento do lote de limpeza e o snapshot consistente.
+- `tests/preset-request-guard.test.cjs`: escolhida a suíte mais abrangente da main (111 linhas), com quatro assertions explícitas adicionais para criação/uso do guard e descarte de respostas antigas.
+- `docs/PENDENCIAS_ABERTAS_E_LIMPEZA_GITHUB.md`: preservado o histórico completo da PR #14 e acrescentado este estado posterior à integração da #11, sem copiar snapshots antigos como se ainda fossem atuais.
+- Os dois relatórios de CI exclusivos da main foram preservados na árvore resultante: `2026-11-07-run-42317322491-cancelled-no-steps.md` e `2026-11-07-run-42324621995-falha-sem-steps-recuperada-na-tentativa-2.md`. Os demais arquivos exclusivos da PR #14 foram mantidos.
+
+### Backups e validação
+- Backups anteriores a qualquer reconciliação: `backup/gc-pr14-pre-main-reconcile-20261107` → `115aa65b`; `backup/gc-main-pre-pr14-reconcile-20261107` → `e9335b95`; `backup/gc-pr14-base-pre-reconcile-20261107` → `f648b1bd`.
+- O merge commit de sincronização foi criado somente na branch da PR #14; a `main` não foi alterada. O CI canônico automático após o novo HEAD precisa concluir antes de declarar esta reconciliação validada.
+- A PR #14 não foi mesclada nem retirada de Draft. Permanecem pendentes: revisão independente do novo diff e aceite manual offline `file://` com IndexedDB real (importar, editar, salvar, fechar/reabrir, reabrir pela Biblioteca, gravar no Creator e confirmar persistência do projeto principal).
+- Próximo passo: confirmar CI no SHA de sincronização, retargetear a PR #14 para `main`, confirmar o diff de 46 arquivos e executar/observar CI da PR #14 contra a base final. Não mesclar a PR #14 antes da revisão independente e do aceite manual.
+
+### Incidente de CI — run #42378776734: escape duplo no teste de concorrência (07/11/2026)
+
+- Run [#42378776734](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42378776734), tentativa 1, SHA `74614a6c97e86f6e0be7519ddb30b7e4138cc8df`, concluiu `completed/failure` no step 11 (`Testar concorrência dos presets Apoena`).
+- **Causa comprovada:** `tests/preset-request-guard.test.cjs:26` recebeu barras invertidas duplicadas ao gerar quatro RegExp; Node lançou `SyntaxError: Invalid regular expression ... Unterminated group`. Erro no teste, não no produto nem no runner.
+- Steps 1–10 passaram; steps 12–26 foram skipped; step 27 anexou artefato `v41-ci-diagnostics` ID `13576454021` com sucesso.
+- Relatório individual: [2026-11-07-run-42378776734-regex-duplamente-escapada.md](relatorios-actions/2026-11-07-run-42378776734-regex-duplamente-escapada.md).
+- Backup antes da correção: `backup/gc-pr14-pre-regex-test-fix-20261107` → `74614a6c97e86f6e0be7519ddb30b7e4138cc8df`.
+- Correção aplicada em `3285d888cb5c203b8a6ff94e4694818e1e085a5c`; [run #42379244625](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42379244625) concluiu `success` no SHA exato, com steps funcionais 1–24 aprovados. O incidente GC-CI-022 está resolvido. A PR #14 foi retargetada para `main`, mergeable/clean; permanece Draft e sem merge.
+
+
+### Estado após retarget da PR #14 para main — 07/11/2026
+
+- **PR #14:** base `main` (`e9335b9527fc20c1ee6bf95c7729f8a82e68339c`); HEAD de código validado `3285d888cb5c203b8a6ff94e4694818e1e085a5c`; `mergeable=true`, `mergeable_state=clean`; comparação com main: 114 commits à frente, zero atrás, 44 arquivos no diff.
+- **Sincronização:** merge commit `74614a6c97e86f6e0be7519ddb30b7e4138cc8df` tem pais `115aa65b` (head anterior da PR #14) e `e9335b95` (main). A main não foi alterada durante a reconciliação.
+- **CI:** [run #42379244625](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42379244625) concluiu success no SHA `3285d888`; steps funcionais 1–24 passaram. O erro de teste no run #42378776734 foi corrigido e documentado como GC-CI-022.
+- **Backups:** `backup/gc-pr14-pre-main-reconcile-20261107` → `115aa65b`; `backup/gc-main-pre-pr14-reconcile-20261107` → `e9335b95`; `backup/gc-pr14-base-pre-reconcile-20261107` → `f648b1bd`; `backup/gc-pr14-pre-regex-test-fix-20261107` → `74614a6c`; `backup/gc-pr14-post-ci-20261107` → `3285d888`.
+- **Estado:** PR #14 continua Draft, não mesclada. Pendem revisão independente CodeRabbit, inspeção visual das spritesheets/grades e aceite manual offline `file://` com IndexedDB real (salvar, fechar/reabrir, reabrir pela Biblioteca, gravar no Creator e confirmar persistência do projeto principal).
+- **Próxima etapa:** obter revisão e aceite manual; depois, com autorização do proprietário, avaliar sair de Draft e mesclar. Não fazer merge enquanto esses aceites não forem concluídos.
+

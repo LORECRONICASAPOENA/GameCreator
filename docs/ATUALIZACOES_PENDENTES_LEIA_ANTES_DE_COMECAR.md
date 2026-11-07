@@ -228,3 +228,53 @@ O clone --no-checkout deixa o índice vazio; o status pode apresentar remoções
 ## GC-UPDATE-TEST-002 — Parser PowerShell
 
 A CI 41114836257 falhou no step 17 com Token '}' inesperado. A causa foi um segundo bloco de código duplicado após o catch, deixado por uma substituição anterior do trecho de validação do remote. O bloco duplicado foi removido no commit d90541bd642f17aa681ea7e623b49dba12ca2b36. Nova CI pendente; o teste end-to-end PowerShell ainda não foi considerado aprovado.
+
+
+## Resultado validado — Criador Modular de Personagens no GameCreator (03/11/2026)
+
+- **IMPLEMENTADO E VALIDADO no branch do PR #14** no SHA `03382b02e74e2b39da0924bd0ff72ddacdf27e5a`; ainda não integrado à `main`.
+- Causa do CI duplicado: `push` e `pull_request` concorriam no mesmo grupo e cancelavam execuções. Push agora é filtrado para `main`; PRs de branches de trabalho mantêm validação automática.
+- O teste funcional no navegador passou após o harness aguardar o fim real das operações assíncronas; IndexedDB foi validado separadamente no mesmo workflow.
+- Execução comprovadora: [Actions run 41565001752](https://github.com/apoenalore/GameCreator/actions/runs/41565001752), concluída com sucesso no SHA acima. Incluiu build, testes do Criador Modular, biblioteca/backup, exportação, contratos de integração, hidrologia/erosão, Godot 4 e preservação do Creator.
+- O snapshot técnico e sua proveniência serão indexados no Apoena Skill. Não altera as Skills de cânone/lore.
+
+
+### Reabertura da validação do Criador Modular — 03/11/2026
+
+- A validação bem-sucedida do SHA `03382b02e74e2b39da0924bd0ff72ddacdf27e5a` continua comprovada para aquele commit.
+- No head da PR #14, commit `37e026a8da5bd55aa823e49fa36fe81f16f20647`, o Actions #41632223425 falhou no teste funcional “Gravar no Creator”. O mesmo timeout foi reproduzido no run #41663786861, SHA `1775d77f447e9e245c7a71a35327d935ebaf6bc1`, sem mudanças no runtime ou no teste.
+- Causa-raiz ainda não confirmada. O registro individual está em [relatório do run #41632223425](relatorios-actions/2026-11-03-run-41632223425-character-bridge-timeout.md).
+- Estado da PR #14: **EM INVESTIGAÇÃO / NÃO VALIDADA NO HEAD ATUAL**. PR #13 permanece aberta com escopo sobreposto; não declarar integração concluída nem mesclar até reconciliar as PRs e validar o fluxo do bridge.
+
+
+### Retomada do Criador Modular — 03/11/2026
+
+- Run [#41702943279](https://github.com/apoenalore/GameCreator/actions/runs/41702943279) reproduziu o timeout no step 11, mas o log de diagnóstico mostrou `GLOBAL_RECEIVED=true` e `stored=true:keys=manifest,png`; o callback do host havia armazenado o payload.
+- Causa provável: espera do harness curta/condição final sem rechecagem; o evento chegou após o polling deixar de observar a variável.
+- Correção enviada: espera ampliada para 30 s somente em “Gravar no Creator” e checagem final; assertions de conteúdo mantidas.
+- Estado da PR #14: aguarda nova execução canônica. PR #13 segue sobreposta e ainda requer reconciliação; não mesclar até CI completo.
+
+
+### Atualização Creator — 03/11/2026
+
+- A espera de 30 s no teste de “Gravar no Creator” não resolveu o run #41704904027: o trace mostra payload capturado no host (`GLOBAL_RECEIVED=true`, `FRAME_RECEIVED=false`, `stored=true:keys=manifest,png`) mesmo com timeout.
+- O harness agora aguarda uma Promise resolvida diretamente pelo callback de bridge em vez de consultar a variável por polling; assertions de manifesto e PNG mantidas.
+- Estado: nova execução canônica pendente. CI verde necessário; PRs #13 e #14 continuam exigindo reconciliação.
+
+
+## Atualização da cadeia de PRs do Criador Modular — 06/11/2026
+
+- A PR #19 resolveu a sincronização da branch-base da PR #11 com a main e foi integrada em 2026-11-06T19:56:11Z, merge commit `8acf515c6be8f097b05b4231608894f06740ab17`.
+- A PR #11 permanece aberta/draft, base `main`, head `8acf515c6be8f097b05b4231608894f06740ab17`; a CI [#42283992136](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42283992136) passou no SHA exato.
+- A PR #14 permanece a implementação escolhida e continua empilhada sobre a branch da #11. A sincronização foi concluída por merge commit `fbc7aad8c6ef2de0255de5479a1f2b4c83b279c1`, com base `8acf515c6be8f097b05b4231608894f06740ab17`, sem force-push e sem retarget para main.
+- A PR #13 permanece fora da cadeia e não será mesclada sobre a #14.
+- Próximas validações: CI no novo head da #14, CodeRabbit no head atualizado, inspeção visual das grades de animação e teste manual offline/file:// com persistência real do IndexedDB.
+
+
+### Resultado da sincronização #14 — 06/11/2026
+
+- Novo head: `fbc7aad8c6ef2de0255de5479a1f2b4c83b279c1`; primeiro pai é o head anterior da #14 e segundo pai é o head atualizado da #11.
+- CI [#42290101577](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42290101577) concluiu success no SHA exato. Passaram Criador Modular no navegador, presets, exportação pixel-perfect, IndexedDB, backup/restauração, contratos, manifesto do atualizador, hidrologia, runtime Godot 4 e preservação do Creator. Os passos de empacotamento e anexação de logs foram skipped por condição do workflow.
+- Backup pós-sincronização: `backup/gc-pr14-post-base-sync-20261106` → `fbc7aad8c6ef2de0255de5479a1f2b4c83b279c1`.
+- CodeRabbit foi solicitado nos comentários #6694982589 (PR #11) e #6694983194 (PR #14); nenhuma resposta nova foi observada. A revisão CLI permanece indisponível nesta sessão.
+- Inspeção visual das grades de animação e teste manual offline/file:// com IndexedDB real permanecem pendentes; manter as PRs em draft até fechar esses itens.
