@@ -382,78 +382,6 @@ Os trechos abaixo são snapshots históricos de 02/11/2026. Foram preservados se
 
 Em 02/11/2026, o autor enviou captura da anotação expandida do GitHub Actions. A mensagem confirma que o executor auto-hospedado perdeu comunicação com o servidor. A categoria da falha é infraestrutura/conectividade do runner; a causa específica (rede, suspensão/desligamento, processo encerrado, CPU/memória ou bloqueio de acesso) continua pendente. Não há evidência de erro de código do Estúdio nesta anotação. Não alterar código de produto para tentar resolver a desconexão. Quando o computador estiver disponível, consultar os logs locais do runner no diretório _diag e verificar energia, rede, DNS, proxy/firewall e recursos do runner. Relatório atualizado: [GC-CI-014](relatorios-actions/2026-11-02-run-41433942503-falha-sem-steps-recuperaveis.md).
 
-
-## Atualização — PR #14 / CI do Criador Modular (03/11/2026)
-
-- **Estado:** validação do head de código concluída; PR [#14](https://github.com/apoenalore/GameCreator/pull/14) permanece aberta em draft, sem merge.
-- O CI executou uma única validação por evento `pull_request` depois que o gatilho de `push` foi limitado a `main`. O run [41565001752](https://github.com/apoenalore/GameCreator/actions/runs/41565001752) passou em `03382b02e74e2b39da0924bd0ff72ddacdf27e5a`.
-- Correção do teste funcional: aguardar o contador explícito de operações pendentes e o evento `apoena:character-idle`. A validação funcional no navegador, a persistência IndexedDB e as demais etapas obrigatórias do workflow passaram.
-- Snapshot do Apoena Skill será registrado em `apoena-knowledge/backups/gamecreator-pr14-ci-fixes-2026-11-03/`, identificando repositório-fonte, branch, SHA, run e arquivos copiados. Esse snapshot é cópia técnica de implementação, não atualização de cânone.
-
-
-## Atualização de manutenção — 04/11/2026 — PRs #11, #13 e #14
-
-- **WIP = 1:** a linha de implementação ativa do Criador Modular é a PR #14. O workflow automático da branch-base foi corrigido e os runs #41902283423 (PR #11), #41902995635 (reconciliação) e #41906361151 (hardening da ponte) passaram. A PR #14 segue draft aguardando revisão independente CodeRabbit, verificação manual offline `file://` e reconciliação final do histórico.
-- **PR #11:** continua como branch-base `feat/apoena-personagem-estudio-main`; o filtro `pull_request.branches` foi atualizado para permitir a PR #14. O run [#41902283423](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41902283423) passou. A branch permanece draft, 27 commits à frente e 51 atrás de `main`.
-- **PR #13:** aberta, base `main`, HEAD `34a0a722444448e384c91286affecf0f50217038`; contém findings de revisão e histórico divergente. Os deltas funcionais identificados (builds, fixture/teste Godot e redirect legado) foram portados e validados na PR #14. A PR #13 permanece aberta até concluir revisão dos arquivos sobrepostos; não fechar nem mesclar automaticamente. Nota registrada no comentário [#6640862983](https://github.com/LORECRONICASAPOENA/GameCreator/pull/13#issuecomment-6640862983).
-- **PR #14:** aberta/draft, base `feat/apoena-personagem-estudio-main`, HEAD de código validado `d5bea2b3c7905f00bcff2645e1b2e8b3f49a8df6`; branch 101 commits à frente e 2 atrás da base, sem conflito reportado. Run [#41906361151](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41906361151) passou em todos os testes obrigatórios, inclusive a ponte segura e runtime Godot 4.
-- **Reconciliação:** a comparação entre PR #13 e o HEAD da #14 indicou 101 commits à frente e 47 atrás. Os deltas funcionais exclusivos encontrados foram portados; o histórico continua divergente e os arquivos sobrepostos precisam de revisão antes de fechar PR #13, retargetear ou mesclar qualquer PR. Acompanhar issue [#16](https://github.com/LORECRONICASAPOENA/GameCreator/issues/16).
-- **CodeRabbit:** revisão solicitada para o hardening do HEAD `d5bea2b` no comentário [#6641314397](https://github.com/LORECRONICASAPOENA/GameCreator/pull/14#issuecomment-6641314397); nenhuma review formal foi recebida até a última consulta de 04/11/2026.
-- **Correção de concorrência:** `pixel-art/preset-request-guard.js` invalida solicitações antigas de presets; somente a mais recente pode alterar o estado do Estúdio. `tests/preset-request-guard.test.cjs` verifica a semântica e a ligação HTML/JS.
-- **Ajuste do teste:** run #395 falhou porque o teste exigia espaços inexistentes no JS minificado. Os regexes foram ajustados para whitespace opcional no commit `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`.
-- **CI final de segurança:** run [#41906361151](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41906361151) concluiu `success` no SHA `d5bea2b3c7905f00bcff2645e1b2e8b3f49a8df6`; passaram navegador, teste unitário do bridge, rejeição de source/token/origem inválidos, contratos, Godot 4 e preservação do Creator. Etapas opcionais de empacotamento/entrega/anexação de logs foram `skipped`. O teste de animação continua usando hook determinístico; o agendamento real de `requestAnimationFrame` requer cobertura manual separada. Logs: 17:25:36–17:27:21 BRT; avisos não bloqueantes de Node.js 20 nas actions v4 e do módulo `punycode`.
-- **Backups:** pré-correção `backup/pr14-before-preset-race-fix-20261104` no SHA `4f90fc8739b4af351c929a97d8ed73c094477c36`; pós-correção `backup/pr14-after-preset-race-fix-20261104` no SHA `dca28d0065a4cc24f38d6ebff759346575b49428`; checkpoint de código validado `backup/pr14-after-test-regex-fix-20261104` no SHA `2ec3c55c1612fdb885e328bfa19f5ef64a49f010`; checkpoint final documental `backup/pr14-final-docs-20261104` no SHA `b945ba16050bfb051b2bc27d5ecdddd91c1f9348`.
-- **Proteção de branches:** issue [#15](https://github.com/LORECRONICASAPOENA/GameCreator/issues/15) acompanha a exigência de checks e revisão independente na `main`.
-
-## Ponto de situação — Criador Modular / GC-CHAR-001 (03/11/2026)
-
-- **WIP = 1:** manter esta integração como a única tarefa de implementação ativa entre GameCreator e Apoena Pixel Art HTML.
-- **PR #11:** aberta em draft, base `main`, branch `feat/apoena-personagem-estudio-main`, HEAD `0447ea9dc9d9310e985247325e3af1d1c726519a`.
-- **PR #13:** aberta, fora de draft, base `main`, HEAD `34a0a722444448e384c91286affecf0f50217038`. O workflow mais recente consultado para esse SHA foi o run [#41528996973](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41528996973), concluído com falha; esse resultado não valida o HEAD atual se houver commits posteriores.
-- **PR #14:** aberta em draft, base na branch da PR #11 (`feat/apoena-personagem-estudio-main`), HEAD consultado `98c46503ed1ec567422b947d2fec88d470a25b39`. O run automático [#41728100712](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41728100712) estava `in_progress` na consulta de 03/11/2026. A validação anterior [#41565001752](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41565001752) passou no SHA `03382b02e74e2b39da0924bd0ff72ddacdf27e5a`, que não é o HEAD consultado agora.
-- **Bloqueio de integração:** PRs #13 e #14 cobrem a mesma integração do Criador Modular; a #14 também depende da branch ainda draft da #11. Não declarar concluído nem mesclar enquanto o run do HEAD atual não terminar e as diferenças entre as PRs não forem reconciliadas.
-- **Próxima ação:** acompanhar o run #41728100712 sem iniciar execução duplicada. Depois, comparar os arquivos/commits das PRs #11, #13 e #14 e definir uma única rota de integração. Se houver falha, coletar logs e seguir o procedimento individual de incidente antes de alterar código.
-
-
-### Atualização — falha do Criador Modular no run #41728611799 (03/11/2026)
-
-- O run #41728100712 foi cancelado quando uma execução mais nova assumiu o mesmo grupo de concorrência; o substituto automático foi [#41728611799](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41728611799), no HEAD 37e7395013e6423c61fe4beb487265b97d0031b0.
-- A execução substituta falhou no step 11, “Testar Criador Modular no navegador”, com timeout aguardando a mensagem de sucesso de “Gravar no Creator”. Build, DOM, sintaxe e modelo passaram; etapas seguintes foram puladas.
-- O trace comprovou que o host recebeu a requisição saveAsset e armazenou manifest e png. A resposta de volta ao iframe e a conclusão da fila do editor não foram comprovadas naquele run.
-- **Estado:** integração ainda não validada; causa-raiz do atraso não confirmada. Relatório: [2026-11-03-run-41728611799-character-bridge-timeout.md](relatorios-actions/2026-11-03-run-41728611799-character-bridge-timeout.md).
-- **Correção aplicada no harness:** após capturar o payload, o teste espera a fila assíncrona real do editor via hook de inatividade e mantém as verificações de mensagem de sucesso, manifesto com 12 quadros e PNG. O código de produção do bridge não foi alterado.
-- Aguardar somente a execução canônica automática do novo commit; não iniciar workflow duplicado nem marcar a tarefa como concluída antes de todos os steps obrigatórios passarem.
-
-
-### Atualização — run #41731726616 terminou sem diagnóstico acessível (03/11/2026)
-
-- O run [#41731726616](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41731726616), HEAD 71c142bc4371c1f7b1a4ca047b6c61fb1f5be0f1, terminou em failure.
-- A API mostra o step 6, “Verificar DOM responsivo do Estúdio, Mapas e Biblioteca no navegador”, como in_progress sem horário de conclusão, embora o job tenha encerrado às 19:50:16 BRT. Os steps seguintes, inclusive o teste funcional do Criador Modular, ficaram pending.
-- Logs do job retornaram BlobNotFound; a listagem do run não contém artefatos. Causa-raiz não confirmada, portanto essa execução não valida nem refuta a correção do harness.
-- Relatório individual: [2026-11-03-run-41731726616-step6-runner-diagnostics.md](relatorios-actions/2026-11-03-run-41731726616-step6-runner-diagnostics.md).
-- **Estado posterior:** o bloqueio atual foi superado pelo run #41902995635, que passou no smoke test DOM e concluiu todos os testes obrigatórios. A causa histórica de `BlobNotFound` permanece não confirmada; a coleta de logs locais pode continuar como melhoria de observabilidade, mas não bloqueia a PR #14.
-
-
-- **Segurança da ponte — correção implementada e validada no CI:** `shared/creator-bridge.js` exige nonce criptográfico de 256 bits e `WindowProxy` previamente autorizado; payloads/respostas trafegam por `MessageChannel`. A origem `null` só é aceita com source+nonce autorizados. `postMessage("*")` permanece exclusivamente no handshake de transferência do `MessagePort` para origem opaca `file://`; nenhum payload do projeto trafega por esse wildcard. O nonce é passado em fragmento, removido após leitura. Testes rejeitam source não autorizado, token incorreto e origem externa. Revisão independente CodeRabbit e verificação manual offline ainda pendentes; solicitação no comentário [#6641314397](https://github.com/LORECRONICASAPOENA/GameCreator/pull/14#issuecomment-6641314397).
-- **Incidentes de CI anteriores:** #41728611799, #41743357325 e #41731726616 deixaram de bloquear a PR após os runs #41840891930 e #41902995635; a causa histórica específica de #41731726616 continua não confirmada.
-
-
-### Atualização — reconciliação PR13/PR14 validada no run #41902995635 (04/11/2026)
-
-- Os checks de build PowerShell/Python agora exigem os quatro arquivos do Criador Modular.
-- O teste Godot verifica o recurso `SpriteFrames` exportado e a compatibilidade da rota legada foi preservada.
-- O run #41902995635 passou em todos os testes obrigatórios; o relatório está em [2026-11-04-run-41902995635-pr13-delta-reconciliation.md](relatorios-actions/2026-11-04-run-41902995635-pr13-delta-reconciliation.md).
-- Não houve merge nem fechamento de PR. A próxima ação do WIP é receber a revisão CodeRabbit e tratar a segurança da ponte antes de qualquer integração final.
-
-
-### Atualização — hardening da ponte V4.0/V4.1 validado (04/11/2026)
-
-- A primeira tentativa de hardening, run #41905233755, falhou no teste de navegador porque o iframe não enviou a mensagem `ready`; o artefato mostrou `BRIDGETRACE` vazio. A causa foi tratada como falha de propagação do nonce, não como perda de dados.
-- O nonce agora é transmitido também no fragmento `#apoenaBridgeToken`, que não é enviado ao servidor; o bridge remove o fragmento depois de capturá-lo. `window.name` permanece como fallback.
-- O teste Node foi corrigido para simular corretamente a direção de `postMessage` e expor `URLSearchParams` no fake Window.
-- Run [#41906361151](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/41906361151) passou em todos os testes obrigatórios, inclusive browser real, protocolo privado, validação de origem opaca, Godot 4 e preservação do Creator.
-- A segurança automatizada está validada; não declarar a PR pronta para merge até revisão independente CodeRabbit e teste manual do fluxo offline `file://`.
-
 ## Atualização canônica — 06/11/2026 após GC-UPDATE-009
 
 - **Main atual:** `90879c3099ca4cce2a229d745a08f8d1c9e5bb29`. Desde o merge de GC-UPDATE-009, a main avançou três commits somente documentais; o merge commit `b23900f578be096fb731e822796fc2266e58e551` permanece ancestral.
@@ -481,66 +409,48 @@ Em 02/11/2026, o autor enviou captura da anotação expandida do GitHub Actions.
 - **Próximas ações:** (1) revisão e integração da PR #19 na branch-base #11; (2) aguardar CI canônico da PR #11 no novo SHA; (3) revisar/validar a #11 antes de sua integração à main; (4) retarget da #14 para main; (5) CodeRabbit e CI atualizados na #14; (6) teste manual offline/file:// e persistência IndexedDB real antes do merge final da #14.
 - **Governança:** WIP=1 permanece na tarefa ALB-GC-CHAR-001. Nenhum merge na main foi realizado nesta etapa; nenhuma PR #13 foi mesclada ou fechada.
 
+## Atualização 07/11/2026 — auditoria profunda e correção da PR #11
+
+Esta seção é o estado mais recente e prevalece sobre os snapshots históricos de 06/11 registrados acima.
+
+- PR [#11](https://github.com/LORECRONICASAPOENA/GameCreator/pull/11): aberta e em Draft; base `main`; branch `feat/apoena-personagem-estudio-main`. Antes desta correção, o HEAD consultado era `d70d2bc3e22027b679e181ecf67ef102bf1c3830`; comparação com a main: 35 commits à frente, 0 atrás, 17 arquivos alterados, `mergeable=true`. Portanto, o bloqueio não era conflito de merge.
+- CI: Run #427 passou no SHA anterior `8acf515c6be8f097b05b4231608894f06740ab17`; Run #430 (push) foi cancelado pela concorrência configurada; Run #431 (pull_request) foi cancelado sem steps e sem logs recuperáveis. Ver relatório `docs/relatorios-actions/2026-11-07-run-42317322491-cancelled-no-steps.md`.
+- Revisão independente: os pedidos ao CodeRabbit para os HEADs anteriores e `d70d2bc` não resultaram em review formal; a API retornou zero reviews e zero review threads no momento da auditoria.
+- Defeitos de concorrência confirmados por inspeção: o guard anterior cobria apenas preset contra preset; importação manual, asset da biblioteca e projetos JSON/biblioteca podiam aplicar respostas antigas. O decodificador de projeto podia concluir após uma solicitação mais nova. A limpeza inteligente em lote não cancelava callbacks antigos. O salvamento de asset consultava metadados/imagem original após awaits, permitindo misturar snapshots.
+- Correção aplicada nesta atualização: token de geração compartilhado entre todas as fontes assíncronas; verificação do token durante a decodificação de cada quadro; descarte e liberação de URLs obsoletas; reset central do estado transitório; cancelamento lógico de lotes de limpeza antigos; snapshot consistente de spritesheet, metadados e imagem original antes da primeira operação assíncrona; validação de limite de pixels em assets da biblioteca e tratamento de erro na importação manual.
+- Testes ampliados: concorrência entre fontes, guard em cada caminho de carregamento, cancelamento de limpeza em lote, snapshot de salvamento, presença/assinatura/dimensões dos três PNGs originais e contratos de grade/direção. O workflow já contém a etapa que executa este teste; o Run #431 não chegou a executá-la.
+- Limites mantidos: `andar_ref` continua sendo uma prévia com poses de corrida, não uma caminhada fiel. As referências de ataque são recortadas por grade inicial e exigem inspeção visual. Esta PR não comprova integração de gameplay nem validação no runtime Godot.
+- Estado da validação da correção: aguardando Actions canônico no novo HEAD, revisão CodeRabbit e inspeção visual/manual. Não declarar a PR pronta nem mesclá-la apenas com a pré-checagem sintática.
+
+## Atualização 07/11/2026 (BRT, ~09:20) — CI canônica verde no HEAD da PR #11
+- Run [`42324621995`](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42324621995), SHA `1754348c244f41df820f3525cd523cf9e7aacdb5`: a tentativa 1 falhou sem etapas e sem logs (22:33–22:43 BRT de 06/11); a **tentativa 2, sem alteração de código, passou** (09:16:55–09:19:10 BRT, runner `Game-Creator-Runerr`). Causa da falha inicial: **NÃO CONFIRMADA** (runner/infraestrutura). Relatório: `docs/relatorios-actions/2026-11-07-run-42324621995-falha-sem-steps-recuperada-na-tentativa-2.md`.
+- O teste `tests/preset-request-guard.test.cjs` e o de exportação pixel-perfect executaram nesse SHA pela validação canônica. As suítes locais que dependem de `fake-indexeddb`/PowerShell não rodaram no ambiente de revisão e dependem do runner.
+- Continua pendente: inspeção visual das imagens no Estúdio e revisão do CodeRabbit. A integração na `main` depende de aprovação do autor; a PR #14 está empilhada sobre esta branch.
 
 ---
 
-## Estado canônico após o merge da PR #19 — 06/11/2026 às 17:30 BRT
+## Atualização 07/11/2026 — Integração da PR #11 concluída; reconciliação da PR #14
 
-- **PR #19:** fechada com merge em 2026-11-06T19:56:11Z; merge commit `8acf515c6be8f097b05b4231608894f06740ab17`. A branch-base da PR #11 recebeu a sincronização validada.
-- **PR #11 / GC-ANIM-006:** aberta, draft, base `main`, head `8acf515c6be8f097b05b4231608894f06740ab17`; GitHub informa `mergeable=true`. O Actions [#42283992136](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42283992136) concluiu success nesse SHA.
-- **PR #14 / GC-CHAR-001:** permanece a implementação escolhida, aberta/draft e empilhada sobre a branch da #11. Seu head original `4a5082c1db17946b03cf9a1eabf57aaa26b00261` foi preservado no backup `backup/gc-pr14-pre-base-sync-20261106`. A sincronização da base foi concluída no head `fbc7aad8c6ef2de0255de5479a1f2b4c83b279c1`, com base `8acf515c6be8f097b05b4231608894f06740ab17`; GitHub confirma `mergeable=true`.
-- **PR #13:** permanece aberta e não será mesclada sobre a #14. Preservar branch, comentários e documentos exclusivos até a integração final.
-- **Backups:** `backup/gc-pr11-pre-sync-20261106` → `a60ef6ea0549f3d30c9fd62ba1a7f716fd454142`; `backup/gc-pr14-pre-base-sync-20261106` → `4a5082c1db17946b03cf9a1eabf57aaa26b00261`; `backup/gc-pr19-pre-resolution-20261106` → `bdbd6cb9cbb5901561135f70c70ce2e83147e4a8`.
-- **Validação pendente:** CI no futuro merge SHA da #14, revisão CodeRabbit no head atualizado, inspeção visual das grades de animação e teste manual offline/file:// com persistência real no IndexedDB.
-- **Limites desta sessão:** CodeRabbit CLI não está instalado e o terminal não resolve github.com; os PNGs binários não foram renderizados pelo conector GitHub. Não declarar essas revisões executadas.
-- **Governança:** WIP=1 permanece na reconciliação da cadeia. Não alterar main, não fechar #13 e não iniciar outra implementação paralela.
+### Estado confirmado da cadeia
+- PR [#11](https://github.com/LORECRONICASAPOENA/GameCreator/pull/11) foi integrada à `main` em 2026-11-07T12:49:19Z pelo merge `e9335b9527fc20c1ee6bf95c7729f8a82e68339c`. O HEAD da PR #11 era `f648b1bdb0c1f0c17251755c166c397f517666d8`.
+- O CI pós-merge [#42374165197](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42374165197) concluiu `completed/success` no SHA da `main` `e9335b95`. O CI da PR #11 [#42324621995](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42324621995) passou no SHA `1754348c244f41df820f3525cd523cf9e7aacdb5`; o commit posterior da PR #11 foi documental.
+- A correção da PR #11 que precisa permanecer na linha integrada inclui token de geração compartilhado para preset/importação manual/assets/projetos, cancelamento de lotes de limpeza obsoletos, snapshot consistente de salvamento e validação de limite de pixels. Os limites criativos continuam: `andar_ref` é uma prévia com poses de corrida, não uma caminhada fiel; grades de ataque ainda exigem inspeção visual.
 
+### Diagnóstico da PR #14 antes da reconciliação
+- PR [#14](https://github.com/LORECRONICASAPOENA/GameCreator/pull/14) continua aberta em Draft; branch `feat/apoena-modular-character-creator-integration`, HEAD anterior `115aa65b093daa66f38baebfe52988f681c4a85f`.
+- A branch-base `feat/apoena-personagem-estudio-main` avançou de `8acf515c6be8f097b05b4231608894f06740ab17` para `f648b1bdb0c1f0c17251755c166c397f517666d8`; a `main` atual está em `e9335b9527fc20c1ee6bf95c7729f8a82e68339c`. A comparação da PR #14 com a base antiga mostrava 111 commits à frente/3 atrás; contra a main, 111 à frente/4 atrás, com `mergeable_state=dirty`.
+- O merge-base comum das três árvores é `8acf515c6be8f097b05b4231608894f06740ab17`. A auditoria árvore-a-árvore identificou 48 caminhos alterados, quatro conflitos reais e dois relatórios de CI presentes somente na main.
 
----
+### Resolução de três vias preparada
+- `.github/workflows/pixel-art.yml`: preservada a versão da PR #14, que contém todas as linhas da versão da main e acrescenta as etapas de teste do Criador Modular no modelo e no navegador; mantém `pull_request` para `main` e para a branch-base.
+- `pixel-art/estudio.js`: escolhida a versão atual da main, que contém as correções mais completas de concorrência da PR #11; a implementação da PR #14 não continha o cancelamento entre fontes, o cancelamento do lote de limpeza e o snapshot consistente.
+- `tests/preset-request-guard.test.cjs`: escolhida a suíte mais abrangente da main (111 linhas), com quatro assertions explícitas adicionais para criação/uso do guard e descarte de respostas antigas.
+- `docs/PENDENCIAS_ABERTAS_E_LIMPEZA_GITHUB.md`: preservado o histórico completo da PR #14 e acrescentado este estado posterior à integração da #11, sem copiar snapshots antigos como se ainda fossem atuais.
+- Os dois relatórios de CI exclusivos da main foram preservados na árvore resultante: `2026-11-07-run-42317322491-cancelled-no-steps.md` e `2026-11-07-run-42324621995-falha-sem-steps-recuperada-na-tentativa-2.md`. Os demais arquivos exclusivos da PR #14 foram mantidos.
 
-## Validação da PR #14 após sincronização da base — 06/11/2026
-
-- **Head:** `fbc7aad8c6ef2de0255de5479a1f2b4c83b279c1`; base branch `feat/apoena-personagem-estudio-main`, base SHA `8acf515c6be8f097b05b4231608894f06740ab17`.
-- **Mergeabilidade:** GitHub informa `mergeable=true`; a comparação da PR #14 com a base atualizada mostra 106 commits à frente, zero atrás e 46 arquivos no diff. A #14 continua contendo a implementação escolhida do Criador Modular.
-- **CI:** [run #42290101577](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42290101577) concluiu `completed/success` no head exato. Passaram as etapas 1–24, incluindo navegador, concorrência de presets, exportação pixel-perfect, IndexedDB, backup/restauração, manifesto do atualizador, hidrologia, runtime Godot 4 e preservação do Creator. Etapas 25–27 foram skipped pela condição do workflow; não são falhas.
-- **Backup pós-sincronização:** `backup/gc-pr14-post-base-sync-20261106` → `fbc7aad8c6ef2de0255de5479a1f2b4c83b279c1`.
-- **CodeRabbit:** solicitações registradas nos comentários [#6694982589](https://github.com/LORECRONICASAPOENA/GameCreator/pull/11#issuecomment-6694982589) e [#6694983194](https://github.com/LORECRONICASAPOENA/GameCreator/pull/14#issuecomment-6694983194); nenhuma nova review do bot observada até este checkpoint. O CLI não pôde ser executado porque não está instalado e o terminal não resolve `github.com`.
-- **Aceite manual pendente:** revisão visual das três spritesheets no Estúdio e teste offline/file:// com persistência real no IndexedDB. Não marcar PR #14 ready nem mesclar na #11 até concluir as verificações.
-- **PR #13:** permanece aberta e fora da cadeia; não foi mesclada sobre a #14.
-- **Main:** não foi alterada nesta operação.
-
----
-
-## Atualização 07/11/2026 — PR #13 encerrada como supersedida; PR #14 continua WIP=1
-
-Esta atualização substitui as instruções históricas anteriores que diziam para não fechar a PR #13 antes de preservar seus arquivos.
-
-### GC-CHAR-001 — decisão sobre a PR #13
-- PR [#13](https://github.com/LORECRONICASAPOENA/GameCreator/pull/13) foi **fechada sem merge**, como supersedida pela implementação escolhida da PR [#14](https://github.com/LORECRONICASAPOENA/GameCreator/pull/14). A branch original foi mantida.
-- HEAD fechado: `34a0a722444448e384c91286affecf0f50217038`.
-- Inventário dos 26 caminhos alterados na PR #13: nenhum arquivo exclusivo da PR está ausente simultaneamente da `main` e da branch da PR #14. Os arquivos funcionais compartilhados foram preservados com blobs idênticos; as versões divergentes de workflow, Estúdio, módulo integrado, editor de personagens e teste de navegador são substituídas pelas versões posteriores da PR #14.
-- As três spritesheets de referência já estão preservadas na `main` e na PR #14 com os mesmos blobs. Os documentos históricos (ideia, registro inicial e relatório GC-CI-013) também estão na `main`/PR #14. O relatório GC-CI-014 da PR #14 contém proveniência de commits e agora documenta os controles de PAT.
-- O trecho de protótipo do README da #13 continha limites já superados; seu conteúdo útil de operação foi reescrito como **Uso rápido — Criador Modular de Personagens** no README da PR #14. Os snapshots antigos da fila continuam preservados como histórico; esta seção registra o estado atual.
-- Backups confirmados: `backup/gc-pr13-pre-closeout-20261107` → `34a0a722444448e384c91286affecf0f50217038`; `backup/gc-pr14-pre-pr13-closeout-20261107` → `ce4e7a26a611f7e941ce36f2ac15837391776583`; backups anteriores também permanecem.
-- Os nove threads históricos do CodeRabbit continuam preservados na PR fechada. Não foram apagados nem convertidos em aprovação da PR #14.
-
-### Findings históricos da revisão da PR #13
-- Workflow: ambos os testes de navegador incluem candidatos em Program Files e Program Files (x86).
-- Corrida de presets: a PR #14 usa guard de solicitação e teste para descartar carregamentos obsoletos.
-- Limite acumulado: a nova camada é aplicada a um candidato validado por `C.validate` antes de criar snapshot/confirmar a importação; o limite de 48 MB rejeita a montagem antes de alterar o projeto.
-- Manifesto: a ponte valida limite de 256 KB antes de gravar no Creator.
-- README: os limites obsoletos do protótipo foram substituídos por descrição e guia compatíveis com a implementação atual.
-- Incidentes: a versão da PR #14 preenche a proveniência do relatório GC-CI-014 e os campos de GC-CI-013/014 com valores preservados ou limitações explícitas.
-- PAT: o relatório GC-CI-014 agora exige token dedicado, curta duração, privilégio mínimo, proteção de histórico/logs e revogação após o diagnóstico. Nenhum PAT foi criado ou utilizado nesta atualização.
-- Esses itens reconciliam findings antigos; **não equivalem a uma nova revisão independente do HEAD atual da PR #14**.
-
-### PR #14 — estado atual e validação
-- Continua **aberta e em Draft**, não mesclada. A branch da PR #14 continua sendo a linha única de integração do Criador Modular; a PR #13 não deve ser reaberta nem mesclada sobre ela.
-- Código validado no HEAD `ce4e7a26a611f7e941ce36f2ac15837391776583`, pelo [run #42290749610](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42290749610), `completed/success`. As etapas funcionais 1–24 passaram; as etapas de empacotamento/logs 25–27 foram skipped pelas condições do evento PR. Os commits posteriores desta atualização são exclusivamente documentais.
-- README atualizado com guia operacional; relatório GC-CI-014 atualizado com controles de PAT; este checkpoint atualiza o estado de PRs e pendências. Os commits de README/relatório/fila são apenas documentais. Nenhum run novo foi criado: o workflow carregado pela branch-base da PR #14 não inclui README nem docs em pull_request.paths; push só valida main. Isso é o comportamento esperado para esta atualização sem código, não uma falha de CI. O último SHA de código continua validado pelo run #42290749610.
-- **Aceite manual ainda pendente:** executar no Windows o fluxo offline `file://` com IndexedDB real do navegador: importar peça, editar, salvar, fechar/reabrir, reabrir pela Biblioteca, gravar no Creator, salvar o projeto principal e confirmar persistência após nova abertura.
-- **Revisão independente ainda pendente:** solicitar/obter review formal do CodeRabbit ou de outro revisor no HEAD atualizado da PR #14. Os findings antigos da #13 foram reconciliados, mas não substituem uma revisão nova.
-- A PR #11 já foi integrada na `main` pelo merge `e9335b9527fc20c1ee6bf95c7729f8a82e68339c`; CI pós-merge [#42374165197](https://github.com/LORECRONICASAPOENA/GameCreator/actions/runs/42374165197) terminou `completed/success`.
-- **Próximas ações:** concluir aceite manual offline/IndexedDB e revisão independente; depois retargetear a #14 para `main`, confirmar o diff, executar CI canônica no novo SHA e somente então avaliar sair de Draft/merge. Não mesclar a #14 antes desses critérios.
-- **WIP=1 permanece ativo** em GC-CHAR-001 / PR #14. Não iniciar outro eixo de implementação em GameCreator/Pixel Art em paralelo.
+### Backups e validação
+- Backups anteriores a qualquer reconciliação: `backup/gc-pr14-pre-main-reconcile-20261107` → `115aa65b`; `backup/gc-main-pre-pr14-reconcile-20261107` → `e9335b95`; `backup/gc-pr14-base-pre-reconcile-20261107` → `f648b1bd`.
+- O merge commit de sincronização foi criado somente na branch da PR #14; a `main` não foi alterada. O CI canônico automático após o novo HEAD precisa concluir antes de declarar esta reconciliação validada.
+- A PR #14 não foi mesclada nem retirada de Draft. Permanecem pendentes: revisão independente do novo diff e aceite manual offline `file://` com IndexedDB real (importar, editar, salvar, fechar/reabrir, reabrir pela Biblioteca, gravar no Creator e confirmar persistência do projeto principal).
+- Próximo passo: confirmar CI no SHA de sincronização, retargetear a PR #14 para `main`, confirmar o diff de 46 arquivos e executar/observar CI da PR #14 contra a base final. Não mesclar a PR #14 antes da revisão independente e do aceite manual.
 
