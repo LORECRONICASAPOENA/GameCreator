@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Apoena — laboratório de água e erosão</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,Arial;background:#0c1927;color:#e4f6ee}*{box-sizing:border-box}
+body{margin:0;padding:12px;max-width:1100px;margin-inline:auto}h1{font-size:22px;margin:8px 0 4px}p{color:#bed2db;line-height:1.45;font-size:14px}
+.controls{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin:12px 0}
+button,.file,select,input{background:#1b394b;color:#fff;border:1px solid #4b7380;border-radius:9px;padding:9px;font:600 13px system-ui;min-height:42px}
+button.primary{background:#91d9c9;color:#09242e;border-color:#91d9c9}button:active{transform:translateY(1px)}label{font-size:12px;color:#c9dde3;display:flex;flex-direction:column;gap:4px}
+.canvas{background:#263b3c;padding:6px;border:1px solid #446977;border-radius:10px;overflow:auto;max-width:100%}
+canvas{display:block;width:100%;height:auto;max-width:960px;aspect-ratio:64/42;touch-action:none;image-rendering:pixelated}
+#status,#details{background:#102a3a;padding:10px;border-radius:8px;margin-top:10px;color:#e2f4d3;font-size:13px;line-height:1.5}
+a{color:#a0e5d9}input[type=file]{display:none}input[type=range]{padding:0;width:90px;min-height:18px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0;font-size:12px;color:#dae9ed}.legend i{display:inline-block;width:12px;height:12px;margin-right:4px;vertical-align:middle;border:1px solid #888}
+</style></head>
+<body>
+<h1>APOENA — Hidrologia, Relevo e Erosão 2D</h1>
+<p>Laboratório jogável sem imagens externas. Desenhe uma depressão (1 a 6), aplique chuva e veja a água procurar as partes baixas, infiltrar, transbordar e desgastar o solo. A simulação usa unidades de jogo; não é uma previsão física real.</p>
+<div class="controls">
+<label>Ferramenta<select id="tool"><option value="basin">Criar bacia circular</option><option value="raise">Elevar terreno</option><option value="lower">Rebaixar terreno</option><option value="rock">Solo rochoso</option><option value="soil">Solo permeável</option><option value="protect">Proteger construção</option><option value="source">Adicionar água</option></select></label>
+<label>Nível da bacia<select id="level"><option value="1">1 — Poça pequena</option><option value="2">2 — Poça média</option><option value="3">3 — Poça grande</option><option value="4" selected>4 — Lago</option><option value="5">5 — Água profunda</option><option value="6">6 — Oceano profundo</option></select></label>
+<label>Raio (células)<input id="radius" type="range" min="1" max="14" value="5"><span id="radiusVal">5</span></label>
+</div>
+<div class="controls">
+<button id="rain" class="primary">Chover 20 ciclos</button><button id="storm">Tempestade 50 ciclos</button><button id="sun">Sol / Secagem 50 ciclos</button>
+<button id="auto">▶ Clima automático</button><button id="demo">Refazer cenário</button>
+</div>
+<div class="controls"><button id="save">Baixar simulação JSON</button>
+<label class="file" for="load">Abrir mapa/backup JSON</label><input id="load" type="file" accept=".json,application/json">
+<button id="mapExport">Exportar mapa do Game Creator</button>
+</div>
+<div class="canvas"><canvas id="canvas" width="768" height="504" aria-label="Mapa de água e erosão interativo"></canvas></div>
+<div class="legend"><span><i style="background:#628b5c"></i>Terra</span><span><i style="background:#a67e59"></i>Solo seco</span><span><i style="background:#3f9ab5"></i>Água rasa</span><span><i style="background:#17416d"></i>Água profunda</span><span><i style="background:#83919b"></i>Rocha</span><span><i style="background:#e8bd6b"></i>Correnteza</span></div>
+<div id="status" role="status"></div><div id="details">Toque no mapa para usar a ferramenta selecionada.</div>
+<script src="hidrologia-core.js"></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id), Engine=window.ApoenaHidrologia;
+if(!Engine){$("status").textContent="Erro: motor de hidrologia não encontrado.";return;}
+const canvas=$("canvas"),ctx=canvas.getContext("2d"),CW=12,CH=12;
+let world,sourceMap=null,clock=null,paint=false,cycles=0;
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+function demo(){
+ world=new Engine.Hidrologia(64,42);
+ for(let y=0;y<42;y++)for(let x=0;x<64;x++){
+   const i=world.index(x,y),ridge=x>30&&x<36&&y>6&&y<35?2:0;
+   world.elevation[i]=Math.max(-1,Math.round((x+y*.13)/22))+ridge;
+   world.permeability[i]=.55;world.hardness[i]=.28;
+ }
+ world.paintBasin(16,23,7,4);world.paintBasin(45,31,10,3);
+ world.paintElevation(32,20,5,3);
+ sourceMap=null;cycles=0;render();
+}
+function snapshot(){
+ const d=world.serialize();return {width:world.width,height:world.height,...d};
+}
+function download(obj,name){
+ const blob=new Blob([JSON.stringify(obj,null,0)],{type:"application/json"});
+ const a=document.createElement("a"),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+function ticks(n,options){
+ let stat;for(let i=0;i<n;i++)stat=world.advance(options);
+ cycles+=n;render(stat);
+}
+function render(stat){
+ if(!world)return;
+ canvas.width=world.width*CW;canvas.height=world.height*CH;ctx.clearRect(0,0,canvas.width,canvas.height);
+ let wet=0,river=0,dead=0;
+ for(let y=0;y<world.height;y++)for(let x=0;x<world.width;x++){
+  const i=world.index(x,y),depth=world.water[i],moist=world.moisture[i],elev=world.elevation[i];
+  if(depth>.07)wet++;if(world.flow[i]>.15)river++;
+  const bad=world.vegetation(i)!=="saudavel";if(bad)dead++;
+  let fill;
+  if(world.protected[i])fill="#706783";
+  else if(world.hardness[i]>.8)fill="#86949c";
+  else if(depth>.07){
+   const tone=clamp(Math.round(Math.min(depth/5,1)*95),0,95);
+   fill="rgb("+Math.round(51-tone*.37)+","+Math.round(149-tone*.9)+","+Math.round(177-tone*.57)+")";
+  }else if(moist<.17)fill="#aa8058";
+  else if(elev>3)fill="#8c9c7d";
+  else if(elev<0)fill="#496a4a";
+  else fill="#61855a";
+  ctx.fillStyle=fill;ctx.fillRect(x*CW,y*CH,CW,CH);
+  if(world.flow[i]>.12){ctx.fillStyle="#ebc970";ctx.fillRect(x*CW+5,y*CH+5,3,3);}
+  if(elev<=-1&&depth<=.07){ctx.strokeStyle="#213d4b88";ctx.strokeRect(x*CW+.5,y*CH+.5,CW-1,CH-1);}
+ }
+ $("status").textContent="Ciclos: "+cycles+" | Água acumulada: "+world.water.reduce((a,b)=>a+b,0).toFixed(1)+" | Células molhadas: "+wet+" | Células com correnteza: "+river+" | Plantas em estresse hídrico (indicativo): "+dead+(stat?" | Solo erodido neste ciclo: "+stat.eroded.toFixed(3):"");
+}
+function use(ev){
+ const rect=canvas.getBoundingClientRect();
+ const x=Math.floor((ev.clientX-rect.left)/rect.width*world.width),y=Math.floor((ev.clientY-rect.top)/rect.height*world.height);
+ if(!world.valid(x,y))return;
+ const t=$("tool").value,r=Number($("radius").value),i=world.index(x,y);
+ if(t==="basin")world.paintBasin(x,y,r,Number($("level").value));
+ if(t==="raise")world.paintElevation(x,y,r,clamp(world.elevation[i]+1,-6,16));
+ if(t==="lower")world.paintElevation(x,y,r,clamp(world.elevation[i]-1,-6,16));
+ if(t==="source")for(let yy=Math.max(0,y-r);yy<=Math.min(world.height-1,y+r);yy++)for(let xx=Math.max(0,x-r);xx<=Math.min(world.width-1,x+r);xx++)if(Math.hypot(xx-x,yy-y)<=r)world.water[world.index(xx,yy)]=clamp(world.water[world.index(xx,yy)]+.7,0,12);
+ if(["soil","rock","protect"].includes(t))for(let yy=Math.max(0,y-r);yy<=Math.min(world.height-1,y+r);yy++)for(let xx=Math.max(0,x-r);xx<=Math.min(world.width-1,x+r);xx++){
+  if(Math.hypot(xx-x,yy-y)>r)continue;
+  world.setSoil(xx,yy,t==="rock"?{hardness:.97,permeability:.04}:t==="soil"?{hardness:.12,permeability:.8}:{protected:1});
+ }
+ const cell=world.get(x,y);
+ $("details").textContent="Posição ("+x+", "+y+") | Altitude: "+cell.elevation.toFixed(2)+" | Bacia: "+cell.capacity+" | Água: "+cell.water.toFixed(2)+" | Umidade: "+Math.round(cell.moisture*100)+"% | Tipo: "+cell.kind+" | Vegetação: "+cell.health;
+ render();
+}
+canvas.addEventListener("pointerdown",ev=>{paint=true;canvas.setPointerCapture(ev.pointerId);use(ev)});
+canvas.addEventListener("pointermove",ev=>{if(paint)use(ev)});
+for(const e of ["pointerup","pointercancel","lostpointercapture"])canvas.addEventListener(e,()=>paint=false);
+$("radius").oninput=()=>{$("radiusVal").textContent=$("radius").value};
+$("rain").onclick=()=>ticks(20,{rain:.18,sun:0});
+$("storm").onclick=()=>ticks(50,{rain:.36,sun:0});
+$("sun").onclick=()=>ticks(50,{rain:0,sun:.28});
+$("demo").onclick=()=>{if(clock){clearInterval(clock);clock=null;$("auto").textContent="▶ Clima automático"}demo()};
+$("auto").onclick=()=>{
+ if(clock){clearInterval(clock);clock=null;$("auto").textContent="▶ Clima automático"}
+ else {clock=setInterval(()=>ticks(1,Math.floor(cycles/20)%4===0?{rain:.2,sun:0}:{rain:0,sun:.2}),150);$("auto").textContent="⏸ Pausar clima"}
+};
+$("save").onclick=()=>download(snapshot(),"apoena_hidrologia_teste.json");
+$("mapExport").onclick=()=>{
+ if(!sourceMap){$("details").textContent="Importe primeiro um mapa JSON do Game Creator; o cenário demonstrativo não tem tiles originais.";return;}
+ download({...sourceMap,hydrology:snapshot()},"apoena_mapa_com_hidrologia.json");
+};
+$("load").onchange=async ev=>{
+ const file=ev.target.files[0];if(!file)return;
+ try{
+  if(file.size>8e6)throw Error("Arquivo maior que 8 MB.");
+  const doc=JSON.parse(await file.text());
+  if(doc.schema==="apoena.map2d.v1"){
+   sourceMap=doc;
+   world=Engine.fromMap(doc);cycles=world.ticks;render();
+   $("details").textContent="Mapa do Creator importado: "+(doc.name||"sem nome")+". O arquivo original será preservado na exportação.";
+  } else {
+   world=Engine.Hidrologia.fromData(doc);sourceMap=null;cycles=world.ticks;render();
+   $("details").textContent="Simulação carregada.";
+  }
+ }catch(error){$("details").textContent="Falha ao importar: "+error.message}
+ ev.target.value="";
+};
+demo();
+})();
+</script></body></html>
