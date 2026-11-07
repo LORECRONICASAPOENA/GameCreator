@@ -279,7 +279,31 @@ $('libraryAssets').onchange=async()=>{
 if(ApoenaLibrary.subscribe)ApoenaLibrary.subscribe(()=>{refreshLibrary();refreshLibraryProjects()});
 refreshLibrary();refreshLibraryProjects();
 function ready(){if(frames.length)return true;msg('Adicione quadros antes de exportar.');return false}
-function animate(t){if(t-lastPreview>1000/clamp(num('fps'),1,30)){pc.clearRect(0,0,preview.width,preview.height);const action=$('action').value,direction=$('direction').value;const matching=frames.filter(f=>f.action===action&&f.direction===direction);const sequence=matching.length?matching:frames;const index=$('playing').checked?Math.floor(t/(1000/clamp(num('fps'),1,30)))%Math.max(1,sequence.length):Math.max(0,current);const f=$('playing').checked?sequence[index]:frames[index];if(f){const c=f.canvas,k=Math.min(178/c.width,178/c.height);pc.imageSmoothingEnabled=false;pc.drawImage(c,(192-c.width*k)/2,185-c.height*k,c.width*k,c.height*k)}lastPreview=t}requestAnimationFrame(animate)}
+function animate(t){
+ const fps=clamp(num('fps'),1,30);
+ if(t-lastPreview>1000/fps){
+  pc.clearRect(0,0,preview.width,preview.height);
+  const action=$('action').value,direction=$('direction').value;
+  const matching=frames.filter(f=>f.action===action&&f.direction===direction);
+  const sequence=matching.length?matching:frames;
+  const playing=$('playing').checked;
+  const playback=ApoenaAnimationEngine.getPlaybackPosition({
+   durationFrames:Math.max(1,sequence.length),
+   fps:fps,
+   loopMode:'loop',
+   elapsedMs:Math.max(0,t)
+  });
+  const index=playing?playback.frameIndex:Math.max(0,current);
+  const f=playing?sequence[index]:frames[index];
+  if(f){
+   const c=f.canvas,k=Math.min(178/c.width,178/c.height);
+   pc.imageSmoothingEnabled=false;
+   pc.drawImage(c,(192-c.width*k)/2,185-c.height*k,c.width*k,c.height*k)
+  }
+  lastPreview=t
+ }
+ requestAnimationFrame(animate)
+}
 $('file').onchange=ev=>{
   const f=ev.target.files?.[0];if(!f)return;
   const requestId=presetRequestGuard.begin();
