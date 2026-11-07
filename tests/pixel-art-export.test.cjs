@@ -52,3 +52,5 @@ assert.deepEqual(smoothingAtDraw, [false, false], 'nearest-neighbor fica ativo a
 assert.equal(frames[0].canvas.width, 16, 'dimensões do original não são alteradas');
 assert.equal(frames[1].canvas.height, 16, 'dimensões do original não são alteradas');
 console.log('PASS: spritesheet desativa suavização antes de redimensionar e preserva quadros de origem.');
+
+require('./animation-engine.test.cjs');

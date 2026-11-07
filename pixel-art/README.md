@@ -68,3 +68,9 @@ O menu **Pixel Art** do shell V4.1 abre `estudio.html`. Esse módulo trabalha co
 Os arquivos editáveis podem ficar grandes porque cada quadro é incorporado como data URL no JSON. O importador limita o arquivo a 18 MB e o conjunto descompactado a 32 MB; para projetos maiores, exporte em partes.
 
 A presença desses controles não substitui os testes visuais em navegador/Android nem a importação de recursos exportados no Godot. Consulte o README da raiz para o status de validação da branch.
+
+## Motor de animação ACE — etapa 4
+
+O módulo animation-engine.js fornece o contrato versionado apoena.animation.v1 para sequências de sprites e tracks de transformação de ossos/peças. Inclui keyframes, interpolação discreta/linear/cúbica, amostragem determinística, timeline model e reprodução loop, once ou pingpong. A prévia do Estúdio existente usa o motor para calcular a reprodução sem alterar o comportamento de edição ou os pixels originais.
+
+**Limite atual:** a API de rig já pode amostrar tracks de ossos e peças, mas a interface visual de rigging/timeline multi-track, IK, malhas e exportação Godot ainda não estão incluídas nesta etapa. Consulte docs/ACE_ANIMATION_ENGINE_STEP4.md.
